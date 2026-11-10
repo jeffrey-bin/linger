@@ -669,18 +669,14 @@ describe("Wiki Profile sources", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Another AI" }));
 
     const prompt = within(dialog).getByLabelText("Prompt to use");
-    expect((prompt as HTMLTextAreaElement).value).toContain(
-      "Based on our previous conversations",
-    );
+    expect(prompt).toHaveTextContent("Based on our previous conversations");
     const add = within(dialog).getByRole("button", { name: "Add" });
     expect(add).toBeDisabled();
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Copy prompt" }),
     );
     await waitFor(() =>
-      expect(writeText).toHaveBeenCalledWith(
-        (prompt as HTMLTextAreaElement).value,
-      ),
+      expect(writeText).toHaveBeenCalledWith(prompt.textContent),
     );
 
     fireEvent.change(within(dialog).getByLabelText("AI summary"), {

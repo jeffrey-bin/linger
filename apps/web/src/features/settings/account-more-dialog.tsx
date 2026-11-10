@@ -2,16 +2,10 @@ import {
   ArrowLeft01Icon,
   Attachment01Icon,
   BotIcon,
-  Calendar03Icon,
   Cancel01Icon,
   Copy01Icon,
-  GameController03Icon,
-  GitForkIcon,
   Link01Icon,
   Loading03Icon,
-  Mail01Icon,
-  Message01Icon,
-  Notebook01Icon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
@@ -28,6 +22,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ModalDialog } from "@/components/ui/modal-dialog";
+import { AppLogo } from "@/features/apps/app-logo";
 import { writeClipboardText } from "@/lib/clipboard";
 import { connectionAuthorizationError } from "@/features/apps/authorization-error";
 import {
@@ -140,15 +135,6 @@ function useExternalAISummary(onError: (message: string) => void) {
     summary,
   };
 }
-
-const APP_ICONS: Record<string, ReactNode> = {
-  discord: <Icon icon={GameController03Icon} size={20} />,
-  gmail: <Icon icon={Mail01Icon} size={20} />,
-  google_calendar: <Icon icon={Calendar03Icon} size={20} />,
-  github: <Icon icon={GitForkIcon} size={20} />,
-  notion: <Icon icon={Notebook01Icon} size={20} />,
-  slack: <Icon icon={Message01Icon} size={20} />,
-};
 
 interface AccountMoreDialogProps {
   client: TeamHubClient;
@@ -747,12 +733,12 @@ function AccountMoreExternalAIPane({
       />
       <div className="mt-3">
         <div className="mb-1.5 flex items-center justify-between gap-2">
-          <label
+          <span
             className="text-sm font-medium text-foreground"
-            htmlFor="external-ai-prompt"
+            id="external-ai-prompt-label"
           >
             Prompt to use
-          </label>
+          </span>
           <Button
             aria-label={promptCopied ? "Prompt copied" : "Copy prompt"}
             onClick={onCopyPrompt}
@@ -767,13 +753,15 @@ function AccountMoreExternalAIPane({
             )}
           </Button>
         </div>
-        <textarea
-          aria-label="Prompt to use"
-          className="ui-field-control min-h-32 w-full resize-none bg-app-surface-soft py-2 text-xs leading-5 text-foreground"
+        {/* Read only and copied whole, so it shows as text that grows with
+            its lines rather than a field that scrolls inside. */}
+        <p
+          aria-labelledby="external-ai-prompt-label"
+          className="ui-field-control w-full bg-app-surface-soft py-2 text-sm whitespace-pre-wrap text-foreground select-text"
           id="external-ai-prompt"
-          readOnly
-          value={EXTERNAL_AI_PROFILE_PROMPT}
-        />
+        >
+          {EXTERNAL_AI_PROFILE_PROMPT}
+        </p>
       </div>
       <label className="mt-4 block">
         <span className="mb-1.5 block text-sm font-medium text-foreground">
@@ -889,7 +877,7 @@ function AppConnectRow({
     <div className="py-2">
       <div className="flex min-h-10 items-center gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-card shadow-outline">
-          {APP_ICONS[app.key]}
+          <AppLogo name={app.display_name} url={app.logo_url} />
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{app.display_name}</p>
