@@ -268,7 +268,7 @@ export function ComputerPermissionDecision({
                   <Button
                     disabled={busy || act.isPending}
                     onClick={() => act.mutate(step.action)}
-                    size="default"
+                    size="large"
                     tone="subtle"
                   >
                     {step.label}
@@ -301,7 +301,7 @@ export function ComputerPermissionDecision({
                 <Button
                   disabled={busy}
                   onClick={() => void decline()}
-                  size="default"
+                  size="large"
                   tone="subtle"
                 >
                   Don't allow

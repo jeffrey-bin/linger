@@ -41,6 +41,19 @@ const toneClassName: Record<ButtonTone, string> = {
   subtle: "bg-secondary text-secondary-foreground hover:bg-primary/[0.09]",
 };
 
+/** A button's classes, for an element that must look like one (a menu trigger). */
+export function buttonClassName({
+  className = "",
+  size = "default",
+  tone = "secondary",
+}: {
+  className?: string;
+  size?: ButtonSize;
+  tone?: ButtonTone;
+} = {}) {
+  return `relative inline-flex shrink-0 items-center justify-center font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-150 active:scale-(--chat-press-scale) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-50 ${sizeClassName[size]} ${toneClassName[tone]} ${className}`;
+}
+
 export function Button({
   children,
   className = "",
@@ -59,7 +72,7 @@ export function Button({
   return (
     <button
       aria-busy={loading || undefined}
-      className={`relative inline-flex shrink-0 items-center justify-center font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-150 active:scale-(--chat-press-scale) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-50 ${sizeClassName[size]} ${toneClassName[tone]} ${className}`}
+      className={buttonClassName({ className, size, tone })}
       disabled={disabled || loading}
       type={type}
       {...props}

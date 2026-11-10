@@ -313,7 +313,7 @@ function SetupAppRow({
               !interactive || !flow.canStart(app) || flow.connection.isPending
             }
             onClick={() => flow.start(app, pending)}
-            size="default"
+            size="large"
             tone="subtle"
           >
             {pending ? "Continue" : "Connect"}
@@ -542,7 +542,7 @@ function ProfileSetupSources(props: Props) {
               <Button
                 disabled={!draft.trim()}
                 onClick={addLink}
-                size="default"
+                size="large"
                 tone="subtle"
               >
                 Add link
@@ -550,7 +550,7 @@ function ProfileSetupSources(props: Props) {
               <Button
                 disabled={files.length >= MAX_FILES}
                 onClick={() => fileInput.current?.click()}
-                size="default"
+                size="large"
                 tone="subtle"
               >
                 Upload files
@@ -653,7 +653,7 @@ function SetupReplies({
           ? onDone()
           : void decision.decide(reply.decision)
       }
-      size="default"
+      size="large"
       tone={index === 0 ? "primary" : "subtle"}
     >
       {reply.label}

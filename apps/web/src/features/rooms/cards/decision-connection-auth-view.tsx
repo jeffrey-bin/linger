@@ -277,7 +277,7 @@ function ConnectionAuthorizationActions({
     <Button
       aria-label="Open authorization window"
       disabled={busy}
-      size="default"
+      size="large"
       tone="primary"
       onClick={() => {
         if (!openOAuthUrl(resumeUrl))
@@ -297,7 +297,7 @@ function ConnectionAuthorizationActions({
       }
       disabled={busy}
       onClick={() => void authorize(false)}
-      size="default"
+      size="large"
       tone="primary"
     >
       {selected.status === "active" ? "Allow" : "Connect"}
@@ -307,7 +307,7 @@ function ConnectionAuthorizationActions({
       aria-label={`Connect ${appName}`}
       disabled={busy || loading}
       onClick={() => void authorize(true)}
-      size="default"
+      size="large"
       tone="primary"
     >
       Connect
@@ -322,7 +322,7 @@ function ConnectionAuthorizationActions({
           <Button
             disabled={busy}
             onClick={() => void cancel()}
-            size="default"
+            size="large"
             tone="subtle"
           >
             {authorizing ? "Cancel" : "Not now"}

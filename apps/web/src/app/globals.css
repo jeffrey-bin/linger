@@ -5429,15 +5429,6 @@ button.question-choice:focus-visible {
   --room-bubble-background: var(--chat-agent-bubble-bg);
 }
 
-/* Decision card actions are a size up from the default buttons: easier to
-   hit, and their labels match the card's text. */
-.card-box .ui-button-default {
-  height: 2.25rem;
-  padding-inline: 1rem;
-  border-radius: 8px;
-  font-size: var(--text-sm);
-}
-
 .card-box .ui-button-icon {
   width: 2.25rem;
   height: 2.25rem;

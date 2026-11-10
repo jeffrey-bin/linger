@@ -210,7 +210,7 @@ export function QuestionDecision({
                   }
                   goToStep(stepIndex + 1);
                 }}
-                size="default"
+                size="large"
                 tone="primary"
               >
                 {isFinalStep ? "Send" : "Next"}

@@ -8,6 +8,7 @@ import {
 import { type RefObject, useRef } from "react";
 
 import { ActionMenu } from "@/components/ui/action-menu";
+import { buttonClassName } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 
 /** The Library heading with the New menu and its hidden file pickers. */
@@ -60,7 +61,7 @@ export function LibraryDocumentsHeader({
           type="file"
         />
         <ActionMenu
-          buttonClassName="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground shadow-button transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          buttonClassName={buttonClassName({ size: "large", tone: "primary" })}
           items={[
             {
               disabled: createBusy,

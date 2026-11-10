@@ -202,7 +202,7 @@ export function DecisionActions({
         className="group/tip w-full"
         disabled={disabled}
         onClick={onApprove}
-        size={composing ? "icon" : "default"}
+        size={composing ? "icon" : "large"}
         tone="primary"
       >
         {composing ? (

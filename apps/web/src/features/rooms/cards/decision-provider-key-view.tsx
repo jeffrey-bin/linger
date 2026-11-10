@@ -90,7 +90,7 @@ export function ProviderKeyDecision({
             <Button
               disabled={busy}
               onClick={() => setOpen(true)}
-              size="default"
+              size="large"
               tone="primary"
             >
               Add key
@@ -98,7 +98,7 @@ export function ProviderKeyDecision({
             <Button
               disabled={busy}
               onClick={() => void decline()}
-              size="default"
+              size="large"
               tone="subtle"
             >
               Not now

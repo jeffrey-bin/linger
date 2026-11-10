@@ -84,7 +84,7 @@ export function BrowserConnectionDecision({
             <Button
               disabled={busy}
               onClick={() => setOpen(true)}
-              size="default"
+              size="large"
               tone="primary"
             >
               Connect
@@ -92,7 +92,7 @@ export function BrowserConnectionDecision({
             <Button
               disabled={busy}
               onClick={() => void decline()}
-              size="default"
+              size="large"
               tone="subtle"
             >
               Not now
