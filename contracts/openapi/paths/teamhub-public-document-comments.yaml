@@ -1,0 +1,277 @@
+documentCommentThreads:
+  get:
+    tags: [Room Documents]
+    operationId: listRoomDocumentCommentThreads
+    summary: List durable Comment Threads for one active Room Document.
+    parameters:
+      - $ref: "../components/common.yaml#/components/parameters/Cursor"
+      - $ref: "../components/common.yaml#/components/parameters/Limit"
+    responses:
+      "200":
+        description: Comment Threads ordered by stable creation identity.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentThreadPage"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+  post:
+    tags: [Room Documents]
+    operationId: createRoomDocumentCommentThread
+    summary: Create a pending Comment Thread before its Yjs anchor mark is durable.
+    description: A repeated submission creates another Thread.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentThreadCreateRequest"
+    responses:
+      "201":
+        description: Thread, immutable initial Comment Version, and Anchor evidence committed atomically.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentThread"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+documentCommentThread:
+  get:
+    tags: [Room Documents]
+    operationId: getRoomDocumentCommentThread
+    summary: Read one durable Comment Thread and its current Comment projections.
+    responses:
+      "200":
+        description: Current Thread, Anchor, Comments, reactions, and resolution state.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentThread"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+  patch:
+    tags: [Room Documents]
+    operationId: updateRoomDocumentCommentThread
+    summary: Resolve or reopen a Comment Thread as a current Human Room Member.
+    description: A repeated submission finds the Thread in the requested state and returns it unchanged.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentThreadResolutionRequest"
+    responses:
+      "200":
+        description: Current Thread projection after the idempotent state transition.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentThread"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+documentCommentAnchorAttachments:
+  post:
+    tags: [Room Documents]
+    operationId: attachDocumentCommentSelectionAnchor
+    summary: Attach one pending selection Comment through a server-validated comment-only Draft update.
+    description: A repeated submission finds the Thread attached and reports already_attached.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentAnchorAttachmentRequest"
+    responses:
+      "200":
+        description: Selection Anchor is durably attached, or was already attached by the same command.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentAnchorAttachmentResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+documentCommentReplies:
+  post:
+    tags: [Room Documents]
+    operationId: createRoomDocumentCommentReply
+    summary: Add a Human-authored reply to an existing Comment Thread.
+    description: A repeated submission adds another reply.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentReplyCreateRequest"
+    responses:
+      "201":
+        description: Logical Comment and immutable version 1 committed atomically.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentComment"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+documentCommentAnchors:
+  post:
+    tags: [Room Documents]
+    operationId: reanchorRoomDocumentCommentThread
+    summary: Create new immutable Anchor evidence for a Comment Thread as a current Human Room Member.
+    description: A repeated submission records another Anchor while the Thread is still pending.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentAnchorInput"
+    responses:
+      "200":
+        description: Thread now points at the new pending Anchor evidence.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentThread"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+documentComment:
+  patch:
+    tags: [Room Documents]
+    operationId: updateRoomDocumentComment
+    summary: Create a new immutable Version for the Human author's Comment.
+    description: A repeated submission carries a stale expected_version and gets 409 VERSION_CONFLICT.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentUpdateRequest"
+    responses:
+      "200":
+        description: Updated current Comment projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentComment"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+  delete:
+    tags: [Room Documents]
+    operationId: deleteRoomDocumentComment
+    summary: Soft-delete the Human author's Comment with a new immutable Version.
+    description: A repeated submission finds the Comment deleted and gets 409 VERSION_CONFLICT.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentCommentVersionRequest"
+    responses:
+      "200":
+        description: Soft-deleted Comment tombstone.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-document-comments.yaml#/components/schemas/DocumentComment"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+
+documentCommentReaction:
+  put:
+    tags: [Room Documents]
+    operationId: putRoomDocumentCommentReaction
+    summary: Idempotently add the current Human Actor's reaction to a Comment.
+    responses:
+      "204":
+        description: Reaction exists for this Actor and emoji.
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+  delete:
+    tags: [Room Documents]
+    operationId: deleteRoomDocumentCommentReaction
+    summary: Idempotently remove the current Human Actor's reaction from a Comment.
+    responses:
+      "204":
+        description: Reaction no longer exists for this Actor and emoji.
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"

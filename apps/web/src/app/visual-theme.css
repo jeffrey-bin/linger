@@ -1,0 +1,177 @@
+/* Town design system: semantic tokens are bare HSL triplets consumed as
+   hsl(var(--town-x) / alpha); every --app-* role below derives from them. */
+:root {
+  color-scheme: light;
+  --town-background: 60 20% 99%;
+  --town-foreground: 60 8% 9.4%;
+  --town-card: 0 0% 100%;
+  --town-popover: 0 0% 100%;
+  --town-primary: 60 8% 9.4%;
+  --town-primary-foreground: 0 0% 100%;
+  --town-secondary: 240 4.8% 95.9%;
+  --town-secondary-foreground: 53 7% 23.7%;
+  --town-muted: 60 16% 95%;
+  --town-muted-foreground: 55 6% 42.5%;
+  --town-accent: 240 4.8% 95.9%;
+  --town-accent-foreground: 60 8% 9.4%;
+  --town-destructive: 14 89% 41%;
+  --town-destructive-foreground: 0 0% 100%;
+  --town-info: 207 92% 42%;
+  --town-success: 98 48% 35%;
+  --town-warning: 37 100% 39%;
+  --town-border: 72 9% 92%;
+  --town-border-hover: 72 9% 85%;
+  --town-border-heavy: 60 8% 9.4%;
+  --town-input: 72 9% 92%;
+  --town-input-hover: 72 9% 85%;
+  --town-sidebar: 75 23% 96.5%;
+  --town-sidebar-foreground: 60 8% 9.4%;
+  --town-sidebar-muted: 70 15% 92%;
+  --town-sidebar-border: 240 6% 90%;
+  --town-highlight: 207 95% 40%;
+  --town-button-accent: 208 54% 35%;
+  --town-comment-amber: 45 93% 47%;
+  --town-send: 221 97% 53%;
+  --town-send-hover: 225 84% 49%;
+  --town-shadow-outline: 0 0 0 1px #1a191a0d;
+  --town-shadow-sm: 0 0 0 1px #1a191a0d, 0 1px 3px #0000000a, 0 0 1px #0000000a;
+  --town-shadow-md: 0 0 0 1px #1a191a0d, 0 2px 8px #0000000f, 0 0 2px #0000000a;
+  --town-shadow-lg:
+    0 0 0 1px #1a191a0d, 0 4px 16px #00000012, 0 2px 6px -2px #0000000a;
+  --town-shadow-xl:
+    0 0 0 1px #1a191a0d, 0 8px 32px #00000014, 0 2px 8px -4px #0000000a;
+  --town-shadow-button:
+    0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+:root {
+  --app-canvas: hsl(var(--town-background));
+  --app-surface: hsl(var(--town-card));
+  --app-surface-soft: hsl(var(--town-muted));
+  --app-sidebar: hsl(var(--town-sidebar));
+  --app-rail: hsl(var(--town-card));
+  --app-ink: hsl(var(--town-foreground));
+  --app-body: hsl(var(--town-foreground));
+  --app-muted: hsl(var(--town-muted-foreground));
+  --app-subtle: hsl(var(--town-muted-foreground));
+  --app-border: hsl(var(--town-border));
+  --app-border-strong: hsl(var(--town-border-hover));
+  --app-border-interactive: hsl(var(--town-foreground) / 0.25);
+  /* Same as the Message list row hover (muted at 70%). */
+  --app-hover: hsl(var(--town-muted) / 0.7);
+  --app-selected: hsl(var(--town-muted));
+  --app-selected-strong: hsl(var(--town-primary));
+  --app-action: hsl(var(--town-primary));
+  --app-action-hover: hsl(var(--town-primary) / 0.9);
+  --app-action-active: hsl(var(--town-border-heavy));
+  --app-action-foreground: hsl(var(--town-primary-foreground));
+  /* Town has no brand accent: the old accent role reads as the primary ink. */
+  --app-accent: hsl(var(--town-primary));
+  --app-accent-hover: hsl(var(--town-primary) / 0.9);
+  --app-accent-surface: hsl(var(--town-muted));
+  --app-accent-border: hsl(var(--town-border-hover));
+  --app-accent-text: hsl(var(--town-foreground));
+  --app-unread: hsl(var(--town-destructive));
+  --app-unread-foreground: hsl(var(--town-destructive-foreground));
+  --app-info: hsl(var(--town-info));
+  --app-info-hover: hsl(var(--town-highlight));
+  --app-link: hsl(var(--town-info));
+  --app-comment-highlight: hsl(var(--town-comment-amber));
+  --app-focus: hsl(var(--town-foreground));
+  --app-ring: hsl(var(--town-primary) / 0.4);
+  --app-danger: hsl(var(--town-destructive));
+  --app-danger-hover: hsl(var(--town-destructive) / 0.08);
+  --app-danger-border: hsl(var(--town-destructive) / 0.3);
+  --app-danger-border-hover: hsl(var(--town-destructive));
+  --app-overlay: hsl(var(--town-background) / 0.2);
+  --app-field-surface: hsl(var(--town-card));
+  --app-field-hover: hsl(var(--town-card));
+  --app-field-border: hsl(var(--town-input));
+  --app-field-border-hover: hsl(var(--town-input-hover));
+  --app-field-focus: hsl(var(--town-foreground));
+  --app-field-disabled-surface: hsl(var(--town-muted));
+  --app-field-disabled-text: hsl(var(--town-muted-foreground));
+  --app-status-neutral-surface: hsl(var(--town-muted));
+  --app-status-neutral-border: hsl(var(--town-border));
+  --app-status-neutral-text: hsl(var(--town-secondary-foreground));
+  --app-status-warning-surface: hsl(var(--town-warning) / 0.1);
+  --app-status-warning-border: hsl(var(--town-warning) / 0.3);
+  --app-status-warning-text: hsl(var(--town-warning));
+  --app-status-success-surface: hsl(var(--town-success) / 0.1);
+  --app-status-success-border: hsl(var(--town-success) / 0.3);
+  --app-status-success-text: hsl(var(--town-success));
+  --app-status-busy-text: hsl(var(--town-warning));
+  --app-status-danger-surface: hsl(var(--town-destructive) / 0.08);
+  --app-status-danger-border: hsl(var(--town-destructive) / 0.3);
+  --app-status-danger-text: hsl(var(--town-destructive));
+  --app-card-info-surface: hsl(var(--town-info) / 0.06);
+  --app-card-info-border: hsl(var(--town-info) / 0.3);
+  --app-card-info-text: hsl(var(--town-info));
+  --app-card-feedback-surface: hsl(var(--town-destructive) / 0.06);
+  --app-card-feedback-border: hsl(var(--town-destructive) / 0.3);
+  --app-mention-surface: hsl(var(--town-info) / 0.12);
+  --app-mention-hover: hsl(var(--town-info) / 0.2);
+  --app-mention-text: hsl(var(--town-info));
+  --app-column-surface: hsl(var(--town-muted));
+  --app-column-border: hsl(var(--town-border));
+  --app-progress-track: hsl(var(--town-border));
+  --app-progress-fill: hsl(var(--town-primary));
+  --app-floating-shadow-color: rgba(0, 0, 0, 0.06);
+  --app-modal-shadow-color: rgba(0, 0, 0, 0.07);
+  --app-nav-selected-shadow-color: hsl(var(--town-border));
+  --app-work-surface: hsl(var(--town-card));
+  --message-hover-shadow-color: rgba(0, 0, 0, 0.04);
+  --composer-line: hsl(var(--town-border));
+  --composer-surface: hsl(var(--town-card));
+  --composer-action-surface: hsl(var(--town-muted));
+  --composer-action-hover: hsl(var(--town-accent));
+  --composer-action-icon: hsl(var(--town-muted-foreground));
+  --composer-send: hsl(var(--town-primary));
+  --composer-send-hover: hsl(var(--town-primary) / 0.9);
+  /* File-type tints come from the Town nature palette. */
+  --composer-attachment-pdf-surface: color-mix(
+    in srgb,
+    #d95b31 15%,
+    transparent
+  );
+  --composer-attachment-pdf-text: #d95b31;
+  --composer-attachment-code-surface: color-mix(
+    in srgb,
+    #a17cb9 15%,
+    transparent
+  );
+  --composer-attachment-code-text: #a17cb9;
+  --composer-attachment-presentation-surface: color-mix(
+    in srgb,
+    #b88022 15%,
+    transparent
+  );
+  --composer-attachment-presentation-text: #b88022;
+  --composer-attachment-document-surface: color-mix(
+    in srgb,
+    #698cc7 15%,
+    transparent
+  );
+  --composer-attachment-document-text: #698cc7;
+  --composer-attachment-sheet-surface: color-mix(
+    in srgb,
+    #5e9662 15%,
+    transparent
+  );
+  --composer-attachment-sheet-text: #5e9662;
+  --composer-attachment-compressed-surface: color-mix(
+    in srgb,
+    #a08e00 15%,
+    transparent
+  );
+  --composer-attachment-compressed-text: #a08e00;
+  --composer-attachment-universal-surface: color-mix(
+    in srgb,
+    #4e9ba2 15%,
+    transparent
+  );
+  --composer-attachment-universal-text: #4e9ba2;
+  --composer-shadow-color: rgba(0, 0, 0, 0.06);
+  --composer-shadow-focus-color: rgba(0, 0, 0, 0.07);
+  --app-scrollbar: hsl(var(--town-muted-foreground) / 0.4);
+}

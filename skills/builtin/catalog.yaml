@@ -1,0 +1,238 @@
+---
+schema_version: 1
+skills:
+  - skill_id: simplexai_create_meeting_minutes
+    bootstrap_manifest_id: platform_skill_create_meeting_minutes_1_0_0
+    default_agent_types:
+      - anotherme
+    manifests:
+      - manifest_id: platform_skill_create_meeting_minutes_1_0_0
+        version: 1.0.0
+        package_path: builtin/create-meeting-minutes/1.0.0
+  - skill_id: simplexai_collaborate
+    bootstrap_manifest_id: skill_manifest_simplexai_collaborate_1_0_0
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_collaborate_1_0_0
+        version: 1.0.0
+        package_path: builtin/collaborate/1.0.0
+  - skill_id: simplexai_teamhub_files
+    bootstrap_manifest_id: skill_manifest_simplexai_teamhub_files_1_0_3
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_teamhub_files_1_0_3
+        version: 1.0.3
+        package_path: builtin/teamhub-files/1.0.3
+      - manifest_id: skill_manifest_simplexai_teamhub_files_1_0_2
+        version: 1.0.2
+        package_path: builtin/teamhub-files/1.0.2
+      - manifest_id: skill_manifest_simplexai_teamhub_files_1_0_1
+        version: 1.0.1
+        package_path: builtin/teamhub-files/1.0.1
+      - manifest_id: skill_manifest_simplexai_teamhub_files_1_0_0
+        version: 1.0.0
+        package_path: builtin/teamhub-files/1.0.0
+  - skill_id: simplexai_lev8_search
+    bootstrap_manifest_id: skill_manifest_simplexai_lev8_search_1_0_1
+    default_agent_types: []
+    manifests:
+      - manifest_id: skill_manifest_simplexai_lev8_search_1_0_1
+        version: 1.0.1
+        package_path: builtin/lev8-search/1.0.1
+      - manifest_id: skill_manifest_simplexai_lev8_search_1_0_0
+        version: 1.0.0
+        package_path: builtin/lev8-search/1.0.0
+  - skill_id: simplexai_impeccable
+    bootstrap_manifest_id: skill_manifest_simplexai_impeccable_1_0_1
+    default_agent_types: []
+    manifests:
+      - manifest_id: skill_manifest_simplexai_impeccable_1_0_1
+        version: 1.0.1
+        package_path: builtin/impeccable/1.0.1
+      - manifest_id: skill_manifest_simplexai_impeccable_1_0_0
+        version: 1.0.0
+        package_path: builtin/impeccable/1.0.0
+  - skill_id: simplexai_superpowers
+    bootstrap_manifest_id: skill_manifest_simplexai_superpowers_1_0_0
+    default_agent_types: []
+    manifests:
+      - manifest_id: skill_manifest_simplexai_superpowers_1_0_0
+        version: 1.0.0
+        package_path: builtin/superpowers/1.0.0
+  - skill_id: simplexai_taste
+    bootstrap_manifest_id: skill_manifest_simplexai_taste_1_0_1
+    default_agent_types: []
+    manifests:
+      - manifest_id: skill_manifest_simplexai_taste_1_0_1
+        version: 1.0.1
+        package_path: builtin/taste/1.0.1
+      - manifest_id: skill_manifest_simplexai_taste_1_0_0
+        version: 1.0.0
+        package_path: builtin/taste/1.0.0
+  - skill_id: simplexai_proactive_response
+    bootstrap_manifest_id: skill_manifest_simplexai_proactive_response_1_0_0
+    default_agent_types:
+      - anotherme
+    manifests:
+      - manifest_id: skill_manifest_simplexai_proactive_response_1_0_0
+        version: 1.0.0
+        package_path: builtin/proactive-response/1.0.0
+  - skill_id: simplexai_canvas
+    bootstrap_manifest_id: skill_manifest_simplexai_canvas_1_0_2
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_canvas_1_0_2
+        version: 1.0.2
+        package_path: builtin/canvas/1.0.2
+      - manifest_id: skill_manifest_simplexai_canvas_1_0_1
+        version: 1.0.1
+        package_path: builtin/canvas/1.0.1
+      - manifest_id: skill_manifest_simplexai_canvas_1_0_0
+        version: 1.0.0
+        package_path: builtin/canvas/1.0.0
+  - skill_id: simplexai_artifact
+    bootstrap_manifest_id: skill_manifest_simplexai_artifact_1_0_2
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_artifact_1_0_2
+        version: 1.0.2
+        package_path: builtin/artifact/1.0.2
+      - manifest_id: skill_manifest_simplexai_artifact_1_0_1
+        version: 1.0.1
+        package_path: builtin/artifact/1.0.1
+      - manifest_id: skill_manifest_simplexai_artifact_1_0_0
+        version: 1.0.0
+        package_path: builtin/artifact/1.0.0
+  - skill_id: simplexai_chat_card
+    bootstrap_manifest_id: skill_manifest_simplexai_chat_card_1_0_0
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_chat_card_1_0_0
+        version: 1.0.0
+        package_path: builtin/chat-card/1.0.0
+  - skill_id: simplexai_media_generation
+    bootstrap_manifest_id: skill_manifest_simplexai_media_generation_1_0_1
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_media_generation_1_0_1
+        version: 1.0.1
+        package_path: builtin/media-generation/1.0.1
+      - manifest_id: skill_manifest_simplexai_media_generation_1_0_0
+        version: 1.0.0
+        package_path: builtin/media-generation/1.0.0
+  - skill_id: simplexai_slide_deck
+    bootstrap_manifest_id: skill_manifest_simplexai_slide_deck_1_0_1
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_slide_deck_1_0_1
+        version: 1.0.1
+        package_path: builtin/slide-deck/1.0.1
+      - manifest_id: skill_manifest_simplexai_slide_deck_1_0_0
+        version: 1.0.0
+        package_path: builtin/slide-deck/1.0.0
+  - skill_id: simplexai_builtin_docx
+    bootstrap_manifest_id: skill_manifest_simplexai_builtin_docx_1_0_0
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_builtin_docx_1_0_0
+        version: 1.0.0
+        package_path: builtin/docx/1.0.0
+  - skill_id: simplexai_builtin_pdf
+    bootstrap_manifest_id: skill_manifest_simplexai_builtin_pdf_1_0_0
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_builtin_pdf_1_0_0
+        version: 1.0.0
+        package_path: builtin/pdf/1.0.0
+  - skill_id: simplexai_builtin_pptx
+    bootstrap_manifest_id: skill_manifest_simplexai_builtin_pptx_1_0_2
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_builtin_pptx_1_0_0
+        version: 1.0.0
+        package_path: builtin/pptx/1.0.0
+      - manifest_id: skill_manifest_simplexai_builtin_pptx_1_0_1
+        version: 1.0.1
+        package_path: builtin/pptx/1.0.1
+      - manifest_id: skill_manifest_simplexai_builtin_pptx_1_0_2
+        version: 1.0.2
+        package_path: builtin/pptx/1.0.2
+  - skill_id: simplexai_builtin_skill_installer
+    bootstrap_manifest_id: skill_manifest_simplexai_builtin_skill_installer_1_0_0
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_builtin_skill_installer_1_0_0
+        version: 1.0.0
+        package_path: builtin/skill-installer/1.0.0
+  - skill_id: simplexai_builtin_xlsx
+    bootstrap_manifest_id: skill_manifest_simplexai_builtin_xlsx_1_0_0
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_builtin_xlsx_1_0_0
+        version: 1.0.0
+        package_path: builtin/xlsx/1.0.0
+  - skill_id: simplexai_personal_profile
+    bootstrap_manifest_id: skill_manifest_simplexai_personal_profile_1_0_5
+    default_agent_types:
+      - anotherme
+    manifests:
+      - manifest_id: skill_manifest_simplexai_personal_profile_1_0_5
+        version: 1.0.5
+        package_path: builtin/personal-profile/1.0.5
+      - manifest_id: skill_manifest_simplexai_personal_profile_1_0_4
+        version: 1.0.4
+        package_path: builtin/personal-profile/1.0.4
+      - manifest_id: skill_manifest_simplexai_personal_profile_1_0_3
+        version: 1.0.3
+        package_path: builtin/personal-profile/1.0.3
+      - manifest_id: skill_manifest_simplexai_personal_profile_1_0_2
+        version: 1.0.2
+        package_path: builtin/personal-profile/1.0.2
+      - manifest_id: skill_manifest_simplexai_personal_profile_1_0_1
+        version: 1.0.1
+        package_path: builtin/personal-profile/1.0.1
+      - manifest_id: skill_manifest_simplexai_personal_profile_1_0_0
+        version: 1.0.0
+        package_path: builtin/personal-profile/1.0.0
+  - skill_id: simplexai_humanlike_browse
+    bootstrap_manifest_id: skill_manifest_simplexai_humanlike_browse_1_0_3
+    default_agent_types:
+      - anotherme
+      - general
+    manifests:
+      - manifest_id: skill_manifest_simplexai_humanlike_browse_1_0_3
+        version: 1.0.3
+        package_path: builtin/humanlike-browse/1.0.3
+      - manifest_id: skill_manifest_simplexai_humanlike_browse_1_0_2
+        version: 1.0.2
+        package_path: builtin/humanlike-browse/1.0.2
+      - manifest_id: skill_manifest_simplexai_humanlike_browse_1_0_1
+        version: 1.0.1
+        package_path: builtin/humanlike-browse/1.0.1
+      - manifest_id: skill_manifest_simplexai_humanlike_browse_1_0_0
+        version: 1.0.0
+        package_path: builtin/humanlike-browse/1.0.0

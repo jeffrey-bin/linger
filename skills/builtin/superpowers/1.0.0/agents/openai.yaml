@@ -1,0 +1,4 @@
+interface:
+  display_name: "Superpowers"
+  short_description: "Disciplined build, debug, and verify workflow"
+  default_prompt: "Use $superpowers to frame the work, test first, and verify before claiming done."

@@ -1,0 +1,16 @@
+node_modules
+.cache
+coverage
+dist
+playwright-report
+test-results
+.local
+.llm-wiki-external-sync
+pnpm-lock.yaml
+contracts/openapi/teamhub-public/**/*.yaml
+apps/node-services/validation
+skills/builtin/*/*/**
+# Preserve the supplied meeting-note rules byte-for-byte, including examples.
+apps/node-services/prompts/llm-wiki/personal/session-meeting-note/*.md
+# Preserve supplied Profile Skill bytes and its explicitly maintained references.
+apps/teamhub/internal/personalprofile/skill/

@@ -1,0 +1,5444 @@
+@import "tailwindcss";
+@import "./visual-theme.css";
+
+@theme inline {
+  --color-app-canvas: var(--app-canvas);
+  --color-app-surface: var(--app-surface);
+  --color-app-surface-soft: var(--app-surface-soft);
+  --color-app-sidebar: var(--app-sidebar);
+  --color-app-rail: var(--app-rail);
+  --color-app-ink: var(--app-ink);
+  --color-app-body: var(--app-body);
+  --color-app-muted: var(--app-muted);
+  --color-app-subtle: var(--app-subtle);
+  --color-app-border: var(--app-border);
+  --color-app-border-strong: var(--app-border-strong);
+  --color-app-border-interactive: var(--app-border-interactive);
+  --color-app-hover: var(--app-hover);
+  --color-app-selected: var(--app-selected);
+  --color-app-action: var(--app-action);
+  --color-app-action-hover: var(--app-action-hover);
+  --color-app-action-active: var(--app-action-active);
+  --color-app-action-foreground: var(--app-action-foreground);
+  --color-app-accent: var(--app-accent);
+  --color-app-accent-hover: var(--app-accent-hover);
+  --color-app-accent-surface: var(--app-accent-surface);
+  --color-app-accent-border: var(--app-accent-border);
+  --color-app-accent-text: var(--app-accent-text);
+  --color-app-info: var(--app-info);
+  --color-app-info-hover: var(--app-info-hover);
+  --color-app-focus: var(--app-focus);
+  --color-app-danger: var(--app-danger);
+  --color-app-success: var(--app-status-success-text);
+  --color-app-warning: var(--app-status-warning-text);
+  --color-app-work-surface: var(--app-work-surface);
+  --color-app-link: var(--app-link);
+  --color-background: hsl(var(--town-background));
+  --color-foreground: hsl(var(--town-foreground));
+  --color-card: hsl(var(--town-card));
+  --color-popover: hsl(var(--town-popover));
+  --color-primary: hsl(var(--town-primary));
+  --color-primary-foreground: hsl(var(--town-primary-foreground));
+  --color-secondary: hsl(var(--town-secondary));
+  --color-secondary-foreground: hsl(var(--town-secondary-foreground));
+  --color-muted: hsl(var(--town-muted));
+  --color-muted-foreground: hsl(var(--town-muted-foreground));
+  --color-accent: hsl(var(--town-accent));
+  --color-accent-foreground: hsl(var(--town-accent-foreground));
+  --color-destructive: hsl(var(--town-destructive));
+  --color-border: hsl(var(--town-border));
+  --color-border-hover: hsl(var(--town-border-hover));
+  --color-input: hsl(var(--town-input));
+  --color-ring: hsl(var(--town-primary) / 0.4);
+  --color-sidebar: hsl(var(--town-sidebar));
+  --color-sidebar-muted: hsl(var(--town-sidebar-muted));
+  --color-sun-500: #d95b31;
+  --color-sun-700: #912b00;
+  --color-lichen-500: #839127;
+  --color-lichen-700: #515a16;
+  --color-rain-500: #4e9ba2;
+  --color-rain-700: #2c5b60;
+  --color-butter-500: #a08e00;
+  --color-butter-700: #5f5302;
+  --color-lake-500: #509578;
+  --color-lake-700: #305d4a;
+  --color-bubblegum-500: #df5583;
+  --color-bubblegum-700: #95154b;
+  --color-grass-500: #5e9662;
+  --color-grass-700: #39603c;
+  --color-lavender-500: #a17cb9;
+  --color-lavender-700: #65417b;
+  --color-acorn-500: #b88022;
+  --color-acorn-700: #6e4b0f;
+  --color-bluebell-500: #698cc7;
+  --color-bluebell-700: #2e518d;
+  --color-fawn-500: #b07f77;
+  --color-fawn-700: #6b4944;
+  --font-sans: var(--app-font-sans);
+  --font-slab: var(--app-font-slab);
+  --font-weight-normal: 400;
+  --font-weight-medium: 470;
+  --font-weight-semibold: 580;
+  --font-weight-bold: 640;
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 1.5em;
+  --text-2xs--letter-spacing: 0.03em;
+  --text-2xs--font-weight: 400;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5em;
+  --text-xs--letter-spacing: 0.02em;
+  --text-xs--font-weight: 400;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5em;
+  --text-sm--letter-spacing: 0.02em;
+  --text-sm--font-weight: 400;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5em;
+  --text-base--letter-spacing: 0.0175em;
+  --text-base--font-weight: 400;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.5em;
+  --text-lg--letter-spacing: -0.45px;
+  --text-lg--font-weight: 580;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.45em;
+  --text-xl--letter-spacing: -0.5px;
+  --text-xl--font-weight: 580;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.4em;
+  --text-2xl--letter-spacing: -0.6px;
+  --text-2xl--font-weight: 580;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --shadow-outline: var(--town-shadow-outline);
+  --shadow-sm: var(--town-shadow-sm);
+  --shadow-md: var(--town-shadow-md);
+  --shadow-lg: var(--town-shadow-lg);
+  --shadow-xl: var(--town-shadow-xl);
+  --shadow-button: var(--town-shadow-button);
+  --ease-town: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-town-out: cubic-bezier(0, 0, 0.2, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root[data-han-font="sc"] {
+  --app-font-han: "PingFang SC", "Noto Sans SC Variable";
+}
+
+:root {
+  /* Town uses licensed ABC Diatype and Material Upright; the open Geist and
+     Roboto Slab variable fonts stand in with the same weight axis. */
+  /* --app-font-han is set only for Simplified Chinese readers (han-font.ts);
+     everyone else falls through to the OS font for CJK and other scripts. */
+  --app-font-sans:
+    "Geist Variable", var(--app-font-han, ui-sans-serif), ui-sans-serif,
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
+  --app-font-slab: "Roboto Slab Variable", Georgia, "Songti SC", serif;
+  --app-font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --app-header-font: var(--app-font-sans);
+  --app-control-radius: 6px;
+  --app-control-radius-large: 8px;
+  --app-button-radius: 8px;
+  --app-button-radius-large: 8px;
+  --app-pill-radius: 999px;
+  --app-card-radius: 12px;
+  --app-panel-radius: 16px;
+  --app-modal-radius: 8px;
+  --app-typed-card-radius: 12px;
+
+  /* Chat component tokens: the one place to tune how the chat looks.
+     Message rows, bubbles, cards and quotes read only these. */
+  --chat-avatar-size: 36px;
+  --chat-avatar-gap: 4px;
+  --chat-own-avatar-gap: 8px;
+  --chat-row-padding-y: 8px;
+  --chat-own-row-padding-y: 4px;
+  --chat-group-gap: 8px;
+  --chat-paragraph-gap: 8px;
+  --chat-time-divider-margin: 16px 0 8px;
+  --chat-bubble-radius: 12px;
+  --chat-bubble-padding-y: 8px;
+  --chat-bubble-padding-x: 12px;
+  --chat-bubble-bg: hsl(var(--town-muted) / 0.7);
+  --chat-own-bubble-bg: var(--app-ink);
+  --chat-own-bubble-text: var(--app-surface);
+  /* Every chat card (decisions, files, message cards) shares one width. */
+  --chat-card-width: 500px;
+  /* A file in a Message is a compact card, narrower than the other cards. */
+  --chat-file-width: 360px;
+  --chat-card-radius: 12px;
+  /* Every card sits 16px in from its border, like a file card. */
+  --chat-card-padding: 16px;
+  /* Card type: primary text matches chat body copy; secondary is one step down. */
+  --chat-card-text-size: 15px;
+  --chat-card-text-leading: 22px;
+  --chat-card-meta-size: 13px;
+  --chat-card-meta-leading: 18px;
+  --chat-card-border: var(--app-border);
+  --chat-card-bg: var(--app-surface);
+  /* An Agent reply's bubble: a lighter tint than the person's own. */
+  --chat-agent-bubble-bg: hsl(var(--town-muted) / 0.7);
+  /* A soft lift so a decision card reads above the chat. */
+  --chat-card-shadow: 0 1px 2px rgb(0 0 0 / 4%), 0 4px 14px rgb(0 0 0 / 6%);
+  --chat-row-min-height: 32px;
+  --chat-row-radius: 8px;
+  --chat-row-padding: 6px 8px;
+  --chat-quote-bg: hsl(var(--town-muted) / 0.4);
+  --chat-quote-padding: 6px 12px;
+  --chat-quote-font-size: 13px;
+  --chat-quote-line-height: 18px;
+  /* Chat motion: a new Message's pop, a card collapsing or growing, a
+     question's next step, a button press. */
+  --chat-pop-duration: 0.45s;
+  --chat-pop-fade-duration: 0.18s;
+  /* An Agent reply's words sweep in partway through the pop. */
+  --chat-sweep-delay: 0.15s;
+  --chat-sweep-duration: 1.6s;
+  /* A damped spring (damping 0.62): about 8% overshoot, settled by the end. */
+  --chat-pop-spring: linear(
+    0,
+    0.047,
+    0.161,
+    0.31,
+    0.47,
+    0.623,
+    0.757,
+    0.868,
+    0.954,
+    1.015,
+    1.054,
+    1.076,
+    1.083,
+    1.081,
+    1.073,
+    1.061,
+    1.047,
+    1.034,
+    1.023,
+    1.013,
+    1.005,
+    1,
+    0.996,
+    0.994,
+    1
+  );
+  --chat-resize-duration: 0.28s;
+  --chat-step-duration: 0.15s;
+  --chat-press-scale: 0.97;
+  --app-work-column-radius: 12px;
+  --app-work-card-radius: 8px;
+  --app-floating-shadow: var(--town-shadow-md);
+  --app-modal-shadow: var(--town-shadow-lg);
+  --app-popover-shadow: var(--town-shadow-xl);
+  --app-nav-selected-shadow: none;
+  --message-hover-shadow: var(--town-shadow-sm);
+  --composer-shadow: var(--town-shadow-md);
+  --composer-shadow-focus: var(--town-shadow-lg);
+  --composer-radius: 16px;
+  --composer-action-radius: 999px;
+  --app-room-font: var(--app-font-sans);
+  --app-serif: var(--app-font-slab);
+  --room-readable-width: 768px;
+  --app-content-width: clamp(720px, calc(60cqw + 204px), 1600px);
+  --app-rail-width: 56px;
+  --app-sidebar-width: 260px;
+  --app-threads-sidebar-width: 400px;
+  --app-header-height: 57px;
+  --app-settings-width: 832px;
+  /* Town motion: 150ms on the standard curve for state changes, ease-out for
+     entrances, 200ms for layout (sidebar grid) transitions. */
+  --app-emphasized-curve: cubic-bezier(0.4, 0, 0.2, 1);
+  --app-micro-duration: 0.15s;
+  --app-out-quint: cubic-bezier(0, 0, 0.2, 1);
+  --app-floating-duration: 0.15s;
+  --app-spinner-duration: 1s;
+  --app-emphasized-duration: 0.2s;
+  background: var(--app-canvas);
+  color: var(--app-ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Never fake bold on a fallback face; every shipped weight has real glyphs. */
+  font-synthesis-weight: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--app-font-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  background: var(--app-canvas);
+  color: var(--app-ink);
+}
+
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--app-ring);
+    outline-offset: 1px;
+  }
+}
+
+.trim-range-input {
+  height: 2rem;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.trim-range-input::-webkit-slider-runnable-track {
+  height: 0.5rem;
+  background: transparent;
+}
+
+.trim-range-input::-webkit-slider-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: -0.375rem;
+  appearance: none;
+  border: 2px solid var(--app-surface);
+  border-radius: 999px;
+  background: var(--app-info);
+  box-shadow: 0 0 0 1px var(--app-border-strong);
+  cursor: ew-resize;
+  pointer-events: auto;
+}
+
+.trim-range-input::-moz-range-track {
+  height: 0.5rem;
+  background: transparent;
+}
+
+.trim-range-input::-moz-range-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--app-surface);
+  border-radius: 999px;
+  background: var(--app-info);
+  box-shadow: 0 0 0 1px var(--app-border-strong);
+  cursor: ew-resize;
+  pointer-events: auto;
+}
+
+.trim-range-input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.trim-range-input:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+a[href]:not([aria-disabled="true"]),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+button:disabled,
+a[href][aria-disabled="true"],
+[role="button"][aria-disabled="true"] {
+  cursor: default;
+}
+
+.ui-field-frame {
+  position: relative;
+}
+
+@layer components {
+  .ui-field-control {
+    min-height: 2.25rem;
+    border: 1px solid var(--app-field-border);
+    border-radius: 6px;
+    background: var(--app-field-surface);
+    padding: 0.375rem 0.75rem;
+    outline: none;
+    transition:
+      border-color var(--app-micro-duration) var(--app-emphasized-curve),
+      background-color var(--app-micro-duration) var(--app-emphasized-curve),
+      box-shadow var(--app-micro-duration) var(--app-emphasized-curve);
+  }
+
+  .ui-field-control:hover:not(:disabled) {
+    border-color: var(--app-field-border-hover);
+  }
+
+  .ui-field-control:focus-visible,
+  .ui-field-control[aria-expanded="true"] {
+    border-color: var(--app-field-focus);
+    box-shadow: 0 0 0 2px var(--app-ring);
+  }
+
+  .ui-field-control:disabled {
+    background: var(--app-field-disabled-surface);
+    color: var(--app-field-disabled-text);
+  }
+
+  .ui-field-control[aria-invalid="true"] {
+    border-color: var(--app-danger);
+  }
+
+  /* Agent settings read as one 780px column (Town /assistant/settings) while
+     the scroll container keeps its scrollbar at the panel edge. */
+  .agent-settings-column {
+    padding-inline: max(0px, calc((100% - 780px) / 2));
+  }
+}
+
+.agent-profile-name-control {
+  font-size: 20px;
+  font-weight: 580;
+  line-height: 24px;
+}
+
+.auth-page {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(28rem, 1fr) minmax(0, 1fr);
+  overflow: hidden;
+  background: hsl(var(--town-background));
+}
+
+.auth-brand {
+  position: absolute;
+  top: 2rem;
+  left: 2.5rem;
+  z-index: 3;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.linger-brand-mark {
+  display: block;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+}
+
+.auth-stage {
+  display: contents;
+}
+
+.auth-panel {
+  position: relative;
+  z-index: 2;
+  grid-column: 1;
+  width: min(24.75rem, calc(100% - 3rem));
+  align-self: center;
+  justify-self: center;
+  padding: 5rem 0 3.5rem;
+}
+
+.auth-footer {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0;
+  z-index: 2;
+  width: 50%;
+  text-align: center;
+}
+
+.auth-illustration {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  background: hsl(var(--town-foreground));
+  pointer-events: none;
+  /* The picture is sized in em off this panel, so it scales with the window. */
+  container-type: size;
+}
+
+/* The login picture, after the demo film's opening frame: Another Me, a
+   personal AI on your own computer, floats in its card and reaches out every
+   few seconds. This is the only looping animation, and only on the login page. */
+.auth-art {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: hsl(var(--town-background));
+  box-shadow: var(--town-shadow-outline);
+  font-size: clamp(12px, 2.2cqmin, 20px);
+}
+
+/* The film's faint grid, fading out toward the form. */
+.auth-art::before {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(hsl(var(--town-border)) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--town-border)) 1px, transparent 1px);
+  background-position: center;
+  background-size: 2.5em 2.5em;
+  content: "";
+  mask-image: linear-gradient(90deg, transparent, black 80%);
+  animation: auth-art-fade 1.2s var(--ease-town-out) both;
+}
+
+.auth-art-copy {
+  position: absolute;
+  right: 3em;
+  bottom: 3em;
+  left: 3em;
+}
+
+.auth-art-title {
+  font-size: 3.5em;
+  font-weight: 580;
+  line-height: 1.06;
+  letter-spacing: -0.045em;
+}
+
+.auth-art-title > span {
+  display: block;
+  animation: auth-art-rise 0.9s var(--ease-town-out) 0.15s both;
+}
+
+.auth-art-title > span + span {
+  font-family: var(--app-font-slab);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  animation-delay: 0.35s;
+}
+
+.auth-art-lede {
+  max-width: 25em;
+  margin-top: 1em;
+  color: hsl(var(--town-muted-foreground));
+  font-size: 1.0625em;
+  text-wrap: pretty;
+  animation: auth-art-rise 0.9s var(--ease-town-out) 0.6s both;
+}
+
+.auth-art-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625em;
+  margin-top: 2em;
+  animation: auth-art-rise 0.9s var(--ease-town-out) 0.9s both;
+}
+
+.auth-art-steps > li {
+  padding: 0.5em 1em;
+  border: 1px solid hsl(var(--town-border-hover));
+  border-radius: 999px;
+  font-size: 0.9375em;
+}
+
+.auth-art-steps > li[aria-hidden] {
+  padding: 0;
+  border: 0;
+  color: hsl(var(--town-muted-foreground));
+}
+
+/* The film's tilted card turns upright, then floats while the nudges land. */
+.auth-art-mark {
+  position: absolute;
+  top: 3em;
+  right: 3em;
+  animation: auth-art-float 6s ease-in-out 2s infinite;
+}
+
+.auth-art-card {
+  display: grid;
+  width: 10em;
+  height: 11.75em;
+  place-items: center;
+  border: 1px solid hsl(var(--town-border));
+  border-radius: 2.25em;
+  background: hsl(var(--town-card));
+  box-shadow: 0 1.5em 4em hsl(var(--town-foreground) / 0.05);
+  animation: auth-art-card-in 3s var(--ease-town-out) both;
+}
+
+.auth-art-avatar {
+  position: relative;
+  display: block;
+  width: 6em;
+  height: 6em;
+}
+
+.auth-art-badge {
+  position: absolute;
+  top: -0.5em;
+  right: -0.625em;
+  display: grid;
+  min-width: 1.75em;
+  height: 1.75em;
+  padding: 0 0.5em;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--app-unread);
+  box-shadow: 0 0 0 0.25em hsl(var(--town-card));
+  color: var(--app-unread-foreground);
+  font-size: 0.875em;
+  font-weight: 580;
+  line-height: 1;
+}
+
+/* Each nudge lands beside the card, then leaves upward as the next lands. */
+.auth-art-nudges {
+  position: absolute;
+  top: 6.5em;
+  right: 14em;
+  display: grid;
+  width: 20em;
+  justify-items: end;
+}
+
+.auth-art-nudge {
+  grid-area: 1 / 1;
+  width: fit-content;
+  padding: 0.625em 0.875em;
+  border-radius: 12px;
+  background: hsl(var(--town-card));
+  box-shadow: var(--town-shadow-lg);
+  font-size: 0.875em;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(0.6em);
+  transition:
+    opacity 0.3s var(--ease-town-out),
+    transform 0.3s var(--ease-town-out);
+}
+
+.auth-art-nudge[data-state="shown"] {
+  opacity: 1;
+  transform: none;
+}
+
+.auth-art-nudge[data-state="previous"] {
+  transform: translateY(-0.6em);
+}
+
+.auth-art-nudge-time {
+  display: block;
+  color: hsl(var(--town-muted-foreground));
+  font-size: 0.857em;
+}
+
+@keyframes auth-art-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes auth-art-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.5em);
+  }
+}
+
+@keyframes auth-art-card-in {
+  from {
+    opacity: 0;
+    transform: rotate(-7deg) scale(0.83);
+  }
+  25% {
+    opacity: 1;
+  }
+}
+
+@keyframes auth-art-float {
+  50% {
+    transform: translateY(-0.35em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-art::before,
+  .auth-art-title > span,
+  .auth-art-lede,
+  .auth-art-steps,
+  .auth-art-mark,
+  .auth-art-card,
+  /* Outranks the shared town-pill-pop rule, which comes later in this file. */
+  .auth-art .auth-art-badge {
+    animation: none;
+  }
+
+  .auth-art-nudge {
+    transition: none;
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .auth-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+
+  .auth-brand {
+    position: static;
+  }
+
+  .auth-stage {
+    display: grid;
+    min-height: calc(100dvh - 6rem);
+    place-items: center;
+  }
+
+  .auth-illustration {
+    display: none;
+  }
+
+  .auth-panel {
+    grid-column: 1;
+    width: min(100%, 24.75rem);
+    padding: 2rem 0;
+  }
+
+  .auth-footer {
+    position: static;
+    width: auto;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .auth-page {
+    padding: 1.25rem;
+  }
+
+  .auth-panel {
+    width: 100%;
+    padding: 2rem 0;
+  }
+
+  .auth-stage {
+    min-height: 100%;
+    margin: 0;
+    place-items: center;
+  }
+}
+
+/* Every modal is one surface, one position and one entrance. ModalDialog
+   applies this; a caller only picks a size and supplies content. The dialog
+   is centred on screen and fades in from 95% over a pale frosted scrim. */
+.app-dialog {
+  border: 0;
+  border-radius: var(--app-modal-radius);
+  background: hsl(var(--town-popover));
+  color: hsl(var(--town-foreground));
+  text-align: start;
+  box-shadow: var(--town-shadow-lg);
+  animation: app-dialog-enter 0.1s ease both;
+}
+
+/* Dialogs that opt into the shared sizes/chrome sit in the middle of the
+   screen, at least 16px from every edge; a taller body scrolls inside. Full-
+   screen and custom-frame dialogs keep their own layout. */
+.app-dialog[data-size],
+.app-dialog.app-dialog-standard {
+  margin: auto;
+  max-height: calc(100dvh - 32px);
+}
+
+/* Four widths cover every ordinary dialog; full-screen viewers keep their own
+   frame and do not set a size. */
+.app-dialog[data-size="sm"] {
+  width: min(400px, calc(100vw - 32px));
+}
+
+.app-dialog[data-size="md"] {
+  width: min(520px, calc(100vw - 32px));
+}
+
+.app-dialog[data-size="lg"] {
+  width: min(720px, calc(100vw - 32px));
+}
+
+.app-dialog[data-size="xl"] {
+  width: min(960px, calc(100vw - 32px));
+}
+
+.app-dialog::backdrop {
+  background: var(--app-overlay);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: app-dialog-backdrop 0.1s ease both;
+}
+
+@keyframes app-dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes app-dialog-backdrop {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Town motion (design system "Motion"): shared keyframes and utilities.
+   Overlays: town-dropdown-in, town-dropdown-out, town-tooltip-in,
+   town-toast-in, town-toast-swipe-out, town-spinner-bar,
+   town-skeleton-shimmer.
+   AI and status: town-dot-wave, town-shimmer-text, town-caret-blink,
+   town-response-arrive, town-ai-edit-fade, town-selection-pulse,
+   town-pill-pop, town-status-roll-in,
+   town-status-roll-out.
+   File drop: town-drop-hop (one upward hop on enter), town-drop-float. */
+@keyframes town-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translate(
+        var(--town-dropdown-from-x, 0),
+        var(--town-dropdown-from-y, -0.5rem)
+      )
+      scale(0.95);
+  }
+}
+
+@keyframes town-dropdown-out {
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes town-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--town-tooltip-from-y, 0.5rem)) scale(0.95);
+  }
+}
+
+@keyframes town-toast-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes town-countdown-ring {
+  to {
+    stroke-dashoffset: 100;
+  }
+}
+
+@keyframes town-toast-swipe-out {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes town-skeleton-shimmer {
+  0%,
+  to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes town-spinner-bar {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes town-dot-wave {
+  0%,
+  60%,
+  to {
+    opacity: 0.55;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes town-shimmer-text {
+  0% {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* The Room status line rolls each new line up from below (grok-bot). */
+@keyframes town-status-roll-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(100% + 1px));
+  }
+}
+
+@keyframes town-status-roll-out {
+  to {
+    opacity: 0;
+    transform: translateY(calc(-100% - 1px));
+  }
+}
+
+@keyframes town-caret-blink {
+  0%,
+  to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes town-response-arrive {
+  0%,
+  to {
+    -webkit-mask-image: linear-gradient(to bottom right, #000 25%, #0000 75%);
+    mask-image: linear-gradient(to bottom right, #000 25%, #0000 75%);
+    -webkit-mask-size: 400% 400%;
+    mask-size: 400% 400%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  0% {
+    -webkit-mask-position: 100% 100%;
+    mask-position: 100% 100%;
+  }
+  to {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+}
+
+@keyframes town-ai-edit-fade {
+  0% {
+    background-color: #3c83f661;
+  }
+  50% {
+    background-color: #3c83f633;
+  }
+  to {
+    background-color: #0000;
+  }
+}
+
+@keyframes town-selection-pulse {
+  0% {
+    background-color: #3c83f666;
+  }
+  to {
+    background-color: #3c83f626;
+  }
+}
+
+@keyframes town-drop-hop {
+  0% {
+    transform: translateY(6px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Looping motion stays within the 2px / >=1.5s limit. */
+@keyframes town-drop-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes town-pill-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Dropdown entrance; set data-side="top" when the surface opens upward. */
+.town-dropdown-enter {
+  animation: town-dropdown-in var(--app-floating-duration) ease both;
+}
+
+.town-dropdown-enter[data-side="top"] {
+  --town-dropdown-from-y: 0.5rem;
+}
+
+.town-dropdown-enter[data-side="right"] {
+  --town-dropdown-from-x: -0.5rem;
+  --town-dropdown-from-y: 0;
+}
+
+.town-tooltip-enter {
+  animation: town-tooltip-in var(--app-floating-duration) ease both;
+}
+
+.town-toast-enter {
+  animation: town-toast-in 0.3s ease forwards;
+}
+
+.town-toast-exit {
+  animation: town-toast-swipe-out 0.2s ease-out forwards;
+}
+
+/* An SVG circle with pathLength="100" that empties over its animation. */
+.town-countdown-ring {
+  stroke-dasharray: 100;
+  animation: town-countdown-ring 5s linear forwards;
+}
+
+.town-skeleton {
+  animation: town-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.town-spinner {
+  position: relative;
+  display: inline-block;
+}
+
+.town-spinner > span {
+  position: absolute;
+  top: 5%;
+  left: 45%;
+  width: 10%;
+  height: 25%;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: 50% 180%;
+  animation: town-spinner-bar 1.2s linear infinite;
+}
+
+.town-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--town-muted-foreground)) 0%,
+    hsl(var(--town-muted-foreground)) 40%,
+    hsl(var(--town-foreground)) 50%,
+    hsl(var(--town-muted-foreground)) 60%,
+    hsl(var(--town-muted-foreground)) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: town-shimmer-text 3s linear infinite;
+}
+
+/* grok-bot's status shimmer: a wide highlight swept over 40% ink. */
+.town-status-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--town-foreground) / 0.4) 0%,
+    hsl(var(--town-foreground) / 0.4) 25%,
+    hsl(var(--town-foreground)) 60%,
+    hsl(var(--town-foreground) / 0.4) 75%,
+    hsl(var(--town-foreground) / 0.4) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: town-shimmer-text 2.2s ease-in-out infinite;
+}
+
+.town-status-roll-in {
+  animation: town-status-roll-in 260ms var(--ease-town-out) both;
+}
+
+.town-status-roll-out {
+  animation: town-status-roll-out 260ms var(--ease-town-out) both;
+}
+
+.town-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.2em;
+  background: currentColor;
+  animation: town-caret-blink 1.1s ease-in-out infinite;
+}
+
+.town-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.town-dots > * {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: town-dot-wave 1.2s ease-in-out infinite;
+}
+
+.town-dots > :nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.town-dots > :nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.town-response-arrive {
+  animation: town-response-arrive var(--response-block-duration, 1.3s)
+    ease-in-out backwards;
+}
+
+/* A new Agent reply: its bubble pops in, and as it settles its words sweep
+   in as if typed, fast at first. The words stay hidden until then. */
+.message-text-sweep {
+  animation: message-text-sweep var(--chat-sweep-duration) var(--ease-town-out)
+    var(--chat-sweep-delay) backwards;
+}
+
+/* The Town sweep, started where the first words begin to show (85%) rather
+   than fully masked, so no time passes on an empty bubble. */
+@keyframes message-text-sweep {
+  0%,
+  to {
+    -webkit-mask-image: linear-gradient(to bottom right, #000 25%, #0000 75%);
+    mask-image: linear-gradient(to bottom right, #000 25%, #0000 75%);
+    -webkit-mask-size: 400% 400%;
+    mask-size: 400% 400%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  0% {
+    -webkit-mask-position: 85% 85%;
+    mask-position: 85% 85%;
+  }
+  to {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+}
+
+.town-ai-edit {
+  animation: town-ai-edit-fade 5s ease-out forwards;
+}
+
+.town-selection-pulse {
+  animation: town-selection-pulse 0.6s ease-out forwards;
+}
+
+.town-pill-pop {
+  animation: town-pill-pop 0.35s ease-out both;
+}
+
+.town-drop-card {
+  --town-dropdown-from-y: 0;
+  animation: town-dropdown-in 150ms var(--ease-town-out) both;
+}
+
+.town-drop-icon {
+  animation:
+    town-drop-hop 0.45s var(--ease-town-out),
+    town-drop-float 1.6s ease-in-out 0.45s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .town-dropdown-enter,
+  .town-tooltip-enter,
+  .town-toast-enter,
+  .town-toast-exit,
+  .town-countdown-ring,
+  .town-skeleton,
+  .town-spinner > span,
+  .town-caret,
+  .town-dots > *,
+  .town-response-arrive,
+  .town-ai-edit,
+  .town-selection-pulse,
+  .town-pill-pop,
+  .town-drop-card,
+  .town-drop-icon,
+  .town-status-roll-in {
+    animation: none;
+  }
+
+  .town-status-roll-out {
+    display: none;
+  }
+
+  .town-shimmer-text,
+  .town-status-shimmer {
+    animation: none;
+    background: none;
+    color: hsl(var(--town-muted-foreground));
+  }
+}
+
+/* The shared floating card for menus and popovers: the Town dropdown surface,
+   a 6px popover card on the medium shadow. */
+.app-popover-card {
+  border-radius: 6px;
+  background: hsl(var(--town-popover));
+  color: hsl(var(--town-foreground));
+  box-shadow: var(--town-shadow-md);
+}
+
+/* The layer behind an open menu catches outside presses below the menu (z 90
+   under the menu's 100). Town dropdowns leave the page undimmed, so it stays
+   clear. */
+.app-menu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: transparent;
+}
+
+/* Standard chrome: a titled header with an optional subtitle and a close
+   button, a scrolling body, and a right-aligned footer. Scoped to dialogs that
+   opt in, so a caller that still supplies its own layout is untouched. */
+.app-dialog-standard {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.app-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 12px 20px;
+  border-bottom: 1px solid hsl(var(--town-border));
+}
+
+.app-dialog-title {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 580;
+  letter-spacing: 0.0175em;
+  color: hsl(var(--town-foreground));
+}
+
+.app-dialog-description {
+  margin-top: 2px;
+  font-size: 0.875rem;
+  color: hsl(var(--town-muted-foreground));
+}
+
+.app-dialog-close {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: hsl(var(--town-muted-foreground));
+  transition:
+    background-color var(--app-micro-duration) var(--app-emphasized-curve),
+    color var(--app-micro-duration) var(--app-emphasized-curve);
+}
+
+.app-dialog-close:hover {
+  background: hsl(var(--town-accent));
+  color: hsl(var(--town-accent-foreground));
+}
+
+.app-dialog-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.app-dialog-body {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.app-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-dialog,
+  .app-dialog::backdrop {
+    animation: none;
+  }
+}
+
+/* Template cards settle in on open, staggered by their position in the grid so
+   the shelf reads as one list arriving rather than a block appearing. */
+.template-card-enter {
+  animation: template-card-enter 240ms ease both;
+  animation-delay: calc(var(--template-card-index, 0) * 40ms);
+}
+
+@keyframes template-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-card-enter {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-field-control {
+    transition: none;
+  }
+}
+
+.ui-button-compact {
+  height: 1.75rem;
+  border-radius: 999px;
+}
+
+.ui-button-default {
+  height: 2rem;
+  border-radius: 6px;
+}
+
+.ui-button-large {
+  height: 2.25rem;
+  border-radius: 8px;
+}
+
+.ui-button-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+}
+
+.ui-button-icon-compact {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 8px;
+}
+
+.workspace-nav-row {
+  min-height: 2.125rem;
+}
+
+.room-file-library {
+  container-type: inline-size;
+}
+
+.app-secondary-navigation .workspace-nav-row {
+  min-height: 56px;
+}
+
+.app-secondary-navigation .workspace-nav-row[aria-current="page"] {
+  box-shadow: none;
+}
+
+.app-work-surface {
+  container-type: inline-size;
+  background: var(--app-work-surface);
+}
+
+.workspace-content-viewport {
+  container-type: inline-size;
+}
+
+.workspace-content {
+  width: 100%;
+  max-width: var(--app-content-width);
+  margin-inline: auto;
+}
+
+@media (min-width: 48rem) {
+  .app-shell {
+    overflow: hidden;
+    border-radius: var(--app-panel-radius);
+    background: var(--app-work-surface);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 10%);
+  }
+}
+
+/* Only the primary rail animates, and only while it is toggling. The shell moves
+   by exactly the same amount on the same curve, so the Room list beside it rides
+   along rigidly; outside the toggle it has no width transition at all, so
+   dragging the Room list wider tracks the pointer. */
+.app-navigation[data-animating],
+.app-navigation[data-animating] .app-primary-navigation {
+  transition: width var(--app-emphasized-duration) var(--app-emphasized-curve);
+}
+
+.app-navigation {
+  background: var(--app-rail);
+}
+
+/* Desktop app on macOS: the page runs full height under the native traffic
+   lights (html[data-desktop-chrome="inset"], set by the desktop preload). The
+   sidebar starts below a strip that holds the lights. A strip as tall as the
+   page headers drags the window across its whole width; controls inside it
+   stay clickable because the drag area excludes them. */
+:root[data-desktop-chrome="inset"] {
+  --desktop-inset-top: 38px;
+  --desktop-drag-height: 44px;
+}
+:root[data-desktop-chrome="inset"] .app-shell {
+  border-radius: 0;
+  box-shadow: none;
+}
+:root[data-desktop-chrome="inset"] .app-navigation {
+  padding-top: var(--desktop-inset-top);
+}
+:root[data-desktop-chrome="inset"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: var(--desktop-drag-height);
+  pointer-events: none;
+  -webkit-app-region: drag;
+}
+:root[data-desktop-chrome="inset"]
+  :is(
+    a,
+    button,
+    input,
+    select,
+    summary,
+    textarea,
+    [contenteditable="true"],
+    [role="button"],
+    [role="combobox"],
+    [role="menuitem"],
+    [role="tab"],
+    [tabindex]:not([tabindex="-1"])
+  ) {
+  -webkit-app-region: no-drag;
+}
+
+/* Desktop app window layout (html[data-desktop-shell], set by the web app when
+   it runs inside the desktop app; browsers never get it). The rail and a bar
+   along the top are a grey frame around one white card with a soft shadow.
+   The modules in the card (list, page, preview panel) are split by single
+   hairlines that run on up through the bar, so each title sits over its own
+   column. Each piece draws the shared shadow but clips it off the sides where
+   it meets a neighbour, so the pieces read as one card. */
+:root[data-desktop-shell] {
+  --app-card-gap: 6px;
+  --desktop-seam: rgb(0 0 0 / 8%);
+  --app-card-shadow:
+    0 0 0 1px rgb(0 0 0 / 5%), 0 1px 2px rgb(0 0 0 / 4%),
+    0 6px 20px rgb(0 0 0 / 6%);
+  --desktop-card-reach: -32px;
+  /* The frame keeps its own sizes: every bar is as tall as the drag strip. */
+  --app-header-height: 44px;
+  /* Wide enough to leave a strip of frame between the stops and the card;
+     the stops sit centred across the whole of it. */
+  --app-rail-width: 62px;
+}
+:root[data-desktop-shell][data-desktop-chrome="inset"] .app-navigation {
+  padding-top: 0;
+}
+:root[data-desktop-shell][data-desktop-chrome="inset"] .app-primary-navigation {
+  padding-top: var(--desktop-inset-top);
+}
+/* The list header starts under the traffic lights, so its title moves clear. */
+:root[data-desktop-shell][data-desktop-chrome="inset"]
+  .room-secondary-navigation-header {
+  padding-left: 24px;
+}
+.primary-navigation-list-toggle {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.room-secondary-navigation-title {
+  min-width: 0;
+  flex: 1;
+  color: var(--app-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (min-width: 48rem) {
+  :root[data-desktop-shell] .app-shell {
+    overflow: hidden;
+    border-radius: 0;
+    background: var(--app-sidebar);
+    box-shadow: none;
+  }
+  :root[data-desktop-shell] .app-shell > .app-work-surface {
+    background: transparent;
+  }
+  /* The seam is drawn once, by the module on its right; any other edge
+     there would show the frame through it as a second line. */
+  :root[data-desktop-shell] .app-navigation {
+    border-right-width: 0;
+  }
+  :root[data-desktop-shell] .app-navigation .app-secondary-navigation {
+    width: calc(var(--sidebar-width) + 20px);
+    margin-inline: 0;
+  }
+  :root[data-desktop-shell] .room-secondary-navigation-header {
+    height: 44px;
+    padding-inline: 10px;
+  }
+  :root[data-desktop-shell] .room-secondary-navigation-search {
+    height: 30px;
+    gap: 7px;
+    border-radius: 9999px;
+    background: rgb(0 0 0 / 5%);
+    padding-inline: 12px;
+    box-shadow: none;
+    font-size: 14px;
+  }
+  :root[data-desktop-shell] .room-secondary-navigation-search:hover {
+    background: rgb(0 0 0 / 8%);
+  }
+  /* The rail and the list sit on the frame, as the bar along the top does. */
+  :root[data-desktop-shell] .app-navigation,
+  :root[data-desktop-shell] .app-navigation .app-secondary-navigation {
+    background: var(--app-sidebar);
+  }
+  /* The rail stacks above the page for its labels, so it lets the frame
+     show through rather than paint over the card's edge beside it. */
+  :root[data-desktop-shell] .app-primary-navigation {
+    background: transparent;
+  }
+  /* The list keeps its group headings and rows as the desktop app drew them. */
+  :root[data-desktop-shell] .room-secondary-navigation-list > section > div {
+    padding-left: 4px;
+  }
+  :root[data-desktop-shell]
+    .room-secondary-navigation-list
+    > section
+    > div
+    > h2
+    > button {
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: rgb(0 0 0 / 40%);
+  }
+  :root[data-desktop-shell]
+    .room-secondary-navigation-list
+    > section
+    > div
+    > h2
+    > button:hover {
+    color: rgb(0 0 0 / 60%);
+  }
+  :root[data-desktop-shell]
+    .room-secondary-navigation-list
+    > section
+    > div
+    + div
+    > :not(:last-child) {
+    margin-block-end: 3px;
+  }
+  :root[data-desktop-shell] .room-secondary-navigation-list .group {
+    border-radius: 12px;
+  }
+  :root[data-desktop-shell]
+    .room-secondary-navigation-list
+    .group:is([class~="bg-muted"], :hover) {
+    background: rgb(128 128 128 / 10%);
+  }
+
+  /* Rail: larger stops, the open module marked by a darker icon only. The
+     rail opens straight on the stops, with no brand mark (and so no control
+     to widen it); they sit centred, the first level with the list's search. */
+  :root[data-desktop-shell] .primary-navigation-topbar {
+    display: none;
+  }
+  :root[data-desktop-shell] .primary-navigation-items {
+    padding: 10px 12px 0;
+  }
+  :root[data-desktop-shell] .primary-navigation-items .room-rail-link {
+    width: 38px;
+    height: 38px;
+    gap: 6px;
+    margin-bottom: 14px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+  :root[data-desktop-shell]
+    .primary-navigation-items
+    .room-rail-link[aria-current="page"]:not(:hover, :focus-visible) {
+    background: transparent;
+  }
+  :root[data-desktop-shell] .primary-navigation-items .room-rail-link > svg {
+    width: 22px;
+    height: 22px;
+    margin-inline: 8px;
+    opacity: 0.4;
+    transition: opacity var(--app-micro-duration) ease;
+  }
+  :root[data-desktop-shell]
+    .primary-navigation-items
+    .room-rail-link:is(:hover, :focus-visible)
+    > svg {
+    opacity: 0.7;
+  }
+  :root[data-desktop-shell]
+    .primary-navigation-items
+    .room-rail-link[aria-current="page"]
+    > svg {
+    opacity: 1;
+  }
+  :root[data-desktop-shell] .room-secondary-navigation-list .workspace-nav-row {
+    gap: 6px;
+    border-radius: 12px;
+    padding-block: 10px;
+  }
+  :root[data-desktop-shell]
+    .room-secondary-navigation-list
+    .workspace-nav-row
+    > span
+    > span
+    + span {
+    font-size: 12px;
+    font-weight: 300;
+  }
+
+  /* The chat title sits at the left of the bar, level with the list title. */
+  :root[data-desktop-shell] .app-room-surface > .room-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 4px;
+    padding-inline: 8px;
+  }
+  :root[data-desktop-shell] .app-room-surface > .room-header > :nth-child(2) {
+    justify-content: flex-start;
+    padding-inline: 8px;
+  }
+  :root[data-desktop-shell] .app-room-surface > .room-header h1 {
+    font-weight: 600;
+  }
+  :root[data-desktop-shell] .room-header .room-header-room-avatar {
+    display: none;
+  }
+
+  /* Chat: list | conversation | preview panel. */
+  :root[data-desktop-shell] .app-navigation .room-secondary-navigation-list {
+    margin: 0 0 var(--app-card-gap);
+    padding-inline: 10px 8px;
+    border-radius: var(--app-panel-radius) 0 0 var(--app-panel-radius);
+    background: var(--app-surface);
+    box-shadow: var(--app-card-shadow);
+    clip-path: inset(
+      var(--desktop-card-reach) 0 var(--desktop-card-reach)
+        var(--desktop-card-reach)
+    );
+  }
+  :root[data-desktop-shell] .app-room-surface {
+    border-inline: 0;
+    background: transparent;
+  }
+  :root[data-desktop-shell] .app-room-surface > .room-header {
+    border-bottom-color: transparent;
+    background: transparent;
+  }
+  :root[data-desktop-shell] .room-surface-card {
+    --card-clip-left: var(--desktop-card-reach);
+    --card-clip-right: var(--desktop-card-reach);
+    margin: 0 var(--app-card-gap) var(--app-card-gap) 0;
+    overflow: hidden;
+    border-radius: var(--app-panel-radius);
+    background: var(--app-surface);
+    box-shadow: var(--app-card-shadow);
+    clip-path: inset(
+      var(--desktop-card-reach) var(--card-clip-right) var(--desktop-card-reach)
+        var(--card-clip-left)
+    );
+  }
+  :root[data-desktop-shell]
+    .app-shell:has(.app-secondary-navigation)
+    .app-room-surface
+    > .room-header,
+  :root[data-desktop-shell]
+    .app-shell:has(.app-secondary-navigation)
+    .room-surface-card {
+    border-left: 1px solid var(--desktop-seam);
+  }
+  :root[data-desktop-shell]
+    .app-shell:has(.app-secondary-navigation)
+    .room-surface-card {
+    --card-clip-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  :root[data-desktop-shell]
+    .app-room-layout[data-detail-open="true"]
+    .room-surface-card {
+    --card-clip-right: 0;
+    margin-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  :root[data-desktop-shell] .panel-sidebar,
+  :root[data-desktop-shell] .panel-sidebar-body > :first-child {
+    background: transparent;
+  }
+  :root[data-desktop-shell] .panel-sidebar-body {
+    padding: 0 var(--app-card-gap) var(--app-card-gap) 0;
+  }
+  :root[data-desktop-shell] .panel-sidebar-body > :first-child {
+    border-left: 1px solid var(--desktop-seam);
+  }
+  :root[data-desktop-shell] .panel-content-surface {
+    border-left: 1px solid var(--desktop-seam);
+    border-radius: 0 var(--app-panel-radius) var(--app-panel-radius) 0;
+    box-shadow: var(--app-card-shadow);
+    clip-path: inset(
+      var(--desktop-card-reach) var(--desktop-card-reach)
+        var(--desktop-card-reach) 0
+    );
+  }
+
+  /* Other pages put their title in the bar, with the page as the card. */
+  :root[data-desktop-shell] .desktop-frame-bar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    height: var(--desktop-drag-height, 44px);
+    padding-inline: 6px;
+  }
+  :root[data-desktop-shell]
+    .app-work-surface:has(.app-room-surface, .library-layout)
+    > .desktop-frame-bar {
+    display: none;
+  }
+  :root[data-desktop-shell]
+    .app-work-surface:not(:has(.app-room-surface, .library-layout))
+    > .app-page-card {
+    margin: 0 var(--app-card-gap) var(--app-card-gap) 0;
+    overflow: hidden;
+    border-radius: var(--app-panel-radius);
+    background: var(--app-work-surface);
+    box-shadow: var(--app-card-shadow);
+  }
+  /* A title moved into a bar drops the look it had at the top of the page. */
+  :root[data-desktop-shell] .desktop-frame-bar > div > header {
+    position: static;
+    flex: 1;
+    min-width: 0;
+    height: var(--desktop-drag-height, 44px);
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border-bottom: 0;
+    background: transparent;
+  }
+  :root[data-desktop-shell] .desktop-frame-bar > div > header :is(h1, h2) {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* A bare page heading moved into the bar takes the bar's title look. */
+  :root[data-desktop-shell] .desktop-frame-bar > div > :is(h1, h2) {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  /* Library: the browser layout, as one card under an empty bar. */
+  :root[data-desktop-shell] .library-layout {
+    background: transparent;
+  }
+  :root[data-desktop-shell] .library-layout-body {
+    margin: 0 var(--app-card-gap) var(--app-card-gap) 0;
+    border-radius: var(--app-panel-radius);
+    background: var(--app-surface);
+    box-shadow: var(--app-card-shadow);
+  }
+}
+/* Titles and controls on the frame move clear of the traffic lights. */
+:root[data-desktop-chrome="inset"] .desktop-frame-bar {
+  padding-left: 24px;
+}
+.library-desktop-bar {
+  flex-shrink: 0;
+  height: 44px;
+  background: var(--app-sidebar);
+}
+
+.sidebar-resize-handle {
+  position: absolute;
+  inset-block: 0;
+  right: -4px;
+  z-index: 20;
+  display: none;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.sidebar-resize-handle-left {
+  right: auto;
+  left: -4px;
+}
+
+.sidebar-resize-handle::after {
+  position: absolute;
+  inset-block: 0;
+  left: 3px;
+  width: 1px;
+  content: "";
+}
+
+.sidebar-resize-handle:focus-visible::after {
+  background: var(--app-focus);
+}
+
+@media (min-width: 48rem) {
+  .sidebar-resize-handle {
+    display: block;
+  }
+}
+
+.room-brand-mark {
+  width: 32px;
+  height: 32px;
+}
+
+.app-work-surface,
+.app-room-surface,
+.work-items-surface {
+  background: var(--app-work-surface);
+}
+
+.room-chat-column {
+  container-type: inline-size;
+}
+
+.room-chat-column .room-readable {
+  max-width: min(100%, var(--room-readable-width));
+}
+
+/* Body copy wraps at the chat card width, so long text lines up with the
+   cards around it; code, tables, figures and cards opt out below. Inside a
+   bubble the text leaves room for the bubble's own padding. */
+.message-row-body > :not(pre):not(table):not(figure):not(.agent-status-card) {
+  max-width: var(--chat-card-width);
+}
+
+.room-message-bubble
+  .message-row-body
+  > :not(pre):not(table):not(figure):not(.agent-status-card) {
+  max-width: calc(var(--chat-card-width) - 2 * var(--chat-bubble-padding-x));
+}
+
+/* On narrow screens a card takes the whole lane beside the avatar, and the
+   Message actions move up onto the author line instead of reserving room. */
+@media (max-width: 767px) {
+  .room-message-card.has-wide-card[data-current-actor] > .room-message-content {
+    width: calc(100% - 44px);
+    max-width: calc(100% - 44px);
+  }
+
+  .room-message-card.has-wide-card .room-message-body-main {
+    flex: 1 1 auto;
+  }
+
+  .room-message-card.has-wide-card
+    .room-message-body-line
+    > .message-row-actions {
+    top: -28px;
+    right: 0;
+    left: auto;
+    margin: 0;
+  }
+}
+
+/* Structured cards stay compact so their actions sit beside their content. */
+.message-row .agent-status-card {
+  max-width: 640px;
+}
+
+/* Keep compact hover tools at the 24px minimum target. */
+.message-row-actions button {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* The timeline fades out under the header's bottom edge instead of meeting it
+   at a hard divider line. */
+.room-timeline {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-rail-link {
+    transition: none;
+  }
+}
+
+.document-comments-resize-handle {
+  display: none;
+}
+
+.document-comment-send {
+  width: 24px;
+  height: 24px;
+}
+
+.document-comment-input {
+  padding-block: 7px;
+  field-sizing: content;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@media (min-width: 64rem) {
+  .document-comments-resize-handle {
+    display: block;
+  }
+}
+
+.room-timeline {
+  padding-inline: 12px;
+}
+
+.app-secondary-navigation,
+.app-room-surface {
+  font-family: var(--app-room-font);
+}
+
+/* The closed panel parks one panel-width past the layout edge instead of
+   collapsing, so it slides in rigidly while the negative margin it gives back
+   compresses the chat lane in the same movement. Opening and closing share one
+   duration and curve, so the panel leaves the way it arrived. The percentages in the clamp
+   resolve against the same containing block in both properties, so the parked
+   offset always matches the width the panel actually renders at. */
+.panel-sidebar {
+  --panel-sidebar-clamp: min(100%, max(50vw, calc(100% - min(22.5rem, 45%))));
+  width: var(--panel-sidebar-width);
+  max-width: var(--panel-sidebar-clamp);
+  transition:
+    margin-right var(--app-emphasized-duration) var(--app-emphasized-curve),
+    width 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.panel-sidebar[data-maximized="true"] {
+  width: 100%;
+  max-width: none;
+}
+
+.panel-sidebar[data-open="false"] {
+  margin-right: calc(
+    -1 * min(var(--panel-sidebar-width), var(--panel-sidebar-clamp))
+  );
+  pointer-events: none;
+}
+
+.panel-sidebar[data-maximized="true"][data-open="false"] {
+  margin-right: -100%;
+}
+
+/* Entering, the content rides the slide, so the reveal never shows an empty
+   surface waiting for its content. Leaving keeps the quick fade, which is what
+   makes the exit calm. */
+.panel-sidebar-body {
+  transition: opacity var(--app-emphasized-duration) var(--app-emphasized-curve);
+}
+
+.panel-sidebar[data-open="false"] .panel-sidebar-body {
+  opacity: 0;
+  transition: opacity 0.1s cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+.panel-sidebar[data-dragging="true"] {
+  transition: none;
+}
+
+.app-room-layout:has(.panel-sidebar[data-maximized="true"]) .app-room-surface {
+  display: none;
+}
+
+/* A maximized panel is an immersive view: the app navigation gives its width
+   back too, and Restore or Escape brings it back. */
+.app-shell:has(.panel-sidebar[data-maximized="true"]) .app-navigation {
+  display: none;
+}
+
+/* The desktop window keeps its rail: the traffic lights sit over it, and the
+   panel stays a card on the frame. Only the list gives its width back. */
+@media (min-width: 48rem) {
+  :root[data-desktop-shell]
+    .app-shell:has(.panel-sidebar[data-maximized="true"])
+    .app-navigation {
+    display: flex;
+  }
+  :root[data-desktop-shell]
+    .app-shell:has(.panel-sidebar[data-maximized="true"])
+    .app-secondary-navigation {
+    display: none;
+  }
+}
+
+.workspace-nav-row[aria-current="page"] {
+  box-shadow: var(--app-nav-selected-shadow);
+}
+
+.room-header {
+  position: relative;
+  z-index: 11;
+  background: var(--app-work-surface);
+}
+
+.room-members-trigger {
+  height: 22px;
+  min-height: 22px;
+  gap: 0;
+  border-radius: 999px;
+  background: hsl(var(--town-foreground) / 0.05);
+  padding: 2px;
+}
+
+.room-members-trigger:hover {
+  background: hsl(var(--town-foreground) / 0.1);
+}
+
+.room-member-avatar[data-actor-kind="agent"] > [role="img"] {
+  border-radius: 5px;
+}
+
+.room-readable {
+  width: 100%;
+  max-width: var(--room-readable-width);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.room-rail-link:is(:hover, :focus-visible) {
+  color: var(--app-ink);
+}
+
+/* Keep the chat surface border box symmetric; the readable lane follows the
+   remaining width after the adjustable navigation. */
+@media (min-width: 64rem) {
+  .app-room-surface {
+    border-left: 1px solid transparent;
+  }
+}
+
+/* Opening a Room fades its whole lane in at once. Opacity alone never changes
+   layout, so the timeline keeps its height and the reader parked at the newest
+   Message is not nudged while the bottom-follow settles. */
+@keyframes room-lane-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+.room-timeline[data-initial-scroll-ready="true"] > .room-readable {
+  animation: room-lane-enter var(--app-floating-duration) var(--app-out-quint)
+    both;
+}
+
+/* A Message that lands after the Room opened pops in whole, like iMessage:
+   it springs up from the corner of its sender's side, overshooting a little
+   before it settles, so an Agent's reply rises from the bottom left and the
+   person's own words from the bottom right. The scale follows one damped
+   spring (CSS linear()); the fade is quicker, so it reads as solid early. */
+@keyframes room-message-pop {
+  from {
+    transform: scale(0.6);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes room-message-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.room-timeline[data-initial-scroll-ready="true"] [data-entering="true"] {
+  transform-origin: bottom left;
+  animation:
+    room-message-pop var(--chat-pop-duration) var(--chat-pop-spring) both,
+    room-message-fade var(--chat-pop-fade-duration) var(--ease-town-out) both;
+}
+
+.room-timeline[data-initial-scroll-ready="true"]
+  [data-entering="true"][data-current-actor="true"] {
+  transform-origin: bottom right;
+}
+
+/* A question card's next step fades in while the card eases to its height. */
+@keyframes card-step-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.card-step-in {
+  animation: card-step-in var(--chat-step-duration) var(--ease-town) both;
+}
+
+/* Global search. The leading glass turns into a spinner while a search is in
+   flight and a hairline sweeps under the field; results resolve from a light
+   blur row by row; one selection tile slides between rows. */
+.global-search-lead > * {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  transition:
+    opacity var(--app-micro-duration) var(--app-out-quint),
+    transform var(--app-floating-duration) var(--app-out-quint);
+}
+
+.global-search-lead .global-search-lead-busy {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.global-search-lead[data-loading] .global-search-lead-idle {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.global-search-lead[data-loading] .global-search-lead-busy {
+  opacity: 1;
+  transform: none;
+}
+
+.app-dialog.global-search {
+  width: min(560px, calc(100vw - 32px));
+  border-radius: 8px;
+}
+
+/* Provider key dialogs (Composio, voice) share the search dialog's width. */
+.app-dialog.app-key-dialog {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.global-search-progress {
+  position: relative;
+  height: 1px;
+  overflow: hidden;
+  background: hsl(var(--town-border));
+}
+
+.global-search-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 32%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--app-ink) 50%,
+    transparent
+  );
+  opacity: 0;
+}
+
+.global-search-progress[data-loading]::after {
+  opacity: 0.5;
+  animation: global-search-sweep 900ms var(--app-out-quint) infinite;
+}
+
+@keyframes global-search-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}
+
+.global-search-indicator {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  left: 8px;
+  z-index: 0;
+  height: 0;
+  border-radius: 4px;
+  background: hsl(var(--town-accent));
+  pointer-events: none;
+  transition:
+    transform var(--app-floating-duration) var(--app-out-quint),
+    height var(--app-floating-duration) var(--app-out-quint),
+    opacity var(--app-micro-duration) var(--app-out-quint);
+}
+
+.global-search-group + .global-search-group {
+  margin-top: 8px;
+}
+
+.global-search-enter {
+  animation: global-search-enter 240ms var(--app-out-quint) both;
+  animation-delay: calc(min(var(--enter-index, 0), 10) * 20ms);
+}
+
+.global-search-preview {
+  animation: global-search-enter 200ms var(--app-out-quint) both;
+}
+
+@keyframes global-search-enter {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-search-lead > *,
+  .global-search-indicator {
+    transition: none;
+  }
+
+  .global-search-progress[data-loading]::after,
+  .global-search-enter,
+  .global-search-preview {
+    animation: none;
+  }
+}
+
+/* Connectivity and runtime notices above the composer expand in instead of
+   shoving the timeline up when they appear. */
+@keyframes room-notice-enter {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 240px;
+    opacity: 1;
+  }
+}
+
+.room-notice-enter {
+  overflow: hidden;
+  animation: room-notice-enter 0.22s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+/* A small gap sets the pinned rows apart from the rest, without a divider. */
+.room-secondary-navigation-list
+  .group:has([aria-label="Pinned"])
+  + .group:not(:has([aria-label="Pinned"])) {
+  margin-top: 6px;
+}
+
+/* The pinned badge sits after the room name and pops in (town-pill-pop). */
+.room-pin-badge {
+  color: var(--app-muted);
+}
+
+/* The Room list header grows a hairline underline once the list scrolls. */
+.app-secondary-navigation-header {
+  box-shadow: 0 1px 0 transparent;
+  transition: box-shadow var(--app-micro-duration) var(--app-out-quint);
+}
+
+.app-secondary-navigation[data-scrolled="true"]
+  .app-secondary-navigation-header {
+  box-shadow: 0 1px 0 hsl(var(--town-border) / 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-notice-enter {
+    animation: none;
+  }
+
+  .app-secondary-navigation-header {
+    transition: none;
+  }
+}
+
+.room-message-card {
+  /* Three 24px targets, two 2px gaps, 4px padding and a 4px bubble gap. */
+  --message-actions-room: 84px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--chat-avatar-size) minmax(0, 1fr);
+  column-gap: var(--chat-avatar-gap);
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  /* No side inset: avatars line up with the composer's outer edges. */
+  padding: var(--chat-row-padding-y) 0;
+  transition: background-color var(--app-micro-duration) ease;
+}
+
+.room-message-card:hover,
+.room-message-card:focus-within {
+  background: transparent;
+}
+
+.room-message-card[data-current-actor] {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--chat-own-avatar-gap);
+  padding: var(--chat-own-row-padding-y) 0;
+  transform-origin: bottom left;
+}
+
+.room-message-card[data-group-start="true"] {
+  margin-top: var(--chat-group-gap);
+}
+
+.room-message-avatar {
+  flex: 0 0 36px;
+}
+
+.room-message-card[data-current-actor="false"][data-group-start="true"]
+  > .room-message-avatar {
+  padding-top: 8px;
+}
+
+/* Reserve room beside the bubble for the end-of-Message actions. */
+.room-message-card[data-current-actor] > .room-message-content {
+  flex: 0 1 auto;
+  width: max-content;
+  max-width: calc(100% - 44px - var(--message-actions-room));
+  padding: 0;
+}
+
+.room-message-card[data-current-actor="true"] {
+  justify-content: flex-end;
+  transform-origin: bottom right;
+}
+
+.room-message-card[data-current-actor="true"] > .room-message-content {
+  max-width: min(85%, calc(100% - 44px - var(--message-actions-room)));
+}
+
+.room-message-card[data-current-actor="true"] > .room-message-avatar {
+  order: 1;
+}
+
+/* Own Messages sit on the right even when a quote above is wider than the
+   bubble. */
+.room-message-card[data-current-actor="true"] .room-message-body-line {
+  justify-content: flex-end;
+}
+
+/* Own Messages sit on the right even when a quote above makes the lane
+   wider than the bubble. */
+.room-message-card[data-current-actor="true"] .room-message-body-line {
+  justify-content: flex-end;
+}
+
+.room-message-card[data-current-actor] .room-message-header {
+  min-height: 20px;
+  margin-bottom: 4px;
+}
+
+.room-message-body-line {
+  position: relative;
+}
+
+.room-message-bubble {
+  /* Matches the secondary navigation row hover (muted at 70%). */
+  --room-bubble-background: var(--chat-bubble-bg);
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: var(--chat-bubble-radius);
+  background: var(--room-bubble-background);
+  padding: var(--chat-bubble-padding-y) var(--chat-bubble-padding-x);
+  overflow-wrap: anywhere;
+  transition: padding-bottom 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Room under the text for Reaction chips straddling the bottom edge. */
+.room-message-bubble[data-has-reactions="true"] {
+  padding-bottom: 16px;
+}
+
+/* Chips sit half inside the bubble, left aligned with its text. */
+.room-message-bubble + .message-reactions {
+  margin-top: -14px;
+  padding-left: 12px;
+}
+
+/* Chips lift a little under the pointer. */
+.message-reaction-chip {
+  transition:
+    transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 180ms ease;
+}
+
+.message-reaction-chip:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: var(--town-shadow-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-message-bubble,
+  .message-reaction-chip {
+    transition: none;
+  }
+}
+
+.room-message-bubble .message-row-body + .message-row-body {
+  margin-top: var(--chat-paragraph-gap);
+}
+
+.room-message-card[data-current-actor="true"] .room-message-bubble {
+  --room-bubble-background: var(--chat-own-bubble-bg);
+  margin-left: auto;
+  color: var(--chat-own-bubble-text);
+}
+
+.room-message-card[data-current-actor="true"]
+  .room-message-bubble
+  + .message-reactions {
+  align-items: flex-end;
+  padding-right: 12px;
+  padding-left: 0;
+}
+
+.room-message-card[data-current-actor="true"]
+  .room-message-bubble
+  :is(
+    .message-row-body,
+    .message-markdown,
+    .message-markdown a,
+    .message-markdown blockquote
+  ) {
+  color: inherit;
+}
+
+.room-message-card[data-current-actor="true"]
+  .room-message-bubble
+  .message-markdown
+  :is(:not(pre) > code, pre) {
+  background: hsl(0 0% 100% / 0.14);
+  color: inherit;
+}
+
+/* Actions sit beside the Message, top aligned with its first line of text,
+   without changing its width or wrapping. */
+.room-message-body-line > .message-row-actions,
+.room-message-bubble > .message-row-actions {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin: 0 0 0 4px;
+  background: var(--app-surface);
+}
+
+/* Beside a bubble, the actions center on the bubble's height. */
+.room-message-bubble > .message-row-actions {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.room-message-card[data-current-actor="true"]
+  :is(.room-message-body-line, .room-message-bubble)
+  > .message-row-actions {
+  right: 100%;
+  left: auto;
+  margin: 0 4px 0 0;
+}
+
+.room-conversation-time {
+  margin: var(--chat-time-divider-margin);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-timeline[data-initial-scroll-ready="true"] .message-row {
+    animation: none;
+  }
+
+  .message-composer-input {
+    transition: none;
+  }
+}
+
+.message-composer-box {
+  border: 0;
+  border-radius: var(--composer-radius);
+  background: hsl(var(--town-background));
+  padding: 8px;
+  box-shadow: var(--composer-shadow);
+  transition: box-shadow var(--app-micro-duration) var(--app-emphasized-curve);
+}
+
+.message-composer-box:focus-within {
+  box-shadow: var(--composer-shadow-focus);
+}
+
+/*
+ * Voice Mode turns the composer into one quiet line: no frame or fill, no
+ * editor, just the Voice Mode bar. Anything stacked above it (voice
+ * materials, reply context) keeps its own full-width row.
+ */
+.message-composer-box[data-voice-mode]:not([data-voice-prefix]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  background: transparent;
+  box-shadow: none;
+}
+
+.message-composer-box[data-voice-mode]:not([data-voice-prefix])
+  > :not(.message-composer-toolbar) {
+  flex-basis: 100%;
+}
+
+.message-composer-box[data-voice-mode]:not([data-voice-prefix])
+  > .message-composer-editor {
+  display: none;
+}
+
+.message-composer-box[data-voice-mode]:not([data-voice-prefix])
+  > .message-composer-toolbar {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.composer-attach-button,
+.message-composer-send {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--composer-action-radius);
+}
+
+.composer-attach-button {
+  background: transparent;
+  color: var(--composer-action-icon);
+}
+
+.composer-attach-button:hover {
+  background: var(--composer-action-hover);
+}
+
+.message-composer-send {
+  background: var(--composer-send);
+  color: #fff;
+}
+
+.message-composer-send:hover {
+  background: var(--composer-send-hover);
+}
+
+.message-composer-editor {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.375;
+  letter-spacing: 0.02em;
+  word-spacing: 0;
+}
+
+.message-composer-input,
+.message-composer-highlight-content {
+  padding: 6px 8px;
+}
+
+.message-composer-input {
+  min-height: 40px;
+  max-height: 400px;
+  /* A new line eases the field taller instead of jumping. */
+  transition: height var(--chat-resize-duration) var(--ease-town);
+  overflow-y: hidden;
+  font: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  color: transparent;
+  caret-color: var(--app-ink);
+  -webkit-text-fill-color: transparent;
+}
+
+/* Document comment pills keep one row until the draft wraps. */
+:where(.room-document-comment-composer)
+  .message-composer-box[data-compact="true"]:not([data-multiline="true"]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+:where(.room-document-comment-composer)
+  .message-composer-box[data-compact="true"]:not([data-multiline="true"])
+  > .message-composer-toolbar {
+  display: contents;
+}
+
+.room-document-comment-composer .message-composer-input {
+  min-height: 20px;
+  max-height: 160px;
+}
+
+.room-document-comment-composer .message-composer-input,
+.room-document-comment-composer .message-composer-highlight-content {
+  padding: 0 4px;
+}
+
+.message-composer-input::placeholder {
+  color: var(--app-muted);
+  -webkit-text-fill-color: var(--app-muted);
+}
+
+.message-composer-input::selection {
+  background: color-mix(in srgb, var(--app-info) 24%, transparent);
+}
+
+.message-composer-input[data-composing="true"] {
+  color: var(--app-ink);
+  -webkit-text-fill-color: var(--app-ink);
+}
+
+.message-composer-input[data-composing="true"]
+  + .message-composer-highlight-layer {
+  visibility: hidden;
+}
+
+.message-composer-highlight-layer {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.message-composer-highlight-content {
+  overflow-wrap: break-word;
+  font: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  transform-origin: left top;
+}
+
+.message-composer-reference {
+  position: relative;
+  z-index: 2;
+  display: inline;
+  margin: 0;
+  border: 0;
+  border-radius: 3px;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  box-shadow: 0 0 0 2px transparent;
+}
+
+.message-composer-reference[role="button"] {
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    color var(--app-micro-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    background-color var(--app-micro-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--app-micro-duration) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.message-composer-reference[data-reference-kind="actor"] {
+  color: var(--app-mention-text);
+  background: var(--app-mention-surface);
+  box-shadow: 0 0 0 2px var(--app-mention-surface);
+}
+
+/* An Agent mention keeps the text's exact width for caret alignment: the
+   "@" turns transparent under the Agent's avatar, the name takes its colour. */
+.message-composer-reference[data-agent="true"] {
+  background: transparent;
+  box-shadow: none;
+}
+.composer-agent-mention {
+  color: var(--agent-mention-ink);
+}
+.composer-agent-mention-at {
+  position: relative;
+  color: transparent;
+}
+.composer-agent-mention-avatar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  width: 0.95em;
+  height: 0.95em;
+  transform: translate(-55%, -50%);
+}
+.composer-agent-mention-avatar > * {
+  width: 100%;
+  height: 100%;
+}
+
+.message-composer-reference[data-reference-kind="document"] {
+  color: hsl(var(--town-send));
+  background: hsl(var(--town-send) / 0.1);
+  box-shadow: 0 0 0 2px hsl(var(--town-send) / 0.1);
+}
+
+.message-composer-reference[data-reference-kind="skill"] {
+  pointer-events: auto;
+  color: var(--app-info);
+  background: color-mix(in srgb, var(--app-info) 14%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-info) 14%, transparent);
+  cursor: help;
+  transition:
+    color var(--app-micro-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    background-color var(--app-micro-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--app-micro-duration) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.message-composer-reference[data-reference-kind="skill"]:hover,
+.message-composer-reference[data-reference-kind="skill"]:focus-visible {
+  color: var(--app-info-hover);
+  background: color-mix(in srgb, var(--app-info) 22%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-info) 22%, transparent);
+}
+
+.message-composer-reference[data-reference-kind="skill"]:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 3px;
+}
+
+.message-composer-reference[role="button"][data-reference-kind="actor"]:hover {
+  background: var(--app-mention-hover);
+  box-shadow: 0 0 0 2px var(--app-mention-hover);
+}
+
+.message-composer-reference[role="button"][data-reference-kind="document"]:hover {
+  color: hsl(var(--town-send-hover));
+  background: hsl(var(--town-send) / 0.16);
+  box-shadow: 0 0 0 2px hsl(var(--town-send) / 0.16);
+}
+
+.message-composer-reference[role="button"]:active {
+  box-shadow: 0 0 0 2px currentColor;
+}
+
+.message-composer-reference[role="button"]:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 3px;
+}
+
+.hardware-device-option {
+  transition:
+    border-color var(--app-micro-duration) ease,
+    background-color var(--app-micro-duration) ease;
+}
+
+.hardware-device-option:hover {
+  background: var(--app-hover);
+}
+
+.hardware-device-option[data-selected="true"] {
+  border-color: var(--app-selected-strong);
+  background: var(--app-selected);
+}
+
+.runtime-activity-panel {
+  animation: app-floating-enter var(--app-floating-duration)
+    var(--app-out-quint) both;
+}
+
+.runtime-activity-step {
+  position: relative;
+}
+
+.runtime-activity-step:not(:last-child)::after {
+  position: absolute;
+  top: 30px;
+  bottom: -10px;
+  left: 7px;
+  width: 1px;
+  background: var(--app-border);
+  content: "";
+  pointer-events: none;
+}
+
+/* Floating surfaces arrive as Town dropdowns do: 150ms, fading in from 95%.
+   Menus open both above and below their trigger, so there is no slide. */
+@keyframes app-floating-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.app-floating-enter {
+  animation: app-floating-enter var(--app-floating-duration) ease both;
+}
+
+/* The "Room avatar stack": a 40px stack. The first member leads in a 26px
+   top-left tile and the others sit in 18px tiles around it, each ringed in
+   the surface color so overlapping faces stay apart. */
+.room-avatar {
+  /* Every length is in design pixels, so the large size scales as a whole. */
+  --room-avatar-unit: 1px;
+  --room-avatar-ring: var(--app-canvas);
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  width: calc(40 * var(--room-avatar-unit));
+  height: calc(40 * var(--room-avatar-unit));
+}
+
+.room-avatar[data-size="header"] {
+  --room-avatar-unit: 0.8px;
+}
+
+.room-avatar[data-size="lg"] {
+  --room-avatar-unit: 1.6px;
+  --room-avatar-ring: var(--app-surface);
+}
+
+.room-avatar-empty {
+  display: grid;
+  place-items: center;
+  border-radius: calc(10 * var(--room-avatar-unit));
+  background: rgb(0 0 0 / 6%);
+  color: var(--app-muted);
+}
+
+.room-avatar-tile,
+.room-avatar-more {
+  position: absolute;
+  z-index: 2;
+  width: calc(18 * var(--room-avatar-unit));
+  height: calc(18 * var(--room-avatar-unit));
+  overflow: hidden;
+  border-radius: calc(6 * var(--room-avatar-unit));
+  box-shadow: 0 0 0 calc(1.5 * var(--room-avatar-unit)) var(--room-avatar-ring);
+}
+
+.room-avatar-tile[data-position^="lead"] {
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: calc(26 * var(--room-avatar-unit));
+  height: calc(26 * var(--room-avatar-unit));
+  border-radius: calc(8 * var(--room-avatar-unit));
+}
+
+.room-avatar-tile[data-position="lead-center"] {
+  left: calc(7 * var(--room-avatar-unit));
+}
+
+.room-avatar-tile[data-position="solo"] {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: calc(10 * var(--room-avatar-unit));
+  box-shadow: none;
+}
+
+.room-avatar [data-position="tr"] {
+  top: 0;
+  left: calc(22 * var(--room-avatar-unit));
+}
+
+.room-avatar [data-position="bl"] {
+  top: calc(22 * var(--room-avatar-unit));
+  left: 0;
+}
+
+.room-avatar [data-position="br"] {
+  top: calc(22 * var(--room-avatar-unit));
+  left: calc(22 * var(--room-avatar-unit));
+}
+
+.room-avatar-more {
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--town-muted));
+  color: hsl(var(--town-secondary-foreground));
+  font-size: calc(9 * var(--room-avatar-unit));
+  font-weight: 580;
+  letter-spacing: -0.02em;
+}
+
+.room-avatar-tile > *,
+.room-avatar-tile .agent-avatar-tile {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+/* The "Agent card": the Another Me card is soft paper that tilts toward
+   the pointer under a glow of the Agent's own colour. The open card fills
+   with that colour and its avatar grows to the card's full height. */
+.another-me-card {
+  --am-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: var(--app-surface);
+  box-shadow: var(--town-shadow-outline);
+  transform: perspective(700px) rotateX(var(--am-tilt-x, 0deg))
+    rotateY(var(--am-tilt-y, 0deg));
+  transition:
+    background-color 0.45s var(--am-ease),
+    border-color 0.45s var(--am-ease),
+    box-shadow 0.45s var(--am-ease),
+    transform 0.25s cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.another-me-card::before {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    150px circle at var(--am-glow-x, -200px) var(--am-glow-y, -200px),
+    color-mix(in srgb, var(--am-brand) 7.5%, transparent) 0%,
+    color-mix(in srgb, var(--am-brand) 2.5%, transparent) 45%,
+    transparent 70%
+  );
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.another-me-card:hover::before {
+  opacity: 1;
+}
+
+.another-me-card[data-active="true"] {
+  border-color: transparent;
+  background-color: var(--am-brand);
+  box-shadow: none;
+}
+
+.another-me-card[data-active="true"]::before {
+  opacity: 0;
+}
+
+.app-secondary-navigation .another-me-card-link {
+  position: relative;
+  min-height: 68px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  transition:
+    padding 0.45s var(--am-ease),
+    gap 0.45s var(--am-ease);
+}
+
+.another-me-card-link:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: -3px;
+}
+
+.another-me-card[data-active="true"] .another-me-card-link {
+  gap: 14px;
+  padding: 0 12px 0 0;
+}
+
+.another-me-card-avatar [role="img"] {
+  transition:
+    width 0.45s var(--am-ease),
+    height 0.45s var(--am-ease),
+    border-radius 0.45s var(--am-ease);
+}
+
+.another-me-card[data-active="true"] .another-me-card-avatar [role="img"],
+.another-me-card[data-active="true"]
+  .another-me-card-avatar
+  .agent-avatar-tile {
+  width: 64px;
+  height: 64px;
+  border-radius: 0;
+}
+
+.another-me-card-title,
+.another-me-card-sub {
+  transition: color 0.45s var(--am-ease);
+}
+
+.another-me-card[data-active="true"] .another-me-card-title {
+  color: var(--am-text);
+}
+
+.another-me-card[data-active="true"] .another-me-card-sub {
+  color: var(--am-text);
+  opacity: var(--am-sub-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .another-me-card {
+    transform: none;
+  }
+
+  .another-me-card,
+  .another-me-card::before,
+  .app-secondary-navigation .another-me-card-link,
+  .another-me-card-avatar [role="img"],
+  .another-me-card-title,
+  .another-me-card-sub {
+    transition: none;
+  }
+}
+
+/* The first-visit greeting: the figure pops in, then its words rise under it. */
+.another-me-intro-avatar {
+  animation: another-me-intro-pop 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.another-me-intro-text {
+  animation: another-me-intro-rise 420ms ease-out 320ms both;
+}
+
+@keyframes another-me-intro-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+@keyframes another-me-intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .another-me-intro-avatar,
+  .another-me-intro-text {
+    animation: none;
+  }
+}
+
+/* An Agent is a rounded square: an animal character drawn edge to edge on its
+   background color, or an uploaded image inset so that color still frames
+   it. The corner follows the source art (27 of 134px). */
+.agent-avatar-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 20%;
+}
+
+.agent-avatar-tile > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+/* The figure's Lottie loop sits on the still portrait and replaces it once
+   loaded; the tile's own color shows through both. */
+.agent-avatar-motion {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.agent-avatar-motion[data-ready="true"] {
+  opacity: 1;
+}
+.agent-avatar-tile:has(> .agent-avatar-motion[data-ready="true"]) > img {
+  visibility: hidden;
+}
+
+.agent-avatar-tile[data-kind="image"] > img {
+  position: absolute;
+  inset: 12%;
+  width: 76%;
+  height: 76%;
+  border-radius: 14%;
+}
+
+.agent-avatar-tile[data-presentation="hero"] {
+  box-shadow: var(--town-shadow-md);
+}
+
+/* Clicking the avatar uploads a picture; hovering says so without a label. */
+.agent-avatar-upload-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20%;
+  background: hsl(var(--town-background) / 0.6);
+  color: hsl(var(--town-foreground));
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity var(--app-micro-duration) ease;
+}
+
+.agent-avatar-upload:is(:hover, :focus-visible):not(:disabled)
+  .agent-avatar-upload-hint {
+  opacity: 1;
+}
+
+/* An Agent @mentioned in a comment shows it is answering: three dots rise
+   and fall in a wave while a white highlight sweeps the gray label from left
+   to right, then rests before the next pass. */
+.agent-replying {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 2px 4px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.agent-replying-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+
+.agent-replying-dots > span {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--app-muted);
+  animation: agent-replying-wave 1.2s ease-in-out infinite;
+}
+
+.agent-replying-dots > span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.agent-replying-dots > span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes agent-replying-wave {
+  0%,
+  60%,
+  100% {
+    translate: 0 0;
+    opacity: 0.55;
+  }
+  30% {
+    translate: 0 -4px;
+    opacity: 1;
+  }
+}
+
+.agent-replying-label {
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        transparent 35%,
+        hsl(var(--town-background) / 0.95) 50%,
+        transparent 65%,
+        transparent 100%
+      )
+      no-repeat,
+    var(--app-muted);
+  background-size:
+    60% 100%,
+    100% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: agent-replying-shimmer 2.6s ease-in-out infinite;
+}
+
+@keyframes agent-replying-shimmer {
+  0% {
+    background-position:
+      -150% 0,
+      0 0;
+  }
+  60%,
+  100% {
+    background-position:
+      250% 0,
+      0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-replying-dots > span,
+  .agent-replying-label {
+    animation: none;
+  }
+}
+
+/* A continuous palette: a saturation/brightness field tinted by the chosen
+   hue, over a full-spectrum hue strip. */
+.color-palette {
+  display: grid;
+  gap: 10px;
+  width: 240px;
+  max-width: 100%;
+}
+
+.color-palette[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.color-palette-field,
+.color-palette-hue {
+  position: relative;
+  touch-action: none;
+  cursor: crosshair;
+  outline: none;
+}
+
+.color-palette-field {
+  height: 120px;
+  border-radius: 8px;
+  background:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, var(--color-palette-hue));
+  box-shadow: inset 0 0 0 1px hsl(var(--town-border));
+}
+
+.color-palette-hue {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #f00,
+    #ff0 17%,
+    #0f0 33%,
+    #0ff 50%,
+    #00f 67%,
+    #f0f 83%,
+    #f00
+  );
+  cursor: ew-resize;
+}
+
+.color-palette-thumb {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 15%),
+    0 1px 4px rgb(0 0 0 / 25%);
+  pointer-events: none;
+  translate: -50% -50%;
+}
+
+.color-palette-field:focus-visible .color-palette-thumb,
+.color-palette-hue:focus-visible .color-palette-thumb {
+  box-shadow:
+    0 0 0 2px var(--app-ring),
+    0 1px 4px rgb(0 0 0 / 25%);
+}
+
+/* Figma 8713:10526: the one option list every Select opens, drawn as the Town
+   dropdown: a 6px popover card with a 4px inset, 33px rows on 4px corners. */
+.dropdown-options {
+  padding: 4px;
+  border-radius: 6px;
+  background: hsl(var(--town-popover));
+  box-shadow: var(--town-shadow-md);
+  animation: town-dropdown-in var(--app-floating-duration) ease both;
+}
+
+.dropdown-options[data-side="top"] {
+  --town-dropdown-from-y: 0.5rem;
+}
+
+.dropdown-options-list {
+  display: flex;
+  flex-direction: column;
+  max-height: min(18rem, calc(100dvh - 20px));
+  overflow: hidden auto;
+  border-radius: 4px;
+}
+
+.dropdown-option {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  width: 100%;
+  min-width: 128px;
+  min-height: 33px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  color: hsl(var(--town-foreground));
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: left;
+  cursor: default;
+  user-select: none;
+  outline: none;
+  transition: background-color var(--app-micro-duration)
+    var(--app-emphasized-curve);
+}
+
+.dropdown-option:hover,
+.dropdown-option:focus-visible,
+.dropdown-option:focus,
+.dropdown-option[aria-selected="true"] {
+  background: hsl(var(--town-accent));
+  color: hsl(var(--town-accent-foreground));
+}
+
+.dropdown-option:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.dropdown-option-label {
+  min-width: 0;
+  max-width: min(28rem, 70vw);
+}
+
+/* The compact filter pill (Workspace filters, search filters): a Town xs
+   outline pill. */
+.select-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 8px 0 10px;
+  border: 1px solid hsl(var(--town-border));
+  border-radius: 999px;
+  color: hsl(var(--town-foreground));
+  font-size: 0.75rem;
+  font-weight: 470;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+  transition:
+    background-color var(--app-micro-duration) var(--app-emphasized-curve),
+    border-color var(--app-micro-duration) var(--app-emphasized-curve);
+}
+
+.select-pill:hover:not(:disabled),
+.select-pill[aria-expanded="true"] {
+  border-color: hsl(var(--town-foreground) / 0.15);
+  background-color: hsl(var(--town-accent));
+}
+
+.select-pill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+/* A pill that is one of several choices (weekdays, quick times) fills when
+   chosen; a checkbox pill keeps its input visually hidden just before it. */
+.select-pill[aria-pressed="true"],
+.select-pill[aria-pressed="true"]:hover:not(:disabled),
+input:checked + .select-pill,
+input:checked + .select-pill:hover {
+  border-color: hsl(var(--town-primary));
+  background-color: hsl(var(--town-primary));
+  color: hsl(var(--town-primary-foreground));
+}
+
+input:focus-visible + .select-pill {
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+/* Sidebar rows share one hover grammar: at rest a row shows only its title.
+   Hovering or focusing it tints the row, fades its actions in over the row's
+   end, and fades the title out beneath them instead of cutting it with an
+   ellipsis. An open row menu holds the row in that state. Only keyboard focus
+   reveals them: a clicked action keeps focus, and a pinned row that moves out
+   from under the pointer must not keep showing its buttons. The main Workspace
+   file grid keeps its own always-visible columns. */
+.group:not(.workspace-file-row):has(> .row-reveal-action) {
+  position: relative;
+  transition: background-color var(--app-micro-duration) ease;
+}
+
+.group:not(.workspace-file-row) > .row-reveal-action {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  opacity: 0;
+  translate: 0 -50%;
+  scale: 0.92;
+  transition:
+    opacity var(--app-micro-duration) ease,
+    scale var(--app-floating-duration) var(--app-out-quint);
+}
+
+.group:not(.workspace-file-row):is(
+    :hover,
+    :has(:focus-visible),
+    :has([aria-expanded="true"])
+  )
+  > .row-reveal-action {
+  opacity: 1;
+  scale: 1;
+}
+
+.group:not(.workspace-file-row):has(> .row-reveal-action):is(
+    :hover,
+    :has(:focus-visible),
+    :has([aria-expanded="true"])
+  )
+  > :first-child {
+  mask-image: linear-gradient(
+    to left,
+    transparent var(--row-reveal-fade, 32px),
+    #000 calc(var(--row-reveal-fade, 32px) + 20px)
+  );
+}
+
+.group:not(.workspace-file-row):has(> .row-reveal-action):is(
+    :hover,
+    :has(:focus-visible),
+    :has([aria-expanded="true"])
+  )
+  > :first-child
+  .truncate {
+  text-overflow: clip;
+}
+
+/* Status that the revealed actions cover, such as unread counts. */
+.row-reveal-hide {
+  transition: opacity var(--app-micro-duration) ease;
+}
+
+.wiki-display-actions {
+  pointer-events: none;
+}
+
+.wiki-generated-row:is(:hover, :has(:focus-visible)) > .wiki-display-actions {
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .wiki-generated-row.group > .wiki-display-actions {
+    pointer-events: auto;
+    opacity: 1;
+    scale: 1;
+  }
+
+  .wiki-generated-row:has(> .wiki-display-actions) > a {
+    padding-right: 116px;
+  }
+}
+
+.group:has(> .row-reveal-action):is(
+    :hover,
+    :has(:focus-visible),
+    :has([aria-expanded="true"])
+  )
+  .row-reveal-hide {
+  opacity: 0;
+}
+
+/* A route that resolves quickly never flashes its skeleton, and a slow one
+   fades in instead of cutting. */
+@keyframes app-route-loading-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+.route-loading-surface {
+  animation: app-route-loading-enter 0.2s ease-out 0.12s both;
+}
+
+/* A Workspace page settles in beside the sidebar that stayed put. Only the
+   start is filled, so no transform outlives the entry and becomes the
+   containing block of a fixed dialog inside the page. */
+@keyframes workspace-route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.workspace-route-enter {
+  animation: workspace-route-enter var(--app-floating-duration)
+    var(--app-out-quint) backwards;
+}
+
+@keyframes wiki-directory-slide {
+  from {
+    opacity: 0;
+    transform: translateX(var(--wiki-directory-offset));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.wiki-directory-forward {
+  --wiki-directory-offset: 24px;
+}
+
+.wiki-directory-back {
+  --wiki-directory-offset: -24px;
+}
+
+.wiki-directory-forward,
+.wiki-directory-back {
+  animation: wiki-directory-slide 220ms var(--app-out-quint) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiki-directory-forward,
+  .wiki-directory-back {
+    animation: none;
+  }
+}
+
+/* Every spinner shares one period, so several on screen read as one system. */
+.animate-spin {
+  animation-duration: var(--app-spinner-duration);
+}
+
+.room-composer-dock {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: var(--app-work-surface);
+}
+
+@keyframes voice-focus-orb-in {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.voice-focus-orb {
+  animation: voice-focus-orb-in 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes voice-focus-orb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+/* While a recording is live the orb breathes so the surface reads as active. */
+.voice-focus-orb-active {
+  animation:
+    voice-focus-orb-in 500ms cubic-bezier(0.16, 1, 0.3, 1),
+    voice-focus-orb-pulse 2400ms ease-in-out 500ms infinite;
+}
+
+/* The focus surface footer uses two large circular actions: leave and mute. */
+.voice-focus-action {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-focus-orb,
+  .voice-focus-orb-active {
+    animation: none;
+  }
+}
+
+.agent-status-card {
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-typed-card-radius);
+  background: var(--app-surface);
+  color: var(--app-body);
+}
+
+.agent-status-card .ui-button-compact {
+  height: 2rem;
+  border-radius: 6px;
+}
+
+.room-message-card.has-typed-card,
+.room-message-card.has-typed-card:hover,
+.room-message-card.has-typed-card:focus-within {
+  background: transparent;
+  box-shadow: none;
+}
+
+.typed-card-tone {
+  color: hsl(var(--town-muted-foreground));
+}
+
+/* Town badge: muted fill; status shows only as the 6px dot. */
+.town-badge,
+.work-item-status {
+  --town-badge-dot: hsl(var(--town-muted-foreground));
+  display: inline-flex;
+  height: 22px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 4px;
+  background: hsl(var(--town-muted));
+  padding: 0 8px;
+  color: hsl(var(--town-muted-foreground));
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.town-badge::before,
+.work-item-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--town-badge-dot);
+}
+
+.town-badge-info {
+  --town-badge-dot: hsl(var(--town-info));
+}
+
+.town-badge-success {
+  --town-badge-dot: hsl(var(--town-success));
+}
+
+.town-badge-warning {
+  --town-badge-dot: hsl(var(--town-warning));
+}
+
+.town-badge-danger {
+  --town-badge-dot: hsl(var(--town-destructive));
+}
+
+.town-badge-neutral {
+  --town-badge-dot: hsl(var(--town-muted-foreground));
+}
+
+.town-badge:has(> .town-dots)::before {
+  display: none;
+}
+
+/* Minimal chat cards: the card's text reads as one more Agent bubble, and the
+   interaction sits in one small box under it. */
+.card-prompt {
+  width: fit-content;
+  max-width: min(100%, var(--chat-card-width));
+  border-radius: var(--chat-bubble-radius);
+  background: var(--chat-agent-bubble-bg);
+  padding: var(--chat-bubble-padding-y) var(--chat-bubble-padding-x);
+  color: var(--app-ink);
+}
+
+.card-box {
+  width: var(--chat-card-width);
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--chat-card-border);
+  border-radius: var(--chat-card-radius);
+  background: var(--chat-card-bg);
+  padding: var(--chat-card-padding);
+  box-shadow: var(--chat-card-shadow);
+}
+
+/* A quoted Message above a reply: a faded, smaller bubble. */
+.reply-context-bubble {
+  width: fit-content;
+  max-width: min(320px, 100%);
+  border-radius: var(--chat-bubble-radius);
+  background: var(--chat-quote-bg);
+  padding: var(--chat-quote-padding);
+  color: var(--app-muted);
+  font-size: var(--chat-quote-font-size);
+  line-height: var(--chat-quote-line-height);
+}
+
+.question-choice {
+  display: flex;
+  width: 100%;
+  min-height: var(--chat-row-min-height);
+  align-items: center;
+  gap: 10px;
+  border-radius: var(--chat-row-radius);
+  padding: var(--chat-row-padding);
+  color: var(--app-ink);
+  font-size: var(--chat-card-text-size);
+  line-height: var(--chat-card-text-leading);
+  text-align: left;
+  overflow-wrap: anywhere;
+  /* Town Thread row: hover muted/70 over 300ms. */
+  transition: background-color 300ms var(--ease-town);
+}
+
+button.question-choice {
+  cursor: pointer;
+  transition:
+    background-color 300ms var(--ease-town),
+    transform 100ms var(--ease-town);
+}
+
+button.question-choice:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+button.question-choice:hover,
+.question-choice-writing {
+  background: hsl(var(--town-muted) / 0.7);
+}
+
+button.question-choice:focus-visible {
+  outline: 2px solid var(--app-ring);
+  outline-offset: -2px;
+}
+
+/* A chosen option keeps no fill (the fill is only for hover), so chosen rows
+   next to each other stay apart; a check at the row's end marks it. */
+.question-choice-selected {
+  font-weight: 470;
+}
+
+.question-choice-check {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--app-ink);
+  animation: question-choice-check-in 150ms var(--ease-town-out) both;
+}
+
+@keyframes question-choice-check-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.question-choice-other {
+  color: var(--app-muted);
+}
+
+.question-choice-readonly {
+  color: var(--app-muted);
+}
+
+/* A settled card keeps the chosen answers in ink on their tint; the rest
+   fade back. */
+.question-choice-readonly.question-choice-selected {
+  color: var(--app-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .question-choice-check {
+    animation: none;
+  }
+
+  .question-choice {
+    transition: none;
+  }
+}
+
+.typed-card-link {
+  display: inline-flex;
+  height: 2rem;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: transparent;
+  padding: 0 0.75rem;
+  color: var(--app-ink);
+  font-size: 0.75rem;
+  font-weight: 470;
+  letter-spacing: 0.02em;
+  transition:
+    border-color var(--app-micro-duration) ease,
+    background-color var(--app-micro-duration) ease;
+}
+
+.typed-card-link:hover {
+  border-color: hsl(var(--town-foreground) / 0.15);
+  background: hsl(var(--town-accent));
+}
+
+.typed-card-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.typed-card-link-primary {
+  border-color: transparent;
+  background: var(--app-action);
+  color: var(--app-action-foreground);
+  box-shadow: var(--town-shadow-button);
+}
+
+.typed-card-link-primary:hover {
+  border-color: transparent;
+  background: var(--app-action-hover);
+}
+
+.typed-card-feedback {
+  border: 1px solid var(--app-card-feedback-border);
+  border-radius: 8px;
+  background: var(--app-card-feedback-surface);
+}
+
+.agent-run-summary {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-control-radius-large);
+  background: var(--app-surface-soft);
+}
+
+.work-item-column {
+  border-radius: 12px;
+  background: hsl(var(--town-muted) / 0.4);
+}
+
+.work-item-card {
+  border-radius: 12px;
+  background: hsl(var(--town-card));
+  box-shadow: var(--town-shadow-outline);
+  transition: background-color var(--app-micro-duration) ease;
+}
+
+.work-item-card:hover {
+  background: hsl(var(--town-muted) / 0.5);
+}
+
+.work-item-card[aria-current="location"] {
+  box-shadow:
+    var(--town-shadow-outline),
+    0 0 0 2px hsl(var(--town-border-hover));
+}
+
+.work-item-priority[data-priority="high"],
+.work-item-priority[data-priority="urgent"] {
+  border-color: var(--app-accent-border);
+  background: var(--app-accent-surface);
+  color: var(--app-accent-text);
+}
+
+.work-item-creator {
+  background: var(--app-accent-surface);
+}
+
+.work-item-status[data-status="in-progress"] {
+  --town-badge-dot: hsl(var(--town-info));
+}
+
+.work-item-status[data-status="done"] {
+  --town-badge-dot: hsl(var(--town-success));
+}
+
+.work-item-status[data-compact="true"] {
+  height: auto;
+  background: transparent;
+  padding: 0;
+  font-size: 12px;
+}
+
+/* A Message opened from global search: tinted with an accent bar, then the
+   tint fades over three seconds and the row reads like its neighbours. The
+   tint is a pseudo-element behind the row's content because the timeline's
+   entrance animation already owns the row's own animation property. */
+.message-row-focused {
+  isolation: isolate;
+}
+
+.message-row-focused::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: hsl(var(--town-info) / 0.06);
+  box-shadow: inset 2px 0 0 var(--app-info);
+  pointer-events: none;
+  animation: message-row-focus-fade 3s ease-out forwards;
+}
+
+@keyframes message-row-focus-fade {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-row-focused::after {
+    animation: none;
+  }
+}
+
+/* The keyword global search matched inside that Message, marked in the accent
+   tint so it reads the same in every browser's selection palette. */
+::highlight(search-term) {
+  background-color: hsl(var(--town-comment-amber) / 0.35);
+}
+
+.message-row-actions {
+  pointer-events: none;
+  border-radius: 8px;
+  padding: 2px;
+  background: transparent;
+  opacity: 0;
+  transition: opacity var(--app-micro-duration) ease;
+}
+
+.message-row-actions .message-inline-action-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--app-muted);
+  transition:
+    background-color var(--app-micro-duration) var(--app-emphasized-curve),
+    color var(--app-micro-duration) var(--app-emphasized-curve);
+}
+
+.message-inline-action-button[aria-expanded="true"],
+.message-inline-action-button:hover {
+  background: hsl(var(--town-accent));
+  color: hsl(var(--town-accent-foreground));
+}
+
+.room-message-content {
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
+.room-message-card .room-message-author {
+  color: var(--app-ink);
+  font-weight: 400;
+}
+
+.room-message-card time {
+  color: var(--app-muted);
+}
+
+.message-row:hover .message-row-actions,
+.message-row:focus-within .message-row-actions,
+.message-row[data-selected-context="true"] .message-row-actions {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.room-message-author:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.room-message-mention-icon {
+  width: 0;
+  margin-right: 0;
+  opacity: 0;
+  transition:
+    width 120ms ease,
+    margin-right 120ms ease,
+    opacity 120ms ease;
+}
+
+.room-message-author:hover .room-message-mention-icon,
+.room-message-author:focus-visible .room-message-mention-icon {
+  width: 13px;
+  margin-right: 0.2rem;
+  opacity: 1;
+}
+
+.message-action-tooltip {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 50%;
+  z-index: 20;
+  width: max-content;
+  max-width: 12rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: hsl(var(--town-primary));
+  color: hsl(var(--town-primary-foreground));
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-0.5rem) scale(0.95);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  white-space: nowrap;
+}
+
+/* Open tooltips upward to keep them clear of the newest Message. */
+.message-row-actions-beside .message-action-tooltip {
+  top: auto;
+  bottom: calc(100% + 0.375rem);
+  transform: translateX(-50%) translateY(0.5rem) scale(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-action-tooltip {
+    transition: none;
+  }
+}
+
+.message-action-tooltip-trigger:hover .message-action-tooltip,
+.message-action-tooltip-trigger:focus-within .message-action-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* The open Reaction picker replaces its trigger's hint. */
+[data-reaction-picker-open] .message-action-tooltip {
+  display: none;
+}
+
+.room-message-card[data-selected-context="true"] {
+  box-shadow: inset 0 0 0 1px var(--app-border-strong);
+}
+
+@media (pointer: coarse), (max-width: 47.999rem) {
+  .document-comment-input {
+    padding-block: 10px;
+    min-height: 44px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .ui-button-compact,
+  .ui-button-default,
+  .ui-button-large,
+  .typed-card-link {
+    min-height: 2.75rem;
+    height: auto;
+  }
+
+  .ui-button-icon,
+  .ui-button-icon-compact,
+  .composer-attach-button,
+  .message-composer-send {
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.375rem;
+    background: transparent;
+  }
+
+  .composer-attach-button::before,
+  .message-composer-send::before {
+    position: absolute;
+    top: 0.375rem;
+    left: 0.375rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--composer-action-radius);
+    content: "";
+  }
+
+  .composer-attach-button::before {
+    background: var(--composer-action-surface);
+  }
+
+  .message-composer-send::before {
+    background: var(--composer-send);
+  }
+
+  .composer-attach-button:hover,
+  .message-composer-send:hover {
+    background: transparent;
+  }
+
+  .composer-attach-button:hover::before {
+    background: var(--composer-action-hover);
+  }
+
+  .message-composer-send:hover::before {
+    background: var(--composer-send-hover);
+  }
+
+  .composer-attach-button > svg,
+  .message-composer-send > svg {
+    z-index: 1;
+  }
+
+  .workspace-nav-row {
+    min-height: 2.75rem;
+  }
+
+  .message-artifact-link {
+    min-height: 2.75rem;
+  }
+
+  .actor-profile-inline-trigger,
+  button.agent-mention {
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .room-message-card[data-current-actor="false"][data-group-start="true"]
+    > .room-message-avatar {
+    padding-top: 32px;
+  }
+
+  .room-message-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .room-members-trigger {
+    position: relative;
+    height: 44px;
+    min-height: 44px;
+    margin-block: -11px;
+    background: transparent;
+  }
+
+  .room-members-trigger::before {
+    position: absolute;
+    top: 11px;
+    right: 0;
+    bottom: 11px;
+    left: 0;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 5%);
+    content: "";
+  }
+
+  .room-members-trigger:hover {
+    background: transparent;
+  }
+
+  .room-members-trigger:hover::before {
+    background: rgb(0 0 0 / 10%);
+  }
+
+  .message-row > div > div:first-child {
+    padding-right: 0;
+  }
+
+  .message-row-body {
+    padding-right: 0;
+  }
+
+  .message-composer-editor {
+    font-size: 16px;
+  }
+}
+
+@media (pointer: coarse) {
+  .room-message-card {
+    --message-actions-room: 136px;
+  }
+
+  .message-row-actions {
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .message-row-actions .message-inline-action-button {
+    position: relative;
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0;
+    background: transparent !important;
+    transition-property: color;
+  }
+
+  .message-row-actions .message-inline-action-button::before {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    content: "";
+  }
+
+  .message-row-actions
+    .message-inline-action-button[aria-expanded="true"]::before,
+  .message-row-actions .message-inline-action-button:hover::before {
+    background: rgb(0 0 0 / 5%);
+  }
+
+  .message-row-actions .message-inline-action-button > svg {
+    position: relative;
+    z-index: 1;
+  }
+
+  .message-row-actions .message-inline-action-button > img {
+    position: relative;
+    z-index: 1;
+  }
+
+  .message-action-tooltip {
+    display: none;
+  }
+}
+
+@media (min-width: 48rem) {
+  .room-composer-dock {
+    padding-bottom: 12px;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .room-nav-controls {
+    padding-top: 6px;
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .app-room-layout[data-detail-open="true"] .app-room-surface {
+    display: none;
+  }
+
+  .app-room-layout .panel-sidebar,
+  .app-room-layout .room-profile-panel {
+    width: 100% !important;
+    max-width: none;
+    border-radius: 0;
+  }
+
+  .app-room-layout .panel-sidebar[data-open="false"] {
+    margin-right: -100%;
+  }
+
+  .app-room-layout .panel-sidebar [aria-label="Resize sidebar"],
+  .panel-maximize-control {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .composer-attach-button,
+  .message-composer-send {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-timeline[data-initial-scroll-ready="true"] > .room-readable,
+  .room-timeline[data-initial-scroll-ready="true"] .message-row,
+  .room-timeline[data-initial-scroll-ready="true"] [data-entering="true"],
+  .message-text-sweep,
+  .card-step-in,
+  .app-floating-enter,
+  .runtime-activity-panel,
+  .route-loading-surface,
+  .workspace-route-enter,
+  .dropdown-options {
+    animation: none;
+  }
+
+  .row-reveal-action,
+  .row-reveal-hide,
+  .group:has(> .row-reveal-action) {
+    transition: none;
+  }
+
+  .app-navigation,
+  .app-primary-navigation,
+  .panel-sidebar,
+  .panel-sidebar-body,
+  .message-composer-box,
+  .message-composer-reference[role="button"],
+  .message-row-actions,
+  .room-message-card,
+  .typed-card-link,
+  .work-item-card {
+    transition: none;
+  }
+}
+
+/* One scrollbar everywhere: a 4px rounded thumb on a clear track, half the
+   browser's thin bar. Chromium and Safari draw these pseudo-elements only while
+   no standard scrollbar-width or scrollbar-color applies, so those stay unset
+   outside Firefox, which has no pseudo-elements and gets the thin bar instead. */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background-color: var(--app-scrollbar);
+}
+
+/* Workspace panes (the Room list and the message timeline) float a pill: a
+   4px rounded thumb inset from a 10px gutter, hidden at rest, fading in on
+   hover or while scrolling (JS toggles data-scrolling, clearing it 900ms after
+   the last scroll), thickening to 6px and darkening under the pointer. The
+   colour rides a registered custom property so show and hide can transition. */
+@property --thumb {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgb(0 0 0 / 0);
+}
+
+.workspace-scrollbar {
+  --thumb: rgb(0 0 0 / 0);
+  transition: --thumb var(--app-floating-duration) var(--app-out-quint);
+}
+
+.workspace-scrollbar:hover {
+  --thumb: hsl(var(--town-foreground) / 0.14);
+}
+
+.workspace-scrollbar[data-scrolling="true"] {
+  --thumb: hsl(var(--town-foreground) / 0.22);
+}
+
+.workspace-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.workspace-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 8px;
+}
+
+.workspace-scrollbar::-webkit-scrollbar-thumb,
+.workspace-scrollbar:hover::-webkit-scrollbar-thumb {
+  min-height: 40px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-color: var(--thumb);
+  background-clip: padding-box;
+}
+
+.workspace-scrollbar::-webkit-scrollbar-thumb:hover {
+  border-width: 2px;
+  background-color: hsl(var(--town-foreground) / 0.34);
+}
+
+.workspace-scrollbar::-webkit-scrollbar-thumb:active {
+  border-width: 2px;
+  background-color: hsl(var(--town-foreground) / 0.45);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-color: var(--app-scrollbar) transparent;
+    scrollbar-width: thin;
+  }
+
+  .workspace-scrollbar {
+    scrollbar-color: transparent transparent;
+  }
+
+  .workspace-scrollbar:hover,
+  .workspace-scrollbar[data-scrolling="true"] {
+    scrollbar-color: hsl(var(--town-foreground) / 0.22) transparent;
+  }
+}
+
+/* A quiet pill for the one secondary action an Agent profile header offers:
+   hairline border and ink text at rest, a soft fill under the pointer. */
+.agent-publish-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid hsl(var(--town-border));
+  border-radius: 999px;
+  background: transparent;
+  color: hsl(var(--town-foreground));
+  font-size: 12px;
+  font-weight: 470;
+  letter-spacing: 0.02em;
+  line-height: 16px;
+  transition:
+    background-color var(--app-micro-duration) ease,
+    border-color var(--app-micro-duration) ease;
+}
+
+.agent-publish-button:hover {
+  border-color: hsl(var(--town-foreground) / 0.15);
+  background: hsl(var(--town-accent));
+}
+
+.agent-publish-button:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.panel-tab-scroll {
+  overscroll-behavior-x: contain;
+  padding-block: 4px;
+}
+
+/* Town icon rail: 56px card column padded 12px top and bottom, the brand and
+   32px circular targets 8px apart, utilities pinned to the bottom. */
+.app-primary-navigation {
+  position: relative;
+  z-index: 30;
+  width: var(--app-rail-width);
+  background: var(--app-rail);
+}
+.app-navigation[data-expanded="true"] .app-primary-navigation {
+  width: 220px;
+  max-width: 86vw;
+}
+.primary-navigation-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 12px 12px 0;
+  margin-bottom: 28px;
+}
+.app-navigation[data-expanded="true"] .primary-navigation-topbar {
+  justify-content: space-between;
+  gap: 8px;
+}
+.primary-navigation-topbar .room-brand-mark,
+.primary-navigation-toggle {
+  width: 32px;
+  height: 32px;
+}
+.primary-navigation-toggle {
+  border-radius: 999px;
+  color: var(--app-muted);
+}
+.primary-navigation-toggle:is(:hover, :focus-visible) {
+  color: var(--app-ink);
+}
+.primary-navigation-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+/* Collapsed, the brand and the expand control share one spot and cross-fade:
+   the brand shrinks away as the control grows in under the pointer. */
+.primary-navigation-toggle:has(.primary-navigation-toggle-logo) {
+  display: grid;
+  place-items: center;
+}
+
+.primary-navigation-toggle-logo,
+.primary-navigation-toggle-glyph {
+  grid-area: 1 / 1;
+  transition:
+    opacity var(--app-floating-duration) var(--app-out-quint),
+    scale var(--app-floating-duration) var(--app-out-quint);
+}
+
+.primary-navigation-toggle-glyph {
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  scale: 0.7;
+}
+
+.primary-navigation-toggle:is(:hover, :focus-visible)
+  .primary-navigation-toggle-logo {
+  opacity: 0;
+  scale: 0.7;
+}
+
+.primary-navigation-toggle:is(:hover, :focus-visible)
+  .primary-navigation-toggle-glyph {
+  opacity: 1;
+  scale: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-navigation-toggle-logo,
+  .primary-navigation-toggle-glyph {
+    transition: none;
+  }
+}
+
+/* Pocket Notes and Meetings are icon-only, sized like the list's collapse
+   toggle beside them; their names live in the tooltip and accessible name. */
+.xs-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--app-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.xs-nav-btn:hover {
+  background: var(--app-hover);
+  color: var(--app-ink);
+}
+.xs-nav-btn:disabled {
+  cursor: default;
+}
+.xs-nav-btn svg,
+.xs-nav-search svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.xs-nav-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  color: hsl(var(--town-muted-foreground));
+  cursor: pointer;
+  transition:
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.xs-nav-search:hover {
+  background: hsl(var(--town-muted) / 0.5);
+  color: hsl(var(--town-foreground));
+}
+.xs-nav-btn:focus-visible,
+.xs-nav-search:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+/* The compact labels float above the list instead of resizing it. */
+.primary-navigation-items {
+  padding: 0 12px;
+  overflow: visible;
+}
+
+.primary-navigation-items .room-rail-link {
+  position: relative;
+  justify-content: flex-start;
+  width: 32px;
+  height: 32px;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 20px;
+  transition:
+    width var(--app-emphasized-duration) var(--app-out-quint),
+    background-color var(--app-micro-duration) var(--app-out-quint),
+    color var(--app-micro-duration) var(--app-out-quint),
+    box-shadow var(--app-floating-duration) var(--app-out-quint),
+    transform var(--app-floating-duration) var(--app-out-quint);
+}
+
+.primary-navigation-items .room-rail-link[aria-current="page"] {
+  background: hsl(var(--town-sidebar-muted));
+  color: hsl(var(--town-sidebar-foreground));
+}
+
+.primary-navigation-items .room-rail-link > svg {
+  width: 20px;
+  height: 20px;
+  margin-inline: 6px;
+  transition:
+    width 340ms ease,
+    height 340ms ease,
+    margin 340ms ease;
+}
+
+.primary-navigation-label {
+  position: absolute;
+  left: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: block;
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 220ms ease;
+}
+
+.app-navigation[data-expanded="true"]
+  .primary-navigation-items
+  .room-rail-link {
+  width: 100%;
+  padding-inline: 0;
+}
+
+.app-navigation[data-expanded="true"] .primary-navigation-label {
+  position: static;
+  transform: none;
+  opacity: 1;
+}
+
+.primary-navigation-items .room-rail-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+/* Keyboard focus gets the same readable label as pointer hover, drawn as a
+   Town tooltip: inverted primary pill, 12px caption, a short ringed shadow. */
+.app-navigation[data-expanded="false"] .room-rail-link:focus-visible {
+  width: max-content;
+  padding-right: 10px;
+  background: hsl(var(--town-primary));
+  color: hsl(var(--town-primary-foreground));
+  font-size: 12px;
+  font-weight: 400;
+  box-shadow:
+    0 0 0 2px var(--app-ring),
+    var(--town-shadow-md);
+}
+.app-navigation[data-expanded="false"] .room-rail-link:focus-visible > svg {
+  margin-inline: 8px 0;
+}
+.app-navigation[data-expanded="false"]
+  .room-rail-link:focus-visible
+  .primary-navigation-label {
+  position: static;
+  transform: none;
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .app-navigation[data-expanded="false"] .room-rail-link:hover {
+    width: max-content;
+    padding-right: 10px;
+    background: hsl(var(--town-primary));
+    color: hsl(var(--town-primary-foreground));
+    font-size: 12px;
+    font-weight: 400;
+    transform: translateY(-2px);
+    box-shadow: var(--town-shadow-md);
+  }
+  .app-navigation[data-expanded="false"] .room-rail-link:hover > svg {
+    margin-inline: 8px 0;
+  }
+  .app-navigation[data-expanded="false"]
+    .room-rail-link:hover
+    .primary-navigation-label {
+    position: static;
+    transform: none;
+    opacity: 1;
+  }
+  .app-navigation[data-expanded="false"]
+    .room-rail-link:has(~ .room-rail-link:hover) {
+    transform: translateY(-4px);
+  }
+  .app-navigation[data-expanded="false"]
+    .room-rail-link:hover
+    ~ .room-rail-link {
+    transform: translateY(4px);
+  }
+  .app-navigation[data-expanded="true"]
+    .room-rail-link:not([aria-current="page"]):hover {
+    background: hsl(var(--town-sidebar-muted) / 0.6);
+    color: hsl(var(--town-sidebar-foreground));
+  }
+}
+
+.app-navigation {
+  border-right: 1px solid hsl(var(--town-border) / 0.6);
+}
+@media (min-width: 48rem) {
+  .app-navigation[data-workspace-adjoined] {
+    border-right-color: transparent;
+  }
+}
+.app-navigation .app-secondary-navigation {
+  margin-inline: 10px 6px;
+}
+
+.room-secondary-navigation-list {
+  --app-scrollbar: hsl(var(--town-foreground) / 0.1);
+  /* Extend through the navigation's end margin while preserving row spacing. */
+  margin-right: -6px;
+  padding-right: 2px;
+  scrollbar-gutter: stable;
+}
+.app-secondary-navigation .workspace-nav-row > [role="img"] {
+  width: 36px;
+  height: 36px;
+  margin-right: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-navigation-items .room-rail-link,
+  .primary-navigation-items .room-rail-link > svg,
+  .primary-navigation-label {
+    transition: none;
+    transform: none !important;
+  }
+  .app-navigation[data-expanded="false"] .primary-navigation-label {
+    transform: translateY(-50%) !important;
+  }
+}
+
+.primary-navigation-footer {
+  align-items: center;
+  padding: 12px 0;
+}
+.app-navigation[data-expanded="true"] .primary-navigation-footer {
+  align-items: flex-start;
+  padding-inline: 12px;
+}
+
+.app-navigation .room-nav-controls {
+  padding-top: 0;
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .primary-navigation-items .room-rail-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .app-navigation[data-expanded="true"] .app-primary-navigation {
+    width: 120px;
+  }
+  .app-navigation[data-expanded="true"] .primary-navigation-items {
+    padding-inline: 4px;
+  }
+  .app-navigation[data-expanded="true"] .room-rail-link {
+    gap: 6px;
+    font-size: 12px;
+  }
+}
+
+.workspace-file-browser {
+  /* Centered column with side gutters, like the Town Library. */
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  color: var(--app-ink);
+}
+
+.workspace-files-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.workspace-files-heading :is(h1, h2) {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 580;
+  line-height: 1.4;
+  letter-spacing: -0.6px;
+}
+
+.workspace-file-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.workspace-file-tabs {
+  margin-bottom: 20px;
+}
+
+/* The Recent row: one line of cards that keeps its height, so the tabs below
+   never move; cards that do not fit the width are hidden, not wrapped. */
+.workspace-recent {
+  margin-bottom: 24px;
+}
+
+.workspace-recent-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: hsl(var(--town-muted-foreground));
+}
+
+.workspace-recent-cards {
+  display: grid;
+  /* Town Collections: at most five tiles, never narrower than 205px. */
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(max(205px, calc((100% - 48px) / 5)), 1fr)
+  );
+  grid-template-rows: auto;
+  grid-auto-rows: 0;
+  gap: 0 12px;
+  overflow: hidden;
+}
+
+.workspace-recent-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid hsl(var(--town-border));
+  border-radius: 12px;
+  background: hsl(var(--town-card));
+  transition:
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workspace-recent-card:hover,
+.workspace-recent-card:focus-within {
+  border-color: hsl(var(--town-border-hover));
+  background: hsl(var(--town-muted) / 0.5);
+}
+
+.workspace-file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 28px 28px;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.workspace-file-row:hover,
+.workspace-file-row:focus-within {
+  background: hsl(var(--town-accent) / 0.5);
+}
+
+/* Workspace rows download from their actions menu, so they end in one action. */
+.workspace-file-list .workspace-file-row {
+  grid-template-columns: minmax(0, 1fr) auto 28px;
+  min-height: 56px;
+  padding: 8px 12px;
+  transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workspace-file-name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: auto;
+  gap: 16px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 470;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+}
+
+.workspace-file-name strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 470;
+}
+
+.workspace-file-context {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: hsl(var(--town-muted-foreground));
+}
+
+.workspace-file-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+.workspace-file-icon[data-compact] {
+  width: 24px;
+  height: 20px;
+}
+
+.workspace-file-metadata {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* The panel stacks the name over its metadata, so the icon is lifted out of the
+   name's text flow and centred against the whole row instead of the first line.
+   The 48px inset keeps the text exactly where the inline icon used to leave it. */
+.room-file-library .workspace-file-row {
+  position: relative;
+}
+
+.room-file-library .workspace-file-name {
+  padding-left: 48px;
+}
+
+.room-file-library .workspace-file-name > .workspace-file-icon {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+}
+
+.workspace-file-owner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 6px 2px 4px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 18px;
+  color: hsl(var(--town-secondary-foreground));
+  background: hsl(var(--town-muted));
+}
+.workspace-file-owner > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-file-metadata time {
+  color: hsl(var(--town-muted-foreground));
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.workspace-file-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--app-muted);
+  opacity: 1;
+}
+.workspace-file-action:hover {
+  background: hsl(var(--town-accent));
+  color: var(--app-ink);
+}
+.workspace-file-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.workspace-file-action:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+/* Fixed owner and date columns keep every row aligned, like the Town Library. */
+@container (min-width: 621px) {
+  .workspace-file-list .workspace-file-metadata {
+    display: grid;
+    grid-template-columns: 180px 96px;
+    justify-items: start;
+  }
+}
+
+@container (max-width: 620px) {
+  .workspace-file-row {
+    grid-template-columns: minmax(0, 1fr) 28px 28px;
+    column-gap: 4px;
+  }
+  .workspace-file-name {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .workspace-file-row > .workspace-file-metadata {
+    grid-column: 1;
+    grid-row: 2;
+    margin-left: 48px;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  .workspace-file-row > .workspace-file-name {
+    grid-row: 1;
+  }
+  .workspace-file-row > button:not(.workspace-file-name) {
+    grid-row: 1 / span 2;
+  }
+}
+
+/* Agent Info follows the compact Figma sidebar; native history behavior is reused. */
+.agent-info-panel > header {
+  padding: 8px 12px 0;
+}
+.agent-info-panel > header > div {
+  min-height: 36px;
+  padding-bottom: 8px;
+}
+.agent-info-panel > header [role="img"],
+.agent-info-panel > header p {
+  display: none;
+}
+.agent-info-panel > header h2 {
+  font-size: 14px;
+  font-weight: 580;
+}
+.agent-status-popover > div:first-child {
+  padding: 4px;
+}
+.agent-status-popover [role="menuitem"] {
+  font-size: 12px;
+}
+.agent-info-content {
+  min-height: calc(100% - 16px);
+}
+.agent-info-content [role="tab"] {
+  font-size: 12px;
+  font-weight: 470;
+  line-height: 18px;
+}
+
+.panel-tab-item {
+  container: panel-tab / inline-size;
+}
+
+@container panel-tab (max-width: 80px) {
+  .panel-tab-title,
+  .panel-tab-status {
+    display: none;
+  }
+
+  .panel-tab-initial {
+    display: block;
+  }
+
+  .panel-tab-item > [role="tab"] {
+    gap: 3px;
+    padding-inline: 4px;
+  }
+
+  .panel-tab-close {
+    width: 20px;
+    margin-right: 2px;
+    opacity: 1;
+  }
+}
+
+.computer-settings-detail {
+  container: computer-detail / inline-size;
+}
+
+@container computer-detail (min-width: 520px) {
+  .computer-command-row {
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.agent-connector-switch {
+  appearance: none;
+  position: relative;
+  width: 28px;
+  height: 16px;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: hsl(var(--town-input));
+  box-shadow: var(--town-shadow-sm);
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.agent-connector-switch::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: hsl(var(--town-background));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.agent-connector-switch:checked {
+  background: hsl(var(--town-primary));
+}
+.agent-connector-switch:checked::before {
+  transform: translateX(12px);
+}
+.agent-connector-switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+.agent-connector-switch:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.pocket-note-paper {
+  line-height: 1.6;
+}
+
+/* Five thin bars beside the dictation control. They follow the voice level,
+   and breathe gently while the connection is still being made. */
+.pocket-dictation-meter {
+  display: flex;
+  height: 18px;
+  align-items: center;
+  gap: 3px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: hsl(var(--town-popover) / 0.88);
+  box-shadow: var(--town-shadow-md);
+}
+
+.pocket-dictation-meter > span {
+  width: 2px;
+  height: calc(4px + 10px * var(--bar) * var(--pocket-level, 0));
+  border-radius: 999px;
+  background: var(--color-app-ink);
+  opacity: 0.7;
+  transition: height 90ms ease-out;
+}
+
+.pocket-dictation-meter-waiting > span {
+  animation: pocket-dictation-breathe 1.1s ease-in-out infinite;
+  animation-delay: calc(var(--bar) * -0.6s);
+}
+
+@keyframes pocket-dictation-breathe {
+  50% {
+    height: 9px;
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dictation-meter > span {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* The Create Agent menu focuses its first action on open; only hover fills a row. */
+[role="menu"][aria-label="Create Agent"] [role="menuitem"]:focus {
+  background-color: transparent;
+}
+[role="menu"][aria-label="Create Agent"] [role="menuitem"]:hover {
+  background-color: hsl(var(--town-accent));
+}
+[role="menu"][aria-label="Create Agent"] [role="menuitem"]:focus-visible {
+  background-color: hsl(var(--town-accent));
+  outline: none;
+}
+
+/* Library overview and meeting groups */
+.workspace-recent-cards {
+  padding: 4px;
+  margin: -4px;
+}
+/* Too narrow for a row of tiles: swipe through all of them instead of
+   clipping every card after the first. */
+@container (max-width: 520px) {
+  .workspace-recent-cards {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    grid-auto-rows: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+  }
+  .workspace-recent-card {
+    scroll-snap-align: start;
+  }
+}
+.workspace-recent-title {
+  font-weight: 500;
+}
+.workspace-recent-card {
+  position: relative;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  transition:
+    transform 0.2s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+.workspace-recent-card:hover {
+  transform: scale(1.02);
+}
+.workspace-recent-link {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+.workspace-recent-icon {
+  display: flex;
+  margin-bottom: 10px;
+}
+.workspace-recent-icon .workspace-file-icon {
+  width: 16px;
+  height: 16px;
+  background: transparent;
+}
+.workspace-recent-name,
+.workspace-recent-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-recent-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+.workspace-recent-meta {
+  color: var(--app-muted);
+  font-size: 12px;
+}
+.workspace-recent-link time {
+  margin-top: 10px;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+/* The 28px action sits 6px higher than the 16px icon so their centers align. */
+.workspace-recent-card > .workspace-file-action {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.workspace-file-tabs {
+  margin-left: -12px;
+}
+.meeting-date-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 0 6px;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+}
+.meeting-date-toggle:hover {
+  color: var(--app-ink);
+}
+.meeting-date-toggle svg {
+  transition: transform 0.22s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-recent-card,
+  .meeting-date-toggle svg {
+    transition: none;
+  }
+  .workspace-recent-card:hover {
+    transform: none;
+  }
+}
+.workspace-view-tab {
+  position: relative;
+}
+.workspace-view-tab[aria-selected="true"] {
+  color: var(--app-ink);
+}
+.meeting-calendar-cell {
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.3s ease;
+}
+.meeting-calendar-cell:hover {
+  transform: scale(1.12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .meeting-calendar-cell {
+    transition: none;
+  }
+  .meeting-calendar-cell:hover {
+    transform: none;
+  }
+}
+.meeting-heatmap-cell {
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.meeting-heatmap-cell:hover {
+  position: relative;
+  z-index: 3;
+  transform: scale(1.45);
+}
+.meeting-today {
+  animation: meeting-today-breathe 2.8s ease-in-out infinite;
+}
+@keyframes meeting-today-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1.5px var(--app-ink);
+  }
+  50% {
+    box-shadow: 0 0 0 3.5px hsl(var(--town-foreground) / 0.45);
+  }
+}
+.meeting-tip {
+  position: fixed;
+  z-index: 50;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: var(--app-ink);
+  color: #fdfdfc;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 6px));
+  animation: meeting-tip-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes meeting-tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 2px)) scale(0.95);
+  }
+}
+.workspace-tab-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  border-radius: 9999px;
+  background: var(--app-ink);
+  pointer-events: none;
+  transition:
+    left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .meeting-heatmap-cell,
+  .workspace-tab-indicator {
+    transition: none;
+  }
+  .meeting-heatmap-cell:hover {
+    transform: none;
+  }
+  .meeting-today,
+  .meeting-tip {
+    animation: none;
+  }
+}
+
+/* Every chat card (decisions, message cards, file items) uses the same two
+   text sizes: primary text and titles at body size, secondary lines one
+   step down. Buttons keep their own sizes. */
+:is(.card-box, [data-message-card], [data-message-file-item])
+  .text-sm:not(button) {
+  font-size: var(--chat-card-text-size);
+  line-height: var(--chat-card-text-leading);
+}
+
+:is(.card-box, [data-message-card], [data-message-file-item])
+  .text-xs:not(button) {
+  font-size: var(--chat-card-meta-size);
+  line-height: var(--chat-card-meta-leading);
+}
+
+/* An Agent reply sits in its own, lighter bubble. */
+.room-message-card[data-author-kind="agent"] .room-message-bubble {
+  --room-bubble-background: var(--chat-agent-bubble-bg);
+}
+
+/* Decision card actions are a size up from the default buttons: easier to
+   hit, and their labels match the card's text. */
+.card-box .ui-button-default {
+  height: 2.25rem;
+  padding-inline: 1rem;
+  border-radius: 8px;
+  font-size: var(--text-sm);
+}
+
+.card-box .ui-button-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+}

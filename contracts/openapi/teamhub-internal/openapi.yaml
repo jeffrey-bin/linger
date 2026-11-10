@@ -1,0 +1,1478 @@
+openapi: 3.1.0
+info:
+  title: Linger TeamHub Internal API
+  version: 0.1.0
+  description:
+    Node Services and Voice Runtime calls into TeamHub. Agent Service callbacks commit Agent messages,
+    Artifacts, runtime state, and explicitly authorized Work Item collaboration; TeamHub rebinds every Agent ID to an
+    active Tenant Agent registration, and the shared service credential alone never grants product-record access. The
+    Document Runtime reads and commits authoritative Room Document state with stable identities, the Agent Service
+    checks MCP Context authority before activation, and Voice Runtime reports normalized speech observations and
+    recordings. Each operation declares the service credential TeamHub checks.
+servers:
+  - url: http://teamhub:8080
+security:
+  - serviceBearer: []
+tags:
+  - name: Agent Identity
+    description: Active AgentManagement-to-TeamHub Actor identity projection.
+  - name: Agent Skills
+    description: Agent effective Skill configuration and immutable package delivery.
+  - name: Agent Messages
+    description: Agent-attributed Room Message publication.
+  - name: Agent Artifacts
+    description: Agent-attributed Room Artifact publication with optimistic concurrency.
+  - name: Agent Work Items
+    description: Agent-scoped Work Item reads, collaboration, and transitions.
+  - name: Agent Task Execution
+    description: Managed Task identity resolution, execution reads, and result Candidate admission.
+  - name: Task Worker
+    description: Fenced PostgreSQL Task execution claim, heartbeat, reload, and transition operations.
+  - name: Agent Document Comments
+    description: Agent Room Member reads and replies for existing Document Comment Threads.
+  - name: Agent Runtime State
+    description: Epoch-fenced APIs over TeamHub-owned Execution Context, input, Local Run, RuntimeSession, and status state.
+  - name: Agent File Projections
+    description: Read-only fixed-revision metadata for immutable TeamHub file generations.
+  - name: Personal Knowledge Projection
+    description: Memory service reads of the Human's latest published Wiki revision.
+  - name: Memory Wiki Refresh
+    description: Memory service requests to refresh a Human's Personal Wiki after it indexed new Session Raw.
+  - name: Local Computers
+    description: Agent Service registry commits that wake Tenant Local Computer inventory.
+  - name: MCP Contexts
+    description: Runtime Context authorization before activation.
+paths:
+  /v0/tracking-items/{actorId}/list:
+    parameters:
+      - $ref: "#/components/parameters/ActorId"
+    post:
+      operationId: listMemoryTrackingItems
+      summary: listMemoryTrackingItems
+      security:
+        - memoryServiceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/tracking-items.yaml#/components/schemas/TrackingItemList
+      responses:
+        "200":
+          description: Human-owned tracking item command result.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/tracking-items.yaml#/components/schemas/TrackingItemPage
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+  /v0/tracking-items/{actorId}/apply:
+    parameters:
+      - $ref: "#/components/parameters/ActorId"
+    post:
+      operationId: applyMemoryTrackingItems
+      summary: applyMemoryTrackingItems
+      security:
+        - memoryServiceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/tracking-items.yaml#/components/schemas/TrackingItemChanges
+      responses:
+        "200":
+          description: Human-owned tracking item command result.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/tracking-items.yaml#/components/schemas/TrackingItemResult
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+  /v0/tracking-items/{actorId}/plan:
+    parameters:
+      - $ref: "#/components/parameters/ActorId"
+    post:
+      operationId: planMemoryTrackingItems
+      summary: Ask the Human's AnotherMe to plan Routines for changed Tracking Items
+      description:
+        Queues one hidden wake in the AnotherMe direct Room listing the items; it goes out once the Room has been
+        quiet for three minutes. Items that are gone or done are skipped.
+      security:
+        - memoryServiceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/tracking-items.yaml#/components/schemas/TrackingItemPlanRequest
+      responses:
+        "204":
+          description: The planning wake is queued, or nothing was left to plan.
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+  /v0/agent-runtime/human-interactions:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/humanInteractions
+  /v0/agent-runtime/permission-reviews:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/permissionReviews
+  /internal/agents/{agentId}/access-credentials:
+    $ref: ../paths/agent-access-credentials.yaml#/managedCredentials
+  /v0/agent-runtime/agents/{agentId}/memory:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/agentMemory
+  /v0/agent-runtime/config:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/configSnapshot
+  /v0/agent-runtime/another-me-placements:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/anotherMePlacements
+  /v0/agent-runtime/deletion-snapshot:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/deletionSnapshot
+  /v0/agent-runtime/contexts:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/listOrEnsureContexts
+  /v0/agent-runtime/contexts/recently-used:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/listRecentlyUsedContexts
+  /v0/agent-runtime/contexts/reconcile:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/reconcileContexts
+  /v0/agent-runtime/context:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/getContext
+  /v0/agent-runtime/contexts/residency:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/setContextResidency
+  /v0/agent-runtime/contexts/delete:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/deleteContext
+  /v0/agent-runtime/epochs:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/startEpoch
+  /v0/agent-runtime/wakes:
+    get:
+      tags:
+        - Agent Runtime State
+      operationId: streamAgentRuntimeWakes
+      summary: Follow queued Agent work and Context change hints.
+      description: >-
+        Service-token SSE emits run.queued with {context_key} when a Message
+        transaction queued or extended a Local Run, run.steered with
+        {context_key} when it added a steer for the running Run,
+        context.changed with {context_key, state_revision} carrying the
+        committed Context revision, context.prepare with {context_key},
+        task.claimable with {} when a commit may have made a Task claimable,
+        reconcile on connection, LISTEN recovery or overflow, and heartbeat
+        comments. Hints carry no bodies or delivery state; the Agent Service's
+        periodic scan of waiting Runs covers lost hints.
+      responses:
+        "200":
+          description: Wake and reconcile SSE stream.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+  /v0/agent-runtime/inputs/accept-trusted-notification:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/acceptTrustedNotification
+  /v0/agent-runtime/trusted-turns:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/submitTrustedTurn
+  /v0/agent-runtime/run:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/getRun
+  /v0/agent-runtime/runs/waiting:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/waitingRuns
+  /v0/agent-runtime/runs/claim:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/claimRun
+  /v0/agent-runtime/runs/requeue:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/requeueRun
+  /v0/agent-runtime/runs/finish:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/finishRun
+  /v0/agent-runtime/runs/cancel:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/cancelRun
+  /v0/agent-runtime/runs/operations:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/recordRunOperation
+  /v0/agent-runtime/steers/enqueue:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/enqueueSteer
+  /v0/agent-runtime/steers/assign:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/assignSteer
+  /v0/agent-runtime/steers/complete:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/completeSteer
+  /v0/agent-runtime/session:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/session
+  /v0/agent-runtime/sessions/checkpoint:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/checkpointSession
+  /v0/agent-runtime/sessions/clear:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/clearSession
+  /v0/agent-runtime/work-state:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/workState
+  /v0/agent-runtime/statuses/open:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/openStatus
+  /v0/agent-runtime/presentation-events/offer:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/offerStatus
+  /v0/agent-runtime/local-computer:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/getLocalComputer
+  /v0/agent-runtime/local-computers/connect:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/connectLocalComputer
+  /v0/agent-runtime/local-computers/touch:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/touchLocalComputer
+  /v0/agent-runtime/local-computers/remove:
+    $ref: ../paths/teamhub-agent-runtime-state.yaml#/removeLocalComputer
+  /v0/agents/{agentId}/identity:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+    $ref: ../paths/teamhub-agent-identity.yaml#/agentIdentity
+  /v0/agents/{agentId}/effective-resources:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+    get:
+      tags:
+        - Agent Skills
+      operationId: getTeamHubAgentEffectiveResources
+      summary: Read the active Agent's current resources without creating Context state.
+      responses:
+        "200":
+          description: Authoritative default and explicit Skill versions. No Context session, generation or snapshot is created.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/agent-effective-resources.yaml#/components/schemas/AgentEffectiveResources
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "500":
+          $ref: ../components/common.yaml#/components/responses/InternalError
+  /v0/rooms/{roomId}/agents/{agentId}/proactive/window:
+    parameters:
+      - $ref: "#/components/parameters/RoomId"
+      - $ref: "#/components/parameters/AgentId"
+    post:
+      tags:
+        - Agent Messages
+      operationId: getProactiveWindow
+      summary: Next unjudged window of twenty ordinary messages in an AnotherMe direct Room
+      description:
+        Returns the next complete window with the Human's guideline and open Tracking Items, or no window while
+        fewer than twenty new messages exist. A Room seen for the first time starts after its existing history.
+      responses:
+        "200":
+          description: The next window, when one is complete.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/proactive.yaml#/components/schemas/ProactiveWindowResponse
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+  /v0/rooms/{roomId}/agents/{agentId}/proactive/window/finish:
+    parameters:
+      - $ref: "#/components/parameters/RoomId"
+      - $ref: "#/components/parameters/AgentId"
+    post:
+      tags:
+        - Agent Messages
+      operationId: finishProactiveWindow
+      summary: Mark one conversation window judged
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/proactive.yaml#/components/schemas/ProactiveWindowFinishRequest
+      responses:
+        "204":
+          description: The window is judged.
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+  /v0/rooms/{roomId}/agents/{agentId}/proactive/wakes:
+    parameters:
+      - $ref: "#/components/parameters/RoomId"
+      - $ref: "#/components/parameters/AgentId"
+    post:
+      tags:
+        - Agent Messages
+      operationId: queueProactiveWake
+      summary: Queue a hidden wake for the AnotherMe of its direct Room
+      description:
+        The wake is spoken by the represented Human as an agent_runtime message and goes out, in order with other
+        proactive wakes, once the Room has been quiet for three minutes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/proactive.yaml#/components/schemas/ProactiveWakeRequest
+      responses:
+        "204":
+          description: The wake is queued.
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+  /v0/rooms/{roomId}/agents/{agentId}/task-progress:
+    parameters:
+      - $ref: "#/components/parameters/RoomId"
+      - $ref: "#/components/parameters/AgentId"
+    get:
+      tags:
+        - Agent Task Execution
+      operationId: getTaskProgress
+      summary: Progress of the Tasks a Meta Context coordinates
+      description:
+        Reads the Meta Context of the Agent in the Room, whether a Live call holds its foreground, when the Agent last
+        spoke in the Room, and every Task it coordinates that is still at work. The Agent's task-progress feature
+        uses it to decide whether to remind the Meta to tell the user how the work goes. Returns 404
+        META_CONTEXT_NOT_FOUND when the Agent has no Meta Context in the Room.
+      responses:
+        "200":
+          description: The current progress.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/task-progress.yaml#/components/schemas/TaskProgressSnapshot
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "500":
+          $ref: ../components/common.yaml#/components/responses/InternalError
+  /v0/agents/{agentId}/work-items:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+    get:
+      tags:
+        - Agent Work Items
+      operationId: listAgentWorkItems
+      summary: List only Work Items the rebound Agent may currently read.
+      description:
+        Effective access is the union of active Assignment, current structured reference, creator access, and
+        explicit access grant. Filtering occurs in TeamHub before results are returned.
+      parameters:
+        - $ref: ../components/common.yaml#/components/parameters/Cursor
+        - $ref: ../components/common.yaml#/components/parameters/Limit
+        - name: state
+          in: query
+          schema:
+            $ref: ../components/work-items.yaml#/components/schemas/WorkItemState
+        - name: archived
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: work_room_id
+          in: query
+          description: Return only Work Items linked to this Work Room.
+          schema:
+            $ref: ../components/common.yaml#/components/schemas/Id
+      responses:
+        "200":
+          description: Cursor-paginated effective-access Work Items.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/agent-projections.yaml#/components/schemas/AgentWorkItemPage
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+    post:
+      tags:
+        - Agent Work Items
+      operationId: createAgentWorkItem
+      summary: Create a Work Item as the rebound Agent Actor.
+      parameters:
+        - $ref: ../components/common.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/work-items.yaml#/components/schemas/AgentWorkItemCreateRequest
+      responses:
+        "201":
+          description:
+            Work Item, creator access, and any Origin Room-scoped initial Assignments committed atomically without Run
+            creation.
+          headers:
+            Idempotent-Replay:
+              $ref: ../components/common.yaml#/components/headers/IdempotentReplay
+          content:
+            application/json:
+              schema:
+                $ref: ../components/agent-projections.yaml#/components/schemas/AgentWorkItem
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+  /v0/agents/{agentId}/participant-task:resolve:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+    get:
+      tags:
+        - Agent Task Execution
+      operationId: resolveAgentParticipantTaskByWorkRoom
+      summary: Resolve the managed Task whose current frozen generation includes this Agent.
+      description:
+        Resolution is scoped only by the active Agent registration, Tenant, Work Room link, and current
+        execution-generation participant snapshot. Mutable Work Item Assignments, references, and access grants do not
+        grant or revoke this execution identity.
+      parameters:
+        - name: work_room_id
+          in: query
+          required: true
+          description: Exact Work Room whose managed Task execution identity is requested.
+          schema:
+            $ref: ../components/common.yaml#/components/schemas/Id
+      responses:
+        "200":
+          description: Current frozen participant Task identity for the rebound Agent.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/agent-projections.yaml#/components/schemas/AgentParticipantTaskResolution
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+  /v0/agents/{agentId}/work-items/{workItemId}:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+      - $ref: "#/components/parameters/WorkItemId"
+    get:
+      tags:
+        - Agent Work Items
+      operationId: getAgentWorkItem
+      summary: Get one Work Item when the rebound Agent has current access.
+      responses:
+        "200":
+          description: Authoritative Agent-visible Work Item projection.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/agent-projections.yaml#/components/schemas/AgentWorkItem
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+  /v0/agents/{agentId}/work-items/{workItemId}/transitions:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+      - $ref: "#/components/parameters/WorkItemId"
+    post:
+      tags:
+        - Agent Work Items
+      operationId: transitionAgentWorkItem
+      summary: Transition a currently assigned Work Item as the rebound Agent.
+      parameters:
+        - $ref: ../components/common.yaml#/components/parameters/IdempotencyKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/work-items.yaml#/components/schemas/WorkItemTransitionRequest
+      responses:
+        "200":
+          description: Transitioned Work Item; no Agent Run is created.
+          headers:
+            Idempotent-Replay:
+              $ref: ../components/common.yaml#/components/headers/IdempotentReplay
+          content:
+            application/json:
+              schema:
+                $ref: ../components/agent-projections.yaml#/components/schemas/AgentWorkItem
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "403":
+          $ref: ../components/common.yaml#/components/responses/Forbidden
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+  /v0/agents/{agentId}/work-items/{workItemId}/comments:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+      - $ref: "#/components/parameters/WorkItemId"
+    $ref: ../paths/teamhub-agent-work-item-comments.yaml#/workItemComments
+  /v0/agents/{agentId}/work-items/{workItemId}/comments/{commentId}:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+      - $ref: "#/components/parameters/WorkItemId"
+      - $ref: "#/components/parameters/WorkItemCommentId"
+    $ref: ../paths/teamhub-agent-work-item-comments.yaml#/workItemComment
+  /v0/task-execution-claims:
+    $ref: ../paths/teamhub-agent-task-executions.yaml#/workerClaims
+  /v0/task-executions/{taskId}:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    $ref: ../paths/teamhub-agent-task-executions.yaml#/workerExecution
+  /v0/task-executions/{taskId}/heartbeat:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    $ref: ../paths/teamhub-agent-task-executions.yaml#/workerHeartbeat
+  /v0/task-executions/{taskId}/transitions:
+    parameters:
+      - $ref: "#/components/parameters/TaskId"
+    $ref: ../paths/teamhub-agent-task-executions.yaml#/workerTransition
+  /v0/personal-wikis/{actorId}/document-revision:
+    parameters:
+      - $ref: "#/components/parameters/ActorId"
+    get:
+      tags:
+        - Personal Knowledge Projection
+      operationId: getPersonalWikiDocumentRevision
+      summary: Get the Human's current safe Wiki Revision as exact unified Document Versions.
+      description: Returns 409 WIKI_GENERATION_FAILED if the first generation failed before any revision was published.
+      security:
+        - memoryServiceBearer: []
+      parameters:
+        - in: header
+          name: If-None-Match
+          required: false
+          schema:
+            type: string
+          description: ETag of the complete cached representation; authorization and current state are checked first.
+      responses:
+        "200":
+          description: Current safe Wiki Revision and its exact immutable Document page Versions.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: Strong validator for the complete response representation.
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-cache
+          content:
+            application/json:
+              schema:
+                $ref: ../components/personal-wiki-worker.yaml#/components/schemas/PersonalWikiDocumentRevision
+        "304":
+          description: The authorized current representation matches If-None-Match; no response body.
+          headers:
+            ETag:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-cache
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+  /v0/personal-wikis/{actorId}/memory-refresh:
+    parameters:
+      - $ref: "#/components/parameters/ActorId"
+    post:
+      tags:
+        - Memory Wiki Refresh
+      operationId: requestMemoryWikiRefresh
+      summary: Request the Human's nightly Personal Wiki refresh, or the refresh of one meeting.
+      description: >-
+        The Wiki's Session sources are the Human's Room and recording Sessions in the Memory index; TeamHub reads them
+        there, so the request carries no source content. Without capture_id the refresh admits every changed source:
+        Memory sends it once a night after closing the date. With capture_id it admits only that meeting's recording
+        Sessions. TeamHub requests no Wiki refresh on its own.
+      security:
+        - memoryServiceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/personal-wiki-worker.yaml#/components/schemas/MemoryWikiRefreshRequest
+      responses:
+        "200":
+          description: >-
+            The Personal Wiki already holds the requested sources (every current source, or the meeting's), or it has
+            none to read.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/personal-wiki-worker.yaml#/components/schemas/MemoryWikiRefreshResponse
+        "202":
+          description: >-
+            A refresh was admitted, or another one is running: a nightly request then follows it, a meeting request
+            must be sent again once it finishes.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/personal-wiki-worker.yaml#/components/schemas/MemoryWikiRefreshResponse
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+  /v0/personal-wikis/{actorId}/document-revisions/{wikiRevisionId}/documents/{documentId}/versions/{documentVersionId}/content:
+    parameters:
+      - $ref: "#/components/parameters/ActorId"
+      - $ref: "#/components/parameters/PersonalWikiDocumentRevisionId"
+      - $ref: "#/components/parameters/DocumentId"
+      - $ref: "#/components/parameters/DocumentVersionId"
+    get:
+      tags:
+        - Personal Knowledge Projection
+      operationId: downloadPersonalWikiDocumentVersion
+      summary: Download one exact Document Version from the Human's current safe Wiki Revision.
+      security:
+        - memoryServiceBearer: []
+      responses:
+        "200":
+          description: Exact immutable Markdown bytes.
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            text/markdown:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+  /v0/memory/fetch_session/tenants/{tenantId}/document-versions/{documentVersionId}:
+    parameters:
+      - $ref: "#/components/parameters/TenantId"
+      - $ref: "#/components/parameters/DocumentVersionId"
+    get:
+      tags:
+        - Personal Knowledge Projection
+      operationId: fetchSession
+      summary: Fetch one exact TeamHub Document Version for the trusted Memory service.
+      description:
+        TeamHub resolves the tenant-scoped immutable version and opens it from its local artifact storage. The
+        Memory service never receives a physical filesystem path.
+      security:
+        - memoryServiceBearer: []
+      responses:
+        "200":
+          description: Exact immutable Document Version bytes.
+          headers:
+            ETag:
+              description: Strong quoted SHA-256 digest.
+              schema:
+                type: string
+            X-Content-SHA256:
+              schema:
+                type: string
+                pattern: ^[a-f0-9]{64}$
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+  /internal/agents/{agentId}/mcp-context/actions/resolve:
+    parameters:
+      - $ref: "#/components/parameters/McpAgentId"
+    post:
+      tags:
+        - MCP Contexts
+      operationId: resolveMcpContext
+      summary: Resolve one Agent MCP Context
+      description:
+        "Checks the current Agent and Context authority in PostgreSQL. A Document Context also returns the comment
+        and current Document projection of its running Run, or of its oldest queued Run once that Run can start. Nothing
+        is persisted. Skills are not part of the resolution: Agent Service reads the Agent's effective Skill set
+        separately."
+      security:
+        - agentServiceToTeamHubBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/mcp-context-internal.yaml#/components/schemas/McpContextResolveRequest
+      responses:
+        "200":
+          description: Current Context authority.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/mcp-context-internal.yaml#/components/schemas/McpContextResolveResponse
+        "400":
+          $ref: ../components/mcp-context-internal.yaml#/components/responses/McpContextBadRequest
+        "401":
+          $ref: ../components/mcp-context-internal.yaml#/components/responses/McpContextUnauthenticated
+        "403":
+          $ref: ../components/mcp-context-internal.yaml#/components/responses/McpContextForbidden
+        "404":
+          $ref: ../components/mcp-context-internal.yaml#/components/responses/McpContextNotFound
+        "409":
+          $ref: ../components/mcp-context-internal.yaml#/components/responses/McpContextConflict
+        default:
+          $ref: ../components/mcp-context-internal.yaml#/components/responses/McpContextInternalError
+  /internal/v1/voice/observations:
+    post:
+      operationId: reportVoiceObservation
+      summary: Idempotently report one normalized media or transcript observation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceObservation"
+      responses:
+        "202":
+          description: Observation applied, applied again on a retry, or ignored.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceObservationReceipt"
+        "400":
+          $ref: "#/components/responses/VoiceBadRequest"
+        "401":
+          $ref: "#/components/responses/VoiceUnauthenticated"
+        "404":
+          $ref: "#/components/responses/VoiceNotFound"
+        "409":
+          $ref: "#/components/responses/VoiceConflict"
+      security:
+        - voiceRuntimeBearer: []
+  /internal/v1/voice/media-objects:
+    put:
+      operationId: putVoiceMediaObject
+      summary: Store one recorded HLS segment or playlist under an active Capture epoch's staging prefix.
+      description:
+        Segments are immutable; storing the same key again with identical bytes is a replay. A playlist is replaced
+        as the recording grows and becomes final once it contains EXT-X-ENDLIST.
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/VoiceMediaObjectKey"
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "204":
+          description: Object stored or replayed.
+        "400":
+          $ref: "#/components/responses/VoiceBadRequest"
+        "401":
+          $ref: "#/components/responses/VoiceUnauthenticated"
+        "404":
+          $ref: "#/components/responses/VoiceNotFound"
+        "409":
+          $ref: "#/components/responses/VoiceConflict"
+      security:
+        - voiceRuntimeBearer: []
+  /internal/v1/voice/recordings:
+    post:
+      operationId: reportVoiceRecording
+      summary: Report the Voice Runtime recorder state of one Capture epoch.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceRecordingReport"
+      responses:
+        "204":
+          description: Report accepted.
+        "400":
+          $ref: "#/components/responses/VoiceBadRequest"
+        "401":
+          $ref: "#/components/responses/VoiceUnauthenticated"
+        "404":
+          $ref: "#/components/responses/VoiceNotFound"
+      security:
+        - voiceRuntimeBearer: []
+  /internal/v1/voice/sessions/{voiceSessionId}/live-context:
+    get:
+      operationId: getVoiceLiveContext
+      summary: Read the instructions, recent Room conversation, and tools for one active chat_live VoiceSession.
+      parameters:
+        - name: voiceSessionId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/VoiceId"
+      responses:
+        "200":
+          description: Live context for the session's bound Room.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceLiveContext"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /internal/v1/voice/sessions/{voiceSessionId}/live-tasks:
+    get:
+      operationId: listVoiceLiveTasks
+      summary:
+        Read the work this chat_live VoiceSession handed to the Room Agent, with each task's state and the Agent
+        replies it produced.
+      parameters:
+        - name: voiceSessionId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/VoiceId"
+      responses:
+        "200":
+          description: Tasks oldest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceLiveTaskList"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /internal/v1/voice/sessions/{voiceSessionId}/live-task-events:
+    get:
+      operationId: streamVoiceLiveTaskEvents
+      summary: Stream hints that this chat_live VoiceSession's tasks or app events changed.
+      description:
+        "Server-sent events. Each `changed` event carries no state: read live-tasks again. A comment line is sent
+        every 15 seconds; the stream ends when the call closes. Hints are best effort, so the reader also reads
+        live-tasks on its own every 15 seconds."
+      parameters:
+        - name: voiceSessionId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/VoiceId"
+      responses:
+        "200":
+          description: The hint stream.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /internal/v1/voice/live-replies:
+    post:
+      operationId: reportVoiceLiveReply
+      summary: Idempotently save the live reply of one Human turn as the bound Room Agent's Message.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceLiveReply"
+      responses:
+        "202":
+          description: Reply saved or replayed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceLiveReplyReceipt"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /internal/v1/voice/live-tool-calls:
+    post:
+      operationId: executeVoiceLiveToolCall
+      summary: Authorize and execute one live model business tool call as the session's Human, at most once per call ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceLiveToolCall"
+      responses:
+        "200":
+          description: Tool result, or the replayed result of the same call.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceLiveToolResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  securitySchemes:
+    agentBearer:
+      type: http
+      scheme: bearer
+      description: Revocable Agent identity credential, independent of runtime lifecycle.
+    serviceBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+    memoryServiceBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque Memory service token
+      x-service-audience: teamhub-memory-internal
+    agentServiceToTeamHubBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description:
+        Existing Agent Service workload credential used only for Context activation. It never substitutes for an
+        Agent credential.
+      x-service-audience: teamhub-agent-callback
+    voiceRuntimeBearer:
+      type: http
+      scheme: bearer
+  parameters:
+    RoomId:
+      name: roomId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    TenantId:
+      name: tenantId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    AgentId:
+      name: agentId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    ActorId:
+      name: actorId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    PersonalWikiDocumentRevisionId:
+      name: wikiRevisionId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    DocumentVersionId:
+      name: documentVersionId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    WorkItemId:
+      name: workItemId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    WorkItemCommentId:
+      name: commentId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    ArtifactId:
+      name: artifactId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    McpAgentId:
+      name: agentId
+      in: path
+      required: true
+      description: Stable Agent management identifier, not a TeamHub Actor identifier.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+        pattern: ^[A-Za-z0-9][A-Za-z0-9_-]*$
+  schemas:
+    VoiceId:
+      type: string
+      minLength: 1
+      maxLength: 255
+      pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]*$
+    ObservationKind:
+      type: string
+      description:
+        "publisher_absent reports an interval on the VoiceSession clock in which no browser published microphone
+        audio: the previous input ended cleanly (track_ended) and a higher publisher generation delivered its first
+        frame more than 250ms later. TeamHub records the part inside a recording Capture as an unrecoverable media gap;
+        the recorder archived only filler silence there. input_gap reports an unconfirmed ASR interval after buffered
+        replay was exhausted. Archive media may still be complete. track_started/track_ended describe physical tracks,
+        not provider connection retries. For progress and track_ended, start_offset_ms is the start of this ASR
+        attempt's coverage."
+      enum:
+        - partial
+        - final
+        - turn_finalized
+        - progress
+        - input_ended
+        - track_started
+        - track_ended
+        - publisher_absent
+        - input_gap
+    ObservationLane:
+      type: string
+      enum:
+        - live
+        - recovery
+      x-enum-varnames: [ObservationLaneLive, ObservationLaneRecovery]
+    VoiceDictationCommitRequest:
+      $ref: ../components/voice-media.yaml#/components/schemas/VoiceDictationCommitRequest
+    VoiceSessionPurpose:
+      $ref: ../components/voice-media.yaml#/components/schemas/VoiceSessionPurpose
+    VoiceObservation:
+      type: object
+      additionalProperties: false
+      required:
+        - event_id
+        - voice_session_id
+        - media_epoch
+        - lane
+        - kind
+        - start_offset_ms
+        - end_offset_ms
+      properties:
+        event_id:
+          $ref: "#/components/schemas/VoiceId"
+        voice_session_id:
+          $ref: "#/components/schemas/VoiceId"
+        media_epoch:
+          type: integer
+          minimum: 0
+        lane:
+          $ref: "#/components/schemas/ObservationLane"
+        kind:
+          $ref: "#/components/schemas/ObservationKind"
+        start_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        end_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        committed_through_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        text:
+          type: string
+          maxLength: 200000
+        speaker_id:
+          type: string
+          minLength: 1
+          maxLength: 16
+          pattern: ^spk_[1-9][0-9]*$
+          description: Session-scoped anonymous speaker cluster. Omitted when the provider did not label this window.
+    VoiceObservationReceipt:
+      type: object
+      additionalProperties: false
+      required:
+        - event_id
+        - status
+      properties:
+        event_id:
+          $ref: "#/components/schemas/VoiceId"
+        status:
+          type: string
+          enum:
+            - accepted
+            - ignored
+          # Explicit names keep the constants stable when no other enum in
+          # this contract shares these values.
+          x-enum-varnames:
+            - VoiceObservationReceiptStatusAccepted
+            - VoiceObservationReceiptStatusIgnored
+    VoiceMediaObjectKey:
+      type: string
+      minLength: 1
+      maxLength: 512
+      pattern: ^voice-staging/[A-Za-z0-9_-]+/epoch-[0-9]+(_[0-9]{5,}\.ts|\.m3u8)$
+    VoiceRecordingReport:
+      type: object
+      additionalProperties: false
+      required:
+        - staging_prefix
+        - state
+        - archived_through_ms
+      properties:
+        staging_prefix:
+          type: string
+          minLength: 1
+          maxLength: 256
+          pattern: ^voice-staging/[A-Za-z0-9_-]+/epoch-[0-9]+$
+        state:
+          description:
+            active once the first sample is archived; available after the sealed playlist is stored; failed when this
+            recorder can no longer extend the epoch, including a handover.
+          type: string
+          enum:
+            - active
+            - available
+            - failed
+        started_at:
+          description: Wall-clock time of the first archived sample. Required for active and available.
+          type: string
+          format: date-time
+        archived_through_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        failure_code:
+          type: string
+          maxLength: 64
+    VoiceError:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    VoiceLiveContextMessage:
+      type: object
+      additionalProperties: false
+      required:
+        - role
+        - text
+      properties:
+        role:
+          type: string
+          enum:
+            - user
+            - assistant
+        text:
+          type: string
+          maxLength: 20000
+    VoiceLiveTool:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - description
+        - parameters
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+        description:
+          type: string
+          maxLength: 2000
+        parameters:
+          type: object
+          additionalProperties: true
+          description: JSON Schema object for the tool arguments.
+    VoiceLiveContext:
+      type: object
+      additionalProperties: false
+      required:
+        - room_id
+        - agent_name
+        - instructions
+        - history
+        - tools
+      properties:
+        room_id:
+          $ref: "#/components/schemas/VoiceId"
+        agent_name:
+          type: string
+          maxLength: 200
+        instructions:
+          type: string
+          maxLength: 20000
+        history:
+          type: array
+          maxItems: 40
+          items:
+            $ref: "#/components/schemas/VoiceLiveContextMessage"
+        tools:
+          type: array
+          maxItems: 64
+          items:
+            $ref: "#/components/schemas/VoiceLiveTool"
+    VoiceLiveReply:
+      type: object
+      additionalProperties: false
+      required:
+        - event_id
+        - voice_session_id
+        - turn_id
+        - text
+      properties:
+        event_id:
+          $ref: "#/components/schemas/VoiceId"
+        voice_session_id:
+          $ref: "#/components/schemas/VoiceId"
+        turn_id:
+          $ref: "#/components/schemas/VoiceId"
+        text:
+          type: string
+          minLength: 1
+          maxLength: 20000
+        interrupted:
+          type: boolean
+    VoiceLiveReplyReceipt:
+      type: object
+      additionalProperties: false
+      required:
+        - event_id
+        - status
+      properties:
+        event_id:
+          $ref: "#/components/schemas/VoiceId"
+        message_id:
+          $ref: "#/components/schemas/VoiceId"
+        status:
+          type: string
+          enum:
+            - accepted
+            - replayed
+          # Explicit names keep the constants stable when no other enum in
+          # this contract shares these values.
+          x-enum-varnames:
+            - VoiceLiveReplyReceiptStatusAccepted
+            - VoiceLiveReplyReceiptStatusReplayed
+    VoiceLiveToolCall:
+      type: object
+      additionalProperties: false
+      required:
+        - voice_session_id
+        - turn_id
+        - call_id
+        - name
+        - arguments
+      properties:
+        voice_session_id:
+          $ref: "#/components/schemas/VoiceId"
+        turn_id:
+          $ref: "#/components/schemas/VoiceId"
+        call_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        name:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+        arguments:
+          type: string
+          maxLength: 20000
+          description: JSON object text produced by the live model.
+    VoiceLiveToolResult:
+      type: object
+      additionalProperties: false
+      required:
+        - call_id
+        - output
+      properties:
+        call_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        output:
+          type: string
+          maxLength: 20000
+          description: JSON text returned to the live model.
+    VoiceLiveTaskReply:
+      type: object
+      additionalProperties: false
+      required:
+        - message_id
+        - text
+      properties:
+        delivered:
+          type: boolean
+          description: The report and chosen files have been committed as an Agent message; this is not an audio-heard receipt.
+        message_id:
+          $ref: "#/components/schemas/VoiceId"
+        text:
+          type: string
+          maxLength: 20000
+          description: "A report the Task's turn ended with, as its coordinator gets it: a result, or what it needs from the user."
+    VoiceLiveTask:
+      type: object
+      additionalProperties: false
+      required:
+        - task_id
+        - goal
+        - surface
+        - state
+        - replies
+        - started_in_this_call
+      properties:
+        task_id:
+          type: string
+          pattern: ^t[1-9][0-9]{0,5}$
+          description: The short handle the live model uses, such as t1.
+        started_in_this_call:
+          type: boolean
+          description:
+            Whether this call started the task. Tasks from earlier calls are background, not news, even after Voice
+            Runtime restarts mid-call.
+        goal:
+          type: string
+          maxLength: 4000
+        surface:
+          type: string
+          enum:
+            - workspace
+            - web
+            - desktop
+            - apps
+        state:
+          type: string
+          enum:
+            - pending
+            - working
+            - waiting_for_approval
+            - reported
+            - failed
+            - canceled
+          description:
+            The state of the task's delegated Task. pending until it starts, working while it runs,
+            waiting_for_approval while an approval card it raised is pending, reported when its turn ended with a report
+            (a result, or what it needs from the user; the live voice decides which), then failed or canceled. An answer
+            to the task starts it working again.
+        replies:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/VoiceLiveTaskReply"
+          description: The Task's latest final reply, when it gave one.
+    VoiceLiveAlert:
+      type: object
+      additionalProperties: false
+      required:
+        - alert_id
+        - text
+      properties:
+        alert_id:
+          $ref: "#/components/schemas/VoiceId"
+        text:
+          type: string
+          maxLength: 20000
+          description: The event as outside data, never instructions.
+    VoiceLiveTaskList:
+      type: object
+      additionalProperties: false
+      required:
+        - tasks
+      properties:
+        tasks:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/VoiceLiveTask"
+        alerts:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/VoiceLiveAlert"
+          description:
+            Events from the user's connected apps that proactive reminders judged worth telling now and that wait for
+            this call to end; the live voice tells them during the call.
+    VoiceLiveRuntimeEvent:
+      $ref: ../components/voice-media.yaml#/components/schemas/VoiceLiveRuntimeEvent
+    VoiceLiveClientEvent:
+      $ref: ../components/voice-media.yaml#/components/schemas/VoiceLiveClientEvent
+  responses:
+    VoiceBadRequest:
+      description: Request is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoiceError"
+    VoiceUnauthenticated:
+      description: Service bearer is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoiceError"
+    VoiceNotFound:
+      description: VoiceSession is not visible to the runtime.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoiceError"
+    VoiceConflict:
+      description: Event identity conflicts with existing evidence.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/VoiceError"

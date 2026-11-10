@@ -1,0 +1,45 @@
+node_modules/
+packages/*/node_modules/
+*.tsbuildinfo
+coverage/
+dist/
+packages/*/dist/
+!skills/builtin/**/node_modules/
+!skills/builtin/**/node_modules/**
+playwright-report/
+test-results/
+.env
+.env.local
+*.log
+.DS_Store
+.linger-runtime/
+.linger-contexts/
+.local/
+.llm-wiki/
+.llm-wiki-external-sync/
+.worktrees/
+.claude/
+.vscode/
+.pnpm-store/
+.cache/
+.contracts-build/
+.teamhub/
+.superpowers/
+
+# Local .env backups must never be committed
+.env.bak*
+
+# Generated Python bytecode from local verification scripts.
+__pycache__/
+*.py[cod]
+
+# Local process artifacts
+/message-ux-preview.html
+/.impeccable/
+/apps/web/.screenshots/
+
+# Local scratch at the repository root
+/tmp/
+
+# Local go build output of the Daemon package
+/apps/computer/local-daemon/cmd/linger-computer-daemon/linger-computer-daemon

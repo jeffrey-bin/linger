@@ -1,0 +1,56 @@
+{
+  "boundary": 33806,
+  "word_gap_ms": 15264,
+  "left": {
+    "StartMS": 14782,
+    "EndMS": 33801,
+    "Final": true,
+    "Text": "ぁ。あぃいぅううぇえぉお。",
+    "Words": [
+      { "TextStart": 0, "TextEnd": 3, "StartMS": 14942, "EndMS": 15182 },
+      { "TextStart": 6, "TextEnd": 9, "StartMS": 15182, "EndMS": 15302 },
+      { "TextStart": 9, "TextEnd": 12, "StartMS": 15302, "EndMS": 15462 },
+      { "TextStart": 12, "TextEnd": 15, "StartMS": 15462, "EndMS": 15582 },
+      { "TextStart": 15, "TextEnd": 18, "StartMS": 15582, "EndMS": 15702 },
+      { "TextStart": 18, "TextEnd": 21, "StartMS": 15702, "EndMS": 15782 },
+      { "TextStart": 21, "TextEnd": 24, "StartMS": 15822, "EndMS": 15902 },
+      { "TextStart": 24, "TextEnd": 27, "StartMS": 15902, "EndMS": 16062 },
+      { "TextStart": 27, "TextEnd": 30, "StartMS": 16062, "EndMS": 16222 },
+      { "TextStart": 30, "TextEnd": 33, "StartMS": 16302, "EndMS": 16422 },
+      { "TextStart": 33, "TextEnd": 36, "StartMS": 16422, "EndMS": 16542 }
+    ]
+  },
+  "right": {
+    "StartMS": 31806,
+    "EndMS": 38008,
+    "Final": true,
+    "Text": "かがきぎくぐけげこごさざし。ざしじすいずせぜ。ざしずせ。",
+    "Words": [
+      { "TextStart": 0, "TextEnd": 3, "StartMS": 31806, "EndMS": 31886 },
+      { "TextStart": 3, "TextEnd": 6, "StartMS": 31886, "EndMS": 31966 },
+      { "TextStart": 6, "TextEnd": 9, "StartMS": 31966, "EndMS": 32046 },
+      { "TextStart": 9, "TextEnd": 12, "StartMS": 32046, "EndMS": 32166 },
+      { "TextStart": 12, "TextEnd": 15, "StartMS": 32166, "EndMS": 32246 },
+      { "TextStart": 15, "TextEnd": 18, "StartMS": 32326, "EndMS": 32366 },
+      { "TextStart": 18, "TextEnd": 21, "StartMS": 32486, "EndMS": 32526 },
+      { "TextStart": 21, "TextEnd": 24, "StartMS": 32606, "EndMS": 32646 },
+      { "TextStart": 24, "TextEnd": 27, "StartMS": 32726, "EndMS": 32846 },
+      { "TextStart": 27, "TextEnd": 30, "StartMS": 32886, "EndMS": 32966 },
+      { "TextStart": 30, "TextEnd": 33, "StartMS": 33006, "EndMS": 33126 },
+      { "TextStart": 33, "TextEnd": 36, "StartMS": 33246, "EndMS": 33286 },
+      { "TextStart": 36, "TextEnd": 39, "StartMS": 33366, "EndMS": 33446 },
+      { "TextStart": 42, "TextEnd": 45, "StartMS": 34526, "EndMS": 34566 },
+      { "TextStart": 45, "TextEnd": 48, "StartMS": 34646, "EndMS": 34766 },
+      { "TextStart": 48, "TextEnd": 51, "StartMS": 34766, "EndMS": 34886 },
+      { "TextStart": 51, "TextEnd": 54, "StartMS": 34886, "EndMS": 35006 },
+      { "TextStart": 54, "TextEnd": 57, "StartMS": 35006, "EndMS": 35166 },
+      { "TextStart": 57, "TextEnd": 60, "StartMS": 35206, "EndMS": 35286 },
+      { "TextStart": 60, "TextEnd": 63, "StartMS": 35366, "EndMS": 35526 },
+      { "TextStart": 63, "TextEnd": 66, "StartMS": 35606, "EndMS": 35686 },
+      { "TextStart": 69, "TextEnd": 72, "StartMS": 36646, "EndMS": 36686 },
+      { "TextStart": 72, "TextEnd": 75, "StartMS": 36766, "EndMS": 36846 },
+      { "TextStart": 75, "TextEnd": 78, "StartMS": 36926, "EndMS": 36966 },
+      { "TextStart": 78, "TextEnd": 81, "StartMS": 37086, "EndMS": 37126 }
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+tenantRoomActivity:
+  get:
+    operationId: getTenantRoomActivity
+    summary: Get a compact snapshot of visible Rooms with working or failed Agent executions
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Complete snapshot of working (running and not replied) and current failed Rooms. Only Rooms the current account can access are included.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-run-control.yaml#/components/schemas/TenantRoomActivity"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+backgroundTasks:
+  get:
+    operationId: listRoomBackgroundTasks
+    summary: List the background Tasks this Room's Meta delegated that are still running
+    parameters:
+      - name: roomId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Running background Tasks for a Room member.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-run-control.yaml#/components/schemas/RoomBackgroundTaskList"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+cancelRun:
+  post:
+    operationId: cancelRoomRun
+    summary: Request cancellation of one exact Room execution
+    parameters:
+      - name: roomId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/room-run-control.yaml#/components/schemas/RoomRunCancelRequest"
+    responses:
+      "200":
+        description: A request receipt; cancel_requested does not mean execution has stopped.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-run-control.yaml#/components/schemas/RoomRunCancelResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+redeliverUnconfirmedInputs:
+  post:
+    operationId: redeliverRoomRunUnconfirmedInputs
+    summary: Resend a finished Room execution's follow-ups whose delivery is unconfirmed
+    description: >-
+      Places each unconfirmed follow-up Message of the Run again for the same
+      Agent, as a new input of that Agent only. No Message is created and no
+      other Agent is triggered. Each follow-up is resent at most once unless
+      the resend itself ends unconfirmed.
+    parameters:
+      - name: roomId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      "200":
+        description: The follow-ups placed again; nothing_to_redeliver when the Run is still queued or running or none qualifies.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/room-run-control.yaml#/components/schemas/RoomRunRedeliverResult"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"

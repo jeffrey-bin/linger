@@ -1,0 +1,126 @@
+{
+  "name": "linger",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=26.5.0 <27"
+  },
+  "scripts": {
+    "dev": "pnpm dev:prepare && concurrently --kill-others-on-fail --names web,teamhub,node-services,livekit \"pnpm dev:web\" \"pnpm dev:teamhub:watch\" \"pnpm dev:node-services\" \"pnpm dev:livekit\"",
+    "dev:prepare": "node scripts/with-local-env.mjs -- sh -c 'make -C apps/teamhub dev-migrate && node scripts/prepare-local-owner.mjs'",
+    "dev:web": "node scripts/with-local-env.mjs -- sh -c 'teamhub=\"${TEAMHUB_BASE_URL:-http://127.0.0.1:8080}\"; node --import tsx scripts/wait-for-http-services.ts \"${teamhub%/}/healthz\" && pnpm --filter @linger/web dev'",
+    "dev:teamhub:watch": "node scripts/with-local-env.mjs -- sh -c 'GIN_MODE=release make -C apps/teamhub watch'",
+    "dev:teamhub": "make -C apps/teamhub dev",
+    "dev:check": "curl --fail --silent --show-error http://localhost:3000/healthz && curl --fail --silent --show-error http://localhost:8080/healthz && curl --fail --silent --show-error http://localhost:4319/healthz && curl --fail --silent --show-error http://localhost:4319/readyz && curl --fail --silent --show-error http://localhost:4321/healthz && curl --fail --silent --show-error http://localhost:4321/readyz",
+    "dev:livekit": "node scripts/with-local-env.mjs -- node --import tsx scripts/dev-livekit.ts",
+    "dev:node-services": "node scripts/with-local-env.mjs -- pnpm --filter @linger/node-services start",
+    "env:inventory:check": "node --import tsx scripts/check-env-inventory.ts",
+    "stack:up": "node scripts/with-local-env.mjs --optional -- sh -c 'for service in teamhub-migrate teamhub node-services web; do docker compose build \"$service\" || exit; done; docker compose up --detach --wait'",
+    "stack:logs": "node scripts/with-local-env.mjs --optional -- docker compose logs --follow",
+    "stack:down": "node scripts/with-local-env.mjs --optional -- docker compose down",
+    "infra:up": "docker compose up -d postgres",
+    "infra:down": "docker compose down",
+    "prepare": "husky",
+    "commitlint": "commitlint --last --verbose",
+    "lint:staged": "lint-staged --concurrent false --config lint-staged.config.mjs",
+    "contracts:generate": "make contracts-generate",
+    "contracts:verify": "make contracts-verify",
+    "release-lockfiles:generate": "node scripts/ci/generate-release-lockfiles.mjs",
+    "release-lockfiles:check": "node scripts/ci/generate-release-lockfiles.mjs --check",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "eslint .",
+    "react:doctor": "react-doctor . --yes --no-telemetry --blocking error --scope changed",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "test": "make check-scripts && pnpm -r --workspace-concurrency=1 --if-present test",
+    "test:watch": "vitest",
+    "test:e2e:config": "vitest run e2e/playwright-config.test.ts",
+    "test:e2e:room-document": "playwright test --config e2e/playwright.room-document.config.ts",
+    "test:e2e": "pnpm test:e2e:config && pnpm test:e2e:room-document",
+    "smoke:local-runner": "bash scripts/smoke-local-runner.sh",
+    "smoke:local-runner:soak": "LINGER_LOCAL_RUNNER_SOAK_ONLY=1 bash scripts/smoke-local-runner-live.sh",
+    "smoke:local-runner:live": "bash scripts/smoke-local-runner-live.sh"
+  },
+  "devDependencies": {
+    "@asyncapi/parser": "3.6.0",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@eslint/js": "10.0.1",
+    "@iarna/toml": "2.2.5",
+    "@playwright/test": "1.61.1",
+    "@redocly/cli": "2.39.0",
+    "@linger/wire-contracts": "workspace:*",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "26.0.1",
+    "@types/ws": "8.18.2",
+    "@vitejs/plugin-react": "6.0.3",
+    "concurrently": "10.0.3",
+    "eslint": "10.5.0",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.7.0",
+    "husky": "^9.1.7",
+    "jsdom": "29.1.1",
+    "json-schema-to-typescript": "15.0.4",
+    "lint-staged": "16.4.0",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "3.8.4",
+    "react-doctor": "0.8.3",
+    "tsx": "4.22.4",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.62.0",
+    "vitest": "4.1.9",
+    "ws": "8.22.0",
+    "yaml": "2.9.0"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "type-enum": [
+        2,
+        "always",
+        [
+          "build",
+          "chore",
+          "ci",
+          "docs",
+          "feat",
+          "fix",
+          "perf",
+          "refactor",
+          "revert",
+          "style",
+          "test",
+          "release"
+        ]
+      ],
+      "subject-case": [
+        0
+      ],
+      "subject-full-stop": [
+        0
+      ],
+      "header-max-length": [
+        0
+      ],
+      "body-max-line-length": [
+        0
+      ],
+      "footer-max-line-length": [
+        0
+      ]
+    }
+  },
+  "reactDoctor": {
+    "projects": [
+      "apps/web"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@linger/linger-installer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --maxWorkers=2",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "build": "node scripts/build.mjs",
+    "lint": "eslint --max-warnings=0 src"
+  },
+  "dependencies": {
+    "@linger/local-installation": "workspace:*",
+    "@linger/wire-contracts": "workspace:*",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1",
+    "vite": "8.1.5",
+    "@vitejs/plugin-react": "6.0.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "vitest": "4.1.9",
+    "jsdom": "29.1.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/dom": "10.4.1"
+  }
+}

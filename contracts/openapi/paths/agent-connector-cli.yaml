@@ -1,0 +1,349 @@
+bindings:
+  post:
+    operationId: bindConnectorTools
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Resolve exact fixed version tools for one delegated connection.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [connection_id, tool_version, tool_slugs]
+            properties:
+              connection_id: { type: string, minLength: 1 }
+              tool_version: { type: string, pattern: "^[0-9]{8}_[0-9]{2}$" }
+              tool_slugs:
+                type: array
+                minItems: 1
+                maxItems: 24
+                uniqueItems: true
+                items: { type: string, pattern: "^[A-Z0-9][A-Z0-9_]{1,199}$" }
+    responses:
+      "200":
+        description: Exact account scoped tool input schemas; execution always reauthorizes.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [tools]
+              properties:
+                tools:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [tool_slug, tool_version, app_key, input_schema]
+                    properties:
+                      tool_slug: { type: string }
+                      tool_version: { type: string }
+                      app_key: { type: string }
+                      input_schema: { type: object, additionalProperties: true }
+      "400": { description: Invalid bindings }
+      "401": { description: Invalid Agent identity }
+      "403": { description: Connection not delegated }
+      "404": { description: Exact tool unavailable }
+      "503": { description: Provider unavailable }
+uploadRequest:
+  post:
+    operationId: prepareConnectorFileUpload
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Stage one file for an exact authorized tool without exposing provider credentials.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              [connection_id, tool_slug, tool_version, filename, mimetype, md5]
+            properties:
+              connection_id: { type: string, minLength: 1 }
+              tool_slug: { type: string, pattern: "^[A-Z0-9][A-Z0-9_]{1,199}$" }
+              tool_version: { type: string, pattern: "^[0-9]{8}_[0-9]{2}$" }
+              filename: { type: string, minLength: 1, maxLength: 1024 }
+              mimetype: { type: string, minLength: 3, maxLength: 255 }
+              md5: { type: string, pattern: "^[a-f0-9]{32}$" }
+    responses:
+      "200":
+        description: A short lived upload target for private CLI use; never include its URL in business output or logs.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [key, new_presigned_url]
+              properties:
+                key: { type: string, minLength: 1 }
+                new_presigned_url: { type: string, format: uri }
+      "400": { description: Invalid upload metadata }
+      "401": { description: Invalid Agent identity }
+      "403": { description: Connection not delegated }
+      "404": { description: Exact file accepting tool unavailable }
+      "409": { description: Connection is not active }
+      "503": { description: Upload staging unavailable }
+account:
+  post:
+    operationId: resolveConnectorAccount
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Select a delegated account or post a connection authorization card in the current chat.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [app_key]
+            properties:
+              app_key: { type: string, minLength: 1, maxLength: 120 }
+              account: { type: string, minLength: 1, maxLength: 240 }
+    responses:
+      "200":
+        description: A selected account, ambiguous candidates, or the authorization card receipt. No external action has executed.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status:
+                  {
+                    type: string,
+                    enum: [ready, account_ambiguous, authorization_required],
+                  }
+                account:
+                  $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentConnectedApp"
+                candidates:
+                  type: array
+                  items:
+                    $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentConnectedApp"
+                room_id: { type: string }
+                message_id: { type: string }
+                interaction_id: { type: string }
+      "400":
+        {
+          description: "Invalid application key or account selector, or an application without Agent tools support",
+        }
+      "401": { description: Invalid Agent identity }
+      "403": { description: No eligible chat or Human decision owner }
+      "409":
+        {
+          description: "provider_key_required: the deployment has no Composio API key yet; a card asking the Human for it was posted in the chat",
+        }
+      "503": { description: An authorization dependency is unavailable }
+mailBody:
+  post:
+    operationId: prepareConnectorMailBody
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Convert a mail Markdown body to HTML on TeamHub.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [content]
+            properties:
+              content: { type: string, maxLength: 1048576 }
+    responses:
+      "200":
+        description: HTML generated by the backend, without sending a message.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [html]
+              properties:
+                html: { type: string }
+      "400": { description: Invalid body }
+      "401": { description: Invalid Agent identity }
+      "403": { description: Operation not permitted }
+
+gmailCanvasDraft:
+  post:
+    operationId: saveConnectorGmailCanvasDraft
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Save a canvas Document as a Gmail draft with its images inline.
+    description: >-
+      Reads the current canvas the Agent can read. Recipients and subject the
+      request leaves out come from the canvas header: the first block, a code
+      block whose first line is "canvas: gmail", followed by "key: value" lines
+      (case-insensitive; addresses separated by commas only). Converts the body
+      without the header to HTML and embeds its Document images as inline parts
+      (cid), so the draft shows them in the body; its file, video and audio
+      blocks become attachments. Creates a draft, or replaces draft_id in
+      place. Never sends.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [connection_id, document_id]
+            properties:
+              connection_id: { type: string, minLength: 1, maxLength: 128 }
+              document_id:
+                { type: string, pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$" }
+              to:
+                type: array
+                maxItems: 50
+                description: Recipients; a draft may have none yet. Defaults to the header's to.
+                items: { type: string, minLength: 3, maxLength: 320 }
+              cc:
+                type: array
+                maxItems: 50
+                description: Defaults to the header's cc.
+                items: { type: string, minLength: 3, maxLength: 320 }
+              subject:
+                type: string
+                minLength: 1
+                maxLength: 998
+                description: Defaults to the header's subject; the draft needs one.
+              draft_id: { type: string, minLength: 1, maxLength: 256 }
+    responses:
+      "200":
+        description: Draft saved; nothing was sent.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [draft_id, inline_images, attachments]
+              properties:
+                draft_id: { type: string }
+                message_id: { type: string }
+                thread_id: { type: string }
+                inline_images: { type: integer }
+                attachments:
+                  type: array
+                  description: File names of the canvas's file blocks, attached to the email in canvas order.
+                  items: { type: string }
+      "400":
+        description: >-
+          Invalid request, a Document that is not a Gmail canvas while fields
+          are left out, no subject, unsupported body, images over 5 MiB in
+          total, or attachments over 15 MiB in total
+      "401": { description: Invalid Agent identity }
+      "403": { description: Operation not permitted }
+      "404": { description: Document or connection not found }
+
+notionBody:
+  post:
+    operationId: prepareConnectorNotionBody
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Validate the common Notion Markdown subset and prepare literal Markdown plus legal blocks.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [content, markdown]
+            properties:
+              content: { type: string, maxLength: 1048576 }
+              markdown: { type: boolean }
+    responses:
+      "200":
+        description: Validated representations without external writes.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [markdown, blocks]
+              properties:
+                markdown: { type: string }
+                blocks:
+                  {
+                    type: array,
+                    maxItems: 100,
+                    items: { type: object, additionalProperties: true },
+                  }
+      "400": { description: Unsupported content or limit }
+      "401": { description: Invalid Agent identity }
+      "403": { description: Agent authorization denied }
+
+autoRemindersList:
+  post:
+    operationId: listConnectorAutoReminders
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: List the Sponsor's connections that support auto reminders and whether each is on.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { type: object, additionalProperties: false }
+    responses:
+      "200":
+        description: Connections the Agent's Sponsor owns whose app supports auto reminders.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [connections]
+              properties:
+                connections:
+                  type: array
+                  items:
+                    $ref: "../components/agent-connected-apps.yaml#/components/schemas/ConnectorAutoReminders"
+      "400": { description: Invalid request }
+      "401": { description: Invalid Agent identity }
+      "403": { description: Agent cannot manage its Sponsor's connections }
+      "409":
+        {
+          description: "provider_key_required: the deployment has no Composio API key yet; a card asking the Human for it was posted in the chat",
+        }
+      "503": { description: External connections unavailable }
+autoRemindersSet:
+  post:
+    operationId: setConnectorAutoReminders
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Turn auto reminders on or off for one connection the Agent's Sponsor owns.
+    description: >-
+      Same effect as the Human switch: off removes the AnotherMe listener
+      Routines of the connection, on installs the missing ones.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [connection_id, enabled]
+            properties:
+              connection_id: { type: string, minLength: 1, maxLength: 128 }
+              enabled: { type: boolean }
+    responses:
+      "200":
+        description: The connection's current auto reminders state.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-connected-apps.yaml#/components/schemas/ConnectorAutoReminders"
+      "400": { description: Invalid request or an app without auto reminders }
+      "401": { description: Invalid Agent identity }
+      "403": { description: Agent cannot manage its Sponsor's connections }
+      "404": { description: The Sponsor owns no such connection }
+      "409":
+        {
+          description: "provider_key_required: the deployment has no Composio API key yet; a card asking the Human for it was posted in the chat",
+        }
+      "503": { description: External connections unavailable }

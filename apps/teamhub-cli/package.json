@@ -1,0 +1,43 @@
+{
+  "name": "@linger/teamhub-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "teamhub": "bin/teamhub"
+  },
+  "scripts": {
+    "build": "node scripts/build-cli.mjs",
+    "test": "vitest run --config vitest.config.ts",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint --max-warnings=0 ."
+  },
+  "engines": {
+    "node": ">=26.5.0 <27"
+  },
+  "devDependencies": {
+    "@types/node": "26.0.1",
+    "esbuild": "0.28.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.9",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "yaml": "2.9.0",
+    "openapi-fetch": "0.17.0",
+    "zod": "4.4.3",
+    "yauzl": "3.4.0",
+    "yazl": "3.3.1",
+    "@types/yauzl": "3.4.0",
+    "@types/yazl": "3.3.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "tsx": "4.22.4"
+  },
+  "dependencies": {
+    "@linger/wire-contracts": "workspace:*",
+    "@linger/document-files": "workspace:*",
+    "@linger/service-kit": "workspace:*"
+  }
+}

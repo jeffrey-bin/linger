@@ -1,0 +1,117 @@
+components:
+  schemas:
+    ComputerPermissionId:
+      description: A macOS privacy permission an Agent can ask its Computer owner to grant.
+      type: string
+      enum: [screen_recording, accessibility]
+      x-enum-varnames:
+        [ComputerPermissionIdScreenRecording, ComputerPermissionIdAccessibility]
+    ComputerPermissionSubject:
+      description: >-
+        The app macOS grants the permission to. linger is the Linger desktop
+        app, which owns shell commands such as screencapture; computer_use is
+        CuaDriver, which owns the computer-use tools.
+      type: string
+      enum: [linger, computer_use]
+      x-enum-varnames:
+        [ComputerPermissionSubjectLinger, ComputerPermissionSubjectComputerUse]
+    ComputerPermissionState:
+      type: string
+      enum: [granted, denied, not_determined, unknown]
+      x-enum-varnames:
+        [
+          ComputerPermissionStateGranted,
+          ComputerPermissionStateDenied,
+          ComputerPermissionStateNotDetermined,
+          ComputerPermissionStateUnknown,
+        ]
+    ComputerPermissionPrompt:
+      description: >-
+        available when the Computer can raise the macOS prompt itself;
+        settings_only when it can only open the System Settings pane.
+      type: string
+      enum: [available, settings_only]
+      x-enum-varnames:
+        [
+          ComputerPermissionPromptAvailable,
+          ComputerPermissionPromptSettingsOnly,
+        ]
+    ComputerPermissionEntry:
+      type: object
+      additionalProperties: false
+      required: [id, state, prompt, relaunch_required]
+      properties:
+        id:
+          $ref: "#/components/schemas/ComputerPermissionId"
+        state:
+          $ref: "#/components/schemas/ComputerPermissionState"
+        prompt:
+          $ref: "#/components/schemas/ComputerPermissionPrompt"
+        relaunch_required:
+          type: boolean
+          description: >-
+            macOS applies a new grant only after the app restarts. True once the
+            running app asked for this permission without seeing it granted.
+    ComputerPermissionSubjectStatus:
+      type: object
+      additionalProperties: false
+      required: [subject, permissions]
+      properties:
+        subject:
+          $ref: "#/components/schemas/ComputerPermissionSubject"
+        permissions:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/ComputerPermissionEntry"
+    ComputerPermissionStatus:
+      description: >-
+        The macOS privacy permissions of one Local Computer. Other platforms
+        have no such permissions and report no subjects.
+      type: object
+      additionalProperties: false
+      required: [platform, host, subjects]
+      properties:
+        platform:
+          type: string
+          enum: [darwin, windows, linux]
+          x-enum-varnames:
+            [
+              ComputerPermissionPlatformDarwin,
+              ComputerPermissionPlatformWindows,
+              ComputerPermissionPlatformLinux,
+            ]
+        host:
+          description: desktop when the Linger desktop app runs the Computer; standalone otherwise.
+          type: string
+          enum: [desktop, standalone]
+          x-enum-varnames:
+            [ComputerPermissionHostDesktop, ComputerPermissionHostStandalone]
+        subjects:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/ComputerPermissionSubjectStatus"
+    ComputerPermissionAction:
+      description: >-
+        One step the owner takes on their own Mac. prompt raises the macOS
+        prompt, open_settings opens the System Settings pane, and relaunch
+        restarts the Linger desktop app so a new grant takes effect.
+      type: object
+      additionalProperties: false
+      required: [action, subject]
+      properties:
+        action:
+          type: string
+          enum: [prompt, open_settings, relaunch]
+          x-enum-varnames:
+            [
+              ComputerPermissionActionPrompt,
+              ComputerPermissionActionOpenSettings,
+              ComputerPermissionActionRelaunch,
+            ]
+        subject:
+          $ref: "#/components/schemas/ComputerPermissionSubject"
+        permission:
+          $ref: "#/components/schemas/ComputerPermissionId"
+          description: Required for prompt and open_settings.

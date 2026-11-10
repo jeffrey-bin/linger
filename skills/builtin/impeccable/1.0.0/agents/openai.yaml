@@ -1,0 +1,4 @@
+interface:
+  display_name: "Impeccable"
+  short_description: "Production-grade product UI craft"
+  default_prompt: "Use $impeccable to match Xspace density, states, and existing components."

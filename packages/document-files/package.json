@@ -1,0 +1,40 @@
+{
+  "name": "@linger/document-files",
+  "version": "0.0.0",
+  "description": "Document Files: shared Document file type and Markdown helpers.",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "linger-production": "./dist/index.js",
+      "default": "./src/index.ts"
+    },
+    "./media-type": {
+      "types": "./src/media-type.ts",
+      "linger-production": "./dist/media-type.js",
+      "default": "./src/media-type.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint --max-warnings=0 .",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm lint && pnpm test"
+  },
+  "engines": {
+    "node": ">=26.5.0 <27"
+  },
+  "dependencies": {
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.0.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.9"
+  }
+}

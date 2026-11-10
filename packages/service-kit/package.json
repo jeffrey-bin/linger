@@ -1,0 +1,36 @@
+{
+  "name": "@linger/service-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist/**/*.js"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "linger-production": "./dist/index.js",
+      "default": "./src/index.ts"
+    },
+    "./node": {
+      "types": "./src/node.ts",
+      "linger-production": "./dist/node.js",
+      "default": "./src/node.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint --max-warnings=0 .",
+    "test": "vitest run --config vitest.config.ts",
+    "check": "pnpm typecheck && pnpm lint && pnpm test"
+  },
+  "engines": {
+    "node": ">=26.5.0 <27"
+  },
+  "devDependencies": {
+    "@types/node": "26.0.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.9"
+  }
+}

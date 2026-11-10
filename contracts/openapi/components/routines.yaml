@@ -1,0 +1,186 @@
+components:
+  schemas:
+    RoutineCadenceKind:
+      type: string
+      enum: [daily, weekly, every_n_hours, once]
+    RoutineWeekday:
+      type: string
+      enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+    RoutineCadence:
+      type: object
+      additionalProperties: false
+      required: [kind, timezone]
+      properties:
+        kind:
+          $ref: "#/components/schemas/RoutineCadenceKind"
+        timezone:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: IANA timezone used to evaluate the cadence.
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+          description: Local hour for daily and weekly cadences.
+        minute:
+          type: integer
+          minimum: 0
+          maximum: 59
+          description: Local minute for daily and weekly cadences.
+        weekdays:
+          type: array
+          minItems: 1
+          maxItems: 7
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/RoutineWeekday"
+          description: Selected local weekdays for weekly cadences, ordered Monday through Sunday in responses. Required for weekly cadences.
+        interval_hours:
+          type: integer
+          minimum: 1
+          maximum: 168
+          description: Repeat interval for every_n_hours cadences.
+        run_at:
+          type: string
+          format: date-time
+          description: The one moment a once cadence fires; the Routine is done (disabled) afterwards.
+    RoutineListener:
+      type: object
+      additionalProperties: false
+      required: [app]
+      properties:
+        app:
+          type: string
+          enum: [gmail, outlook, google_calendar, slack]
+          description: Connected app whose new events the Routine hands to proactive judgement.
+    Routine:
+      type: object
+      additionalProperties: false
+      description: A Routine has exactly one of cadence and listener. A listener Routine is AnotherMe's app listener; it can only be paused and resumed, and goes away when the Human revokes AnotherMe's access to the app.
+      required:
+        [
+          id,
+          room_id,
+          created_by_actor_id,
+          name,
+          instruction,
+          enabled,
+          revision,
+          created_at,
+          updated_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        created_by_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        mention_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Optional Agent Actor to mention when the Routine fires.
+        cadence:
+          $ref: "#/components/schemas/RoutineCadence"
+        listener:
+          $ref: "#/components/schemas/RoutineListener"
+        enabled:
+          type: boolean
+        next_run_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoutinePage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Routine"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    RoutineCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name, instruction, cadence]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        mention_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        cadence:
+          $ref: "#/components/schemas/RoutineCadence"
+        enabled:
+          type: boolean
+          description: Defaults to true when omitted.
+    RoutineUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_revision]
+      properties:
+        expected_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        mention_actor_id:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 64
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          description: Set to an Agent Actor ID, or null to clear the mention.
+        cadence:
+          $ref: "#/components/schemas/RoutineCadence"
+        enabled:
+          type: boolean
+    RoutineChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, routine_id, change_kind, revision]
+      properties:
+        kind:
+          const: routine.changed
+        routine_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        change_kind:
+          type: string
+          enum: [created, updated, deleted, fired]
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+        routine_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Name snapshotted when a Routine fires, for Human-facing Message provenance.

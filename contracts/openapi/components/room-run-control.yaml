@@ -1,0 +1,80 @@
+components:
+  schemas:
+    TenantRoomActivity:
+      type: object
+      additionalProperties: false
+      required: [running_room_ids, failed_room_ids]
+      properties:
+        running_room_ids:
+          type: array
+          uniqueItems: true
+          description: Room IDs with at least one running Local Run in an active Room Agent membership that has not replied (see RoomRunStatus.replied). Work in a Thread counts for its parent Room. An empty array means no visible Room is working.
+          items:
+            type: string
+        failed_room_ids:
+          type: array
+          uniqueItems: true
+          description: Room IDs whose latest visible Local Run in the last 7 days is failed and that have no running Local Run. An empty array means no visible Room has a current failed run.
+          items:
+            type: string
+    RoomBackgroundTask:
+      type: object
+      additionalProperties: false
+      required: [id, title, requirement, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        title:
+          type: string
+        requirement:
+          type: string
+          description: What the Room's Meta asked its AlterEgo to do.
+        created_at:
+          type: string
+          format: date-time
+    RoomBackgroundTaskList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          description: Oldest first. Waiting for an approval counts as running; a Task leaves the list once it is idle, failed or canceled.
+          items:
+            $ref: "#/components/schemas/RoomBackgroundTask"
+    RoomRunCancelRequest:
+      type: object
+      additionalProperties: false
+      required: [request_id]
+      properties:
+        request_id:
+          $ref: "./common.yaml#/components/schemas/IdempotencyKey"
+    RoomRunCancelResult:
+      type: object
+      additionalProperties: false
+      required: [run_id, status, agent_actor_id, message_ids]
+      properties:
+        agent_actor_id:
+          type: string
+        message_ids:
+          type: array
+          items:
+            type: string
+        run_id:
+          type: string
+        status:
+          type: string
+          enum: [cancel_requested, canceled, already_terminal]
+    RoomRunRedeliverResult:
+      type: object
+      additionalProperties: false
+      required: [run_id, status, redelivered_count]
+      properties:
+        run_id:
+          type: string
+        status:
+          type: string
+          enum: [redelivered, nothing_to_redeliver]
+        redelivered_count:
+          type: integer
+          minimum: 0

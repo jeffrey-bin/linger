@@ -1,0 +1,324 @@
+/* Small level bars beside the timer: a sign of life, not a meter. */
+.liveBars {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+}
+
+.liveBars i {
+  display: block;
+  width: 2px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--app-danger);
+  animation: live-bar 1.2s ease-in-out infinite;
+}
+
+.liveBars i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.liveBars i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.liveBars i:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+@keyframes live-bar {
+  50% {
+    height: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveBars i {
+    animation: none;
+    height: 8px;
+  }
+}
+
+/* The page window: a Town large popover (16px card, shadow-xl) whose title
+   bar shows above it on hover. */
+.window {
+  box-shadow: var(--town-shadow-xl);
+}
+
+.titleBar {
+  position: absolute;
+  top: -36px;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 16px 16px 0 0;
+  background: var(--app-canvas);
+  box-shadow: var(--town-shadow-outline);
+  clip-path: inset(-1px -1px 0 -1px);
+  cursor: grab;
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  transition:
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.titleBar:active {
+  cursor: grabbing;
+}
+
+:global(.recording-window-frame):hover .titleBar,
+:global(.recording-window-frame):focus-within .titleBar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scaleY(1);
+}
+
+:global(.recording-window-frame):is(:hover, :focus-within) > section {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* The picture-in-picture window docks the title bar above the window instead of floating it. */
+.titleBarDocked {
+  position: static;
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: none;
+  cursor: default;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+/* Town ghost icon button: 28px, muted icon, Accent fill on hover. */
+.windowButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--app-muted);
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.windowButton:hover {
+  background: hsl(var(--town-accent));
+  color: var(--app-ink);
+}
+
+.windowButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.windowButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Pause and Stop: Town small outline buttons (32px, 6px radius, hairline
+   border, 12px medium label). Paused fills with the primary ink. */
+.control {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--app-ink);
+  font-size: 12px;
+  font-weight: 470;
+  letter-spacing: 0.02em;
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.control:not([data-active]):hover:not(:disabled) {
+  border-color: hsl(var(--town-foreground) / 0.15);
+  background: hsl(var(--town-accent));
+}
+
+.control:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.control:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.control[data-active] {
+  border-color: var(--app-action);
+  background: var(--app-action);
+  color: var(--app-action-foreground);
+}
+
+.control[data-active]:hover:not(:disabled) {
+  border-color: var(--app-action-hover);
+  background: var(--app-action-hover);
+}
+
+.control[data-active]:disabled {
+  opacity: 1;
+}
+
+/* A paused recording flattens its level bars. */
+[data-paused] .liveBars i {
+  height: 4px;
+  background: var(--app-border-strong);
+  animation: none;
+}
+
+/* Stopping asks inside the window, over its content, as a Town dialog:
+   frosted Background/20 scrim and a 100ms fade + zoom from 95%. */
+.confirmLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 8px;
+  background: var(--app-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: confirm-fade 100ms ease both;
+}
+
+.confirm {
+  width: min(320px, 100%);
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--app-surface);
+  box-shadow: var(--town-shadow-lg);
+  animation: confirm-enter 100ms ease both;
+}
+
+@keyframes confirm-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes confirm-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirmLayer,
+  .confirm {
+    animation: none;
+  }
+}
+
+.confirmTitle {
+  margin: 0 0 6px;
+  color: var(--app-ink);
+  font-size: 16px;
+  font-weight: 580;
+}
+
+.confirmDescription {
+  margin: 0 0 20px;
+  color: var(--app-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Town buttons: 36px, 8px radius, 14px medium. The decision is a primary
+   button; staying is outline. */
+.confirmStop,
+.confirmKeep {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 470;
+  letter-spacing: 0.02em;
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirmStop:focus-visible,
+.confirmKeep:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.confirmStop {
+  background: var(--app-action);
+  box-shadow: var(--town-shadow-button);
+  color: var(--app-action-foreground);
+}
+
+.confirmStop:hover {
+  background: var(--app-action-hover);
+}
+
+.confirmKeep {
+  border: 1px solid var(--app-border);
+  color: var(--app-ink);
+}
+
+.confirmKeep:hover {
+  border-color: hsl(var(--town-foreground) / 0.15);
+  background: hsl(var(--town-accent));
+}
+
+/* A request in Ask handed to Another Me: its node fills green and draws a check. */
+.taskSent {
+  animation: task-sent-node 300ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.taskSentCheck {
+  animation: task-sent-check 220ms ease-out 120ms both;
+}
+
+@keyframes task-sent-node {
+  from {
+    transform: scale(0.4);
+  }
+}
+
+@keyframes task-sent-check {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taskSent,
+  .taskSentCheck {
+    animation: none;
+  }
+}

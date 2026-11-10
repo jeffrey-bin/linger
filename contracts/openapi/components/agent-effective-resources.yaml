@@ -1,0 +1,58 @@
+components:
+  schemas:
+    AgentEffectiveSkill:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          skill_id,
+          manifest_id,
+          manifest_version,
+          name,
+          package_sha256,
+          source,
+          config,
+        ]
+      properties:
+        skill_id:
+          $ref: "./common.yaml#/components/schemas/SkillIdentifier"
+        manifest_id:
+          $ref: "./common.yaml#/components/schemas/SkillManifestIdentifier"
+        manifest_version:
+          $ref: "./common.yaml#/components/schemas/ManifestVersion"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        package_sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        source:
+          type: string
+          enum: [default, explicit]
+        config:
+          type: object
+          additionalProperties: true
+    AgentEffectiveResources:
+      type: object
+      additionalProperties: false
+      required: [effective_sha256, skills, connected_apps]
+      properties:
+        effective_sha256:
+          type: string
+          description: >-
+            Deterministic digest of the effective Skill set and connected_apps;
+            Agent Service compares it at Run boundaries.
+          pattern: "^[a-f0-9]{64}$"
+        connected_apps:
+          type: boolean
+          description: >-
+            TeamHub currently has a Composio API key, from the environment or
+            saved on the Apps page, so the Agent is taught and allowed the
+            connected app commands.
+        skills:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentEffectiveSkill"

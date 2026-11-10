@@ -1,0 +1,68 @@
+{
+  "profile": {
+    "relative_path": "synthetic/profile.md",
+    "content": "Owner: Casey Example (casey@example.test). Casey is an engineer at Example Studio. This is a synthetic profile for tests."
+  },
+  "unresolved_issue": {
+    "relative_path": "synthetic/pending.md",
+    "content": "From: reviewer@example.test\nTo: casey@example.test\nDate: 2026-01-05\nPlease review the sample release checklist by January 9. No reply or completion has been recorded."
+  },
+  "replied_issue": {
+    "relative_path": "synthetic/completed.md",
+    "content": "From: reviewer@example.test\nTo: casey@example.test\nPlease review the sample release checklist.\nReply from Casey Example: I reviewed the checklist and sent the result.\nReply from reviewer@example.test: Received, no further action is needed."
+  },
+  "messages": [
+    {
+      "dataset_id": "synthetic-email-v1",
+      "thread_id": "thread-2",
+      "message_id": "direct-inbound",
+      "timestamp": "2026-01-05T09:00:00Z",
+      "direction": "inbound",
+      "category": "primary",
+      "sender_local": "reviewer",
+      "body": "Please confirm the sample meeting time by Friday."
+    },
+    {
+      "dataset_id": "synthetic-email-v1",
+      "thread_id": "thread-2",
+      "message_id": "direct-outbound",
+      "timestamp": "2026-01-05T09:00:00Z",
+      "direction": "outbound",
+      "category": "primary",
+      "sender_local": "casey",
+      "body": "I sent the sample release checklist for review."
+    },
+    {
+      "dataset_id": "synthetic-email-v1",
+      "thread_id": "thread-3",
+      "message_id": "status-inbound",
+      "timestamp": "2026-01-05T09:00:00Z",
+      "direction": "inbound",
+      "category": "updates",
+      "sender_local": "no-reply",
+      "auto_submitted": true,
+      "body": "The sample export has completed."
+    },
+    {
+      "dataset_id": "synthetic-email-v1",
+      "thread_id": "thread-4",
+      "message_id": "newsletter-inbound",
+      "timestamp": "2026-01-05T09:00:00Z",
+      "direction": "inbound",
+      "category": "primary",
+      "sender_local": "weekly-digest",
+      "list_id": true,
+      "body": "Weekly sample product digest. Unsubscribe ( https://example.test/unsubscribe )"
+    },
+    {
+      "dataset_id": "synthetic-email-v1",
+      "thread_id": "thread-5",
+      "message_id": "draft",
+      "timestamp": "2026-01-05T09:00:00Z",
+      "direction": "draft",
+      "category": "primary",
+      "sender_local": "casey",
+      "body": "Draft: I will review the sample document."
+    }
+  ]
+}

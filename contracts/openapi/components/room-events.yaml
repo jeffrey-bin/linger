@@ -1,0 +1,324 @@
+components:
+  schemas:
+    RoomEventType:
+      type: string
+      enum:
+        - room.created
+        - room.updated
+        - room.participation.changed
+        - room.deleted
+        - room.history.compacted
+        - message.created
+        - message.hidden
+        - message.thread_summary.updated
+        - message.reactions.changed
+        - card.changed
+        - document.created
+        - room.member.added
+        - room.member.role_changed
+        - room.member.removed
+        - work_item.changed
+        - document.comment.changed
+        - routine.changed
+        - capture.session.changed
+        - agent_run.status_changed
+        - team_md.published
+    RoomParticipationChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, actor_id, status]
+      properties:
+        kind:
+          type: string
+          enum: [room.participation.changed]
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          $ref: "./domain.yaml#/components/schemas/RoomParticipationStatus"
+    RoomSnapshotPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, room]
+      properties:
+        kind:
+          type: string
+          enum: [room.created, room.updated]
+        room:
+          $ref: "./domain.yaml#/components/schemas/Room"
+    RoomDeletedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, room_id, deleted_at]
+      properties:
+        kind:
+          const: room.deleted
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        deleted_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoomHistoryCompactedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, removed_event_type]
+      properties:
+        kind:
+          const: room.history.compacted
+        removed_event_type:
+          type: string
+          minLength: 1
+          description: Historical event type removed from the current product model.
+      description: >-
+        Compatibility marker that preserves an existing room_seq after an obsolete event model is
+        removed. Clients advance their cursor without projecting product state from this event.
+    MessageHiddenPayload:
+      type: object
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind:
+          const: message.hidden
+      description: >-
+        Placeholder for a Message that Human clients never receive, such as a Task terminal notice
+        kept in Agent-only history. It keeps room_seq contiguous; clients advance their cursor
+        without projecting product state from this event.
+    MessageSnapshotPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, message]
+      properties:
+        kind:
+          const: message.created
+        message:
+          $ref: "./messages.yaml#/components/schemas/Message"
+    MessageThreadSummaryUpdatedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, message_id, thread]
+      properties:
+        kind:
+          const: message.thread_summary.updated
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        thread:
+          $ref: "./messages.yaml#/components/schemas/MessageThreadSummary"
+    MessageReactionsChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, message_id, reactions]
+      properties:
+        kind:
+          const: message.reactions.changed
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        reactions:
+          type: array
+          maxItems: 64
+          description: Complete current Reaction aggregate for the Message; replaces any local projection.
+          items:
+            $ref: "./messages.yaml#/components/schemas/MessageReaction"
+    CardChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, message_id, version]
+      properties:
+        kind:
+          const: card.changed
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+    RoomDocumentChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, document_id]
+      properties:
+        kind:
+          type: string
+          enum:
+            - document.created
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Present only when the committed change created or selected an immutable Version.
+    RoomMemberSnapshotPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, member]
+      properties:
+        kind:
+          type: string
+          enum:
+            [room.member.added, room.member.role_changed, room.member.removed]
+        member:
+          $ref: "./domain.yaml#/components/schemas/RoomMember"
+          description: For room.member.removed this is the last committed membership snapshot.
+    WorkItemChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, work_item_id, version]
+      properties:
+        kind:
+          const: work_item.changed
+        work_item_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+    DocumentCommentChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, change_kind, document_id, thread_id]
+      properties:
+        kind:
+          const: document.comment.changed
+        change_kind:
+          type: string
+          enum:
+            - thread_created
+            - comment_replied
+            - comment_updated
+            - comment_deleted
+            - resolution_changed
+            - thread_reanchored
+            - reaction_changed
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        comment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        attention_actor_ids:
+          description: Humans this change mentions for the first time in the comment; each counts it as an unread mention.
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+    RoutineChangedPayload:
+      $ref: "./routines.yaml#/components/schemas/RoutineChangedPayload"
+    CaptureSessionChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, session_id, status]
+      properties:
+        kind:
+          const: capture.session.changed
+        session_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          enum: [recording, finalizing, finalized]
+    AgentRunStatusChangedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, run]
+      properties:
+        kind:
+          const: agent_run.status_changed
+        run:
+          $ref: "./room-agent.yaml#/components/schemas/RoomRunStatus"
+      description: >-
+        An Agent Run shown in this Room changed status or committed Runtime presentation events.
+        Clients fetch events after their last ordinal up to run.event_ordinal.
+    TeamMdPublishedPayload:
+      type: object
+      additionalProperties: false
+      required: [kind, revision]
+      properties:
+        kind:
+          const: team_md.published
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+      description: >-
+        An Agent published a new revision of the Room's team.md. Clients read the document from
+        GET /v0/rooms/{roomId}/team-md.
+    RoomEventPayload:
+      oneOf:
+        - $ref: "#/components/schemas/RoomParticipationChangedPayload"
+        - $ref: "#/components/schemas/RoomSnapshotPayload"
+        - $ref: "#/components/schemas/RoomDeletedPayload"
+        - $ref: "#/components/schemas/RoomHistoryCompactedPayload"
+        - $ref: "#/components/schemas/MessageSnapshotPayload"
+        - $ref: "#/components/schemas/MessageHiddenPayload"
+        - $ref: "#/components/schemas/MessageThreadSummaryUpdatedPayload"
+        - $ref: "#/components/schemas/MessageReactionsChangedPayload"
+        - $ref: "#/components/schemas/CardChangedPayload"
+        - $ref: "#/components/schemas/RoomDocumentChangedPayload"
+        - $ref: "#/components/schemas/RoomMemberSnapshotPayload"
+        - $ref: "#/components/schemas/WorkItemChangedPayload"
+        - $ref: "#/components/schemas/DocumentCommentChangedPayload"
+        - $ref: "#/components/schemas/RoutineChangedPayload"
+        - $ref: "#/components/schemas/CaptureSessionChangedPayload"
+        - $ref: "#/components/schemas/AgentRunStatusChangedPayload"
+        - $ref: "#/components/schemas/TeamMdPublishedPayload"
+      discriminator:
+        propertyName: kind
+    RoomEventEnvelope:
+      type: object
+      additionalProperties: false
+      required:
+        - event_id
+        - tenant_id
+        - room_id
+        - room_seq
+        - occurred_at
+        - event_type
+        - payload
+      properties:
+        event_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_seq:
+          $ref: "./common.yaml#/components/schemas/RoomSeq"
+        occurred_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        event_type:
+          $ref: "#/components/schemas/RoomEventType"
+        actor:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+          description: Omitted for service-originated state changes.
+        payload:
+          $ref: "#/components/schemas/RoomEventPayload"
+      description: >-
+        Persistent, at-least-once synchronization record. event_type must equal payload.kind.
+        Payload contains the small committed snapshot needed for immediate UI projection; it is not
+        the authoritative resource and clients may GET the resource to repair or hydrate extra data.
+    RoomEventPage:
+      type: object
+      additionalProperties: false
+      required: [items, latest_room_seq, has_more]
+      properties:
+        items:
+          type: array
+          description: Strictly ascending room_seq values, all greater than after.
+          items:
+            $ref: "#/components/schemas/RoomEventEnvelope"
+        latest_room_seq:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Highest committed sequence observed when this page was produced.
+        has_more:
+          type: boolean
+          description: true when another page is needed before reaching latest_room_seq.
+    SessionExpiredSseEvent:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [SESSION_EXPIRED]
+          description: The Session expired or was revoked by logout or password reset.
+        message:
+          type: string
+          minLength: 1

@@ -1,0 +1,964 @@
+.room-document-main {
+  container: document-surface / inline-size;
+}
+
+.room-document-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4px 12px;
+  min-height: var(--app-header-height);
+  padding: 4px 16px;
+}
+
+.room-document-header-identity {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.room-document-header-file {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.room-document-header-updated {
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: hsl(var(--town-muted));
+  color: hsl(var(--town-muted-foreground));
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.room-document-header-actions {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.room-document-mode-trigger {
+  display: inline-flex;
+  height: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  color: var(--app-ink);
+  font-size: 12px;
+  font-weight: 470;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.room-document-mode-trigger:hover {
+  border-color: color-mix(in srgb, var(--app-ink) 15%, transparent);
+  background: hsl(var(--town-accent));
+}
+
+.room-document-mode-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.room-document-page-title {
+  font-size: 24px;
+  font-weight: 580;
+  letter-spacing: -0.025em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.room-document-layout {
+  container-type: inline-size;
+  width: 100%;
+  max-width: 720px;
+  padding: 24px 32px;
+}
+
+@container document-surface (max-width: 480px) {
+  .room-document-header-identity {
+    flex-basis: 100%;
+  }
+
+  .room-document-header-actions {
+    flex-basis: 100%;
+  }
+
+  .room-document-layout {
+    padding: 28px 24px;
+  }
+}
+
+.room-document-content-lane {
+  width: 100%;
+}
+
+.room-document-layout--knowledge {
+  /* 768px reading column plus horizontal padding. */
+  max-width: calc(768px + 80px);
+  padding: 28px 40px;
+}
+
+/* The page title tops the Town docs scale: above every heading in the body. */
+.room-document-layout--knowledge .room-document-page-title {
+  font-size: 32px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+@media (max-width: 48rem) {
+  .room-document-layout--knowledge {
+    padding: 28px 20px;
+  }
+}
+
+.room-document-blocknote {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  min-height: 420px;
+  margin-inline: auto;
+  color: var(--app-ink);
+}
+
+.room-document-blocknote[data-empty="true"][data-editable="false"] .bn-editor {
+  visibility: hidden;
+}
+
+/* Town docs type scale, the same in Edit and Read so a heading never jumps
+   between modes (Wiki reading uses it through knowledge-document.css). The
+   caret and generated placeholder inherit it through BlockNote's --level. */
+.room-document-blocknote:not([data-knowledge-presentation]) .bn-editor {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.room-document-blocknote:not([data-knowledge-presentation])
+  .bn-editor
+  .bn-block-content[data-content-type="heading"] {
+  --level: 16px;
+  font-weight: 580;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.room-document-blocknote:not([data-knowledge-presentation])
+  .bn-editor
+  .bn-block-content[data-content-type="heading"]:is(
+    [data-level="1"],
+    :not([data-level])
+  ) {
+  --level: 26px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.room-document-blocknote:not([data-knowledge-presentation])
+  .bn-editor
+  .bn-block-content[data-content-type="heading"][data-level="2"] {
+  --level: 22px;
+  line-height: 1.35;
+}
+
+.room-document-blocknote:not([data-knowledge-presentation])
+  .bn-editor
+  .bn-block-content[data-content-type="heading"][data-level="3"] {
+  --level: 18px;
+  line-height: 1.4;
+}
+
+.room-document-blocknote:not([data-knowledge-presentation])
+  .bn-editor
+  .bn-block-content[data-content-type="heading"]
+  :is(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--level);
+  /* Set on the tag: BlockNote's first-block heading rule would win as 700. */
+  font-weight: 580;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
+.room-document-blocknote:not([data-knowledge-presentation])
+  .bn-editor
+  .bn-block-content[data-content-type="heading"]
+  h1 {
+  font-weight: 640;
+}
+
+.room-document-blocknote__view--read-only
+  .bn-block-content:has(.ProseMirror-trailingBreak:only-child)::after {
+  content: "" !important;
+}
+
+.room-document-comments-control {
+  position: static;
+  z-index: 25;
+}
+
+.room-document-comments-trigger {
+  position: absolute;
+  top: 4px;
+  left: calc(100% + 16px);
+  display: inline-flex;
+  min-width: 48px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  appearance: none;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-surface);
+  color: var(--app-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--app-floating-shadow);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.room-document-comments-trigger:hover,
+.room-document-comments-trigger[aria-expanded="true"] {
+  border-color: var(--app-border-strong);
+  background: var(--app-hover);
+  color: var(--app-ink);
+}
+
+.room-document-comments-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.room-document-comments-popover {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 16px);
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(680px, calc(100vh - 150px));
+  overflow-y: auto;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  box-shadow: var(--app-floating-shadow);
+}
+
+.room-document-comments-portal > .room-document-comments-popover {
+  position: static;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  max-height: none;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--app-surface);
+}
+
+@media (min-width: 1024px) {
+  /* The page layout owns the visible scrollbar. Keep the document lane in the
+     outer scroll flow and pin the comments surface to the reading viewport. */
+  [data-document-scroll-layout][data-document-comment-lane="true"] {
+    overflow-y: auto !important;
+  }
+
+  [data-document-scroll-layout][data-document-comment-lane="true"]
+    > .room-document-columns {
+    min-height: max-content;
+    overflow: visible !important;
+  }
+
+  [data-document-comment-lane="true"] [data-document-scroll-container] {
+    flex: 1 1 0%;
+    width: auto;
+    min-width: 0;
+    min-height: 100%;
+    height: max-content;
+    overflow: visible !important;
+  }
+
+  [data-document-comment-lane="true"] .room-document-comments-portal {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+
+.room-document-comments-portal .room-document-comments-heading {
+  flex-shrink: 0;
+  min-height: 52px;
+  padding: 16px 8px 8px 12px;
+}
+
+.room-document-comments-portal .room-document-comments-heading h3 {
+  font-size: 0.875rem;
+}
+
+.room-document-comments-portal .bn-threads-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px 24px;
+}
+
+/* Separate scroll extents let dense comments keep moving at document edges. */
+.room-document-comments-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-anchor: none;
+  overscroll-behavior: contain;
+  /* Keep Comments wheel and anchor scrolling functional without showing a
+     second scrollbar beside the outer document scrollbar. */
+  scrollbar-width: none !important;
+  scrollbar-color: transparent transparent !important;
+  -ms-overflow-style: none;
+}
+
+.room-document-comments-scroll::-webkit-scrollbar,
+.room-document-comments-scroll:hover::-webkit-scrollbar,
+.room-document-comments-scroll:focus-within::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none;
+}
+
+.bn-threads-sidebar[data-anchored="true"] {
+  position: relative;
+  display: block;
+  padding-bottom: 0;
+  overflow: visible;
+}
+
+.bn-threads-sidebar[data-anchored="true"] > [data-comment-card] {
+  position: absolute;
+  top: 0;
+  right: 12px;
+  left: 12px;
+}
+
+.room-document-selected-comment-popover {
+  width: min(360px, calc(100vw - 32px));
+}
+
+.room-document-selected-comment-popover .room-document-comment-thread {
+  margin: 0;
+  box-shadow: var(--app-floating-shadow);
+}
+
+.room-document-comments-popover .room-document-comment-thread {
+  margin: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.room-document-comments-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--app-surface);
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 6px 10px;
+}
+
+.room-document-comments-heading h3 {
+  margin: 0;
+  color: var(--app-ink);
+  font-size: 0.875rem;
+  font-weight: 580;
+}
+
+.room-document-comments-popover [role="alert"],
+.room-document-selected-comment-popover [role="alert"] {
+  margin: 8px 0 0;
+  color: var(--app-danger);
+  font-size: 0.75rem;
+}
+
+.room-document-comment-mention {
+  border-radius: 4px;
+  background: var(--app-card-info-surface);
+  color: var(--app-card-info-text);
+  padding: 1px 3px;
+}
+
+.room-document-comment-composer {
+  min-width: 0;
+  width: 100%;
+}
+/* Fit the Room picker to the narrower comment composer so focusing an
+   option cannot horizontally scroll the comment container. */
+.room-document-comment-composer .message-mention-menu {
+  width: 100%;
+}
+
+/* The draft reads as the card it is about to become: same shell, same quoted
+   reference, with only the active marker to say it is not posted yet. */
+.room-document-pending-comment {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  padding: 8px;
+}
+
+.room-document-pending-comment .room-document-comment-reference {
+  cursor: default;
+}
+
+.room-document-comment-thread {
+  position: relative;
+  margin-bottom: 0;
+  overflow: visible;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  box-shadow: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.room-document-comment-thread[data-selected="true"] {
+  border-color: var(--app-border-interactive);
+  box-shadow: var(--app-floating-shadow);
+}
+
+.room-document-comment-thread-header,
+.room-document-comment-meta,
+.room-document-comment-actions {
+  display: flex;
+  align-items: center;
+}
+
+.room-document-comment-thread-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 8px 8px 0;
+}
+
+.room-document-comment-reference {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  background: var(--app-surface-soft);
+  color: var(--app-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  padding: 5px 7px;
+  text-align: left;
+}
+
+.room-document-comment-reference:hover {
+  background: var(--app-hover);
+  color: var(--app-ink);
+}
+
+.room-document-comment-reference:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--app-ring);
+}
+
+.room-document-comment-reference svg {
+  flex: 0 0 auto;
+  color: var(--app-info);
+}
+
+.room-document-comment-reference span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.room-document-comment-thread[data-orphaned="true"]
+  .room-document-comment-reference {
+  background: var(--app-surface-soft);
+  color: var(--app-muted);
+  font-style: italic;
+}
+
+.room-document-comment-list {
+  border-top: 0;
+}
+
+.room-document-comment-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 4px;
+  padding: 6px 8px;
+}
+
+.room-document-comment-row + .room-document-comment-row {
+  border-top: 0;
+}
+
+.room-document-comment-content {
+  min-width: 0;
+}
+
+.room-document-comment-meta {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 6px;
+  color: var(--app-subtle);
+  font-size: 0.75rem;
+  line-height: 16px;
+}
+
+.room-document-comment-meta strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--app-ink);
+  font-size: 0.875rem;
+  font-weight: 470;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.room-document-comment-body {
+  overflow-wrap: anywhere;
+  color: var(--app-body);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.room-document-comment-actions {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 1;
+  gap: 2px;
+  border-radius: 8px;
+  background: var(--app-surface);
+  box-shadow: 0 0 0 4px var(--app-surface);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+
+.room-document-comment-row:hover .room-document-comment-actions,
+.room-document-comment-row:focus-within .room-document-comment-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.room-document-comment-edit {
+  margin: 2px 0 0;
+}
+
+.room-document-comment-edit .message-composer-box[data-compact="true"] {
+  display: block;
+  min-height: 0;
+  border-radius: 10px;
+  padding: 6px 8px 8px;
+}
+
+.room-document-comment-edit
+  .message-composer-box[data-compact="true"]
+  > .message-composer-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 0;
+  margin-top: 8px;
+}
+
+.room-document-comment-edit .message-composer-confirm {
+  height: 26px;
+  border-radius: 999px;
+  padding-inline: 12px;
+  font-size: 0.75rem;
+}
+
+.room-document-comment-edit .message-composer-toolbar-right > button {
+  height: 26px;
+  font-size: 0.75rem;
+}
+
+.room-document-comment-edit .message-composer-box,
+.room-document-comment-composer .message-composer-box {
+  border: 0;
+  border-radius: 20px;
+  background: var(--app-hover);
+  padding: 4px 4px 4px 12px;
+  box-shadow: none;
+  min-height: 32px;
+  column-gap: 4px;
+}
+.room-document-comment-composer .message-composer-box:focus-within {
+  outline: 1px solid var(--app-border-interactive);
+}
+.room-document-comment-composer
+  .message-composer-box
+  > .message-composer-editor {
+  margin-block: 3px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.room-document-comment-composer .message-composer-input {
+  display: block;
+  align-self: stretch;
+}
+.room-document-comment-reply {
+  padding: 8px;
+}
+
+/* Anchored cards create stacking contexts; the active picker's entire menu
+   must sit above neighbouring cards as well as outside its own card. */
+.bn-threads-sidebar > [data-comment-card]:focus-within {
+  z-index: 2;
+}
+
+.room-document-comment-composer .message-composer-send,
+.room-document-comment-reply .message-composer-send {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  margin: 0;
+  background: var(--composer-send);
+}
+
+.room-document-comment-composer .message-composer-send::before {
+  content: none;
+}
+
+.room-document-comment-composer .message-composer-send:disabled {
+  background: var(--app-subtle);
+}
+
+.room-document-comment-composer .message-composer-send svg,
+.room-document-comment-reply .message-composer-send svg {
+  width: 12px;
+  height: 12px;
+}
+
+.room-document-blocknote .bn-container,
+.room-document-blocknote .bn-editor {
+  background: transparent;
+  font-family: inherit;
+}
+
+.room-document-blocknote .bn-editor {
+  min-height: 420px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.room-document-blocknote .bn-editor a {
+  color: var(--app-link);
+  text-decoration-line: none;
+  text-underline-offset: 3px;
+}
+
+.room-document-blocknote .bn-editor a:hover {
+  text-decoration-line: underline;
+}
+
+.room-document-blocknote .bn-editor ::selection {
+  background: color-mix(in srgb, var(--app-link) 22%, transparent);
+}
+
+.room-document-blocknote .bn-thread-mark:not([data-orphan="true"]) {
+  border-radius: 3px;
+  background: color-mix(
+    in srgb,
+    var(--app-comment-highlight) 32%,
+    var(--app-surface)
+  );
+  box-shadow: inset 0 -2px 0 0
+    color-mix(in srgb, var(--app-comment-highlight) 70%, transparent);
+  box-decoration-break: clone;
+  cursor: pointer;
+}
+
+.room-document-blocknote .bn-thread-mark-selected,
+.room-document-blocknote
+  .bn-thread-mark:not([data-orphan="true"]).bn-thread-mark-selected {
+  background: color-mix(
+    in srgb,
+    var(--app-comment-highlight) 62%,
+    var(--app-surface)
+  );
+  box-shadow: inset 0 -2px 0 0 var(--app-comment-highlight);
+}
+
+.room-document-blocknote .bn-collaboration-cursor__caret {
+  z-index: 3;
+  width: 3px;
+}
+
+.room-document-blocknote .bn-collaboration-cursor__label {
+  border-radius: 3px 3px 3px 0;
+  box-shadow: var(--app-floating-shadow);
+  letter-spacing: 0;
+}
+
+.room-document-blocknote .bn-collaboration-cursor__label::before {
+  content: attr(data-collaborator-name);
+}
+
+.room-document-blocknote .bn-collaboration-cursor__caret {
+  position: relative;
+  width: 1px;
+  margin-inline: -1px;
+}
+
+.room-document-blocknote .bn-collaboration-cursor__label {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 2;
+  min-width: max-content;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 580;
+  line-height: 14px;
+  pointer-events: none;
+}
+
+.room-document-blocknote .ProseMirror-yjs-selection {
+  border-radius: 0;
+  box-decoration-break: clone;
+}
+
+.room-document-blocknote .room-document-reference {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  color: var(--app-link);
+  font-weight: 470;
+  text-decoration: none;
+  text-underline-offset: 0.16em;
+}
+
+.room-document-blocknote .room-document-reference:hover {
+  text-decoration: underline;
+}
+
+.room-document-blocknote .room-document-reference svg {
+  flex: none;
+  align-self: center;
+}
+
+@media (max-width: 63.999rem) {
+  body:has(.room-document-comments-portal:not(.hidden)) .bn-formatting-toolbar {
+    display: none;
+  }
+}
+
+@media (pointer: coarse), (max-width: 48rem) {
+  .room-document-comment-composer .message-composer-send {
+    width: 44px;
+    height: 44px;
+  }
+
+  .room-document-comment-composer
+    .message-composer-box
+    > .message-composer-editor {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .room-document-comment-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 40rem) {
+  .room-document-comments-control {
+    position: static;
+  }
+
+  .room-document-comments-trigger {
+    top: 0;
+    right: 0;
+    left: auto;
+  }
+
+  .room-document-comments-popover {
+    position: fixed;
+    top: 108px;
+    right: 12px;
+    bottom: 12px;
+    left: 50%;
+    width: calc(100vw - 24px);
+    max-height: none;
+    transform: translateX(-50%);
+  }
+
+  .room-document-comments-portal > .room-document-comments-popover {
+    position: static;
+    width: 100%;
+    height: 100%;
+    transform: none;
+  }
+
+  .room-document-empty-state {
+    top: 56px;
+  }
+
+  .room-document-empty-state p {
+    font-size: 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-document-comment-thread,
+  .room-document-comments-trigger,
+  .room-document-comment-actions,
+  .room-document-comment-edit .message-composer-box,
+  .room-document-comment-composer .message-composer-box,
+  .room-document-comment-reply .message-composer-box {
+    transition: none;
+  }
+}
+
+/* Keep wheel/trackpad momentum inside the slash menu at either boundary. */
+.room-document-slash-popover .bn-suggestion-menu {
+  overscroll-behavior-y: contain;
+}
+
+/* The menu is a flex column capped to the space beside the caret; without this
+   its rows shrink to fractional heights and the last pixel cannot be scrolled. */
+.room-document-slash-popover .bn-suggestion-menu > * {
+  flex-shrink: 0;
+}
+
+.room-document-header-actions > button {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+}
+.room-document-header-actions > .room-document-mode-trigger {
+  width: auto;
+  height: 32px;
+  margin-left: 8px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-weight: 470;
+}
+.room-document-header-actions > [role="status"] {
+  margin-right: 8px;
+}
+
+/* Match the active text's highlight without clipping mention menus. An inset
+   edge follows the card's rounded border, so it cannot bleed past the corners
+   the way an overlaid bar did. */
+[data-comment-card][data-comment-active="true"] {
+  box-shadow: inset 0 4px 0 0 var(--app-comment-highlight);
+}
+
+.room-document-comment-thread[data-selected="true"][data-comment-active="true"] {
+  box-shadow:
+    inset 0 4px 0 0 var(--app-comment-highlight),
+    var(--app-floating-shadow);
+}
+
+.bn-root.room-document-blocknote__view {
+  --bn-colors-editor-text: var(--app-ink);
+  --bn-colors-editor-background: transparent;
+  --bn-colors-menu-text: var(--app-ink);
+  --bn-colors-menu-background: hsl(var(--town-popover));
+  --bn-colors-tooltip-text: hsl(var(--town-primary-foreground));
+  --bn-colors-tooltip-background: hsl(var(--town-primary));
+  --bn-colors-hovered-text: var(--app-ink);
+  --bn-colors-hovered-background: hsl(var(--town-accent));
+  --bn-colors-selected-text: hsl(var(--town-primary-foreground));
+  --bn-colors-selected-background: hsl(var(--town-primary));
+  --bn-colors-disabled-text: var(--app-subtle);
+  --bn-colors-disabled-background: hsl(var(--town-muted));
+  --bn-colors-shadow: hsl(var(--town-foreground) / 0.08);
+  --bn-colors-border: hsl(var(--town-border));
+  --bn-colors-side-menu: var(--app-subtle);
+  --bn-font-family: var(--app-font-sans);
+  --bn-border-radius: 6px;
+  --bn-shadow-medium: var(--town-shadow-md);
+  --bn-shadow-light: var(--town-shadow-sm);
+}
+
+.room-document-blocknote .bn-editor [data-content-type="table"] :is(th, td) {
+  border-color: hsl(var(--town-border));
+}
+
+.room-document-blocknote .bn-editor [data-content-type="quote"] blockquote {
+  border-left-color: hsl(var(--town-border-hover));
+  color: var(--app-muted);
+}
+
+.room-document-blocknote .bn-editor [data-content-type="divider"] hr {
+  border-top-color: hsl(var(--town-border));
+}
+
+/* Inline code reads in the body font; code blocks stay monospace. */
+.room-document-blocknote .bn-editor .bn-inline-content code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: hsl(var(--town-muted));
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Space consecutive paragraphs; list items and headings keep their own rhythm. */
+.room-document-blocknote
+  .bn-block-outer:has(
+    > .bn-block > .bn-block-content[data-content-type="paragraph"]
+  )
+  + .bn-block-outer:not(.knowledge-change-log-entry):has(
+    > .bn-block > .bn-block-content[data-content-type="paragraph"]
+  ) {
+  margin-top: 0.75em;
+}

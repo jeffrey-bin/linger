@@ -1,0 +1,23 @@
+components:
+  schemas:
+    CancelAgentRunRequest:
+      type: object
+      additionalProperties: false
+      required: [request_id, run_id]
+      properties:
+        context_ref:
+          $ref: "./agent-runtime-state.yaml#/components/schemas/AgentRuntimeContextRef"
+        request_id:
+          $ref: "./common.yaml#/components/schemas/IdempotencyKey"
+        run_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    CancelAgentRunResult:
+      type: object
+      additionalProperties: false
+      required: [run_id, status]
+      properties:
+        run_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          enum: [cancel_requested, canceled, already_terminal]

@@ -1,0 +1,388 @@
+/* Encyclopedia-style reading layout for the Personal Wiki Profile only. */
+
+/* No overflow clipping: Sources tooltips may extend past the box. */
+.wiki-profile-infobox {
+  border: 1px solid hsl(var(--town-border));
+  border-radius: 12px;
+  background: var(--app-surface);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+.wiki-profile-infobox-title {
+  padding: 10px 16px;
+  border-radius: 11px 11px 0 0;
+  background: var(--app-surface);
+  color: hsl(var(--town-foreground));
+  font-size: 14px;
+  font-weight: 580;
+  text-align: center;
+}
+
+.wiki-profile-infobox-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 16px;
+  border-top: 1px solid hsl(var(--town-border));
+}
+
+.wiki-profile-infobox-row dt {
+  color: hsl(var(--town-muted-foreground));
+  font-weight: 470;
+}
+
+.wiki-profile-infobox-row dd {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  color: var(--app-body);
+}
+
+/* The logo stack outgrows the value column, so Sources takes the full card
+   width under its label and wraps when there are more sources. */
+.wiki-profile-infobox-row:has(> dd.wiki-profile-sources) {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.wiki-profile-infobox-row dd.wiki-profile-sources {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  padding-left: 2px;
+  white-space: normal;
+}
+
+.wiki-profile-sources > ul {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.wiki-profile-sources-label {
+  position: relative;
+  cursor: help;
+}
+
+/* Overlapping logo stack; a hovered or focused logo lifts above its neighbors. */
+.wiki-profile-source {
+  position: relative;
+  margin-left: -6px;
+}
+
+.wiki-profile-source:first-child {
+  margin-left: 0;
+}
+
+.wiki-profile-source:is(:hover, :focus-within) {
+  z-index: 3;
+}
+
+.wiki-profile-source-chip {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--app-surface);
+  box-shadow:
+    0 0 0 2px var(--app-surface),
+    inset 0 0 0 1px hsl(var(--town-border));
+  transition: transform 150ms ease;
+}
+
+.wiki-profile-source:is(:hover, :focus-within) .wiki-profile-source-chip {
+  transform: translateY(-2px) scale(1.1);
+}
+
+.wiki-profile-source-chip:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.wiki-profile-source-tip {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  z-index: 20;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--app-ink);
+  color: var(--app-surface);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 150ms ease;
+  visibility: hidden;
+}
+
+.wiki-profile-sources-label > .wiki-profile-source-tip {
+  left: 0;
+  transform: none;
+}
+
+.wiki-profile-source:is(:hover, :focus-within) > .wiki-profile-source-tip,
+.wiki-profile-sources-label:hover > .wiki-profile-source-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.wiki-profile-body .read-only-blocknote-document {
+  max-width: none;
+  min-height: 0;
+  padding: 0;
+}
+
+.wiki-profile-body [data-knowledge-presentation] .bn-container .bn-editor {
+  font-size: 15px;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+/* Section headings read as article sections, clearly apart from body text. */
+.wiki-profile-body [data-knowledge-presentation] .bn-editor :is(h1, h2) {
+  /* BlockNote lays headings out as flex items; span the rule across the column. */
+  flex: 1;
+  margin-top: 20px;
+  margin-bottom: 6px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid hsl(var(--town-border));
+  font-size: 20px;
+  font-weight: 580;
+  letter-spacing: -0.4px;
+  line-height: 1.4;
+}
+
+/* Each module is its own document, so its heading is a first block and loses
+   the top margin; restore it for every module after the first. */
+.wiki-profile-article
+  .read-only-blocknote-document
+  ~ .read-only-blocknote-document
+  .bn-editor
+  > .bn-block-group
+  > .bn-block-outer:first-child
+  :is(h1, h2) {
+  margin-top: 20px;
+}
+
+/* Sub-points inside a module: smaller and bold, so they never read as a module. */
+.wiki-profile-body [data-knowledge-presentation] .bn-editor h3 {
+  margin-top: 14px;
+  margin-bottom: 2px;
+  color: var(--app-ink);
+  font-size: 16px;
+  font-weight: 580;
+  letter-spacing: -0.2px;
+  line-height: 1.45;
+}
+
+.wiki-profile-body [data-knowledge-presentation] .bn-editor :is(h4, h5, h6) {
+  margin-top: 10px;
+  margin-bottom: 0;
+  color: var(--app-ink);
+  font-size: 15px;
+  font-weight: 580;
+  line-height: 1.5;
+}
+
+/* Background timeline: a thin rail with one dot per entry. */
+/* Background timeline: a résumé grid. The period sits in its own column on the
+   organization's line; every line inside an entry keeps one 24px pitch, and
+   hierarchy comes from weight, size and the two text colors only. */
+.wiki-profile-timeline {
+  margin: 20px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.wiki-profile-timeline-entry {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  column-gap: 20px;
+  padding: 16px 0;
+  border-top: 1px solid hsl(var(--town-border));
+}
+
+.wiki-profile-timeline-entry:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.wiki-profile-timeline-entry:last-child {
+  padding-bottom: 0;
+}
+
+.wiki-profile-timeline-period {
+  color: var(--app-muted);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  line-height: 24px;
+  white-space: nowrap;
+}
+
+.wiki-profile-timeline-organization {
+  margin: 0;
+  color: var(--app-ink);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.wiki-profile-timeline-place {
+  color: var(--app-muted);
+  font-weight: 400;
+}
+
+.wiki-profile-timeline-role {
+  margin: 0;
+  color: var(--app-ink);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.wiki-profile-timeline-detail {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.wiki-profile-timeline-highlights {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--app-muted);
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.wiki-profile-timeline-highlights li {
+  position: relative;
+  padding-left: 14px;
+}
+
+.wiki-profile-timeline-highlights li::before {
+  position: absolute;
+  top: 10px;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+  content: "";
+}
+
+/* Phones: the period moves above the organization on its own line. */
+@media (max-width: 40rem) {
+  .wiki-profile-timeline-entry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Below the two-column layout: a compact infobox with the avatar beside the
+   fields, and the article kept to a readable line length. */
+@media (max-width: 79.999rem) {
+  .wiki-profile-infobox {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+    max-width: 720px;
+    padding: 14px 16px;
+  }
+
+  .wiki-profile-infobox-avatar {
+    grid-row: 1 / span 2;
+    padding: 0;
+  }
+
+  .wiki-profile-infobox-avatar img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .wiki-profile-infobox-title {
+    grid-column: 2;
+    padding: 0 0 4px;
+    background: none;
+    text-align: left;
+  }
+
+  .wiki-profile-infobox dl {
+    grid-column: 2;
+  }
+
+  .wiki-profile-infobox-row {
+    padding: 3px 0;
+    border-top: 0;
+  }
+
+  .wiki-profile-body {
+    max-width: 720px;
+  }
+}
+
+/* Phones: the avatar column leaves too little width beside the labels, so each
+   label sits above its value. */
+@media (max-width: 40rem) {
+  .wiki-profile-infobox-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* Edit: the whole Profile as one Markdown text. */
+.wiki-profile-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wiki-profile-edit-hint {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.wiki-profile-edit-hint code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: hsl(var(--town-muted));
+  font-family: var(--app-font-mono);
+  font-size: 12px;
+}
+
+.wiki-profile-edit-markdown {
+  min-height: max(480px, calc(100vh - 260px));
+  padding: 16px;
+  resize: vertical;
+  font-family: var(--app-font-mono);
+  font-size: 13px;
+  line-height: 22px;
+  tab-size: 2;
+}
+
+/* Save stays in reach at the bottom of the reading column. */
+.wiki-profile-edit-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0 16px;
+  border-top: 1px solid hsl(var(--town-border));
+  background: hsl(var(--town-background));
+}
+
+.wiki-profile-edit-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

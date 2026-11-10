@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // The typecheck script checks the full project; emitting skips it.
+    "noCheck": true,
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts"]
+}

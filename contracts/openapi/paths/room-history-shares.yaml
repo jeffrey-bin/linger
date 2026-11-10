@@ -1,0 +1,177 @@
+manage:
+  parameters:
+    - { name: roomId, in: path, required: true, schema: { type: string } }
+  get:
+    tags: [Rooms]
+    operationId: listRoomHistoryShares
+    responses:
+      "200":
+        description: Success.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/room-history-shares.yaml#/components/schemas/RoomHistorySharePage",
+              }
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+create:
+  parameters:
+    - { name: roomId, in: path, required: true, schema: { type: string } }
+  post:
+    tags: [Rooms]
+    operationId: createRoomHistoryShare
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/room-history-shares.yaml#/components/schemas/CreateRoomHistoryShare",
+            }
+    responses:
+      "201":
+        description: Success.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/room-history-shares.yaml#/components/schemas/RoomHistoryShare",
+              }
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+      "413": { description: Snapshot exceeds 10000 messages or 100 MB. }
+revoke:
+  parameters:
+    - { name: roomId, in: path, required: true, schema: { type: string } }
+    - { name: shareId, in: path, required: true, schema: { type: string } }
+  delete:
+    tags: [Rooms]
+    operationId: revokeRoomHistoryShare
+    responses:
+      "204":
+        description: Success.
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+link:
+  parameters:
+    - { name: roomId, in: path, required: true, schema: { type: string } }
+    - { name: shareId, in: path, required: true, schema: { type: string } }
+  post:
+    tags: [Rooms]
+    operationId: issueRoomHistoryShareLink
+    summary: Issue a fresh link for an existing immutable snapshot.
+    responses:
+      "200":
+        description: A fresh link for the same snapshot.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/room-history-shares.yaml#/components/schemas/RoomHistoryShare",
+              }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+read:
+  post:
+    tags: [Rooms]
+    operationId: readRoomHistoryShare
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/room-history-shares.yaml#/components/schemas/ReadRoomHistoryShare",
+            }
+    responses:
+      "200":
+        description: Success.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/room-history-shares.yaml#/components/schemas/RoomHistorySnapshot",
+              }
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+asset:
+  post:
+    tags: [Rooms]
+    operationId: readRoomHistoryShareAsset
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/room-history-shares.yaml#/components/schemas/ReadRoomHistoryShare",
+            }
+    responses:
+      "200":
+        description: Success.
+        content:
+          application/octet-stream:
+            schema: { type: string, format: binary }
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }

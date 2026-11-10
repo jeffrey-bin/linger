@@ -1,0 +1,45 @@
+name: teamhub
+
+services:
+  postgres:
+    image: "pgvector/pgvector:0.8.6-pg17-bookworm@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f"
+    environment:
+      POSTGRES_DB: teamhub
+      POSTGRES_USER: teamhub
+      POSTGRES_PASSWORD: teamhub
+    ports:
+      - "127.0.0.1:${TEAMHUB_POSTGRES_PORT:-54339}:5432"
+    volumes:
+      - teamhub-postgres:/var/lib/postgresql/data
+      - ../../../../.linger-runtime/postgres-logs/teamhub:/var/log/postgresql
+    entrypoint:
+      - bash
+      - -c
+      - mkdir -p /var/log/postgresql && chown postgres:postgres /var/log/postgresql && exec docker-entrypoint.sh "$$@"
+      - --
+    command:
+      - postgres
+      # OLTP queries gain nothing from JIT, and a backend that JIT-compiles once
+      # keeps LLVM loaded until it exits.
+      - -c
+      - jit=off
+      - -c
+      - log_lock_waits=on
+      - -c
+      - logging_collector=on
+      - -c
+      - log_directory=/var/log/postgresql
+      - -c
+      - log_filename=postgresql-%Y-%m-%d_%H%M%S.log
+      - -c
+      - log_truncate_on_rotation=off
+      - -c
+      - log_error_verbosity=verbose
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teamhub -d teamhub"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  teamhub-postgres:

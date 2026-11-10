@@ -1,0 +1,154 @@
+components:
+  schemas:
+    AgentApiErrorCode:
+      type: string
+      description: Stable machine-readable failure classification.
+      enum:
+        - invalid_request
+        - invalid_input
+        - artifact_reference_invalid
+        - team_md_document_invalid
+        - unauthenticated
+        - forbidden
+        - not_found
+        - version_conflict
+        - artifact_path_conflict
+        - artifact_version_conflict
+        - agent_credential_invalid
+        - operation_forbidden
+        - agent_limit_reached
+        - context_identity_invalid
+        - agent_configuration_updating
+        - idempotency_conflict
+        - profile_revision_conflict
+        - profile_document_invalid
+        - profile_module_empty
+        - payload_too_large
+        - task_finish_conflict
+        - task_limit_reached
+        - connection_not_found
+        - connection_not_active
+        - app_not_connected
+        - provider_key_required
+        - tool_not_found
+        - invalid_tool_arguments
+        - provider_auth_failed
+        - provider_rate_limited
+        - provider_unavailable
+        - tool_execution_failed
+        - incomplete_response
+        - dependency_unavailable
+        - internal_error
+    AgentApiErrorIssue:
+      type: object
+      description: One model-safe validation issue.
+      additionalProperties: false
+      required:
+        - path
+        - code
+        - message
+      properties:
+        path:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        code:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{0,127}$
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1024
+    AgentApiError:
+      type: object
+      description: Safe error detail returned by the TeamHub Agent API.
+      additionalProperties: false
+      required:
+        - code
+        - message
+        - request_id
+      properties:
+        code:
+          $ref: "#/components/schemas/AgentApiErrorCode"
+        message:
+          type: string
+          description: Human-readable failure summary containing no credential material.
+          minLength: 1
+          maxLength: 1024
+        request_id:
+          type: string
+          description: Correlation identifier safe to include in logs and support reports.
+          minLength: 1
+          maxLength: 128
+          pattern: ^[A-Za-z0-9._:-]+$
+        issues:
+          type: array
+          description: Safe field-level validation issues, when the failure has actionable paths.
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentApiErrorIssue"
+    AgentApiErrorEnvelope:
+      type: object
+      description: Standard failure envelope for every TeamHub Agent API operation.
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/AgentApiError"
+  responses:
+    BadRequest:
+      description: The request does not satisfy the operation contract.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    Unauthenticated:
+      description: The Agent credential is missing, invalid or expired.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    Forbidden:
+      description: The Agent is not allowed to perform the operation on the target.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    NotFound:
+      description: The requested resource does not exist or is not visible to the Agent.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    Conflict:
+      description: The request conflicts with current state or an earlier request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    PayloadTooLarge:
+      description: The request payload exceeds the operation limit.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    InternalError:
+      description: The TeamHub Agent API operation could not be completed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    ServiceUnavailable:
+      description: A required TeamHub dependency is temporarily unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"
+    TooManyRequests:
+      description: A connected application Provider rejected a pre-dispatch request due to rate limiting.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AgentApiErrorEnvelope"

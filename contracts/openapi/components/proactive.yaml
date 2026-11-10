@@ -1,0 +1,72 @@
+components:
+  schemas:
+    ProactiveWindowMessage:
+      type: object
+      additionalProperties: false
+      required: [id, author, text, created_at]
+      properties:
+        id: { type: string }
+        author: { type: string, enum: [human, agent] }
+        text: { type: string }
+        created_at: { type: string, format: date-time }
+    ProactiveGuideline:
+      type: object
+      additionalProperties: false
+      required: [version, threshold, specific]
+      properties:
+        version: { type: integer }
+        threshold: { type: number, minimum: 0, maximum: 1 }
+        specific:
+          type: array
+          items: { type: string }
+    ProactiveOpenItem:
+      type: object
+      additionalProperties: false
+      required: [id, kind, content]
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        content: { type: string }
+        due_at: { type: string, format: date-time }
+    ProactiveWindow:
+      type: object
+      additionalProperties: false
+      required: [judged_count, messages, guideline, open_items]
+      properties:
+        judged_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Ordinary messages judged before this window; pass it back to finish the window. A window holds twenty messages unless TeamHub runs with a smaller test window.
+        messages:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { $ref: "#/components/schemas/ProactiveWindowMessage" }
+        guideline: { $ref: "#/components/schemas/ProactiveGuideline" }
+        open_items:
+          type: array
+          items: { $ref: "#/components/schemas/ProactiveOpenItem" }
+    ProactiveWindowResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        window:
+          $ref: "#/components/schemas/ProactiveWindow"
+          description: Absent until twenty new ordinary messages exist.
+    ProactiveWindowFinishRequest:
+      type: object
+      additionalProperties: false
+      required: [judged_count]
+      properties:
+        judged_count: { type: integer, format: int64, minimum: 0 }
+    ProactiveWakeRequest:
+      type: object
+      additionalProperties: false
+      required: [body]
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 20000
+          description: Hidden wake text after the @AnotherMe reference. It goes out once the Room is quiet for three minutes.

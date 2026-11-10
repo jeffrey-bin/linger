@@ -1,0 +1,39 @@
+{
+  "agent_id": "agent-1",
+  "assignment_revision": 1,
+  "connection_epoch": 7,
+  "context_view_ref": {
+    "view_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "error": {
+    "code": "RUNTIME_EXECUTION_FAILED",
+    "diagnostics": {
+      "code": "httpConnectionFailed",
+      "statusCode": 429,
+      "exitCode": 3,
+      "signal": "SIGSEGV"
+    },
+    "failure": {
+      "code": "rate_limited",
+      "runtime_type": "codex"
+    },
+    "message": "Runtime execution failed",
+    "retryable": false
+  },
+  "execution_context_key": "context-1",
+  "execution_lease_id": "lease-1",
+  "generation": 1,
+  "operation_id": "op-diag",
+  "protocol_version": "2",
+  "registration_id": "reg-1",
+  "runner_id": "computer-1",
+  "runner_revision": 1,
+  "runtime_instance_id": "runtime-1",
+  "runtime_type": "codex",
+  "seq": 2,
+  "stage": "runtime_execution",
+  "tenant_id": "tenant-1",
+  "type": "operation.failed",
+  "workspace_grant_id": "grant-1",
+  "host_access": "trusted"
+}

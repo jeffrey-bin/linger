@@ -1,0 +1,53 @@
+components:
+  schemas:
+    DocumentLinkShare:
+      type: object
+      additionalProperties: false
+      required: [id, document_id, role, status, version]
+      properties:
+        id: { type: string }
+        document_id: { type: string }
+        role:
+          type: string
+          enum: [viewer, editor]
+          x-enum-varnames:
+            [DocumentLinkShareRoleViewer, DocumentLinkShareRoleEditor]
+        status: { type: string, enum: [active, revoked] }
+        version: { type: integer, format: int64, minimum: 1 }
+        token:
+          type: string
+          description: Returned only on creation or reset. Never persisted as plaintext.
+        url:
+          type: string
+          format: uri
+          description: Public Web URL with the capability in its fragment; returned only with a new token.
+    SetDocumentLinkShare:
+      type: object
+      additionalProperties: false
+      required: [role, expected_version]
+      properties:
+        role: { type: string, enum: [viewer, editor] }
+        expected_version: { type: integer, format: int64, minimum: 0 }
+        reset: { type: boolean, default: false }
+    RevokeDocumentLinkShare:
+      type: object
+      additionalProperties: false
+      required: [expected_version]
+      properties:
+        expected_version: { type: integer, format: int64, minimum: 1 }
+    ResolveDocumentLinkShare:
+      type: object
+      additionalProperties: false
+      required: [token]
+      properties:
+        token: { type: string, minLength: 52, maxLength: 52 }
+    DocumentLinkAccess:
+      type: object
+      additionalProperties: false
+      required: [link_id, tenant_id, document_id, role, version]
+      properties:
+        link_id: { type: string }
+        tenant_id: { type: string }
+        document_id: { type: string }
+        role: { type: string, enum: [viewer, editor] }
+        version: { type: integer, format: int64, minimum: 1 }

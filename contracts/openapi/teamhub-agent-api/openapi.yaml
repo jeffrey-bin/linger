@@ -1,0 +1,1237 @@
+openapi: 3.1.0
+info:
+  title: Linger TeamHub Agent API
+  version: 0.5.0
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  description: >-
+    Direct Agent business APIs for the Agent CLI. Business operations use revocable Agent
+    identity credentials and current resource authority independently of runtime execution.
+servers:
+  - url: http://teamhub:8080
+tags:
+  - name: Agent Business API
+    description: TeamHub domain operations authorized by a revocable Agent identity credential.
+  - name: Agent Files
+    description: Actor-authorized explicit file downloads, publication and sharing through the Host CLI.
+paths:
+  /api/agent/v1/room-members/query:
+    $ref: "../paths/agent-context-reads.yaml#/roomMembers"
+  /api/agent/v1/team-md/query:
+    $ref: "../paths/agent-context-reads.yaml#/teamMd"
+  /api/agent/v1/messages/commit:
+    post:
+      operationId: commitAgentMessage
+      security: [{ agentBearer: [] }]
+      summary: Atomically commit one message and its prepared resources.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "../components/agent-message-send.yaml#/schemas/AgentMessageCommitMultipart"
+      responses:
+        "200":
+          description: One durable message and its exact resource receipts.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-message-send.yaml#/schemas/AgentMessageCommitResponse"
+        "400": { description: Invalid message or resource input }
+        "401": { description: Invalid Agent identity }
+        "403": { description: Operation is not permitted }
+        "409":
+          { description: Operation input conflicts with an earlier request }
+  /api/agent/v1/messages/read:
+    $ref: "../paths/agent-message-history.yaml#/read"
+  /api/agent/v1/messages/search:
+    $ref: "../paths/agent-message-history.yaml#/search"
+  /api/agent/v1/knowledge/search:
+    $ref: "../paths/agent-cli-capabilities.yaml#/knowledgeSearch"
+  /api/agent/v1/knowledge/read:
+    $ref: "../paths/agent-cli-capabilities.yaml#/knowledgeRead"
+  /api/agent/v1/personal-profile/query:
+    $ref: "../paths/agent-personal-profile.yaml#/personalProfileQuery"
+  /api/agent/v1/personal-profile/builds:
+    $ref: "../paths/agent-personal-profile.yaml#/personalProfileBuilds"
+  /api/agent/v1/personal-profile/revisions:
+    $ref: "../paths/agent-personal-profile.yaml#/personalProfileRevisions"
+  /api/agent/v1/account-profile/query:
+    $ref: "../paths/agent-personal-profile.yaml#/accountProfileQuery"
+  /api/agent/v1/account-profile/updates:
+    $ref: "../paths/agent-personal-profile.yaml#/accountProfileUpdates"
+  /api/agent/v1/tracking-items/list:
+    $ref: "../paths/tracking-items.yaml#/list"
+  /api/agent/v1/tracking-items/add:
+    $ref: "../paths/tracking-items.yaml#/add"
+  /api/agent/v1/tracking-items/update:
+    $ref: "../paths/tracking-items.yaml#/update"
+  /api/agent/v1/tracking-items/done:
+    $ref: "../paths/tracking-items.yaml#/done"
+  /api/agent/v1/skills/packages:
+    $ref: "../paths/agent-cli-capabilities.yaml#/skillPackage"
+  /api/agent/v1/skills/packages/{manifestId}:
+    $ref: "../paths/agent-cli-capabilities.yaml#/skillPackageDownload"
+  /api/agent/v1/document-semantic-mutations:
+    post:
+      tags: [Agent Business API]
+      operationId: applyAgentDocumentSemanticMutation
+      summary: Apply one semantic mutation to a current projected native Document
+      description: >-
+        Re-authorizes the Agent credential for the target Document and its stable projected
+        path. TeamHub derives and pins the exact current base Revision from persisted
+        authority.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 35000
+      x-max-request-body-bytes: 263168
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentSemanticMutationRequest"
+      responses:
+        "200":
+          description: Canonical applied or conflicted durable mutation result.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentSemanticMutationResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "413":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/PayloadTooLarge"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/document-comments/thread:
+    post:
+      tags: [Agent Business API]
+      operationId: getAgentDocumentCommentThread
+      summary: Read the active attached Document Comment Thread
+      description: >-
+        Re-authorizes the Agent credential for the Thread's Document and returns only latest
+        visible Comments and attached selection text.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCommentThreadRequest"
+      responses:
+        "200":
+          description: Narrow active Thread projection.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCommentThreadResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/document-comments/replies:
+    post:
+      tags: [Agent Business API]
+      operationId: replyAgentDocumentComment
+      summary: Reply to the active Document Comment Thread
+      description: >-
+        Re-authorizes the current Document Local Run and creates one idempotent Agent-authored
+        Comment. Agent-authored Comments do not generate Agent mention notifications.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCommentReplyRequest"
+      responses:
+        "200":
+          description: Durable Comment reply result.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCommentReplyResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/document-comments/text-replacements:
+    post:
+      tags: [Agent Business API]
+      operationId: replaceAgentDocumentCommentText
+      summary: Replace the text selected by the active Document Comment Thread
+      description: >-
+        Resolves the exact pinned Document Revision Input from trusted Context authority and
+        atomically commits the replacement Revision and History entry while preserving the
+        Thread's selection mark.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 35000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCommentTextReplacementRequest"
+      responses:
+        "200":
+          description: Canonical applied or conflicted replacement result.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCommentTextReplacementResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/documents:
+    post:
+      tags: [Agent Business API]
+      operationId: createAgentDocument
+      summary: Create one native Document through a canonical Context Generation
+      description: >-
+        Re-authorizes the Agent credential for the target and the trusted invocation.
+        TeamHub derives the Agent owner and the target from persisted authority.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 35000
+      x-max-request-body-bytes: 1052672
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCreateRequest"
+      responses:
+        "200":
+          description: Canonical durable Document creation result.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDocumentCreateResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "413":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/PayloadTooLarge"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/available-agents:
+    post:
+      tags: [Agent Business API]
+      operationId: listAvailableAgents
+      summary: List active General Agents authorized for the calling Agent's Sponsor
+      description: >-
+        Resolves the calling Agent and Tenant exclusively from the Agent credential,
+        re-authorizes list_available_agents, and derives the Human Sponsor from the active
+        Agent registration. It then applies that Human's current Agent-directory
+        visibility rules. Caller-supplied Human, Sponsor, Tenant, or Agent authority is
+        intentionally absent.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentListAvailableAgentsRequest"
+      responses:
+        "200":
+          description: One page of active General Agents authorized for the Sponsor Human.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentListAvailableAgentsResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/creation-approval-requests:
+    post:
+      tags: [Agent Business API]
+      operationId: submitAgentCreationApprovalRequest
+      summary: Submit one Room creation request for Human approval
+      description: >-
+        Resolves the Agent and Tenant exclusively from the Agent credential, re-authorizes
+        create_room in the caller's Room Context, and atomically stores the exact caller input
+        separately from the canonical effective payload. TeamHub revalidates every derived value before freezing
+        the immutable approval snapshot; caller identity is intentionally absent from the
+        request body.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoomCreationApprovalRequest"
+      responses:
+        "200":
+          description: The durable pending Creation approval request and active Manifest attestation.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCreationApprovalResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/tasks:
+    post:
+      tags: [Agent Business API]
+      operationId: createAgentTask
+      summary: Create and start one delegated Task for the calling Agent's own AlterEgo
+      description: >-
+        Resolves the Agent from the opaque Bearer token and the origin Room from the caller's
+        Room Context header, then creates the Task, its Work Room and execution generation in one
+        transaction and starts the AlterEgo immediately. No approval card is created. A Task
+        Context cannot create Tasks. An Agent may have at most 10 running Tasks.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCreateTaskRequest"
+      responses:
+        "200":
+          description: The created and running delegated Task.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCreateTaskResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/tasks/check:
+    post:
+      tags: [Agent Business API]
+      operationId: checkAgentTask
+      summary: Show one delegated Task, or list the Tasks this Room delegated
+      description: >-
+        Resolves the Agent from the opaque Bearer token and the Room from the caller's Room
+        Context header. Only the Meta of the Task's origin Room sees and manages a Task: a Task
+        of another Agent or another origin Room is reported as not found, and a Task Context
+        is forbidden.
+        Without task_id it lists at most 50 Tasks, newest first.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCheckTaskRequest"
+      responses:
+        "200":
+          description: The Task detail, or the Room's Task list.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCheckTaskResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/tasks/send:
+    post:
+      tags: [Agent Business API]
+      operationId: sendAgentTask
+      summary: Send one message to a delegated Task's AlterEgo
+      description: >-
+        Resolves the Agent from the opaque Bearer token and the Room from the caller's Room
+        Context header. Only the Meta of the Task's origin Room sees and manages a Task: a Task
+        of another Agent or another origin Room is reported as not found, and a Task Context
+        is forbidden.
+        An idle, waiting_for_approval, failed or canceled Task starts a new turn and runs; a
+        running Task gets the message as its next turn, or with steer asks to join the running
+        turn and falls back to the next turn when it cannot. Waking a Task counts toward the
+        Agent's 10 running Tasks.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendTaskRequest"
+      responses:
+        "200":
+          description: The accepted message and how it reaches the AlterEgo.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendTaskResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/tasks/stop:
+    post:
+      tags: [Agent Business API]
+      operationId: stopAgentTask
+      summary: Stop a delegated Task's current turn
+      description: >-
+        Resolves the Agent from the opaque Bearer token and the Room from the caller's Room
+        Context header. Only the Meta of the Task's origin Room sees and manages a Task: a Task
+        of another Agent or another origin Room is reported as not found, and a Task Context
+        is forbidden.
+        Cancels the current Run and leaves the Task canceled with reason stopped; its session and
+        playground stay, so task send resumes it.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentStopTaskRequest"
+      responses:
+        "200":
+          description: The canceled Task.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentStopTaskResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/direct-messages:
+    post:
+      tags: [Agent Business API]
+      operationId: sendAgentDirectMessage
+      summary: Send private messages to the calling Agent's Human sponsor
+      description: >-
+        Resolves Agent, Tenant, and Human sponsor exclusively from the Agent credential, and
+        atomically creates or reuses the unique private Direct Room before persisting every
+        message. The invocation_id is derived by the Agent CLI from its operation ID and
+        makes replays of the same command safe.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendDirectMessageRequest"
+      responses:
+        "200":
+          description: The accepted Direct Room messages and active Manifest attestation.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendDirectMessageResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/routines:
+    post:
+      tags: [Agent Business API]
+      operationId: createAgentRoutine
+      summary: Create a Routine in the current room
+      description: >-
+        Authorizes the active execution Context, binds the room from that Context,
+        and creates one Routine. The model cannot choose another room.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCreateRoutineRequest"
+      responses:
+        "200":
+          description: The created Routine and active Manifest attestation.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/routines/query:
+    post:
+      tags: [Agent Business API]
+      operationId: listAgentRoutines
+      summary: List Routines in the current room
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineCommandRequest"
+      responses:
+        "200":
+          description: Every Routine in the current room.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentListRoutinesResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/routines/pause:
+    post:
+      tags: [Agent Business API]
+      operationId: pauseAgentRoutine
+      summary: Pause a Routine in the current room
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineIdRequest"
+      responses:
+        "200":
+          description: The paused Routine.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/routines/enable:
+    post:
+      tags: [Agent Business API]
+      operationId: enableAgentRoutine
+      summary: Enable a Routine in the current room
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineIdRequest"
+      responses:
+        "200":
+          description: The enabled Routine.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/routines/run:
+    post:
+      tags: [Agent Business API]
+      operationId: runAgentRoutine
+      summary: Post a Routine message now without moving its next run
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineIdRequest"
+      responses:
+        "200":
+          description: The Routine after the immediate post.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/routines/deletion:
+    post:
+      tags: [Agent Business API]
+      operationId: deleteAgentRoutine
+      summary: Delete a Routine in the current room
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentRoutineIdRequest"
+      responses:
+        "200":
+          description: The deleted Routine id.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentDeleteRoutineResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/agents:
+    post:
+      tags: [Agent Business API]
+      operationId: createAgent
+      summary: Create a General Agent for the calling Agent's Sponsor
+      description: >-
+        Authorizes a meta Context of the calling Agent. In a Room that is not a Direct Room and that the Sponsor belongs to, TeamHub creates the Agent with the caller's Runtime and adds it to that Room. Otherwise it opens a confirmation card for the Sponsor and creates the Agent, in no Room, only after approval.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 60000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCreateAgentRequest"
+      responses:
+        "200":
+          description: The Agent was created, or a confirmation card is waiting for the Sponsor.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentAgentChangeResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/agents/get:
+    post:
+      tags: [Agent Business API]
+      operationId: getAgent
+      summary: Read one General Agent of the calling Agent's Sponsor
+      description: >-
+        Returns the current name, description, and complete prompt of one active General Agent that the calling Agent's Sponsor created.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentGetAgentRequest"
+      responses:
+        "200":
+          description: The Agent profile.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentAgentProfile"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/agents/updates:
+    post:
+      tags: [Agent Business API]
+      operationId: updateAgent
+      summary: Change one General Agent of the calling Agent's Sponsor
+      description: >-
+        Changes only the provided name, description, or prompt of the caller or of another active General Agent of the same Sponsor. TeamHub applies it now when the target is a current member of the caller's Room and still has the uninitialized prompt; otherwise it opens a confirmation card for the Sponsor. Applying never requires the target to be idle.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 15000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentUpdateAgentRequest"
+      responses:
+        "200":
+          description: The change was applied, or a confirmation card is waiting for the Sponsor.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentAgentChangeResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/room-members/add:
+    post:
+      tags: [Agent Business API]
+      operationId: addAgentRoomMember
+      summary: Add an existing Agent to the calling Agent's Room
+      description: >-
+        Authorizes a meta Context of the calling Agent in a Room. TeamHub adds the Agent
+        to that Room on behalf of the caller's Sponsor, exactly as the Sponsor could from
+        the Web: the Sponsor must be a member, a Direct Room or Thread never changes
+        members, and an Agent visible only to its Sponsor must be the Sponsor's own.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 15000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentAddRoomMemberRequest"
+      responses:
+        "200":
+          description: The Agent is a member of the Room.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentAddRoomMemberResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/presentation-sequences:
+    post:
+      tags: [Agent Business API]
+      operationId: sendAgentPresentationSequence
+      summary: Queue a Room-bound conversational message sequence
+      description: >-
+        Authorizes an AnotherMe Meta Context, verifies that the explicit Room is the
+        current Context Room, then persists one immediate and one or more delayed
+        user-visible message bubbles.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendPresentationSequenceRequest"
+      responses:
+        "200":
+          description: The accepted presentation sequence and active Manifest attestation.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendPresentationSequenceResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/emoji-reactions:
+    post:
+      tags: [Agent Business API]
+      operationId: sendAgentEmojiReaction
+      summary: Add one emoji Reaction to a visible Message
+      description: >-
+        Resolves the Agent from its Bearer credential, requires current membership in the
+        Message's Room (a Thread uses its parent Room), and adds one emoji Reaction from
+        the official library. Adding a Reaction the Agent already placed changes nothing,
+        so retries are safe. A Reaction is not a Message and never wakes anyone.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendEmojiReactionRequest"
+      responses:
+        "200":
+          description: The Reaction is present on the Message.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentSendEmojiReactionResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/user-questions:
+    post:
+      tags: [Agent Business API]
+      operationId: askAgentUser
+      summary: Post a question card for the Agent's sponsor in the current Room
+      description: >-
+        Resolves the Agent from its Bearer credential and posts a question card in its Context
+        Room for its sponsor, then returns at once with the pending card. A sponsor outside the
+        Room cannot be asked. The answer reaches the Agent later
+        as a hidden Message in that Room. A Task Context cannot ask; the same invocation_id
+        replays its card.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 10000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentAskUserRequest"
+      responses:
+        "200":
+          description: The question card is in the Room, waiting for its answer.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentAskUserResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/team-md:
+    post:
+      tags: [Agent Business API]
+      operationId: createAgentTeamMd
+      summary: Publish the collaboration protocol document for the current Room
+      description: >-
+        Resolves Agent, Tenant, and the Room-bound meta Context exclusively from the Agent
+        credential, parses the submitted teamMD document, and rejects the whole submission
+        unless the collaboration pattern is one of the declared values and every
+        Orchestrator and Team Member Actor is an active member of that Room. On acceptance
+        TeamHub replaces the Room's team.md, which Agents read through teamhub room
+        protocol, and persists one conversation Message that Mentions every Team Member so
+        each one wakes. Replays of the same command are safe.
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCreateTeamMdRequest"
+      responses:
+        "200":
+          description: The persisted team.md revision and the notified Team Members.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-collaboration.yaml#/components/schemas/AgentCreateTeamMdResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/computer/browser-connection:
+    $ref: "../paths/agent-browser-connection.yaml#/request"
+  /api/agent/v1/computer/permissions/status:
+    $ref: "../paths/agent-computer-permissions.yaml#/status"
+  /api/agent/v1/computer/permissions/request:
+    $ref: "../paths/agent-computer-permissions.yaml#/request"
+  /api/agent/v1/apps/tools/bind:
+    $ref: ../paths/agent-connector-cli.yaml#/bindings
+  /api/agent/v1/apps/account:
+    $ref: "../paths/agent-connector-cli.yaml#/account"
+  /api/agent/v1/apps/auto-reminders/list:
+    $ref: "../paths/agent-connector-cli.yaml#/autoRemindersList"
+  /api/agent/v1/apps/auto-reminders/set:
+    $ref: "../paths/agent-connector-cli.yaml#/autoRemindersSet"
+  /api/agent/v1/apps/notion-body:
+    $ref: ../paths/agent-connector-cli.yaml#/notionBody
+  /api/agent/v1/apps/mail-body:
+    $ref: "../paths/agent-connector-cli.yaml#/mailBody"
+  /api/agent/v1/apps/gmail/canvas-draft:
+    $ref: "../paths/agent-connector-cli.yaml#/gmailCanvasDraft"
+  /api/agent/v1/apps/files/upload-request:
+    $ref: "../paths/agent-connector-cli.yaml#/uploadRequest"
+  /api/agent/v1/apps/connections:
+    post:
+      tags: [Agent Business API]
+      operationId: listAgentConnectedApps
+      summary: List explicitly delegated connected applications for the current AnotherMe Context
+      security:
+        - agentBearer: []
+      x-deadline-ms: 5000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentListConnectedAppsRequest"
+      responses:
+        "200":
+          description: Active delegated connections plus the exact active Manifest attestation.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentListConnectedAppsResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/apps/tools/search:
+    post:
+      tags: [Agent Business API]
+      operationId: searchAgentConnectedAppTools
+      summary: Search Provider Tools available through explicitly delegated connections
+      security:
+        - agentBearer: []
+      x-deadline-ms: 30000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentSearchAppToolsRequest"
+      responses:
+        "200":
+          description: Sanitized Tool definitions available to the current AnotherMe Context.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentSearchAppToolsResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "429":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/TooManyRequests"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/apps/tools/execute:
+    post:
+      tags: [Agent Business API]
+      operationId: executeAgentConnectedAppTool
+      summary: Execute one pinned Provider Tool through an explicitly delegated connection
+      security:
+        - agentBearer: []
+      x-deadline-ms: 30000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentExecuteAppToolRequest"
+      responses:
+        "200":
+          description: Sanitized Provider Tool result, or the receipt of the confirmation card a write waits for.
+          content:
+            application/json:
+              schema:
+                $ref: "../components/agent-connected-apps.yaml#/components/schemas/AgentExecuteAppToolResponse"
+        "400":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+        "403":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+        "409":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+        "429":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/TooManyRequests"
+        "503":
+          $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+        default:
+          $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+  /api/agent/v1/files:
+    $ref: "../paths/agent-cli-public-files.yaml#/files"
+  /api/agent/v1/files/{documentId}/body:
+    $ref: "../paths/agent-cli-public-files.yaml#/replaceBody"
+  /api/agent/v1/files/{documentId}/content:
+    $ref: "../paths/agent-cli-public-files.yaml#/content"
+  /api/agent/v1/files/{documentId}/assets:
+    $ref: "../paths/agent-cli-public-files.yaml#/assets"
+  /api/agent/v1/files/{documentId}/assets/{assetId}/content:
+    $ref: "../paths/agent-cli-public-files.yaml#/assetContent"
+  /api/agent/v1/files/{documentId}/share:
+    $ref: "../paths/agent-cli-public-files.yaml#/share"
+  /api/agent/v1/files/{documentId}/link-share:
+    $ref: "../paths/agent-cli-public-files.yaml#/linkShare"
+components:
+  schemas:
+    AgentMessageCommitMetadata:
+      $ref: "../components/agent-message-send.yaml#/schemas/AgentMessageCommitMetadata"
+    AgentMessagePreparedSegment:
+      $ref: "../components/agent-message-send.yaml#/schemas/AgentMessagePreparedSegment"
+    AgentMessageResource:
+      $ref: "../components/agent-message-send.yaml#/schemas/AgentMessageResource"
+    AgentMessageDocumentResource:
+      $ref: "../components/agent-message-send.yaml#/schemas/AgentMessageDocumentResource"
+    AgentMessageTreeResource:
+      $ref: "../components/agent-message-send.yaml#/schemas/AgentMessageTreeResource"
+  securitySchemes:
+    agentBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: >-
+        Revocable stable Agent identity credential. Business resource targets do not
+        grant permissions and each operation rechecks current business authority.
+      x-service-audience: teamhub-agent

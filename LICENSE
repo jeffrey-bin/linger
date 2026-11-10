@@ -1,0 +1,43 @@
+# Open Source License
+
+Linger is licensed under a modified version of the Apache
+License 2.0, with the following additional conditions:
+
+1. Linger may be used commercially, including by a company for its own
+   work and as a backend for its own applications. A commercial license must be
+   obtained from the producer when either condition below applies:
+
+   a. Hosted service: Unless explicitly authorized by the producer in writing,
+      you may not use the Linger source code to offer Linger to
+      third parties as a hosted or managed service.
+      - Hosted Service Definition: For the purposes of this license, a hosted
+        or managed service is one where you run Linger for people outside
+        your own organization, whether all of them share one deployment or each
+        has its own.
+
+   b. LOGO and copyright information: In the process of using Linger's
+      frontend, you may not remove or modify the LOGO or copyright information
+      in the Linger console or applications. This restriction does not
+      apply to uses of Linger that do not involve its frontend.
+      - Frontend Definition: For the purposes of this license, the "frontend"
+        of Linger includes all components located in the `apps/web/`
+        directory when running Linger from the raw source code, or the
+        `web` service image when running Linger with Docker Compose.
+
+2. As a contributor, you agree that:
+
+   a. The producer can adjust the open-source agreement to be more strict or
+      relaxed as deemed necessary.
+   b. Your contributed code may be used for commercial purposes, including but
+      not limited to its cloud business operations.
+
+Apart from the specific conditions mentioned above, all other rights and
+restrictions follow the Apache License 2.0. Detailed information about the
+Apache License 2.0 can be found at http://www.apache.org/licenses/LICENSE-2.0.
+
+Third-party code and assets listed in the NOTICE file keep their own licenses;
+the conditions above apply only to the producer's own code.
+
+The producer is SIMPLEX AI TECHNOLOGIES PTE. LTD., the copyright holder of Linger.
+
+© 2026 SIMPLEX AI TECHNOLOGIES PTE. LTD.

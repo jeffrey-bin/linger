@@ -1,0 +1,194 @@
+components:
+  schemas:
+    AgentTemplateOrigin:
+      type: string
+      enum: [builtin, published]
+      description: >-
+        builtin templates ship with the deployment and belong to no Tenant. published templates
+        are Human-published and are visible to every Tenant in the deployment.
+    AgentTemplate:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          template_id,
+          origin,
+          name,
+          description,
+          instructions,
+          skill_bindings,
+          connector_bindings,
+          routines,
+          created_at,
+          updated_at,
+        ]
+      description: >-
+        A reusable Agent definition. It carries identity text, instructions, Routines, and the exact
+        Skill and Connector selections. Runtime provider, model, reasoning effort, and placement are
+        Agent deployment facts and never belong to a template.
+      properties:
+        template_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        origin:
+          $ref: "#/components/schemas/AgentTemplateOrigin"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        instructions:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        avatar_key:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Product avatar selection carried with the template. Clients that do not know the key fall back to their own default.
+        skill_bindings:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "./skills.yaml#/components/schemas/AgentSkillRegistration"
+        connector_bindings:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          description: >-
+            Connected App keys this Agent used, carried so a consumer knows what to authorize.
+            A template never carries a connection, account, credential, or token: the consumer
+            grants access from their own connected accounts after the Agent exists.
+          items:
+            $ref: "./external-sources.yaml#/components/schemas/ExternalAppKey"
+        routines:
+          type: array
+          maxItems: 50
+          description: Fixed snapshots of all Routines in the publisher's direct Room with the source Agent. Copied automatically into the new Agent's direct Room with its Sponsor.
+          items:
+            $ref: "#/components/schemas/AgentTemplateRoutine"
+        published_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+          description: Present only for published templates.
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentTemplateRoutine:
+      type: object
+      additionalProperties: false
+      required: [key, name, instruction, cadence, enabled, created_by_role]
+      properties:
+        key:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        cadence:
+          $ref: "./routines.yaml#/components/schemas/RoutineCadence"
+        enabled:
+          type: boolean
+        created_by_role:
+          type: string
+          enum: [human, agent]
+        mention_role:
+          type: string
+          enum: [agent]
+          description: Absent when the source Routine has no valid mention of the source Agent. Raw instruction text is never rewritten.
+    AgentTemplatePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/AgentTemplate"
+    AgentTemplatePublishRequest:
+      type: object
+      additionalProperties: false
+      required: [name, instructions]
+      description: >-
+        Publishes one reusable definition to the deployment-wide template market. Skill
+        references are stored exactly as given and are resolved against the consuming Tenant
+        catalog when an Agent is created. Publishing shares the referenced Skill versions: a
+        consumer may copy a version private to the publisher into their own Tenant through
+        importAgentTemplateSkills. A reference that can be neither bound nor copied is skipped
+        rather than rejected here. Connector references name Apps only; no connection,
+        credential, or account of the publisher is ever carried.
+      properties:
+        source_agent_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: When present, TeamHub verifies the caller sponsors this Agent and snapshots every Routine in their direct Room. An absent direct Room produces an empty snapshot.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        instructions:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        avatar_key:
+          type: string
+          minLength: 1
+          maxLength: 64
+        skill_bindings:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "./skills.yaml#/components/schemas/AgentSkillRegistration"
+        connector_bindings:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          description: >-
+            Connected App keys this Agent used, carried so a consumer knows what to authorize.
+            A template never carries a connection, account, credential, or token: the consumer
+            grants access from their own connected accounts after the Agent exists.
+          items:
+            $ref: "./external-sources.yaml#/components/schemas/ExternalAppKey"
+    AgentTemplateSkillImportStatus:
+      type: string
+      enum: [importable, imported, unavailable]
+      description: >-
+        importable means the published template's Skill version can be copied from the
+        publisher's Tenant into this Tenant as a private Skill of the caller. imported means the
+        copy exists (created now or reused from an earlier import with identical content).
+        unavailable means the source version is missing, disabled, deleted, or not owned by the
+        template's publishing Tenant.
+    AgentTemplateSkillImport:
+      type: object
+      additionalProperties: false
+      required: [source, status]
+      properties:
+        source:
+          $ref: "./skills.yaml#/components/schemas/AgentSkillRegistration"
+          description: The Skill reference exactly as the template carries it.
+        status:
+          $ref: "#/components/schemas/AgentTemplateSkillImportStatus"
+        skill:
+          $ref: "./skills.yaml#/components/schemas/AgentSkillRegistration"
+          description: The caller-visible private copy to bind. Present only when status is imported.
+    AgentTemplateSkillImportPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      description: >-
+        Template Skill references the caller cannot bind from this Tenant catalog. References the
+        catalog already resolves, including platform Skills, are not listed.
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentTemplateSkillImport"

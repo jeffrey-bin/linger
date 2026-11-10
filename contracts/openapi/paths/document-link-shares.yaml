@@ -1,0 +1,142 @@
+manage:
+  parameters:
+    - name: documentId
+      in: path
+      required: true
+      schema: { type: string }
+  get:
+    tags: [Documents]
+    operationId: getDocumentLinkShare
+    summary: Read link policy as an Owner or Manager; the secret is never returned.
+    responses:
+      "200":
+        description: Current policy, including a revoked policy.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/document-link-shares.yaml#/components/schemas/DocumentLinkShare",
+              }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+  put:
+    tags: [Documents]
+    operationId: setDocumentLinkShare
+    summary: Create, change, or reset a link policy as an Owner or Manager.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/document-link-shares.yaml#/components/schemas/SetDocumentLinkShare",
+            }
+    responses:
+      "200":
+        description: Committed policy. A new token is returned only on creation or reset.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/document-link-shares.yaml#/components/schemas/DocumentLinkShare",
+              }
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+  delete:
+    tags: [Documents]
+    operationId: revokeDocumentLinkShare
+    summary: Revoke link access without changing independent Actor or Room grants.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/document-link-shares.yaml#/components/schemas/RevokeDocumentLinkShare",
+            }
+    responses:
+      "204": { description: Link revoked. }
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "403":
+        { $ref: "../components/common.yaml#/components/responses/Forbidden" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+content:
+  post:
+    tags: [Documents]
+    security: []
+    operationId: downloadSharedDocument
+    summary: Download exact current content using a revocable link capability.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/document-link-shares.yaml#/components/schemas/ResolveDocumentLinkShare"
+    responses:
+      "200":
+        description: Current file bytes; native Documents are exported as read-only Markdown.
+        headers:
+          X-Document-Id: { schema: { type: string } }
+          X-Document-Version-Id: { schema: { type: string } }
+          X-Document-Filename: { schema: { type: string } }
+          X-Document-Representation-Format: { schema: { type: string } }
+          X-Document-Read-Only: { schema: { type: boolean } }
+          X-Content-Sha256: { schema: { type: string } }
+        content:
+          application/octet-stream:
+            schema: { type: string, format: binary }
+      "202":
+        $ref: "../components/agent-cli-files.yaml#/components/responses/FileError"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+resolve:
+  post:
+    tags: [Documents]
+    security: []
+    operationId: resolveDocumentLinkShare
+    summary: Resolve an active capability without permanently granting access.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/document-link-shares.yaml#/components/schemas/ResolveDocumentLinkShare",
+            }
+    responses:
+      "200":
+        description: Current link access. Content operations must revalidate the token.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/document-link-shares.yaml#/components/schemas/DocumentLinkAccess",
+              }
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }

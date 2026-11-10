@@ -1,0 +1,23 @@
+{
+  "name": "@linger/local-installation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": {
+      "types": "./src/*.ts",
+      "linger-production": "./dist/*.js",
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --maxWorkers=2",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "lint": "eslint --max-warnings=0 src"
+  },
+  "dependencies": {
+    "tar": "7.5.22"
+  }
+}

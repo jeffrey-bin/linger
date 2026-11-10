@@ -1,0 +1,95 @@
+components:
+  schemas:
+    AgentKnowledgeSearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description:
+            The distinctive phrase, entity, or term being asked about, keeping
+            the current request's named project, person, or event. Do not add
+            unrelated topics from earlier turns or put dates in the query text.
+        alternates:
+          description:
+            Up to six synonyms, translations or related terms the evidence may
+            use instead of the query's words. Each is searched separately
+            beside the query; always pass some when the query is a single
+            wording.
+          maxItems: 6
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 200
+        dateFrom:
+          description: Start of the period the sources were recorded in; ranks matching sources higher and excludes none.
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+        dateTo:
+          description: End of the period the sources were recorded in; pair with dateFrom.
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+        eventFrom:
+          description: Inclusive start of when the asked event happened; takes precedence over dateFrom and dateTo and excludes none.
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+        eventTo:
+          description: Inclusive end of when the asked event happened; pair with eventFrom.
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+      required:
+        - query
+      additionalProperties: false
+      description:
+        One search over every source of the Human's knowledge index (Sessions,
+        recordings, My pages, mail, Pocket Notes, the Profile, the published
+        Wiki and Daily and Weekly reports); each result names its source kind.
+    AgentKnowledgeReadRequest:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          pattern: ^raw_[a-f0-9]{16}_[a-f0-9]{16}$
+          description: Opaque raw_... candidate ID from a search; pass it unchanged.
+        sectionRequests:
+          minItems: 1
+          maxItems: 8
+          type: array
+          items:
+            type: object
+            properties:
+              sectionId:
+                type: string
+                minLength: 1
+                maxLength: 128
+                pattern: ^[a-z0-9][a-z0-9_-]*$
+                description: Stable section identifier within one evidence item.
+              offset:
+                description: Character offset for continuing a truncated section.
+                type: integer
+                minimum: 0
+                maximum: 200000
+            required:
+              - sectionId
+            additionalProperties: false
+            description: One Markdown section page to read.
+          description: Sections selected from the candidate directory.
+      required:
+        - evidenceId
+        - sectionRequests
+      additionalProperties: false
+      description: Selected evidence sections to read after a search.
+    AgentCapabilityResult:
+      type: object
+      additionalProperties: true
+      description: The domain receipt. Knowledge keeps the original evidence schema.
+    AgentEmptyRequest:
+      type: object
+      additionalProperties: false
+      properties: {}

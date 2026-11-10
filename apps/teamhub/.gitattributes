@@ -1,0 +1,4 @@
+*.gen.go linguist-generated=true
+*.sql.go linguist-generated=true
+/internal/store/db.go linguist-generated=true
+/internal/store/models.go linguist-generated=true

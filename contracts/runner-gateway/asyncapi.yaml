@@ -1,0 +1,103 @@
+asyncapi: 3.0.0
+info:
+  title: Linger Runner Gateway
+  version: 2.0.0
+  description: >-
+    Authenticated bidirectional Agent Runner desired state and Runtime operation
+    protocol between Agent Service and a Local Computer Daemon. Every frame
+    carries protocol_version 2; the Computer and the Agent Service are built
+    from one commit, so the protocol has no feature negotiation. The only
+    capabilities a Computer declares are host features (browser_connection
+    and computer_permissions).
+    The Daemon initiates the WebSocket connection; the service-issued
+    connection epoch fences commands and responses after reconnect. The
+    Daemon receives runner.reconciled only after the service has completed
+    operation reconciliation; runner.welcome alone is not readiness.
+    Messages come in coarse families distinguished by one field: prepare and
+    prepared (target operation or provider), cancel (target operation or
+    provider), execute and executed (kind session_compact, model_invoke,
+    computer_tool, skills_scan, browser_connect, computer_permission,
+    debug_history or
+    cli_credential), agent_runner.state (state ready, removed or failed) and
+    operation.input_result (outcome accepted, rejected or closed); the
+    Operation family carries operation.start, operation.input, operation.ack,
+    operation.accepted, operation.event and the three terminal outcomes.
+    Unknown message types close the connection with protocol error 1002;
+    prepared for a provider and executed for model_invoke are advisory.
+    A Computer that connects with an older protocol is answered only with a
+    runner.welcome carrying target_release, so it updates itself; it receives
+    no work.
+    A Context View is named only by its view_digest, the SHA-256 of its content
+    manifest. Before a prepare, operation.start or operation.input reaches its
+    Runtime, the Computer brings the View to that digest itself: it fetches
+    views/<view_digest> and the files it lacks (files/<sha256>) from the
+    context_content_url of the current runner.welcome, verifies every file's
+    size and SHA-256, and fetches the named Skill packages from TeamHub with
+    the Agent credential. A manifest may carry a TeamHub-trusted
+    shared_task_scope, and the Computer links the shared Task directory into
+    the playground.
+    execute with kind model_invoke is a one-shot model call on the Computer's
+    signed-in Codex or Claude CLI that has no Context, takes no execution slot
+    and is not in the Operation ledger. The Agent Service's model scheduler
+    decides when a call is sent; the Daemon runs every call it receives. Its
+    optional session_key lets a Daemon answer the structured Codex calls of
+    one session in one resident thread; the result is the same either way.
+    execute with kind
+    computer_tool runs native browser actions and retained Task output reads.
+    TeamHub resolves the owner, Agent and Task scope; the Computer checks its
+    current assignment and retained scope. No Meta Context or model turn is
+    started. Responses carry the same owner and connection epoch.
+    Disconnect/timeout means an unknown outcome; the caller must inspect
+    effects and must not automatically replay actions.
+x-frame-limits:
+  maxBytes: 4194304
+  maxDepth: 32
+  maxArrayItems: 1024
+  maxObjectProperties: 256
+  maxNodes: 65536
+servers:
+  production:
+    host: agents.example.invalid
+    pathname: /v1/runner-gateway
+    protocol: wss
+    security:
+      - $ref: "#/components/securitySchemes/runnerBearer"
+channels:
+  runnerGateway:
+    address: /v1/runner-gateway
+    messages:
+      agentToDaemon:
+        $ref: "#/components/messages/AgentToDaemonEnvelope"
+      daemonToAgent:
+        $ref: "#/components/messages/DaemonToAgentEnvelope"
+operations:
+  agentServiceSends:
+    action: send
+    channel:
+      $ref: "#/channels/runnerGateway"
+    messages:
+      - $ref: "#/channels/runnerGateway/messages/agentToDaemon"
+  agentServiceReceives:
+    action: receive
+    channel:
+      $ref: "#/channels/runnerGateway"
+    messages:
+      - $ref: "#/channels/runnerGateway/messages/daemonToAgent"
+components:
+  securitySchemes:
+    runnerBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-runner-credential
+      description: Send the pre-provisioned Runner credential as Authorization Bearer.
+  messages:
+    AgentToDaemonEnvelope:
+      name: AgentToDaemonEnvelope
+      contentType: application/json
+      payload:
+        $ref: "./envelope.schema.json#/$defs/AgentToDaemonEnvelope"
+    DaemonToAgentEnvelope:
+      name: DaemonToAgentEnvelope
+      contentType: application/json
+      payload:
+        $ref: "./envelope.schema.json#/$defs/DaemonToAgentEnvelope"

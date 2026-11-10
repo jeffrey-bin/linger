@@ -1,0 +1,4694 @@
+/** Generated Runner Gateway JSON Schema. Do not edit. */
+export const runnerGatewayEnvelopeSchema = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://simplex.ai/contracts/runner-gateway/v2/envelope.schema.json",
+  title: "RunnerGatewayEnvelope",
+  type: "object",
+  oneOf: [
+    {
+      $ref: "#/$defs/AgentToDaemonEnvelope",
+    },
+    {
+      $ref: "#/$defs/DaemonToAgentEnvelope",
+    },
+  ],
+  $defs: {
+    AgentToDaemonEnvelope: {
+      oneOf: [
+        {
+          $ref: "#/$defs/RunnerWelcome",
+        },
+        {
+          $ref: "#/$defs/RunnerReconciled",
+        },
+        {
+          $ref: "#/$defs/RuntimeRegistrationSnapshot",
+        },
+        {
+          $ref: "#/$defs/AgentRunnerEnsure",
+        },
+        {
+          $ref: "#/$defs/AgentRunnerRemove",
+        },
+        {
+          $ref: "#/$defs/AgentCliCredentialPut",
+        },
+        {
+          $ref: "#/$defs/DebugInspect",
+        },
+        {
+          $ref: "#/$defs/CapabilitySkillsScan",
+        },
+        {
+          $ref: "#/$defs/CapabilityBrowserConnect",
+        },
+        {
+          $ref: "#/$defs/CapabilityComputerPermission",
+        },
+        {
+          $ref: "#/$defs/OperationPrepare",
+        },
+        {
+          $ref: "#/$defs/ProviderPrepare",
+        },
+        {
+          $ref: "#/$defs/SessionCompact",
+        },
+        {
+          $ref: "#/$defs/ModelInvoke",
+        },
+        {
+          $ref: "#/$defs/OperationStart",
+        },
+        {
+          $ref: "#/$defs/OperationInput",
+        },
+        {
+          $ref: "#/$defs/OperationCancel",
+        },
+        {
+          $ref: "#/$defs/OperationAck",
+        },
+        {
+          $ref: "#/$defs/ComputerToolCall",
+        },
+      ],
+    },
+    DaemonToAgentEnvelope: {
+      oneOf: [
+        {
+          $ref: "#/$defs/RunnerHello",
+        },
+        {
+          $ref: "#/$defs/RunnerHeartbeat",
+        },
+        {
+          $ref: "#/$defs/RunnerRuntimeDiagnostics",
+        },
+        {
+          $ref: "#/$defs/RuntimeRegistrationObserved",
+        },
+        {
+          $ref: "#/$defs/AgentRunnerReady",
+        },
+        {
+          $ref: "#/$defs/AgentRunnerRemoved",
+        },
+        {
+          $ref: "#/$defs/AgentRunnerFailed",
+        },
+        {
+          $ref: "#/$defs/AgentCliCredentialStored",
+        },
+        {
+          $ref: "#/$defs/AgentCliCredentialFailed",
+        },
+        {
+          $ref: "#/$defs/DebugInspected",
+        },
+        {
+          $ref: "#/$defs/CapabilitySkillsScanned",
+        },
+        {
+          $ref: "#/$defs/CapabilitySkillsFailed",
+        },
+        {
+          $ref: "#/$defs/CapabilityBrowserConnected",
+        },
+        {
+          $ref: "#/$defs/CapabilityBrowserFailed",
+        },
+        {
+          $ref: "#/$defs/CapabilityComputerPermissionSucceeded",
+        },
+        {
+          $ref: "#/$defs/CapabilityComputerPermissionFailed",
+        },
+        {
+          $ref: "#/$defs/OperationPrepared",
+        },
+        {
+          $ref: "#/$defs/ProviderPrepared",
+        },
+        {
+          $ref: "#/$defs/SessionCompacted",
+        },
+        {
+          $ref: "#/$defs/ModelInvoked",
+        },
+        {
+          $ref: "#/$defs/OperationAccepted",
+        },
+        {
+          $ref: "#/$defs/OperationEvent",
+        },
+        {
+          $ref: "#/$defs/OperationInputAck",
+        },
+        {
+          $ref: "#/$defs/OperationInputRejected",
+        },
+        {
+          $ref: "#/$defs/OperationInputClosed",
+        },
+        {
+          $ref: "#/$defs/OperationCompleted",
+        },
+        {
+          $ref: "#/$defs/OperationFailed",
+        },
+        {
+          $ref: "#/$defs/OperationCancelled",
+        },
+        {
+          $ref: "#/$defs/ComputerToolResult",
+        },
+      ],
+    },
+    Id: {
+      type: "string",
+      pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+    },
+    ProtocolVersion: {
+      const: "2",
+    },
+    RunnerCapability: {
+      description:
+        "A host feature the Computer has. Every other v2 behavior is part of protocol 2 itself.",
+      enum: ["browser_connection", "computer_permissions"],
+    },
+    Timestamp: {
+      type: "string",
+      format: "date-time",
+      minLength: 20,
+      maxLength: 64,
+    },
+    PositiveInteger: {
+      type: "integer",
+      minimum: 1,
+      maximum: 9007199254740991,
+    },
+    NonNegativeInteger: {
+      type: "integer",
+      minimum: 0,
+      maximum: 9007199254740991,
+    },
+    RuntimeDiagnostic: {
+      type: "object",
+      additionalProperties: false,
+      required: ["type", "status", "protocol", "checked_at", "models"],
+      properties: {
+        type: {
+          enum: ["codex", "claude", "pi"],
+        },
+        status: {
+          enum: [
+            "not_installed",
+            "authentication_required",
+            "ready",
+            "incompatible",
+            "error",
+          ],
+        },
+        protocol: {
+          enum: ["app-server", "stream-json", "rpc"],
+        },
+        checked_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        version: {
+          type: "string",
+          minLength: 1,
+          maxLength: 120,
+        },
+        models: {
+          type: "array",
+          maxItems: 100,
+          items: {
+            $ref: "#/$defs/RuntimeModel",
+          },
+        },
+        model_catalog_error: {
+          type: "string",
+          minLength: 1,
+          maxLength: 240,
+        },
+        error: {
+          type: "object",
+          additionalProperties: false,
+          required: ["code", "message"],
+          properties: {
+            code: {
+              enum: [
+                "RUNTIME_NOT_INSTALLED",
+                "RUNTIME_AUTHENTICATION_REQUIRED",
+                "RUNTIME_INCOMPATIBLE",
+                "RUNTIME_DIAGNOSTIC_FAILED",
+              ],
+            },
+            message: {
+              type: "string",
+              minLength: 1,
+              maxLength: 240,
+            },
+          },
+        },
+        managed_services: {
+          $ref: "#/$defs/ManagedServices",
+        },
+      },
+    },
+    RuntimeModel: {
+      type: "object",
+      additionalProperties: false,
+      required: ["id", "label", "allowed_reasoning_effort"],
+      properties: {
+        id: {
+          type: "string",
+          minLength: 1,
+          maxLength: 160,
+        },
+        label: {
+          type: "string",
+          minLength: 1,
+          maxLength: 160,
+        },
+        allowed_reasoning_effort: {
+          type: "array",
+          uniqueItems: true,
+          items: {
+            enum: ["none", "low", "medium", "high", "xhigh", "max", "ultra"],
+          },
+        },
+        default_reasoning_effort: {
+          enum: ["none", "low", "medium", "high", "xhigh", "max", "ultra"],
+        },
+        context_window: {
+          description:
+            "Context length in tokens, from the gateway on the Runtime's API link, the window declared to Claude on its API link, or the Runtime's own catalog; absent when unknown.",
+          type: "integer",
+          minimum: 1,
+          maximum: 100000000,
+        },
+        link: {
+          description:
+            "How the Runtime reaches the model: api through a gateway and key configured in the Runtime, subscription through the vendor account it signed in to; absent when the Computer does not report it.",
+          enum: ["api", "subscription"],
+        },
+        is_default: {
+          description:
+            "True for the model the Runtime runs when none is selected.",
+          type: "boolean",
+        },
+      },
+    },
+    RuntimeDiagnostics: {
+      type: "array",
+      minItems: 1,
+      maxItems: 3,
+      items: {
+        $ref: "#/$defs/RuntimeDiagnostic",
+      },
+    },
+    ManagedService: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "name",
+        "command",
+        "cwd",
+        "log_path",
+        "pid",
+        "state",
+        "observed_at",
+      ],
+      properties: {
+        name: {
+          type: "string",
+          minLength: 1,
+          maxLength: 64,
+        },
+        command: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4096,
+        },
+        cwd: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4096,
+        },
+        log_path: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4096,
+        },
+        pid: {
+          type: "integer",
+          minimum: 1,
+        },
+        state: {
+          enum: ["running", "lost", "stopped"],
+        },
+        observed_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        lost_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        stopped_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        url: {
+          type: "string",
+          maxLength: 2048,
+        },
+        port: {
+          type: "integer",
+          minimum: 1,
+          maximum: 65535,
+        },
+        health: {
+          type: "object",
+          additionalProperties: false,
+          required: ["status", "checked_at"],
+          properties: {
+            status: {
+              enum: ["healthy", "unhealthy", "unreachable"],
+            },
+            http_status: {
+              type: "integer",
+              minimum: 100,
+              maximum: 599,
+            },
+            checked_at: {
+              $ref: "#/$defs/Timestamp",
+            },
+          },
+        },
+      },
+    },
+    ManagedServices: {
+      type: "array",
+      maxItems: 100,
+      items: {
+        $ref: "#/$defs/ManagedService",
+      },
+    },
+    RuntimeRegistrationObservation: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "tenant_id",
+        "owner_actor_id",
+        "provider_type",
+        "status",
+        "revision",
+        "capabilities",
+        "runtime_diagnostics",
+      ],
+      properties: {
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        owner_actor_id: {
+          $ref: "#/$defs/Id",
+        },
+        provider_type: {
+          enum: ["codex", "claude", "pi"],
+        },
+        status: {
+          enum: ["online", "offline", "unavailable"],
+        },
+        revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        capabilities: {
+          type: "array",
+          uniqueItems: true,
+          items: {
+            $ref: "#/$defs/Id",
+          },
+        },
+        runtime_diagnostics: {
+          type: "object",
+          additionalProperties: {
+            $ref: "#/$defs/JsonValue",
+          },
+        },
+      },
+    },
+    RuntimeRegistration: {
+      type: "object",
+      additionalProperties: false,
+      required: ["registration_id", "observation"],
+      properties: {
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        observation: {
+          $ref: "#/$defs/RuntimeRegistrationObservation",
+        },
+      },
+    },
+    JsonValue: {
+      oneOf: [
+        {
+          type: "null",
+        },
+        {
+          type: "boolean",
+        },
+        {
+          type: "number",
+          minimum: -9007199254740991,
+          maximum: 9007199254740991,
+        },
+        {
+          type: "string",
+          maxLength: 262144,
+        },
+        {
+          type: "array",
+          maxItems: 1024,
+          items: {
+            $ref: "#/$defs/JsonValue",
+          },
+        },
+        {
+          type: "object",
+          maxProperties: 256,
+          additionalProperties: {
+            $ref: "#/$defs/JsonValue",
+          },
+        },
+      ],
+    },
+    OpaqueObject: {
+      type: "object",
+      maxProperties: 256,
+      additionalProperties: {
+        $ref: "#/$defs/JsonValue",
+      },
+    },
+    Sha256: {
+      type: "string",
+      pattern: "^[a-f0-9]{64}$",
+    },
+    RelativeWorkspacePath: {
+      type: "string",
+      minLength: 1,
+      maxLength: 1024,
+      pattern:
+        "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*\\\\)(?!.*[\\u0000-\\u001f\\u007f])[^/]+(?:/[^/]+)*$",
+    },
+    ExecutionContextKey: {
+      type: "string",
+      minLength: 1,
+      maxLength: 512,
+      pattern: "^(?!/)(?!.*\\\\)(?!.*[\\u0000-\\u001f\\u007f]).+$",
+    },
+    ContextViewFileInput: {
+      type: "object",
+      additionalProperties: false,
+      required: ["relative_path", "media_type", "size_bytes", "sha256"],
+      properties: {
+        relative_path: {
+          $ref: "#/$defs/RelativeWorkspacePath",
+        },
+        media_type: {
+          type: "string",
+          minLength: 1,
+          maxLength: 255,
+        },
+        size_bytes: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        sha256: {
+          $ref: "#/$defs/Sha256",
+        },
+        executable: {
+          type: "boolean",
+        },
+      },
+    },
+    ContextViewMapping: {
+      type: "object",
+      additionalProperties: false,
+      required: ["kind", "target_path", "access", "files"],
+      properties: {
+        kind: {
+          enum: ["inbox_view", "memory", "llm_wiki", "playground"],
+        },
+        target_path: {
+          $ref: "#/$defs/RelativeWorkspacePath",
+        },
+        access: {
+          enum: ["read_only", "read_write"],
+        },
+        files: {
+          type: "array",
+          items: {
+            $ref: "#/$defs/ContextViewFileInput",
+          },
+        },
+      },
+    },
+    ContextViewSkill: {
+      description:
+        "One Skill package the receiver fetches from TeamHub with the Agent credential and projects read-only under .agents/skills/<package_name>.",
+      type: "object",
+      additionalProperties: false,
+      required: ["package_name", "manifest_id", "package_sha256"],
+      properties: {
+        package_name: {
+          type: "string",
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          maxLength: 64,
+        },
+        manifest_id: {
+          type: "string",
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$",
+          minLength: 1,
+          maxLength: 128,
+        },
+        package_sha256: {
+          $ref: "#/$defs/Sha256",
+        },
+      },
+    },
+    ContextViewManifest: {
+      description:
+        "Content of one Context View. The Agent Service serves these exact bytes; their SHA-256 is the view_digest every ContextViewRef names.",
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "version",
+        "execution_context_key",
+        "runtime_instance_id",
+        "mappings",
+        "skills",
+      ],
+      properties: {
+        version: {
+          const: 1,
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        shared_task_scope: {
+          $ref: "#/$defs/SharedTaskScope",
+        },
+        mappings: {
+          type: "array",
+          maxItems: 64,
+          items: {
+            $ref: "#/$defs/ContextViewMapping",
+          },
+        },
+        skills: {
+          type: "array",
+          maxItems: 256,
+          items: {
+            $ref: "#/$defs/ContextViewSkill",
+          },
+        },
+      },
+    },
+    LocalMcpRelayDescriptor: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "name",
+        "relay_url",
+        "relay_token",
+        "tool_names",
+        "expires_at",
+      ],
+      properties: {
+        name: {
+          $ref: "#/$defs/Id",
+        },
+        relay_url: {
+          type: "string",
+          minLength: 1,
+          maxLength: 2048,
+          pattern: "^https?://",
+        },
+        relay_token: {
+          type: "string",
+          minLength: 32,
+          maxLength: 4096,
+        },
+        tool_names: {
+          type: "array",
+          maxItems: 1024,
+          uniqueItems: true,
+          items: {
+            type: "string",
+            minLength: 1,
+            maxLength: 200,
+          },
+        },
+        expires_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+      },
+    },
+    LocalRunResources: {
+      type: "object",
+      additionalProperties: false,
+      required: ["mcp_servers"],
+      properties: {
+        mcp_servers: {
+          type: "array",
+          maxItems: 128,
+          items: {
+            $ref: "#/$defs/LocalMcpRelayDescriptor",
+          },
+        },
+      },
+    },
+    WorkspaceGrant: {
+      type: "object",
+      additionalProperties: false,
+      required: ["grant_id", "tenant_id", "mode"],
+      properties: {
+        grant_id: {
+          $ref: "#/$defs/Id",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        label: {
+          type: "string",
+          minLength: 1,
+          maxLength: 120,
+        },
+        mode: {
+          enum: ["read-only", "workspace-write"],
+        },
+        scope: {
+          enum: ["owner", "bindings"],
+        },
+      },
+    },
+    OperationScope: {
+      type: "object",
+      required: [
+        "protocol_version",
+        "host_access",
+        "execution_context_key",
+        "runtime_instance_id",
+        "context_view_ref",
+      ],
+      properties: {
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        host_access: {
+          const: "trusted",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        context_view_ref: {
+          $ref: "#/$defs/ContextViewRef",
+        },
+      },
+    },
+    ActiveOperation: {
+      type: "object",
+      additionalProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/OperationScope",
+        },
+      ],
+      required: [
+        "tenant_id",
+        "registration_id",
+        "assignment_revision",
+        "runner_id",
+        "agent_id",
+        "operation_id",
+        "connection_epoch",
+        "runner_revision",
+        "generation",
+        "execution_lease_id",
+        "workspace_grant_id",
+        "runtime_type",
+        "kind",
+        "last_emitted_seq",
+        "last_acked_seq",
+      ],
+      properties: {
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        host_access: {
+          const: "trusted",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        context_view_ref: {
+          $ref: "#/$defs/ContextViewRef",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        operation_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        generation: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        execution_lease_id: {
+          $ref: "#/$defs/Id",
+        },
+        workspace_grant_id: {
+          $ref: "#/$defs/Id",
+        },
+        runtime_type: {
+          enum: ["codex", "claude", "pi"],
+        },
+        kind: {
+          const: "run.start",
+        },
+        last_emitted_seq: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        last_acked_seq: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+      },
+    },
+    ContextViewRef: {
+      description:
+        "Names a Context View by the SHA-256 digest of its content manifest. A receiver that lacks this View fetches the manifest and the files it does not hold from the context_content_url of the current connection's runner.welcome.",
+      type: "object",
+      additionalProperties: false,
+      required: ["view_digest"],
+      properties: {
+        view_digest: {
+          $ref: "#/$defs/Sha256",
+        },
+      },
+    },
+    SharedTaskScopeId: {
+      description:
+        "TeamHub identifier used as a single directory segment on every platform.",
+      type: "string",
+      pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+    },
+    SharedTaskScope: {
+      description:
+        "TeamHub-trusted shared Task directory identity. The receiver resolves it under its own configured shared root; no host path crosses the protocol. A meta scope has no task_id; an alter_ego scope requires one.",
+      type: "object",
+      additionalProperties: false,
+      required: ["version", "tenant_id", "agent_id", "origin_room_id", "role"],
+      properties: {
+        version: {
+          const: 1,
+        },
+        tenant_id: {
+          $ref: "#/$defs/SharedTaskScopeId",
+        },
+        agent_id: {
+          $ref: "#/$defs/SharedTaskScopeId",
+        },
+        origin_room_id: {
+          $ref: "#/$defs/SharedTaskScopeId",
+        },
+        role: {
+          enum: ["meta", "alter_ego"],
+        },
+        task_id: {
+          $ref: "#/$defs/SharedTaskScopeId",
+        },
+      },
+      if: {
+        properties: {
+          role: {
+            const: "alter_ego",
+          },
+        },
+      },
+      then: {
+        properties: {
+          task_id: {
+            $ref: "#/$defs/SharedTaskScopeId",
+          },
+        },
+        required: ["task_id"],
+      },
+      else: {
+        properties: {
+          task_id: false,
+        },
+      },
+    },
+    DebugInspectionStatus: {
+      enum: ["available", "unsupported", "unavailable"],
+    },
+    DebugHistoryInspectionRequest: {
+      type: "object",
+      additionalProperties: false,
+      required: ["runtime", "session"],
+      properties: {
+        runtime: {
+          $ref: "#/$defs/RuntimeConfig",
+        },
+        session: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        cursor: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4096,
+        },
+        limit: {
+          type: "integer",
+          minimum: 1,
+          maximum: 500,
+        },
+      },
+    },
+    DebugInspect: {
+      type: "object",
+      if: {
+        type: "object",
+        properties: {
+          detached_history: {},
+        },
+        required: ["detached_history"],
+      },
+      then: {
+        dependentRequired: {
+          registration_id: ["runner_revision"],
+          assignment_revision: ["runner_revision"],
+        },
+      },
+      else: {
+        properties: {
+          runner_revision: {},
+          view_digest: {},
+          registration_id: {},
+          assignment_revision: {},
+        },
+        required: [
+          "registration_id",
+          "assignment_revision",
+          "runner_revision",
+          "view_digest",
+        ],
+      },
+      additionalProperties: false,
+      required: [
+        "kind",
+        "protocol_version",
+        "command_id",
+        "tenant_id",
+        "runner_id",
+        "agent_id",
+        "connection_epoch",
+        "workspace_grant_id",
+        "execution_context_key",
+        "runtime_instance_id",
+        "type",
+        "request",
+      ],
+      properties: {
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        workspace_grant_id: {
+          $ref: "#/$defs/Id",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        view_digest: {
+          $ref: "#/$defs/Sha256",
+        },
+        type: {
+          const: "execute",
+        },
+        request: {
+          $ref: "#/$defs/DebugHistoryInspectionRequest",
+        },
+        detached_history: {
+          const: true,
+        },
+        kind: {
+          const: "debug_history",
+        },
+      },
+    },
+    DebugHistorySnapshot: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "id",
+        "thread_id",
+        "captured_at",
+        "record_count",
+        "tail_state",
+      ],
+      properties: {
+        id: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        thread_id: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        captured_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        record_count: {
+          type: "integer",
+          minimum: 0,
+          maximum: 1000000,
+        },
+        tail_state: {
+          enum: ["clean", "incomplete", "corrupt"],
+        },
+      },
+    },
+    DebugHistoryInstructionBlock: {
+      type: "object",
+      additionalProperties: false,
+      required: ["record_ordinal", "record_type", "field", "text"],
+      properties: {
+        record_ordinal: {
+          type: "integer",
+          minimum: 0,
+          maximum: 1000000,
+        },
+        record_type: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        field: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        content_ordinal: {
+          type: "integer",
+          minimum: 0,
+          maximum: 1000000,
+        },
+        timestamp: {
+          $ref: "#/$defs/Timestamp",
+        },
+        text: {
+          type: "string",
+          maxLength: 524288,
+        },
+      },
+    },
+    DebugHistoryInstructions: {
+      type: "object",
+      additionalProperties: false,
+      required: ["status", "source", "blocks"],
+      properties: {
+        status: {
+          enum: ["available", "unavailable"],
+        },
+        source: {
+          enum: ["codex_rollout", "claude_transcript", "pi_session"],
+        },
+        reason: {
+          type: "string",
+          minLength: 1,
+          maxLength: 500,
+        },
+        blocks: {
+          type: "array",
+          maxItems: 512,
+          items: {
+            $ref: "#/$defs/DebugHistoryInstructionBlock",
+          },
+        },
+      },
+    },
+    DebugHistoryRedactedField: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path", "reason"],
+      properties: {
+        path: {
+          type: "string",
+          maxLength: 4096,
+        },
+        reason: {
+          enum: [
+            "secret",
+            "encrypted_content",
+            "reasoning_content",
+            "physical_path",
+            "omitted_too_large",
+          ],
+        },
+        byte_count: {
+          type: "integer",
+          minimum: 0,
+          maximum: 67108864,
+        },
+      },
+    },
+    DebugHistoryRecord: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "ordinal",
+        "category",
+        "native_type",
+        "native_record",
+        "redacted_fields",
+      ],
+      properties: {
+        ordinal: {
+          type: "integer",
+          minimum: 0,
+          maximum: 1000000,
+        },
+        timestamp: {
+          $ref: "#/$defs/Timestamp",
+        },
+        turn_id: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        category: {
+          enum: [
+            "message",
+            "tool_call",
+            "tool_result",
+            "lifecycle",
+            "reasoning",
+            "usage",
+            "provider_event",
+            "compaction",
+          ],
+        },
+        native_type: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        tool_call_id: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        tool_name: {
+          type: "string",
+          minLength: 1,
+          maxLength: 256,
+        },
+        role: {
+          type: "string",
+          minLength: 1,
+          maxLength: 64,
+        },
+        phase: {
+          type: "string",
+          minLength: 1,
+          maxLength: 64,
+        },
+        native_record: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        redacted_fields: {
+          type: "array",
+          maxItems: 1024,
+          items: {
+            $ref: "#/$defs/DebugHistoryRedactedField",
+          },
+        },
+      },
+    },
+    DebugHistoryInspectionResult: {
+      type: "object",
+      additionalProperties: false,
+      required: ["status", "provider_kind", "instructions", "records"],
+      properties: {
+        status: {
+          $ref: "#/$defs/DebugInspectionStatus",
+        },
+        provider_kind: {
+          type: "string",
+          minLength: 1,
+          maxLength: 64,
+        },
+        reason: {
+          type: "string",
+          minLength: 1,
+          maxLength: 500,
+        },
+        source: {
+          enum: ["codex_rollout", "claude_transcript", "pi_session"],
+        },
+        snapshot: {
+          $ref: "#/$defs/DebugHistorySnapshot",
+        },
+        instructions: {
+          $ref: "#/$defs/DebugHistoryInstructions",
+        },
+        records: {
+          type: "array",
+          maxItems: 500,
+          items: {
+            $ref: "#/$defs/DebugHistoryRecord",
+          },
+        },
+        previous_cursor: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4096,
+        },
+      },
+    },
+    DebugInspected: {
+      type: "object",
+      if: {
+        type: "object",
+        properties: {
+          detached_history: {},
+        },
+        required: ["detached_history"],
+      },
+      then: {
+        dependentRequired: {
+          registration_id: ["runner_revision"],
+          assignment_revision: ["runner_revision"],
+        },
+      },
+      else: {
+        properties: {
+          runner_revision: {},
+          view_digest: {},
+          registration_id: {},
+          assignment_revision: {},
+        },
+        required: [
+          "registration_id",
+          "assignment_revision",
+          "runner_revision",
+          "view_digest",
+        ],
+      },
+      additionalProperties: false,
+      required: [
+        "kind",
+        "protocol_version",
+        "command_id",
+        "tenant_id",
+        "runner_id",
+        "agent_id",
+        "connection_epoch",
+        "workspace_grant_id",
+        "execution_context_key",
+        "runtime_instance_id",
+        "type",
+        "result",
+      ],
+      properties: {
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        workspace_grant_id: {
+          $ref: "#/$defs/Id",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        view_digest: {
+          $ref: "#/$defs/Sha256",
+        },
+        type: {
+          const: "executed",
+        },
+        result: {
+          $ref: "#/$defs/DebugHistoryInspectionResult",
+        },
+        detached_history: {
+          const: true,
+        },
+        kind: {
+          const: "debug_history",
+        },
+      },
+    },
+    LocalSkillCandidate: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "candidate_ref",
+        "name",
+        "description",
+        "package_sha256",
+        "file_count",
+        "size_bytes",
+        "normalizations",
+        "risk_flags",
+        "importability",
+      ],
+      properties: {
+        native_source: {
+          type: "string",
+          minLength: 1,
+          maxLength: 120,
+        },
+        native_enabled: {
+          type: "boolean",
+        },
+        candidate_ref: {
+          $ref: "#/$defs/Id",
+        },
+        name: {
+          type: "string",
+          minLength: 1,
+          maxLength: 64,
+        },
+        description: {
+          type: "string",
+          minLength: 1,
+          maxLength: 1024,
+        },
+        package_sha256: {
+          $ref: "#/$defs/Sha256",
+        },
+        file_count: {
+          type: "integer",
+          minimum: 1,
+          maximum: 256,
+        },
+        size_bytes: {
+          type: "integer",
+          minimum: 1,
+          maximum: 33554432,
+        },
+        normalizations: {
+          type: "array",
+          maxItems: 8,
+          items: {
+            type: "string",
+            minLength: 1,
+            maxLength: 120,
+          },
+        },
+        risk_flags: {
+          type: "array",
+          maxItems: 16,
+          items: {
+            type: "string",
+            minLength: 1,
+            maxLength: 64,
+          },
+        },
+        importability: {
+          enum: ["ready", "unsupported"],
+        },
+        error_code: {
+          type: "string",
+          minLength: 1,
+          maxLength: 64,
+        },
+        error_detail: {
+          type: "string",
+          minLength: 1,
+          maxLength: 512,
+        },
+        manifest_excerpt: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4096,
+        },
+      },
+    },
+    LocalSkillCommandIdentity: {
+      type: "object",
+      required: [
+        "protocol_version",
+        "command_id",
+        "runner_id",
+        "tenant_id",
+        "owner_actor_id",
+        "connection_epoch",
+        "expires_at",
+      ],
+      properties: {
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        owner_actor_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        expires_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+      },
+    },
+    CapabilitySkillsScan: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "scan_id", "runtime_type"],
+          properties: {
+            type: {
+              const: "execute",
+            },
+            scan_id: {
+              $ref: "#/$defs/Id",
+            },
+            runtime_type: {
+              enum: ["codex", "claude", "pi"],
+            },
+            kind: {
+              const: "skills_scan",
+            },
+          },
+        },
+      ],
+    },
+    CapabilitySkillsScanned: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "kind",
+            "scan_id",
+            "runtime_type",
+            "items",
+            "outcome",
+          ],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            scan_id: {
+              $ref: "#/$defs/Id",
+            },
+            runtime_type: {
+              enum: ["codex", "claude", "pi"],
+            },
+            items: {
+              type: "array",
+              maxItems: 256,
+              items: {
+                $ref: "#/$defs/LocalSkillCandidate",
+              },
+            },
+            kind: {
+              const: "skills_scan",
+            },
+            outcome: {
+              const: "succeeded",
+            },
+          },
+        },
+      ],
+    },
+    BrowserConnectionStatus: {
+      description:
+        "The browser that browser tools of this owner's Agents drive on this Computer. It never contains the extension token.",
+      type: "object",
+      additionalProperties: false,
+      required: ["mode", "state", "platform"],
+      properties: {
+        mode: {
+          enum: ["isolated", "user_chrome"],
+        },
+        state: {
+          enum: [
+            "isolated",
+            "not_connected",
+            "connected",
+            "token_invalid",
+            "browser_unavailable",
+            "extension_unavailable",
+            "unsupported",
+          ],
+        },
+        platform: {
+          enum: ["darwin", "windows", "linux"],
+        },
+        browser: {
+          enum: ["chrome"],
+        },
+        profile: {
+          $ref: "#/$defs/BrowserProfile",
+        },
+        configured_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        verified_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        message: {
+          type: "string",
+          minLength: 1,
+          maxLength: 500,
+        },
+      },
+    },
+    BrowserProfile: {
+      description:
+        "A Chrome profile directory name inside the user's Chrome data directory.",
+      type: "string",
+      pattern: "^(Default|Profile [1-9][0-9]{0,3}|Guest Profile)$",
+    },
+    CapabilityBrowserConnect: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "action"],
+          properties: {
+            type: {
+              const: "execute",
+            },
+            action: {
+              enum: ["status", "configure", "disconnect"],
+            },
+            profile: {
+              $ref: "#/$defs/BrowserProfile",
+            },
+            extension_token: {
+              description:
+                "Playwright Extension token, only with configure. The daemon stores it privately and never returns it.",
+              type: "string",
+              pattern: "^[A-Za-z0-9_-]{20,256}$",
+            },
+            kind: {
+              const: "browser_connect",
+            },
+          },
+        },
+      ],
+    },
+    CapabilityBrowserConnected: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "action", "status", "outcome"],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            action: {
+              enum: ["status", "configure", "disconnect"],
+            },
+            status: {
+              $ref: "#/$defs/BrowserConnectionStatus",
+            },
+            kind: {
+              const: "browser_connect",
+            },
+            outcome: {
+              const: "succeeded",
+            },
+          },
+        },
+      ],
+    },
+    CapabilityBrowserFailed: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "action", "error", "outcome"],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            action: {
+              enum: ["status", "configure", "disconnect"],
+            },
+            error: {
+              $ref: "#/$defs/AgentRunnerError",
+            },
+            kind: {
+              const: "browser_connect",
+            },
+            outcome: {
+              const: "failed",
+            },
+          },
+        },
+      ],
+    },
+    ComputerPermissionStatus: {
+      description:
+        "The macOS privacy permissions of this Computer. Other platforms report no subjects.",
+      type: "object",
+      additionalProperties: false,
+      required: ["platform", "host", "subjects"],
+      properties: {
+        platform: {
+          enum: ["darwin", "windows", "linux"],
+        },
+        host: {
+          enum: ["desktop", "standalone"],
+        },
+        subjects: {
+          type: "array",
+          maxItems: 2,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["subject", "permissions"],
+            properties: {
+              subject: {
+                enum: ["linger", "computer_use"],
+              },
+              permissions: {
+                type: "array",
+                maxItems: 2,
+                items: {
+                  type: "object",
+                  additionalProperties: false,
+                  required: ["id", "state", "prompt", "relaunch_required"],
+                  properties: {
+                    id: {
+                      enum: ["screen_recording", "accessibility"],
+                    },
+                    state: {
+                      enum: ["granted", "denied", "not_determined", "unknown"],
+                    },
+                    prompt: {
+                      enum: ["available", "settings_only"],
+                    },
+                    relaunch_required: {
+                      type: "boolean",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    CapabilityComputerPermission: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "action"],
+          properties: {
+            type: {
+              const: "execute",
+            },
+            action: {
+              enum: ["status", "prompt", "open_settings", "relaunch"],
+            },
+            subject: {
+              description: "Required for every action except status.",
+              enum: ["linger", "computer_use"],
+            },
+            permission: {
+              description: "Required for prompt and open_settings.",
+              enum: ["screen_recording", "accessibility"],
+            },
+            kind: {
+              const: "computer_permission",
+            },
+          },
+        },
+      ],
+    },
+    CapabilityComputerPermissionSucceeded: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "action", "status", "outcome"],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            action: {
+              enum: ["status", "prompt", "open_settings", "relaunch"],
+            },
+            status: {
+              $ref: "#/$defs/ComputerPermissionStatus",
+            },
+            kind: {
+              const: "computer_permission",
+            },
+            outcome: {
+              const: "succeeded",
+            },
+          },
+        },
+      ],
+    },
+    CapabilityComputerPermissionFailed: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "action", "error", "outcome"],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            action: {
+              enum: ["status", "prompt", "open_settings", "relaunch"],
+            },
+            error: {
+              $ref: "#/$defs/AgentRunnerError",
+            },
+            kind: {
+              const: "computer_permission",
+            },
+            outcome: {
+              const: "failed",
+            },
+          },
+        },
+      ],
+    },
+    CapabilitySkillsFailed: {
+      type: "object",
+      unevaluatedProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/LocalSkillCommandIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "kind", "stage", "error", "outcome"],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            stage: {
+              enum: ["scan"],
+            },
+            scan_id: {
+              $ref: "#/$defs/Id",
+            },
+            error: {
+              $ref: "#/$defs/AgentRunnerError",
+            },
+            kind: {
+              const: "skills_scan",
+            },
+            outcome: {
+              const: "failed",
+            },
+          },
+        },
+      ],
+    },
+    RunnerHello: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "protocol_version",
+        "runner_id",
+        "connection_nonce",
+        "sent_at",
+        "runtimes",
+        "runtime_diagnostics",
+        "workspace_grants",
+        "agent_runners",
+        "active_operations",
+        "daemon_version",
+        "platform",
+        "daemon_identity",
+        "runtime_registrations",
+        "capabilities",
+      ],
+      properties: {
+        type: {
+          const: "runner.hello",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        daemon_version: {
+          type: "string",
+          minLength: 1,
+          maxLength: 80,
+        },
+        platform: {
+          enum: ["darwin", "linux", "win32"],
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        display_name: {
+          type: "string",
+          minLength: 1,
+          maxLength: 120,
+        },
+        connection_nonce: {
+          $ref: "#/$defs/Id",
+        },
+        daemon_identity: {
+          type: "object",
+          additionalProperties: false,
+          required: ["daemon_id", "public_key", "identity_version", "proof"],
+          properties: {
+            daemon_id: {
+              type: "string",
+              pattern: "^[A-Za-z0-9_-]{43}$",
+            },
+            public_key: {
+              type: "string",
+              contentEncoding: "base64",
+              minLength: 44,
+              maxLength: 44,
+            },
+            identity_version: {
+              type: "integer",
+              minimum: 1,
+              maximum: 9007199254740991,
+            },
+            proof: {
+              type: "string",
+              contentEncoding: "base64",
+              minLength: 88,
+              maxLength: 88,
+            },
+          },
+        },
+        runtime_registrations: {
+          type: "array",
+          maxItems: 256,
+          items: {
+            $ref: "#/$defs/RuntimeRegistrationObservation",
+          },
+        },
+        sent_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        capacity: {
+          type: "integer",
+          minimum: 1,
+          maximum: 100,
+          description:
+            "Optional Computer-wide active Operation limit. Omission means unlimited.",
+        },
+        runtimes: {
+          type: "array",
+          minItems: 0,
+          uniqueItems: true,
+          items: {
+            enum: ["codex", "claude", "pi"],
+          },
+        },
+        runtime_diagnostics: {
+          $ref: "#/$defs/RuntimeDiagnostics",
+        },
+        capabilities: {
+          type: "array",
+          uniqueItems: true,
+          items: {
+            $ref: "#/$defs/RunnerCapability",
+          },
+        },
+        workspace_grants: {
+          type: "array",
+          items: {
+            $ref: "#/$defs/WorkspaceGrant",
+          },
+        },
+        agent_runners: {
+          type: "array",
+          items: {
+            $ref: "#/$defs/AgentRunnerSnapshot",
+          },
+        },
+        active_operations: {
+          type: "array",
+          items: {
+            $ref: "#/$defs/ActiveOperation",
+          },
+        },
+      },
+    },
+    RuntimeRegistrationSnapshot: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "protocol_version",
+        "command_id",
+        "runner_id",
+        "connection_epoch",
+        "registrations",
+      ],
+      properties: {
+        type: {
+          const: "runtime.registration.snapshot",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        registrations: {
+          type: "array",
+          maxItems: 256,
+          items: {
+            $ref: "#/$defs/RuntimeRegistration",
+          },
+        },
+      },
+    },
+    RuntimeRegistrationObserved: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "protocol_version",
+        "command_id",
+        "runner_id",
+        "connection_epoch",
+        "observed_count",
+      ],
+      properties: {
+        type: {
+          const: "runtime.registration.observed",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        observed_count: {
+          type: "integer",
+          minimum: 0,
+          maximum: 256,
+        },
+      },
+    },
+    RunnerHeartbeat: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "protocol_version",
+        "runner_id",
+        "sent_at",
+        "active_operation_ids",
+      ],
+      properties: {
+        type: {
+          const: "runner.heartbeat",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        sent_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        active_operation_ids: {
+          type: "array",
+          uniqueItems: true,
+          items: {
+            $ref: "#/$defs/Id",
+          },
+        },
+        managed_services: {
+          $ref: "#/$defs/ManagedServices",
+        },
+      },
+    },
+    RunnerRuntimeDiagnostics: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "protocol_version",
+        "runner_id",
+        "sent_at",
+        "revision",
+        "runtime_diagnostics",
+      ],
+      properties: {
+        type: {
+          const: "runner.runtime_diagnostics",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        sent_at: {
+          $ref: "#/$defs/Timestamp",
+        },
+        revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runtime_diagnostics: {
+          $ref: "#/$defs/RuntimeDiagnostics",
+        },
+      },
+    },
+    RunnerReconciled: {
+      type: "object",
+      additionalProperties: false,
+      required: ["type", "protocol_version", "runner_id", "connection_epoch"],
+      properties: {
+        type: {
+          const: "runner.reconciled",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+      },
+    },
+    RunnerWelcome: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "protocol_version",
+        "runner_id",
+        "connection_id",
+        "connection_epoch",
+        "heartbeat_interval_ms",
+        "reconcile_operation_ids",
+      ],
+      properties: {
+        type: {
+          const: "runner.welcome",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        heartbeat_interval_ms: {
+          type: "integer",
+          minimum: 1000,
+          maximum: 9007199254740991,
+        },
+        reconcile_operation_ids: {
+          type: "array",
+          uniqueItems: true,
+          items: {
+            $ref: "#/$defs/Id",
+          },
+        },
+        target_release: {
+          $ref: "#/$defs/ComputerTargetRelease",
+        },
+        context_content_url: {
+          description:
+            "Base URL the Computer fetches Context View manifests (views/<view_digest>) and files (files/<sha256>) from while this connection is current.",
+          type: "string",
+          minLength: 1,
+          maxLength: 2048,
+          pattern: "^https?://",
+        },
+      },
+    },
+    ComputerReleaseArchive: {
+      type: "object",
+      additionalProperties: false,
+      required: ["sha256", "size"],
+      properties: {
+        sha256: {
+          type: "string",
+          pattern: "^[0-9a-f]{64}$",
+        },
+        size: {
+          type: "integer",
+          minimum: 1,
+          maximum: 9007199254740991,
+        },
+      },
+    },
+    ComputerTargetRelease: {
+      type: "object",
+      additionalProperties: false,
+      required: ["targets"],
+      properties: {
+        targets: {
+          type: "object",
+          propertyNames: {
+            enum: [
+              "darwin-arm64",
+              "darwin-x64",
+              "linux-arm64",
+              "linux-x64",
+              "win32-arm64",
+              "win32-x64",
+            ],
+          },
+          additionalProperties: {
+            type: "object",
+            additionalProperties: false,
+            required: ["app", "deps"],
+            properties: {
+              app: {
+                $ref: "#/$defs/ComputerReleaseArchive",
+              },
+              deps: {
+                $ref: "#/$defs/ComputerReleaseArchive",
+              },
+            },
+          },
+        },
+      },
+    },
+    RuntimeConfig: {
+      type: "object",
+      additionalProperties: false,
+      required: ["type"],
+      properties: {
+        type: {
+          enum: ["codex", "claude", "pi"],
+        },
+        model: {
+          type: "string",
+          minLength: 1,
+          maxLength: 160,
+        },
+        reasoning_effort: {
+          enum: ["none", "low", "medium", "high", "xhigh", "max", "ultra"],
+        },
+      },
+    },
+    AgentRunnerWireIdentity: {
+      type: "object",
+      required: [
+        "protocol_version",
+        "command_id",
+        "runner_id",
+        "tenant_id",
+        "agent_id",
+        "connection_epoch",
+        "runner_revision",
+      ],
+      properties: {
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+      },
+    },
+    AgentRunnerEnsure: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "runtime",
+            "workspace_grant_id",
+            "registration_id",
+            "assignment_revision",
+          ],
+          properties: {
+            type: {
+              const: "agent_runner.ensure",
+            },
+            runtime: {
+              $ref: "#/$defs/RuntimeConfig",
+            },
+            workspace_grant_id: {
+              $ref: "#/$defs/Id",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentRunnerRemove: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: ["type"],
+          properties: {
+            type: {
+              const: "agent_runner.remove",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentRunnerReady: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "state",
+            "runner_pid",
+            "registration_id",
+            "assignment_revision",
+          ],
+          properties: {
+            type: {
+              const: "agent_runner.state",
+            },
+            runner_pid: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            cli_credential: {
+              $ref: "#/$defs/AgentCliCredentialReport",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            state: {
+              const: "ready",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentRunnerRemoved: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "state"],
+          properties: {
+            type: {
+              const: "agent_runner.state",
+            },
+            state: {
+              const: "removed",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentRunnerFailed: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "state", "error"],
+          properties: {
+            type: {
+              const: "agent_runner.state",
+            },
+            error: {
+              $ref: "#/$defs/AgentRunnerError",
+            },
+            state: {
+              const: "failed",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentCliCredentialPut: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "kind",
+            "profile",
+            "access_token",
+            "registration_id",
+            "assignment_revision",
+          ],
+          properties: {
+            type: {
+              const: "execute",
+            },
+            profile: {
+              $ref: "#/$defs/AgentCliProfile",
+            },
+            access_token: {
+              type: "string",
+              pattern: "^th_agent_[A-Za-z0-9_-]{43}$",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            kind: {
+              const: "cli_credential",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentCliProfile: {
+      type: "object",
+      additionalProperties: false,
+      required: ["url", "tenant_id", "agent_id"],
+      properties: {
+        url: {
+          type: "string",
+          pattern: "^https?://",
+          maxLength: 2048,
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+      },
+    },
+    AgentCliCredentialReport: {
+      description:
+        "The CLI credential the Daemon stores for the Agent, without its token, and the Runtime Assignment it was installed for.",
+      type: "object",
+      additionalProperties: false,
+      required: ["sha256", "assignment_revision", "profile"],
+      properties: {
+        sha256: {
+          description:
+            "SHA-256 of the token itself, the hash TeamHub records for it.",
+          $ref: "#/$defs/Sha256",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        profile: {
+          $ref: "#/$defs/AgentCliProfile",
+        },
+      },
+    },
+    AgentCliCredentialStored: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "kind",
+            "sha256",
+            "registration_id",
+            "assignment_revision",
+            "outcome",
+          ],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            sha256: {
+              description: "SHA-256 of the stored token itself.",
+              $ref: "#/$defs/Sha256",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            kind: {
+              const: "cli_credential",
+            },
+            outcome: {
+              const: "succeeded",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentCliCredentialFailed: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/AgentRunnerWireIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "kind",
+            "error",
+            "registration_id",
+            "assignment_revision",
+            "outcome",
+          ],
+          properties: {
+            type: {
+              const: "executed",
+            },
+            error: {
+              $ref: "#/$defs/AgentRunnerError",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            kind: {
+              const: "cli_credential",
+            },
+            outcome: {
+              const: "failed",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    AgentRunnerError: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "message", "retryable"],
+      properties: {
+        code: {
+          $ref: "#/$defs/Id",
+        },
+        message: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4000,
+        },
+        retryable: {
+          type: "boolean",
+        },
+      },
+    },
+    AgentRunnerSnapshot: {
+      oneOf: [
+        {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "runner_id",
+            "tenant_id",
+            "agent_id",
+            "runner_revision",
+            "state",
+            "runtime",
+            "workspace_grant_id",
+            "runner_pid",
+            "registration_id",
+            "assignment_revision",
+          ],
+          properties: {
+            runner_id: {
+              $ref: "#/$defs/Id",
+            },
+            tenant_id: {
+              $ref: "#/$defs/Id",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            agent_id: {
+              $ref: "#/$defs/Id",
+            },
+            runner_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            state: {
+              const: "ready",
+            },
+            runtime: {
+              $ref: "#/$defs/RuntimeConfig",
+            },
+            workspace_grant_id: {
+              $ref: "#/$defs/Id",
+            },
+            runner_pid: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "runner_id",
+            "tenant_id",
+            "agent_id",
+            "runner_revision",
+            "state",
+          ],
+          properties: {
+            runner_id: {
+              $ref: "#/$defs/Id",
+            },
+            tenant_id: {
+              $ref: "#/$defs/Id",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            agent_id: {
+              $ref: "#/$defs/Id",
+            },
+            runner_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            state: {
+              const: "removed",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "runner_id",
+            "tenant_id",
+            "agent_id",
+            "runner_revision",
+            "state",
+            "error",
+          ],
+          properties: {
+            runner_id: {
+              $ref: "#/$defs/Id",
+            },
+            tenant_id: {
+              $ref: "#/$defs/Id",
+            },
+            registration_id: {
+              $ref: "#/$defs/Id",
+            },
+            assignment_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            agent_id: {
+              $ref: "#/$defs/Id",
+            },
+            runner_revision: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            state: {
+              const: "failed",
+            },
+            runtime: {
+              $ref: "#/$defs/RuntimeConfig",
+            },
+            workspace_grant_id: {
+              $ref: "#/$defs/Id",
+            },
+            error: {
+              $ref: "#/$defs/AgentRunnerError",
+            },
+          },
+        },
+      ],
+    },
+    SessionOptions: {
+      type: "object",
+      additionalProperties: false,
+      required: ["thread_name"],
+      properties: {
+        thread_name: {
+          type: "string",
+          minLength: 1,
+          maxLength: 200,
+        },
+        base_instructions: {
+          type: "string",
+          maxLength: 100000,
+        },
+        developer_instructions: {
+          type: "string",
+          maxLength: 100000,
+        },
+      },
+    },
+    AgentInput: {
+      type: "object",
+      additionalProperties: false,
+      required: ["type", "text"],
+      properties: {
+        type: {
+          const: "text",
+        },
+        text: {
+          type: "string",
+          maxLength: 1000000,
+        },
+        runtime_response: {
+          type: "object",
+          additionalProperties: false,
+          required: ["request_id", "payload"],
+          properties: {
+            request_id: {
+              $ref: "#/$defs/Id",
+            },
+            payload: {
+              $ref: "#/$defs/OpaqueObject",
+            },
+          },
+        },
+      },
+    },
+    ContextRunContext: {
+      type: "object",
+      additionalProperties: false,
+      required: ["execution_run_ref", "source_inbox_ids"],
+      properties: {
+        human_interactions: {
+          type: "boolean",
+        },
+        permission_review: {
+          type: "boolean",
+          description:
+            "The Daemon sends Runtime permission prompts as human_interaction.requested with kind permission_review; Agent Service answers each with an operation.input runtime_response.",
+        },
+        execution_run_ref: {
+          $ref: "#/$defs/Id",
+        },
+        source_inbox_ids: {
+          type: "array",
+          maxItems: 1024,
+          uniqueItems: true,
+          items: {
+            $ref: "#/$defs/Id",
+          },
+        },
+      },
+    },
+    CliRunContext: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        run_id: {
+          $ref: "#/$defs/Id",
+        },
+        scope: {
+          type: "object",
+          additionalProperties: false,
+          required: ["kind", "id"],
+          properties: {
+            kind: {
+              enum: ["room", "task", "document"],
+            },
+            id: {
+              $ref: "#/$defs/Id",
+            },
+          },
+        },
+      },
+    },
+    ContextRunStartRequest: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "kind",
+        "runtime",
+        "session_options",
+        "session",
+        "input",
+        "run_context",
+        "run_resources",
+      ],
+      properties: {
+        kind: {
+          const: "run.start",
+        },
+        runtime: {
+          $ref: "#/$defs/RuntimeConfig",
+        },
+        session_options: {
+          $ref: "#/$defs/SessionOptions",
+        },
+        session: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        input: {
+          $ref: "#/$defs/AgentInput",
+        },
+        run_context: {
+          $ref: "#/$defs/ContextRunContext",
+        },
+        cli_run_context: {
+          $ref: "#/$defs/CliRunContext",
+        },
+        run_resources: {
+          $ref: "#/$defs/LocalRunResources",
+        },
+      },
+    },
+    RuntimeOperationRequest: {
+      oneOf: [
+        {
+          $ref: "#/$defs/ContextRunStartRequest",
+        },
+      ],
+    },
+    OperationStart: {
+      type: "object",
+      additionalProperties: false,
+      allOf: [
+        {
+          $ref: "#/$defs/OperationScope",
+        },
+      ],
+      required: [
+        "type",
+        "protocol_version",
+        "command_id",
+        "tenant_id",
+        "registration_id",
+        "assignment_revision",
+        "runner_id",
+        "agent_id",
+        "operation_id",
+        "connection_epoch",
+        "runner_revision",
+        "generation",
+        "execution_lease_id",
+        "workspace_grant_id",
+        "runtime_type",
+        "request",
+      ],
+      properties: {
+        type: {
+          const: "operation.start",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        context_view_ref: {
+          $ref: "#/$defs/ContextViewRef",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        operation_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        generation: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        execution_lease_id: {
+          $ref: "#/$defs/Id",
+        },
+        workspace_grant_id: {
+          $ref: "#/$defs/Id",
+        },
+        runtime_type: {
+          enum: ["codex", "claude", "pi"],
+        },
+        host_access: {
+          const: "trusted",
+        },
+        request: {
+          $ref: "#/$defs/RuntimeOperationRequest",
+        },
+      },
+    },
+    OperationPrepare: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "target",
+            "command_id",
+            "runtime",
+            "session_options",
+            "session",
+            "mcp_relays",
+          ],
+          properties: {
+            type: {
+              const: "prepare",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            host_access: {
+              const: "trusted",
+            },
+            runtime: {
+              $ref: "#/$defs/RuntimeConfig",
+            },
+            session_options: {
+              $ref: "#/$defs/SessionOptions",
+            },
+            session: {
+              $ref: "#/$defs/OpaqueObject",
+            },
+            permission_review: {
+              const: true,
+            },
+            mcp_relays: {
+              type: "array",
+              maxItems: 64,
+              items: {
+                $ref: "#/$defs/LocalMcpRelayDescriptor",
+              },
+            },
+            target: {
+              const: "operation",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationIdentity: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationScope",
+        },
+      ],
+      required: [
+        "protocol_version",
+        "tenant_id",
+        "registration_id",
+        "assignment_revision",
+        "runner_id",
+        "agent_id",
+        "operation_id",
+        "connection_epoch",
+        "runner_revision",
+        "generation",
+        "execution_lease_id",
+        "workspace_grant_id",
+        "runtime_type",
+      ],
+      properties: {
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        context_view_ref: {
+          $ref: "#/$defs/ContextViewRef",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        operation_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        generation: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        execution_lease_id: {
+          $ref: "#/$defs/Id",
+        },
+        workspace_grant_id: {
+          $ref: "#/$defs/Id",
+        },
+        runtime_type: {
+          enum: ["codex", "claude", "pi"],
+        },
+      },
+    },
+    OperationInput: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "command_id",
+            "expected_turn_id",
+            "input_context_view_ref",
+            "input",
+          ],
+          properties: {
+            type: {
+              const: "operation.input",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            expected_turn_id: {
+              $ref: "#/$defs/Id",
+            },
+            input_context_view_ref: {
+              $ref: "#/$defs/ContextViewRef",
+            },
+            input: {
+              $ref: "#/$defs/AgentInput",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationCancel: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "target", "command_id", "reason"],
+          properties: {
+            type: {
+              const: "cancel",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            reason: {
+              type: "string",
+              minLength: 1,
+              maxLength: 500,
+            },
+            target: {
+              const: "operation",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationAck: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "command_id", "through_seq"],
+          properties: {
+            type: {
+              const: "operation.ack",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            through_seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationAccepted: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "seq", "command_id", "runner_pid"],
+          properties: {
+            type: {
+              const: "operation.accepted",
+            },
+            seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            runner_pid: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            runtime_pid: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            session: {
+              $ref: "#/$defs/OpaqueObject",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationPrepared: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "target",
+            "command_id",
+            "prepare_command_id",
+            "prepared",
+            "outcome",
+            "duration_ms",
+          ],
+          properties: {
+            type: {
+              const: "prepared",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            prepare_command_id: {
+              $ref: "#/$defs/Id",
+            },
+            prepared: {
+              type: "boolean",
+            },
+            prepare_native_resume: {
+              $ref: "#/$defs/NativeResumeMeasurement",
+            },
+            outcome: {
+              enum: ["ready", "fallback"],
+            },
+            duration_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+            error: {
+              $ref: "#/$defs/AgentRunnerError",
+            },
+            reason: {
+              type: "string",
+              minLength: 1,
+              maxLength: 240,
+            },
+            target: {
+              const: "operation",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    ProviderPrepare: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "target",
+        "command_id",
+        "prepare_id",
+        "protocol_version",
+        "host_access",
+        "tenant_id",
+        "registration_id",
+        "assignment_revision",
+        "runner_id",
+        "runner_revision",
+        "connection_epoch",
+        "agent_id",
+        "workspace_grant_id",
+        "runtime_type",
+        "execution_context_key",
+        "runtime_instance_id",
+        "context_view_ref",
+        "runtime",
+        "session_options",
+        "session",
+      ],
+      properties: {
+        type: {
+          const: "prepare",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        prepare_id: {
+          $ref: "#/$defs/Id",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        host_access: {
+          const: "trusted",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        registration_id: {
+          $ref: "#/$defs/Id",
+        },
+        assignment_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_revision: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        workspace_grant_id: {
+          $ref: "#/$defs/Id",
+        },
+        runtime_type: {
+          enum: ["codex", "claude", "pi"],
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        runtime_instance_id: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        context_view_ref: {
+          $ref: "#/$defs/ContextViewRef",
+        },
+        runtime: {
+          $ref: "#/$defs/RuntimeConfig",
+        },
+        session_options: {
+          $ref: "#/$defs/SessionOptions",
+        },
+        session: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        run_context: {
+          $ref: "#/$defs/ProviderPrepareRunContext",
+        },
+        target: {
+          const: "provider",
+        },
+      },
+    },
+    ProviderPrepareRunContext: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        human_interactions: {
+          type: "boolean",
+        },
+        permission_review: {
+          type: "boolean",
+        },
+      },
+    },
+    SessionCompact: {
+      description:
+        "Compacts the native session of the process parked for this Context with the Runtime's own compaction. It never starts a process; without a parked process the answer is no_process.",
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "kind",
+        "command_id",
+        "compact_id",
+        "protocol_version",
+        "runner_id",
+        "connection_epoch",
+        "agent_id",
+        "runtime_type",
+        "execution_context_key",
+      ],
+      properties: {
+        type: {
+          const: "execute",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        compact_id: {
+          $ref: "#/$defs/Id",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        runtime_type: {
+          enum: ["codex", "claude"],
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        instructions: {
+          type: "string",
+          minLength: 1,
+          maxLength: 8192,
+        },
+        kind: {
+          const: "session_compact",
+        },
+      },
+    },
+    ModelInvoke: {
+      description:
+        "Runs one model call on the Computer's signed-in Codex or Claude CLI in a fresh temporary directory, outside the Operation ledger and without a Context. Only structured carries output_schema, which it requires; only workspace carries workspace_files, the input files of the temporary directory, and gets its tree back. A workspace file may not be AGENTS.md, AGENTS.override.md or CLAUDE.md at the root or lie under a .codex or .claude directory. Codex cannot read files in workspace mode, so the Daemon also inlines the workspace files into the prompt and Codex writes only through apply_patch. The Daemon answers failed for a request that breaks these rules, and for a reply whose encoded model.invoked would exceed the frame limit.",
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "kind",
+        "command_id",
+        "invoke_id",
+        "protocol_version",
+        "runner_id",
+        "connection_epoch",
+        "tenant_id",
+        "owner_actor_id",
+        "agent_id",
+        "runtime_type",
+        "mode",
+        "reasoning_effort",
+        "input",
+        "timeout_ms",
+      ],
+      properties: {
+        type: {
+          const: "execute",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        invoke_id: {
+          $ref: "#/$defs/Id",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        owner_actor_id: {
+          $ref: "#/$defs/Id",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        runtime_type: {
+          enum: ["codex", "claude"],
+        },
+        mode: {
+          enum: ["structured", "text", "workspace"],
+        },
+        reasoning_effort: {
+          enum: ["low", "medium", "high"],
+        },
+        instructions: {
+          type: "string",
+          minLength: 1,
+          maxLength: 3145728,
+        },
+        input: {
+          type: "string",
+          minLength: 1,
+          maxLength: 3145728,
+        },
+        output_schema: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        workspace_files: {
+          type: "array",
+          maxItems: 256,
+          items: {
+            $ref: "#/$defs/ModelInvokeFile",
+          },
+        },
+        timeout_ms: {
+          type: "integer",
+          minimum: 1000,
+          maximum: 14400000,
+        },
+        kind: {
+          const: "model_invoke",
+        },
+        max_output_chars: {
+          description:
+            "Caps the characters the model may stream in its reply. A Daemon interrupts a session call that streams more and answers output_limited with what it streamed. Calls that run on their own are bounded by timeout_ms only.",
+          type: "integer",
+          minimum: 1000,
+          maximum: 1048576,
+        },
+        session_key: {
+          description:
+            "Names the session a structured call belongs to. A Daemon answers the Codex calls of one session in one resident thread whose base instructions are the call's instructions, so only the input is new to the provider; while that thread answers another call, and for Claude, the call runs on its own. Either way the result is the same.",
+          type: "string",
+          minLength: 1,
+          maxLength: 200,
+        },
+      },
+    },
+    ModelInvokeFile: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path", "content_base64"],
+      properties: {
+        path: {
+          type: "string",
+          minLength: 1,
+          maxLength: 512,
+        },
+        content_base64: {
+          type: "string",
+          maxLength: 2796204,
+          contentEncoding: "base64",
+        },
+      },
+    },
+    ModelInvoked: {
+      description:
+        "Advisory outcome of one model.invoke. An outcome nobody waits for is ignored.",
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "kind",
+        "command_id",
+        "runner_id",
+        "invoke_id",
+        "outcome",
+        "duration_ms",
+      ],
+      properties: {
+        type: {
+          const: "executed",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        invoke_id: {
+          $ref: "#/$defs/Id",
+        },
+        outcome: {
+          enum: [
+            "completed",
+            "timed_out",
+            "output_limited",
+            "canceled",
+            "unavailable",
+            "runtime_unavailable",
+            "auth_required",
+            "runtime_incompatible",
+            "failed",
+          ],
+        },
+        text: {
+          description:
+            "The reply of a completed call. For a session call that timed_out, was output_limited or canceled, what the model had streamed so far, when anything.",
+          type: "string",
+          maxLength: 1048576,
+        },
+        workspace_files: {
+          type: "array",
+          maxItems: 256,
+          items: {
+            $ref: "#/$defs/ModelInvokeFile",
+          },
+        },
+        model: {
+          type: "string",
+          minLength: 1,
+          maxLength: 200,
+        },
+        runtime_version: {
+          type: "string",
+          minLength: 1,
+          maxLength: 128,
+        },
+        usage: {
+          type: "object",
+          additionalProperties: false,
+          required: ["input_tokens", "cached_input_tokens", "output_tokens"],
+          properties: {
+            input_tokens: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+            cached_input_tokens: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+            output_tokens: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+          },
+        },
+        reason: {
+          type: "string",
+          minLength: 1,
+          maxLength: 512,
+        },
+        duration_ms: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        kind: {
+          const: "model_invoke",
+        },
+      },
+    },
+    SessionCompacted: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "kind",
+        "command_id",
+        "runner_id",
+        "compact_id",
+        "execution_context_key",
+        "outcome",
+        "duration_ms",
+      ],
+      properties: {
+        type: {
+          const: "executed",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        compact_id: {
+          $ref: "#/$defs/Id",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        outcome: {
+          enum: [
+            "compacted",
+            "nothing_to_compact",
+            "no_process",
+            "canceled",
+            "failed",
+          ],
+        },
+        pre_tokens: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        reason: {
+          type: "string",
+          minLength: 1,
+          maxLength: 512,
+        },
+        duration_ms: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        kind: {
+          const: "session_compact",
+        },
+      },
+    },
+    ProviderPrepared: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "target",
+        "command_id",
+        "runner_id",
+        "prepare_id",
+        "execution_context_key",
+        "outcome",
+        "duration_ms",
+      ],
+      properties: {
+        type: {
+          const: "prepared",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        prepare_id: {
+          $ref: "#/$defs/Id",
+        },
+        execution_context_key: {
+          $ref: "#/$defs/ExecutionContextKey",
+        },
+        outcome: {
+          enum: [
+            "ready",
+            "already_ready",
+            "not_eligible",
+            "failed",
+            "canceled",
+          ],
+        },
+        reason: {
+          type: "string",
+          minLength: 1,
+          maxLength: 512,
+        },
+        duration_ms: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        target: {
+          const: "provider",
+        },
+      },
+    },
+    RunPlanStep: {
+      type: "object",
+      additionalProperties: false,
+      required: ["content", "status"],
+      properties: {
+        content: {
+          type: "string",
+          maxLength: 262144,
+        },
+        status: {
+          enum: ["pending", "in_progress", "completed", "canceled"],
+        },
+      },
+    },
+    RunActivityContentBlock: {
+      type: "object",
+      additionalProperties: false,
+      required: ["format", "content"],
+      properties: {
+        format: {
+          enum: ["text", "code", "json"],
+        },
+        label: {
+          type: "string",
+          minLength: 1,
+          maxLength: 80,
+        },
+        content: {
+          type: "string",
+          minLength: 1,
+          maxLength: 4000,
+        },
+      },
+    },
+    RunEvent: {
+      oneOf: [
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "request"],
+          properties: {
+            type: {
+              const: "human_interaction.requested",
+            },
+            request: {
+              $ref: "#/$defs/OpaqueObject",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "turn_id"],
+          properties: {
+            type: {
+              const: "run.started",
+            },
+            turn_id: {
+              $ref: "#/$defs/Id",
+            },
+            session: {
+              $ref: "#/$defs/OpaqueObject",
+            },
+            process_reused: {
+              type: "boolean",
+            },
+            dispatched_at_unix_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "status"],
+          properties: {
+            type: {
+              const: "status.changed",
+            },
+            status: {
+              const: "working",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "status"],
+          properties: {
+            type: {
+              const: "status.changed",
+            },
+            status: {
+              const: "thinking",
+            },
+            title: {
+              type: "string",
+              minLength: 1,
+              maxLength: 50000,
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "steps"],
+          properties: {
+            type: {
+              const: "plan.updated",
+            },
+            explanation: {
+              type: "string",
+              maxLength: 262144,
+            },
+            steps: {
+              type: "array",
+              maxItems: 1024,
+              items: {
+                $ref: "#/$defs/RunPlanStep",
+              },
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "activity_id", "kind", "title"],
+          properties: {
+            type: {
+              const: "activity.started",
+            },
+            activity_id: {
+              $ref: "#/$defs/Id",
+            },
+            kind: {
+              enum: [
+                "command",
+                "tool",
+                "file_change",
+                "search",
+                "read",
+                "browse",
+                "message",
+                "message_read",
+                "image",
+                "delegation",
+                "response",
+                "interaction",
+                "recovery",
+                "review",
+              ],
+            },
+            title: {
+              type: "string",
+              minLength: 1,
+              maxLength: 200,
+            },
+            content: {
+              type: "array",
+              maxItems: 6,
+              items: {
+                $ref: "#/$defs/RunActivityContentBlock",
+              },
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "activity_id", "detail"],
+          properties: {
+            type: {
+              const: "activity.updated",
+            },
+            activity_id: {
+              $ref: "#/$defs/Id",
+            },
+            detail: {
+              type: "string",
+              minLength: 1,
+              maxLength: 200,
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "activity_id", "outcome"],
+          properties: {
+            type: {
+              const: "activity.finished",
+            },
+            activity_id: {
+              $ref: "#/$defs/Id",
+            },
+            outcome: {
+              enum: ["succeeded", "failed", "canceled", "declined"],
+            },
+            content: {
+              type: "array",
+              maxItems: 6,
+              items: {
+                $ref: "#/$defs/RunActivityContentBlock",
+              },
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "message_id", "delta"],
+          properties: {
+            type: {
+              const: "message.delta",
+            },
+            message_id: {
+              $ref: "#/$defs/Id",
+            },
+            delta: {
+              type: "string",
+              maxLength: 262144,
+            },
+            observed_at_unix_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "call_id", "tool_name", "input"],
+          properties: {
+            type: {
+              const: "tool.called",
+            },
+            call_id: {
+              $ref: "#/$defs/Id",
+            },
+            tool_name: {
+              type: "string",
+              minLength: 1,
+              maxLength: 200,
+            },
+            input: {
+              $ref: "#/$defs/JsonValue",
+            },
+            observed_at_unix_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "call_id", "tool_name", "output", "is_error"],
+          properties: {
+            type: {
+              const: "tool.returned",
+            },
+            call_id: {
+              $ref: "#/$defs/Id",
+            },
+            tool_name: {
+              type: "string",
+              minLength: 1,
+              maxLength: 200,
+            },
+            output: {
+              anyOf: [
+                {
+                  type: "string",
+                },
+                {
+                  $ref: "#/$defs/JsonValue",
+                },
+              ],
+            },
+            is_error: {
+              type: "boolean",
+            },
+            observed_at_unix_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+          },
+        },
+        {
+          description:
+            "One completed model request, reported once per native response. started_at is when the Runtime had the request's inputs; first_item_at is the first observable output at the stated granularity and is not a time to first token.",
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "type",
+            "responded_at_unix_ms",
+            "started_at_unix_ms",
+            "granularity",
+            "usage",
+          ],
+          properties: {
+            type: {
+              const: "model.responded",
+            },
+            responded_at_unix_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+            started_at_unix_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+            first_item_at_unix_ms: {
+              $ref: "#/$defs/NonNegativeInteger",
+            },
+            granularity: {
+              enum: ["item", "block", "delta"],
+            },
+            model: {
+              type: "string",
+              minLength: 1,
+              maxLength: 200,
+            },
+            message_id: {
+              $ref: "#/$defs/Id",
+            },
+            usage: {
+              $ref: "#/$defs/RunTokenCounts",
+            },
+            agent: {
+              description:
+                "Present for a sub-agent's request; absent for the Run's own agent.",
+              type: "object",
+              additionalProperties: false,
+              required: ["id"],
+              properties: {
+                id: {
+                  $ref: "#/$defs/Id",
+                },
+                parent_call_id: {
+                  $ref: "#/$defs/Id",
+                },
+              },
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "path"],
+          properties: {
+            type: {
+              enum: ["file.created", "file.updated", "file.deleted"],
+            },
+            path: {
+              type: "string",
+              minLength: 1,
+              maxLength: 4096,
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type"],
+          properties: {
+            type: {
+              const: "run.completed",
+            },
+          },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["type", "message"],
+          properties: {
+            type: {
+              const: "run.failed",
+            },
+            message: {
+              type: "string",
+              minLength: 1,
+              maxLength: 4000,
+            },
+          },
+        },
+      ],
+    },
+    OperationEvent: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "seq", "event"],
+          properties: {
+            type: {
+              const: "operation.event",
+            },
+            seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            event: {
+              $ref: "#/$defs/RunEvent",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationInputAck: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "outcome", "seq", "command_id", "turn_id"],
+          properties: {
+            type: {
+              const: "operation.input_result",
+            },
+            seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            turn_id: {
+              $ref: "#/$defs/Id",
+            },
+            outcome: {
+              const: "accepted",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationInputClosed: {
+      description:
+        "Durable command receipt for an input targeting a terminal Operation. Does not belong to or advance the immutable Operation event sequence.",
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "outcome",
+            "command_id",
+            "expected_turn_id",
+            "effect",
+          ],
+          properties: {
+            type: {
+              const: "operation.input_result",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            expected_turn_id: {
+              $ref: "#/$defs/Id",
+            },
+            effect: {
+              enum: ["definitely_not_applied", "uncertain"],
+            },
+            outcome: {
+              const: "closed",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationInputRejected: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: [
+            "type",
+            "outcome",
+            "seq",
+            "command_id",
+            "expected_turn_id",
+            "effect",
+            "reason",
+            "message",
+          ],
+          properties: {
+            type: {
+              const: "operation.input_result",
+            },
+            seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            command_id: {
+              $ref: "#/$defs/Id",
+            },
+            expected_turn_id: {
+              $ref: "#/$defs/Id",
+            },
+            actual_turn_id: {
+              $ref: "#/$defs/Id",
+            },
+            effect: {
+              enum: ["definitely_not_applied", "uncertain"],
+            },
+            reason: {
+              enum: [
+                "target_mismatch",
+                "no_active_turn",
+                "rejected",
+                "ack_mismatch",
+                "transport",
+              ],
+            },
+            message: {
+              type: "string",
+              minLength: 1,
+              maxLength: 4000,
+            },
+            outcome: {
+              const: "rejected",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    RunTokenCounts: {
+      type: "object",
+      additionalProperties: false,
+      required: ["input", "cache_read", "cache_write", "output"],
+      properties: {
+        input: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        cache_read: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        cache_write: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        output: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        reasoning: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+      },
+    },
+    NativeResumeMeasurement: {
+      type: "object",
+      additionalProperties: false,
+      required: ["duration_ms", "result"],
+      properties: {
+        duration_ms: {
+          $ref: "#/$defs/NonNegativeInteger",
+        },
+        result: {
+          enum: ["success", "error", "canceled"],
+        },
+      },
+    },
+    RunUsage: {
+      type: "array",
+      minItems: 1,
+      maxItems: 32,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: [
+          "model",
+          "provider",
+          "input",
+          "cache_read",
+          "cache_write",
+          "output",
+        ],
+        properties: {
+          input: {
+            $ref: "#/$defs/NonNegativeInteger",
+          },
+          cache_read: {
+            $ref: "#/$defs/NonNegativeInteger",
+          },
+          cache_write: {
+            $ref: "#/$defs/NonNegativeInteger",
+          },
+          output: {
+            $ref: "#/$defs/NonNegativeInteger",
+          },
+          reasoning: {
+            $ref: "#/$defs/NonNegativeInteger",
+          },
+          model: {
+            type: "string",
+            minLength: 1,
+            maxLength: 128,
+          },
+          provider: {
+            enum: ["openai", "anthropic", "unknown"],
+          },
+          last: {
+            $ref: "#/$defs/RunTokenCounts",
+          },
+          compaction_count: {
+            $ref: "#/$defs/NonNegativeInteger",
+          },
+        },
+      },
+    },
+    RunResult: {
+      type: "object",
+      additionalProperties: false,
+      required: ["type", "final_response", "session"],
+      properties: {
+        type: {
+          const: "run",
+        },
+        final_response: {
+          type: "string",
+          maxLength: 1000000,
+        },
+        session: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        native_resume: {
+          $ref: "#/$defs/NativeResumeMeasurement",
+        },
+        prepare_native_resume: {
+          $ref: "#/$defs/NativeResumeMeasurement",
+        },
+        usage: {
+          $ref: "#/$defs/RunUsage",
+        },
+      },
+    },
+    OperationResult: {
+      oneOf: [
+        {
+          $ref: "#/$defs/RunResult",
+        },
+      ],
+    },
+    OperationCompleted: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "seq", "result"],
+          properties: {
+            type: {
+              const: "operation.completed",
+            },
+            seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            result: {
+              $ref: "#/$defs/OperationResult",
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    RuntimeExecutionFailure: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "runtime_type"],
+      properties: {
+        code: {
+          enum: [
+            "session_not_found",
+            "protocol_incompatible",
+            "authentication_required",
+            "network_error",
+            "rate_limited",
+            "model_unavailable",
+            "context_too_long",
+            "model_service_error",
+            "timeout",
+            "execution_failed",
+          ],
+        },
+        runtime_type: {
+          enum: ["codex", "claude", "pi"],
+        },
+        runtime_version: {
+          type: "string",
+          pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$",
+          maxLength: 80,
+        },
+      },
+    },
+    RuntimeFailureDiagnostics: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        exitCode: {
+          type: "integer",
+          minimum: -2147483648,
+          maximum: 2147483647,
+        },
+        signal: {
+          type: "string",
+          pattern: "^SIG[A-Z0-9]{1,16}$",
+        },
+        code: {
+          type: "string",
+          pattern: "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+        },
+        statusCode: {
+          type: "integer",
+          minimum: 100,
+          maximum: 599,
+        },
+      },
+    },
+    OperationFailed: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "seq", "error"],
+          properties: {
+            native_resume: {
+              $ref: "#/$defs/NativeResumeMeasurement",
+            },
+            prepare_native_resume: {
+              $ref: "#/$defs/NativeResumeMeasurement",
+            },
+            usage: {
+              $ref: "#/$defs/RunUsage",
+            },
+            type: {
+              const: "operation.failed",
+            },
+            seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            stage: {
+              enum: [
+                "operation_admission",
+                "workspace_preparation",
+                "runtime_execution",
+                "runtime_cleanup",
+              ],
+            },
+            error: {
+              type: "object",
+              additionalProperties: false,
+              required: ["code", "message", "retryable"],
+              properties: {
+                code: {
+                  $ref: "#/$defs/Id",
+                },
+                message: {
+                  type: "string",
+                  minLength: 1,
+                  maxLength: 4000,
+                },
+                retryable: {
+                  type: "boolean",
+                },
+                failure: {
+                  $ref: "#/$defs/RuntimeExecutionFailure",
+                },
+                diagnostics: {
+                  $ref: "#/$defs/RuntimeFailureDiagnostics",
+                },
+              },
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    OperationCancelled: {
+      type: "object",
+      allOf: [
+        {
+          $ref: "#/$defs/OperationIdentity",
+        },
+        {
+          type: "object",
+          required: ["type", "seq", "reason"],
+          properties: {
+            native_resume: {
+              $ref: "#/$defs/NativeResumeMeasurement",
+            },
+            prepare_native_resume: {
+              $ref: "#/$defs/NativeResumeMeasurement",
+            },
+            usage: {
+              $ref: "#/$defs/RunUsage",
+            },
+            type: {
+              const: "operation.cancelled",
+            },
+            seq: {
+              $ref: "#/$defs/PositiveInteger",
+            },
+            reason: {
+              type: "string",
+              minLength: 1,
+              maxLength: 500,
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    },
+    ComputerToolCall: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "kind",
+        "protocol_version",
+        "command_id",
+        "runner_id",
+        "connection_epoch",
+        "tenant_id",
+        "owner_actor_id",
+        "agent_id",
+        "tool_session_id",
+        "server",
+        "tool_name",
+        "arguments",
+        "deadline_ms",
+      ],
+      properties: {
+        type: {
+          const: "execute",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        owner_actor_id: {
+          $ref: "#/$defs/Id",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        tool_session_id: {
+          $ref: "#/$defs/Id",
+        },
+        server: {
+          enum: ["browser", "task_files"],
+        },
+        tool_name: {
+          type: "string",
+          minLength: 1,
+          maxLength: 80,
+        },
+        arguments: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        task_scope: {
+          $ref: "#/$defs/SharedTaskScope",
+        },
+        deadline_ms: {
+          type: "integer",
+          minimum: 1000,
+          maximum: 120000,
+        },
+        kind: {
+          const: "computer_tool",
+        },
+      },
+    },
+    ComputerToolResult: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "type",
+        "kind",
+        "protocol_version",
+        "command_id",
+        "runner_id",
+        "connection_epoch",
+        "tenant_id",
+        "owner_actor_id",
+        "agent_id",
+        "result",
+      ],
+      properties: {
+        type: {
+          const: "executed",
+        },
+        protocol_version: {
+          $ref: "#/$defs/ProtocolVersion",
+        },
+        command_id: {
+          $ref: "#/$defs/Id",
+        },
+        runner_id: {
+          $ref: "#/$defs/Id",
+        },
+        connection_epoch: {
+          $ref: "#/$defs/PositiveInteger",
+        },
+        tenant_id: {
+          $ref: "#/$defs/Id",
+        },
+        owner_actor_id: {
+          $ref: "#/$defs/Id",
+        },
+        agent_id: {
+          $ref: "#/$defs/Id",
+        },
+        result: {
+          $ref: "#/$defs/OpaqueObject",
+        },
+        kind: {
+          const: "computer_tool",
+        },
+      },
+    },
+  },
+} as const;

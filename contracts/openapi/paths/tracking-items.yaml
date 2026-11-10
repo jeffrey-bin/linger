@@ -1,0 +1,96 @@
+list:
+  post:
+    operationId: listAgentTrackingItems
+    summary: listAgentTrackingItems
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItemList",
+            }
+    responses:
+      "200":
+        description: Owner-scoped tracking item command result.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItemPage",
+              }
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+add:
+  post:
+    operationId: addAgentTrackingItem
+    summary: addAgentTrackingItem
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItemCreate",
+            }
+    responses:
+      "200":
+        description: Owner-scoped tracking item command result.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItem",
+              }
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+update:
+  post:
+    operationId: updateAgentTrackingItem
+    summary: updateAgentTrackingItem
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItemUpdate",
+            }
+    responses:
+      "200":
+        description: Owner-scoped tracking item command result.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItem",
+              }
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+done:
+  post:
+    operationId: completeAgentTrackingItem
+    summary: completeAgentTrackingItem
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItemVersion",
+            }
+    responses:
+      "200":
+        description: Owner-scoped tracking item command result.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/tracking-items.yaml#/components/schemas/TrackingItem",
+              }
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"

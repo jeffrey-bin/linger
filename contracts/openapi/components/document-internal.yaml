@@ -1,0 +1,139 @@
+components:
+  schemas:
+    DocumentInternalId:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+      description: Opaque, case-sensitive TeamHub identifier.
+    DocumentInternalTimestamp:
+      type: string
+      format: date-time
+    Sha256:
+      type: string
+      pattern: "^[a-f0-9]{64}$"
+    StateHashVersion:
+      type: integer
+      minimum: 1
+      maximum: 1
+    SchemaVersion:
+      type: integer
+      minimum: 1
+    PersistedSequence:
+      type: integer
+      format: int64
+      minimum: 0
+    StateVector:
+      type: string
+      contentEncoding: base64
+      x-max-decoded-bytes: 1048576
+    YjsMutationFrame:
+      type: string
+      contentEncoding: base64
+      x-max-decoded-bytes: 1048576
+    YjsUpdate:
+      type: string
+      contentEncoding: base64
+      x-max-decoded-bytes: 4194304
+    DocumentStateBytes:
+      type: string
+      contentEncoding: base64
+      x-max-decoded-bytes: 33554432
+    DocumentSourceBytes:
+      type: string
+      contentEncoding: base64
+      x-max-decoded-bytes: 33554432
+    CompleteReferences:
+      type: object
+      additionalProperties: false
+      x-max-total-items: 4096
+      required: [document_asset_ids, document_thread_ids]
+      properties:
+        document_asset_ids:
+          type: array
+          maxItems: 4096
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/DocumentInternalId"
+        document_thread_ids:
+          type: array
+          maxItems: 4096
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/DocumentInternalId"
+    ManifestEntry:
+      type: object
+      additionalProperties: false
+      required: [id, media_type, size_bytes, sha256]
+      properties:
+        id:
+          $ref: "#/components/schemas/DocumentInternalId"
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        sha256:
+          $ref: "#/components/schemas/Sha256"
+        title:
+          type: string
+          maxLength: 1024
+    ManifestEntries:
+      type: array
+      maxItems: 4096
+      items:
+        $ref: "#/components/schemas/ManifestEntry"
+    DocumentDurableHead:
+      type: object
+      additionalProperties: false
+      required:
+        - document_id
+        - schema_version
+        - persisted_seq
+        - state_vector
+        - state_hash
+        - state_hash_version
+      properties:
+        document_id:
+          $ref: "#/components/schemas/DocumentInternalId"
+        schema_version:
+          $ref: "#/components/schemas/SchemaVersion"
+        persisted_seq:
+          $ref: "#/components/schemas/PersistedSequence"
+        state_vector:
+          $ref: "#/components/schemas/StateVector"
+        state_hash:
+          $ref: "#/components/schemas/Sha256"
+        state_hash_version:
+          $ref: "#/components/schemas/StateHashVersion"
+    DurableAckEnvelope:
+      type: object
+      additionalProperties: false
+      required: [type, head]
+      properties:
+        delete_set_hash:
+          $ref: "#/components/schemas/Sha256"
+        type:
+          type: string
+          const: durability_ack
+        head:
+          $ref: "#/components/schemas/DocumentDurableHead"
+    DurabilityFailureEnvelope:
+      type: object
+      additionalProperties: false
+      required: [type, code, document_id]
+      properties:
+        type:
+          type: string
+          const: durability_failure
+        code:
+          type: string
+          enum:
+            - append_rejected
+            - backlog_exceeded
+            - durability_invariant_failed
+        document_id:
+          $ref: "#/components/schemas/DocumentInternalId"

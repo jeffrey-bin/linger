@@ -1,0 +1,38 @@
+components:
+  schemas:
+    PersonalWikiState:
+      type: string
+      description: refreshing while a refresh runs or its follow-up is queued; failed when the latest refresh failed or conflicted.
+      enum: [idle, refreshing, failed]
+    PersonalWiki:
+      type: object
+      additionalProperties: false
+      required: [tenant_id, owner_actor_id, published_generation, state]
+      properties:
+        id:
+          description: Absent until a write (binding or uploading a source, a refresh request from Memory) creates the Wiki root.
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        owner_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        published_generation:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Advances by one with each published Revision.
+        state:
+          $ref: "#/components/schemas/PersonalWikiState"
+        preview_revision:
+          type: integer
+          format: int64
+          description: Advances when the active refresh has a new three-minute preview.
+        latest_refresh_id:
+          description: The latest refresh; a client that saw an earlier failure can tell a new one apart.
+          $ref: "./common.yaml#/components/schemas/Id"
+        current_revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"

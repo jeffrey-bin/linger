@@ -1,0 +1,3964 @@
+{
+  "left": {
+    "start_offset_ms": 2000,
+    "end_offset_ms": 34458,
+    "read_start_ms": 0,
+    "segments": [
+      {
+        "Text": "ぁあぃいぅうぇぁうえ ぉおかがきぎくぐ。",
+        "StartMS": 0,
+        "EndMS": 2452,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 30, "StartMS": 80, "EndMS": 520 },
+          { "TextStart": 31, "TextEnd": 34, "StartMS": 720, "EndMS": 880 },
+          { "TextStart": 34, "TextEnd": 37, "StartMS": 880, "EndMS": 960 },
+          { "TextStart": 37, "TextEnd": 40, "StartMS": 960, "EndMS": 1120 },
+          { "TextStart": 40, "TextEnd": 43, "StartMS": 1120, "EndMS": 1240 },
+          { "TextStart": 43, "TextEnd": 46, "StartMS": 1240, "EndMS": 1320 },
+          { "TextStart": 46, "TextEnd": 49, "StartMS": 1320, "EndMS": 1440 },
+          { "TextStart": 49, "TextEnd": 52, "StartMS": 1440, "EndMS": 1560 },
+          { "TextStart": 52, "TextEnd": 55, "StartMS": 1560, "EndMS": 1720 }
+        ]
+      },
+      {
+        "Text": "け。げ。こごさざしじすごずせぜそぞただちぢっつづてぎでとど。げな。にごぜそぞせぬねのさざはそぎばぱひびごぴぴぴごたふぎ。 ぶ。にごぷさへびべぺ。ぜそぞせたほたぼふちぎにごぽま みぁむめぅ ぼもゃやゅゆ。げな。 やゃ。ょ。よごらりぎど。げげ。こごるるにごれろずゎ",
+        "StartMS": 2452,
+        "EndMS": 22941,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 3, "StartMS": 2612, "EndMS": 2772 },
+          { "TextStart": 6, "TextEnd": 9, "StartMS": 2812, "EndMS": 3052 },
+          { "TextStart": 12, "TextEnd": 15, "StartMS": 3052, "EndMS": 3212 },
+          { "TextStart": 15, "TextEnd": 18, "StartMS": 3212, "EndMS": 3332 },
+          { "TextStart": 18, "TextEnd": 21, "StartMS": 3332, "EndMS": 3492 },
+          { "TextStart": 21, "TextEnd": 24, "StartMS": 3492, "EndMS": 3612 },
+          { "TextStart": 24, "TextEnd": 27, "StartMS": 3652, "EndMS": 3812 },
+          { "TextStart": 27, "TextEnd": 30, "StartMS": 3812, "EndMS": 3932 },
+          { "TextStart": 30, "TextEnd": 33, "StartMS": 3932, "EndMS": 4052 },
+          { "TextStart": 33, "TextEnd": 36, "StartMS": 4052, "EndMS": 4132 },
+          { "TextStart": 36, "TextEnd": 39, "StartMS": 4132, "EndMS": 4292 },
+          { "TextStart": 39, "TextEnd": 42, "StartMS": 4292, "EndMS": 4452 },
+          { "TextStart": 42, "TextEnd": 45, "StartMS": 4532, "EndMS": 4692 },
+          { "TextStart": 45, "TextEnd": 48, "StartMS": 4692, "EndMS": 4812 },
+          { "TextStart": 48, "TextEnd": 51, "StartMS": 4812, "EndMS": 4932 },
+          { "TextStart": 51, "TextEnd": 54, "StartMS": 4932, "EndMS": 5132 },
+          { "TextStart": 54, "TextEnd": 57, "StartMS": 5132, "EndMS": 5252 },
+          { "TextStart": 57, "TextEnd": 60, "StartMS": 5252, "EndMS": 5332 },
+          { "TextStart": 60, "TextEnd": 63, "StartMS": 5332, "EndMS": 5412 },
+          { "TextStart": 63, "TextEnd": 66, "StartMS": 5412, "EndMS": 5492 },
+          { "TextStart": 66, "TextEnd": 69, "StartMS": 5492, "EndMS": 5572 },
+          { "TextStart": 69, "TextEnd": 72, "StartMS": 5572, "EndMS": 5652 },
+          { "TextStart": 72, "TextEnd": 75, "StartMS": 5652, "EndMS": 5732 },
+          { "TextStart": 75, "TextEnd": 78, "StartMS": 5732, "EndMS": 5812 },
+          { "TextStart": 78, "TextEnd": 81, "StartMS": 5812, "EndMS": 5972 },
+          { "TextStart": 81, "TextEnd": 84, "StartMS": 5972, "EndMS": 6092 },
+          { "TextStart": 84, "TextEnd": 87, "StartMS": 6092, "EndMS": 6252 },
+          { "TextStart": 90, "TextEnd": 93, "StartMS": 6452, "EndMS": 6572 },
+          { "TextStart": 93, "TextEnd": 96, "StartMS": 6572, "EndMS": 6692 },
+          { "TextStart": 99, "TextEnd": 102, "StartMS": 6852, "EndMS": 6972 },
+          { "TextStart": 102, "TextEnd": 105, "StartMS": 6972, "EndMS": 7092 },
+          { "TextStart": 105, "TextEnd": 108, "StartMS": 7092, "EndMS": 7212 },
+          { "TextStart": 108, "TextEnd": 111, "StartMS": 7212, "EndMS": 7332 },
+          { "TextStart": 111, "TextEnd": 114, "StartMS": 7332, "EndMS": 7492 },
+          { "TextStart": 114, "TextEnd": 117, "StartMS": 7532, "EndMS": 7692 },
+          { "TextStart": 117, "TextEnd": 120, "StartMS": 7692, "EndMS": 7852 },
+          { "TextStart": 120, "TextEnd": 123, "StartMS": 7852, "EndMS": 8012 },
+          { "TextStart": 123, "TextEnd": 126, "StartMS": 8012, "EndMS": 8212 },
+          { "TextStart": 126, "TextEnd": 129, "StartMS": 8332, "EndMS": 8452 },
+          { "TextStart": 129, "TextEnd": 132, "StartMS": 8452, "EndMS": 8572 },
+          { "TextStart": 132, "TextEnd": 135, "StartMS": 8572, "EndMS": 8772 },
+          { "TextStart": 135, "TextEnd": 138, "StartMS": 8772, "EndMS": 8892 },
+          { "TextStart": 138, "TextEnd": 141, "StartMS": 8892, "EndMS": 9092 },
+          { "TextStart": 141, "TextEnd": 144, "StartMS": 9092, "EndMS": 9212 },
+          { "TextStart": 144, "TextEnd": 147, "StartMS": 9212, "EndMS": 9372 },
+          { "TextStart": 147, "TextEnd": 150, "StartMS": 9372, "EndMS": 9572 },
+          { "TextStart": 150, "TextEnd": 153, "StartMS": 9572, "EndMS": 9732 },
+          {
+            "TextStart": 153,
+            "TextEnd": 156,
+            "StartMS": 10212,
+            "EndMS": 10532
+          },
+          {
+            "TextStart": 156,
+            "TextEnd": 159,
+            "StartMS": 10892,
+            "EndMS": 11092
+          },
+          {
+            "TextStart": 159,
+            "TextEnd": 162,
+            "StartMS": 11172,
+            "EndMS": 11292
+          },
+          {
+            "TextStart": 162,
+            "TextEnd": 165,
+            "StartMS": 11332,
+            "EndMS": 11492
+          },
+          {
+            "TextStart": 165,
+            "TextEnd": 168,
+            "StartMS": 11492,
+            "EndMS": 11572
+          },
+          {
+            "TextStart": 168,
+            "TextEnd": 171,
+            "StartMS": 11572,
+            "EndMS": 11732
+          },
+          {
+            "TextStart": 171,
+            "TextEnd": 174,
+            "StartMS": 11732,
+            "EndMS": 11892
+          },
+          {
+            "TextStart": 174,
+            "TextEnd": 177,
+            "StartMS": 11892,
+            "EndMS": 12052
+          },
+          {
+            "TextStart": 181,
+            "TextEnd": 184,
+            "StartMS": 12132,
+            "EndMS": 12372
+          },
+          {
+            "TextStart": 187,
+            "TextEnd": 190,
+            "StartMS": 12372,
+            "EndMS": 12532
+          },
+          {
+            "TextStart": 190,
+            "TextEnd": 193,
+            "StartMS": 12532,
+            "EndMS": 12612
+          },
+          {
+            "TextStart": 193,
+            "TextEnd": 196,
+            "StartMS": 12732,
+            "EndMS": 12932
+          },
+          {
+            "TextStart": 196,
+            "TextEnd": 199,
+            "StartMS": 12932,
+            "EndMS": 13132
+          },
+          {
+            "TextStart": 199,
+            "TextEnd": 202,
+            "StartMS": 13132,
+            "EndMS": 13292
+          },
+          {
+            "TextStart": 202,
+            "TextEnd": 205,
+            "StartMS": 13292,
+            "EndMS": 13372
+          },
+          {
+            "TextStart": 205,
+            "TextEnd": 208,
+            "StartMS": 13372,
+            "EndMS": 13532
+          },
+          {
+            "TextStart": 208,
+            "TextEnd": 211,
+            "StartMS": 13532,
+            "EndMS": 13652
+          },
+          {
+            "TextStart": 214,
+            "TextEnd": 217,
+            "StartMS": 13652,
+            "EndMS": 13812
+          },
+          {
+            "TextStart": 217,
+            "TextEnd": 220,
+            "StartMS": 13812,
+            "EndMS": 13932
+          },
+          {
+            "TextStart": 220,
+            "TextEnd": 223,
+            "StartMS": 13932,
+            "EndMS": 14092
+          },
+          {
+            "TextStart": 223,
+            "TextEnd": 226,
+            "StartMS": 14132,
+            "EndMS": 14212
+          },
+          {
+            "TextStart": 226,
+            "TextEnd": 229,
+            "StartMS": 14292,
+            "EndMS": 14332
+          },
+          {
+            "TextStart": 229,
+            "TextEnd": 232,
+            "StartMS": 14452,
+            "EndMS": 14612
+          },
+          {
+            "TextStart": 232,
+            "TextEnd": 235,
+            "StartMS": 14612,
+            "EndMS": 14652
+          },
+          {
+            "TextStart": 235,
+            "TextEnd": 238,
+            "StartMS": 14652,
+            "EndMS": 14812
+          },
+          {
+            "TextStart": 238,
+            "TextEnd": 241,
+            "StartMS": 14812,
+            "EndMS": 14932
+          },
+          {
+            "TextStart": 241,
+            "TextEnd": 244,
+            "StartMS": 14932,
+            "EndMS": 15012
+          },
+          {
+            "TextStart": 244,
+            "TextEnd": 247,
+            "StartMS": 15012,
+            "EndMS": 15092
+          },
+          {
+            "TextStart": 247,
+            "TextEnd": 250,
+            "StartMS": 15092,
+            "EndMS": 15212
+          },
+          {
+            "TextStart": 250,
+            "TextEnd": 253,
+            "StartMS": 15212,
+            "EndMS": 15332
+          },
+          {
+            "TextStart": 253,
+            "TextEnd": 256,
+            "StartMS": 15332,
+            "EndMS": 15452
+          },
+          {
+            "TextStart": 256,
+            "TextEnd": 259,
+            "StartMS": 15452,
+            "EndMS": 15532
+          },
+          {
+            "TextStart": 260,
+            "TextEnd": 275,
+            "StartMS": 15612,
+            "EndMS": 15692
+          },
+          {
+            "TextStart": 276,
+            "TextEnd": 279,
+            "StartMS": 15932,
+            "EndMS": 16212
+          },
+          {
+            "TextStart": 279,
+            "TextEnd": 282,
+            "StartMS": 16772,
+            "EndMS": 16932
+          },
+          {
+            "TextStart": 282,
+            "TextEnd": 285,
+            "StartMS": 17132,
+            "EndMS": 17292
+          },
+          {
+            "TextStart": 285,
+            "TextEnd": 288,
+            "StartMS": 17292,
+            "EndMS": 17332
+          },
+          {
+            "TextStart": 288,
+            "TextEnd": 291,
+            "StartMS": 17372,
+            "EndMS": 17492
+          },
+          {
+            "TextStart": 291,
+            "TextEnd": 294,
+            "StartMS": 17492,
+            "EndMS": 17612
+          },
+          {
+            "TextStart": 297,
+            "TextEnd": 300,
+            "StartMS": 17692,
+            "EndMS": 17812
+          },
+          {
+            "TextStart": 300,
+            "TextEnd": 303,
+            "StartMS": 17812,
+            "EndMS": 17932
+          },
+          {
+            "TextStart": 307,
+            "TextEnd": 310,
+            "StartMS": 18132,
+            "EndMS": 18332
+          },
+          {
+            "TextStart": 310,
+            "TextEnd": 313,
+            "StartMS": 18332,
+            "EndMS": 18412
+          },
+          {
+            "TextStart": 316,
+            "TextEnd": 319,
+            "StartMS": 18732,
+            "EndMS": 18932
+          },
+          {
+            "TextStart": 322,
+            "TextEnd": 325,
+            "StartMS": 18932,
+            "EndMS": 19092
+          },
+          {
+            "TextStart": 325,
+            "TextEnd": 328,
+            "StartMS": 19092,
+            "EndMS": 19212
+          },
+          {
+            "TextStart": 328,
+            "TextEnd": 331,
+            "StartMS": 19252,
+            "EndMS": 19412
+          },
+          {
+            "TextStart": 331,
+            "TextEnd": 334,
+            "StartMS": 19412,
+            "EndMS": 19532
+          },
+          {
+            "TextStart": 334,
+            "TextEnd": 337,
+            "StartMS": 19572,
+            "EndMS": 19692
+          },
+          {
+            "TextStart": 337,
+            "TextEnd": 340,
+            "StartMS": 19732,
+            "EndMS": 19812
+          },
+          {
+            "TextStart": 343,
+            "TextEnd": 346,
+            "StartMS": 20212,
+            "EndMS": 20452
+          },
+          {
+            "TextStart": 346,
+            "TextEnd": 349,
+            "StartMS": 20492,
+            "EndMS": 20692
+          },
+          {
+            "TextStart": 352,
+            "TextEnd": 355,
+            "StartMS": 20692,
+            "EndMS": 20852
+          },
+          {
+            "TextStart": 355,
+            "TextEnd": 358,
+            "StartMS": 20892,
+            "EndMS": 21092
+          },
+          {
+            "TextStart": 358,
+            "TextEnd": 361,
+            "StartMS": 21132,
+            "EndMS": 21292
+          },
+          {
+            "TextStart": 361,
+            "TextEnd": 364,
+            "StartMS": 21332,
+            "EndMS": 21532
+          },
+          {
+            "TextStart": 364,
+            "TextEnd": 367,
+            "StartMS": 21652,
+            "EndMS": 21812
+          },
+          {
+            "TextStart": 367,
+            "TextEnd": 370,
+            "StartMS": 21812,
+            "EndMS": 22012
+          },
+          {
+            "TextStart": 370,
+            "TextEnd": 373,
+            "StartMS": 22052,
+            "EndMS": 22212
+          },
+          {
+            "TextStart": 373,
+            "TextEnd": 376,
+            "StartMS": 22212,
+            "EndMS": 22332
+          },
+          {
+            "TextStart": 376,
+            "TextEnd": 379,
+            "StartMS": 22332,
+            "EndMS": 22532
+          },
+          { "TextStart": 379, "TextEnd": 382, "StartMS": 22532, "EndMS": 22732 }
+        ]
+      },
+      {
+        "Text": "ごすごぜそぞささざせわよっゐゑぢっをたんしぎぢっばぱぼふ。げな。はそぞ。ゔゕさざひびずゖさざぎァアぼィ。げ。げ。よてよてイるゥウェんエォオカガキギクぢグ。ケ。",
+        "StartMS": 22941,
+        "EndMS": 34452,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 3, "StartMS": 23101, "EndMS": 23181 },
+          { "TextStart": 3, "TextEnd": 6, "StartMS": 23181, "EndMS": 23261 },
+          { "TextStart": 6, "TextEnd": 9, "StartMS": 23261, "EndMS": 23381 },
+          { "TextStart": 9, "TextEnd": 12, "StartMS": 23381, "EndMS": 23501 },
+          { "TextStart": 12, "TextEnd": 15, "StartMS": 23501, "EndMS": 23621 },
+          { "TextStart": 15, "TextEnd": 18, "StartMS": 23621, "EndMS": 23741 },
+          { "TextStart": 18, "TextEnd": 21, "StartMS": 23821, "EndMS": 23861 },
+          { "TextStart": 21, "TextEnd": 24, "StartMS": 23901, "EndMS": 24021 },
+          { "TextStart": 24, "TextEnd": 27, "StartMS": 24021, "EndMS": 24101 },
+          { "TextStart": 27, "TextEnd": 30, "StartMS": 24101, "EndMS": 24221 },
+          { "TextStart": 30, "TextEnd": 33, "StartMS": 24221, "EndMS": 24381 },
+          { "TextStart": 33, "TextEnd": 36, "StartMS": 24381, "EndMS": 24541 },
+          { "TextStart": 36, "TextEnd": 39, "StartMS": 24541, "EndMS": 24701 },
+          { "TextStart": 39, "TextEnd": 42, "StartMS": 24701, "EndMS": 24861 },
+          { "TextStart": 42, "TextEnd": 45, "StartMS": 24861, "EndMS": 24941 },
+          { "TextStart": 45, "TextEnd": 48, "StartMS": 25061, "EndMS": 25101 },
+          { "TextStart": 48, "TextEnd": 51, "StartMS": 25141, "EndMS": 25181 },
+          { "TextStart": 51, "TextEnd": 54, "StartMS": 25181, "EndMS": 25341 },
+          { "TextStart": 54, "TextEnd": 57, "StartMS": 25341, "EndMS": 25461 },
+          { "TextStart": 57, "TextEnd": 60, "StartMS": 25461, "EndMS": 25581 },
+          { "TextStart": 60, "TextEnd": 63, "StartMS": 25581, "EndMS": 25701 },
+          { "TextStart": 63, "TextEnd": 66, "StartMS": 25701, "EndMS": 25821 },
+          { "TextStart": 66, "TextEnd": 69, "StartMS": 25821, "EndMS": 25861 },
+          { "TextStart": 69, "TextEnd": 72, "StartMS": 25861, "EndMS": 25941 },
+          { "TextStart": 72, "TextEnd": 75, "StartMS": 25941, "EndMS": 26021 },
+          { "TextStart": 75, "TextEnd": 78, "StartMS": 26181, "EndMS": 26261 },
+          { "TextStart": 78, "TextEnd": 81, "StartMS": 26301, "EndMS": 26421 },
+          { "TextStart": 81, "TextEnd": 84, "StartMS": 26421, "EndMS": 26541 },
+          { "TextStart": 87, "TextEnd": 90, "StartMS": 26741, "EndMS": 26821 },
+          { "TextStart": 90, "TextEnd": 93, "StartMS": 26821, "EndMS": 26981 },
+          { "TextStart": 96, "TextEnd": 99, "StartMS": 27021, "EndMS": 27181 },
+          { "TextStart": 99, "TextEnd": 102, "StartMS": 27181, "EndMS": 27301 },
+          {
+            "TextStart": 102,
+            "TextEnd": 105,
+            "StartMS": 27301,
+            "EndMS": 27461
+          },
+          {
+            "TextStart": 108,
+            "TextEnd": 111,
+            "StartMS": 27461,
+            "EndMS": 27581
+          },
+          {
+            "TextStart": 111,
+            "TextEnd": 114,
+            "StartMS": 27581,
+            "EndMS": 27701
+          },
+          {
+            "TextStart": 114,
+            "TextEnd": 117,
+            "StartMS": 27701,
+            "EndMS": 27821
+          },
+          {
+            "TextStart": 117,
+            "TextEnd": 120,
+            "StartMS": 27821,
+            "EndMS": 27941
+          },
+          {
+            "TextStart": 120,
+            "TextEnd": 123,
+            "StartMS": 27941,
+            "EndMS": 28061
+          },
+          {
+            "TextStart": 123,
+            "TextEnd": 126,
+            "StartMS": 28061,
+            "EndMS": 28181
+          },
+          {
+            "TextStart": 126,
+            "TextEnd": 129,
+            "StartMS": 28181,
+            "EndMS": 28461
+          },
+          {
+            "TextStart": 129,
+            "TextEnd": 132,
+            "StartMS": 28701,
+            "EndMS": 28941
+          },
+          {
+            "TextStart": 132,
+            "TextEnd": 135,
+            "StartMS": 28981,
+            "EndMS": 29061
+          },
+          {
+            "TextStart": 135,
+            "TextEnd": 138,
+            "StartMS": 29061,
+            "EndMS": 29141
+          },
+          {
+            "TextStart": 138,
+            "TextEnd": 141,
+            "StartMS": 29141,
+            "EndMS": 29221
+          },
+          {
+            "TextStart": 141,
+            "TextEnd": 144,
+            "StartMS": 29221,
+            "EndMS": 29381
+          },
+          {
+            "TextStart": 144,
+            "TextEnd": 147,
+            "StartMS": 29381,
+            "EndMS": 29461
+          },
+          {
+            "TextStart": 147,
+            "TextEnd": 150,
+            "StartMS": 29501,
+            "EndMS": 29661
+          },
+          {
+            "TextStart": 150,
+            "TextEnd": 153,
+            "StartMS": 29661,
+            "EndMS": 29861
+          },
+          {
+            "TextStart": 156,
+            "TextEnd": 159,
+            "StartMS": 30021,
+            "EndMS": 30181
+          },
+          {
+            "TextStart": 162,
+            "TextEnd": 165,
+            "StartMS": 30781,
+            "EndMS": 31021
+          },
+          {
+            "TextStart": 168,
+            "TextEnd": 171,
+            "StartMS": 31021,
+            "EndMS": 31061
+          },
+          {
+            "TextStart": 171,
+            "TextEnd": 174,
+            "StartMS": 31181,
+            "EndMS": 31221
+          },
+          {
+            "TextStart": 174,
+            "TextEnd": 177,
+            "StartMS": 31301,
+            "EndMS": 31421
+          },
+          {
+            "TextStart": 177,
+            "TextEnd": 180,
+            "StartMS": 31421,
+            "EndMS": 31541
+          },
+          {
+            "TextStart": 180,
+            "TextEnd": 183,
+            "StartMS": 31541,
+            "EndMS": 31621
+          },
+          {
+            "TextStart": 183,
+            "TextEnd": 186,
+            "StartMS": 31661,
+            "EndMS": 31781
+          },
+          {
+            "TextStart": 186,
+            "TextEnd": 189,
+            "StartMS": 31781,
+            "EndMS": 31901
+          },
+          {
+            "TextStart": 189,
+            "TextEnd": 192,
+            "StartMS": 31901,
+            "EndMS": 31941
+          },
+          {
+            "TextStart": 192,
+            "TextEnd": 195,
+            "StartMS": 31941,
+            "EndMS": 32101
+          },
+          {
+            "TextStart": 195,
+            "TextEnd": 198,
+            "StartMS": 32101,
+            "EndMS": 32181
+          },
+          {
+            "TextStart": 198,
+            "TextEnd": 201,
+            "StartMS": 32181,
+            "EndMS": 32341
+          },
+          {
+            "TextStart": 201,
+            "TextEnd": 204,
+            "StartMS": 32341,
+            "EndMS": 32461
+          },
+          {
+            "TextStart": 204,
+            "TextEnd": 207,
+            "StartMS": 32461,
+            "EndMS": 32661
+          },
+          {
+            "TextStart": 207,
+            "TextEnd": 210,
+            "StartMS": 32661,
+            "EndMS": 32781
+          },
+          {
+            "TextStart": 210,
+            "TextEnd": 213,
+            "StartMS": 32781,
+            "EndMS": 32941
+          },
+          {
+            "TextStart": 213,
+            "TextEnd": 216,
+            "StartMS": 32941,
+            "EndMS": 33101
+          },
+          {
+            "TextStart": 216,
+            "TextEnd": 219,
+            "StartMS": 33101,
+            "EndMS": 33261
+          },
+          {
+            "TextStart": 219,
+            "TextEnd": 222,
+            "StartMS": 33261,
+            "EndMS": 33341
+          },
+          {
+            "TextStart": 222,
+            "TextEnd": 225,
+            "StartMS": 33341,
+            "EndMS": 33461
+          },
+          {
+            "TextStart": 225,
+            "TextEnd": 228,
+            "StartMS": 33461,
+            "EndMS": 33581
+          },
+          { "TextStart": 231, "TextEnd": 234, "StartMS": 33741, "EndMS": 34021 }
+        ]
+      }
+    ]
+  },
+  "right": {
+    "start_offset_ms": 34458,
+    "end_offset_ms": 67011,
+    "read_start_ms": 32458,
+    "segments": [
+      {
+        "Text": "ゲカガキギクぢグ。ケ。",
+        "StartMS": 32458,
+        "EndMS": 34940,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 3, "StartMS": 32578, "EndMS": 32658 },
+          { "TextStart": 3, "TextEnd": 6, "StartMS": 32738, "EndMS": 32778 },
+          { "TextStart": 6, "TextEnd": 9, "StartMS": 32858, "EndMS": 32978 },
+          { "TextStart": 9, "TextEnd": 12, "StartMS": 32978, "EndMS": 33098 },
+          { "TextStart": 12, "TextEnd": 15, "StartMS": 33098, "EndMS": 33258 },
+          { "TextStart": 15, "TextEnd": 18, "StartMS": 33258, "EndMS": 33338 },
+          { "TextStart": 18, "TextEnd": 21, "StartMS": 33338, "EndMS": 33458 },
+          { "TextStart": 21, "TextEnd": 24, "StartMS": 33458, "EndMS": 33578 },
+          { "TextStart": 27, "TextEnd": 30, "StartMS": 33738, "EndMS": 34018 }
+        ]
+      },
+      {
+        "Text": "にごコゴサ。ゎぜそぞにごコゴサガぽまザシガジぼわスズゅゆふぢセゼソ。ぶ。",
+        "StartMS": 34980,
+        "EndMS": 42820,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 3, "StartMS": 35100, "EndMS": 35260 },
+          { "TextStart": 3, "TextEnd": 6, "StartMS": 35260, "EndMS": 35380 },
+          { "TextStart": 6, "TextEnd": 9, "StartMS": 35380, "EndMS": 35500 },
+          { "TextStart": 9, "TextEnd": 12, "StartMS": 35500, "EndMS": 35620 },
+          { "TextStart": 12, "TextEnd": 15, "StartMS": 35620, "EndMS": 35860 },
+          { "TextStart": 18, "TextEnd": 21, "StartMS": 36300, "EndMS": 36620 },
+          { "TextStart": 21, "TextEnd": 24, "StartMS": 36660, "EndMS": 36860 },
+          { "TextStart": 24, "TextEnd": 27, "StartMS": 36860, "EndMS": 37020 },
+          { "TextStart": 27, "TextEnd": 30, "StartMS": 37020, "EndMS": 37180 },
+          { "TextStart": 30, "TextEnd": 33, "StartMS": 37180, "EndMS": 37300 },
+          { "TextStart": 33, "TextEnd": 36, "StartMS": 37300, "EndMS": 37500 },
+          { "TextStart": 36, "TextEnd": 39, "StartMS": 37500, "EndMS": 37620 },
+          { "TextStart": 39, "TextEnd": 42, "StartMS": 37620, "EndMS": 37700 },
+          { "TextStart": 42, "TextEnd": 45, "StartMS": 37700, "EndMS": 37820 },
+          { "TextStart": 45, "TextEnd": 48, "StartMS": 37860, "EndMS": 38020 },
+          { "TextStart": 48, "TextEnd": 51, "StartMS": 38100, "EndMS": 38220 },
+          { "TextStart": 51, "TextEnd": 54, "StartMS": 38260, "EndMS": 38380 },
+          { "TextStart": 54, "TextEnd": 57, "StartMS": 38420, "EndMS": 38620 },
+          { "TextStart": 57, "TextEnd": 60, "StartMS": 38620, "EndMS": 38780 },
+          { "TextStart": 60, "TextEnd": 63, "StartMS": 38780, "EndMS": 38940 },
+          { "TextStart": 63, "TextEnd": 66, "StartMS": 38940, "EndMS": 39060 },
+          { "TextStart": 66, "TextEnd": 69, "StartMS": 39060, "EndMS": 39260 },
+          { "TextStart": 69, "TextEnd": 72, "StartMS": 39260, "EndMS": 39460 },
+          { "TextStart": 72, "TextEnd": 75, "StartMS": 39660, "EndMS": 39740 },
+          { "TextStart": 75, "TextEnd": 78, "StartMS": 39820, "EndMS": 39900 },
+          { "TextStart": 78, "TextEnd": 81, "StartMS": 39980, "EndMS": 40100 },
+          { "TextStart": 81, "TextEnd": 84, "StartMS": 40100, "EndMS": 40260 },
+          { "TextStart": 84, "TextEnd": 87, "StartMS": 40460, "EndMS": 40660 },
+          { "TextStart": 87, "TextEnd": 90, "StartMS": 40700, "EndMS": 40780 },
+          { "TextStart": 90, "TextEnd": 93, "StartMS": 40900, "EndMS": 40940 },
+          { "TextStart": 93, "TextEnd": 96, "StartMS": 41020, "EndMS": 41100 },
+          { "TextStart": 96, "TextEnd": 99, "StartMS": 41220, "EndMS": 41300 },
+          { "TextStart": 102, "TextEnd": 105, "StartMS": 41500, "EndMS": 41740 }
+        ]
+      },
+      {
+        "Text": "ゎゾタダよぢセチ。ゾタダごすヂッ。",
+        "StartMS": 42950,
+        "EndMS": 46590,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 3, "StartMS": 43150, "EndMS": 43270 },
+          { "TextStart": 3, "TextEnd": 6, "StartMS": 43350, "EndMS": 43470 },
+          { "TextStart": 6, "TextEnd": 9, "StartMS": 43470, "EndMS": 43550 },
+          { "TextStart": 9, "TextEnd": 12, "StartMS": 43550, "EndMS": 43710 },
+          { "TextStart": 12, "TextEnd": 15, "StartMS": 43710, "EndMS": 43870 },
+          { "TextStart": 15, "TextEnd": 18, "StartMS": 43870, "EndMS": 43950 },
+          { "TextStart": 18, "TextEnd": 21, "StartMS": 43950, "EndMS": 44070 },
+          { "TextStart": 21, "TextEnd": 24, "StartMS": 44150, "EndMS": 44310 },
+          { "TextStart": 27, "TextEnd": 30, "StartMS": 44790, "EndMS": 44950 },
+          { "TextStart": 30, "TextEnd": 33, "StartMS": 44950, "EndMS": 45070 },
+          { "TextStart": 33, "TextEnd": 36, "StartMS": 45070, "EndMS": 45230 },
+          { "TextStart": 36, "TextEnd": 39, "StartMS": 45310, "EndMS": 45430 },
+          { "TextStart": 39, "TextEnd": 42, "StartMS": 45470, "EndMS": 45630 },
+          { "TextStart": 42, "TextEnd": 45, "StartMS": 45670, "EndMS": 45790 },
+          { "TextStart": 45, "TextEnd": 48, "StartMS": 45790, "EndMS": 45870 }
+        ]
+      },
+      {
+        "Text": "エツヅぎテカデトすケツ。にドナずニ ヌヌ よネ。け。ノノをゥウチ。",
+        "StartMS": 53639,
+        "EndMS": 59469,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 3, "StartMS": 53839, "EndMS": 53999 },
+          { "TextStart": 3, "TextEnd": 6, "StartMS": 53999, "EndMS": 54159 },
+          { "TextStart": 6, "TextEnd": 9, "StartMS": 54159, "EndMS": 54239 },
+          { "TextStart": 9, "TextEnd": 12, "StartMS": 54239, "EndMS": 54519 },
+          { "TextStart": 12, "TextEnd": 15, "StartMS": 54639, "EndMS": 54679 },
+          { "TextStart": 15, "TextEnd": 18, "StartMS": 54799, "EndMS": 54879 },
+          { "TextStart": 18, "TextEnd": 21, "StartMS": 54999, "EndMS": 55039 },
+          { "TextStart": 21, "TextEnd": 24, "StartMS": 55079, "EndMS": 55119 },
+          { "TextStart": 24, "TextEnd": 27, "StartMS": 55239, "EndMS": 55359 },
+          { "TextStart": 27, "TextEnd": 30, "StartMS": 55399, "EndMS": 55439 },
+          { "TextStart": 30, "TextEnd": 33, "StartMS": 55559, "EndMS": 55599 },
+          { "TextStart": 36, "TextEnd": 39, "StartMS": 55839, "EndMS": 56039 },
+          { "TextStart": 39, "TextEnd": 42, "StartMS": 56039, "EndMS": 56119 },
+          { "TextStart": 42, "TextEnd": 45, "StartMS": 56119, "EndMS": 56239 },
+          { "TextStart": 45, "TextEnd": 48, "StartMS": 56239, "EndMS": 56359 },
+          { "TextStart": 48, "TextEnd": 51, "StartMS": 56359, "EndMS": 56479 },
+          { "TextStart": 52, "TextEnd": 58, "StartMS": 56559, "EndMS": 56759 },
+          { "TextStart": 59, "TextEnd": 62, "StartMS": 56839, "EndMS": 56919 },
+          { "TextStart": 62, "TextEnd": 65, "StartMS": 56919, "EndMS": 57039 },
+          { "TextStart": 68, "TextEnd": 71, "StartMS": 57359, "EndMS": 57479 },
+          { "TextStart": 74, "TextEnd": 77, "StartMS": 57799, "EndMS": 57959 },
+          { "TextStart": 77, "TextEnd": 80, "StartMS": 57999, "EndMS": 58039 },
+          { "TextStart": 80, "TextEnd": 83, "StartMS": 58079, "EndMS": 58239 },
+          { "TextStart": 83, "TextEnd": 86, "StartMS": 58239, "EndMS": 58359 },
+          { "TextStart": 86, "TextEnd": 89, "StartMS": 58359, "EndMS": 58479 },
+          { "TextStart": 89, "TextEnd": 92, "StartMS": 58479, "EndMS": 58679 }
+        ]
+      },
+      {
+        "Text": "をぎほハご。るバそパヒゾタダビよっ ピむ フゐブ。よプっごドヘベた。ペホボづふチ。",
+        "StartMS": 59469,
+        "EndMS": 67009,
+        "Final": true,
+        "Words": [
+          { "TextStart": 0, "TextEnd": 3, "StartMS": 59469, "EndMS": 59589 },
+          { "TextStart": 3, "TextEnd": 6, "StartMS": 59589, "EndMS": 59709 },
+          { "TextStart": 6, "TextEnd": 9, "StartMS": 59709, "EndMS": 59829 },
+          { "TextStart": 9, "TextEnd": 12, "StartMS": 59829, "EndMS": 59909 },
+          { "TextStart": 12, "TextEnd": 15, "StartMS": 59949, "EndMS": 60109 },
+          { "TextStart": 18, "TextEnd": 21, "StartMS": 60109, "EndMS": 60309 },
+          { "TextStart": 21, "TextEnd": 24, "StartMS": 60309, "EndMS": 60469 },
+          { "TextStart": 24, "TextEnd": 27, "StartMS": 60469, "EndMS": 60629 },
+          { "TextStart": 27, "TextEnd": 30, "StartMS": 60709, "EndMS": 60909 },
+          { "TextStart": 30, "TextEnd": 33, "StartMS": 60909, "EndMS": 61069 },
+          { "TextStart": 33, "TextEnd": 36, "StartMS": 61229, "EndMS": 61429 },
+          { "TextStart": 36, "TextEnd": 39, "StartMS": 61429, "EndMS": 61549 },
+          { "TextStart": 39, "TextEnd": 42, "StartMS": 61549, "EndMS": 61789 },
+          { "TextStart": 42, "TextEnd": 45, "StartMS": 61829, "EndMS": 62069 },
+          { "TextStart": 45, "TextEnd": 48, "StartMS": 62069, "EndMS": 62189 },
+          { "TextStart": 48, "TextEnd": 51, "StartMS": 62189, "EndMS": 62389 },
+          { "TextStart": 52, "TextEnd": 58, "StartMS": 62509, "EndMS": 62629 },
+          { "TextStart": 59, "TextEnd": 62, "StartMS": 62749, "EndMS": 62909 },
+          { "TextStart": 62, "TextEnd": 65, "StartMS": 62909, "EndMS": 63029 },
+          { "TextStart": 65, "TextEnd": 68, "StartMS": 63069, "EndMS": 63229 },
+          { "TextStart": 71, "TextEnd": 74, "StartMS": 63429, "EndMS": 63629 },
+          { "TextStart": 74, "TextEnd": 77, "StartMS": 63629, "EndMS": 63749 },
+          { "TextStart": 77, "TextEnd": 80, "StartMS": 63749, "EndMS": 63829 },
+          { "TextStart": 80, "TextEnd": 83, "StartMS": 63829, "EndMS": 63949 },
+          { "TextStart": 83, "TextEnd": 86, "StartMS": 63989, "EndMS": 64069 },
+          { "TextStart": 86, "TextEnd": 89, "StartMS": 64069, "EndMS": 64189 },
+          { "TextStart": 89, "TextEnd": 92, "StartMS": 64189, "EndMS": 64349 },
+          { "TextStart": 92, "TextEnd": 95, "StartMS": 64349, "EndMS": 64469 },
+          { "TextStart": 98, "TextEnd": 101, "StartMS": 65229, "EndMS": 65429 },
+          {
+            "TextStart": 101,
+            "TextEnd": 104,
+            "StartMS": 65429,
+            "EndMS": 65549
+          },
+          {
+            "TextStart": 104,
+            "TextEnd": 107,
+            "StartMS": 65549,
+            "EndMS": 65629
+          },
+          {
+            "TextStart": 107,
+            "TextEnd": 110,
+            "StartMS": 65629,
+            "EndMS": 65749
+          },
+          {
+            "TextStart": 110,
+            "TextEnd": 113,
+            "StartMS": 65749,
+            "EndMS": 65909
+          },
+          { "TextStart": 113, "TextEnd": 116, "StartMS": 65909, "EndMS": 66149 }
+        ]
+      }
+    ]
+  },
+  "calls": [
+    {
+      "read": 0,
+      "end": 39458,
+      "rejected": false,
+      "segments": [
+        {
+          "Text": "ぁあぃいぅうぇぁうえ ぉおかがきぎくぐ。",
+          "StartMS": 0,
+          "EndMS": 2452,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 30, "StartMS": 80, "EndMS": 520 },
+            { "TextStart": 31, "TextEnd": 34, "StartMS": 720, "EndMS": 880 },
+            { "TextStart": 34, "TextEnd": 37, "StartMS": 880, "EndMS": 960 },
+            { "TextStart": 37, "TextEnd": 40, "StartMS": 960, "EndMS": 1120 },
+            { "TextStart": 40, "TextEnd": 43, "StartMS": 1120, "EndMS": 1240 },
+            { "TextStart": 43, "TextEnd": 46, "StartMS": 1240, "EndMS": 1320 },
+            { "TextStart": 46, "TextEnd": 49, "StartMS": 1320, "EndMS": 1440 },
+            { "TextStart": 49, "TextEnd": 52, "StartMS": 1440, "EndMS": 1560 },
+            { "TextStart": 52, "TextEnd": 55, "StartMS": 1560, "EndMS": 1720 }
+          ]
+        },
+        {
+          "Text": "け。げ。こごさざしじすごずせぜそぞただちぢっつづてぎでとど。げな。にごぜそぞせぬねのさざはそぎばぱひびごぴぴぴごたふぎ。 ぶ。にごぷさへびべぺ。ぜそぞせたほたぼふちぎにごぽま みぁむめぅ ぼもゃやゅゆ。げな。 やゃ。ょ。よごらりぎど。げげ。こごるるにごれろずゎ",
+          "StartMS": 2452,
+          "EndMS": 22941,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 2612, "EndMS": 2772 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 2812, "EndMS": 3052 },
+            { "TextStart": 12, "TextEnd": 15, "StartMS": 3052, "EndMS": 3212 },
+            { "TextStart": 15, "TextEnd": 18, "StartMS": 3212, "EndMS": 3332 },
+            { "TextStart": 18, "TextEnd": 21, "StartMS": 3332, "EndMS": 3492 },
+            { "TextStart": 21, "TextEnd": 24, "StartMS": 3492, "EndMS": 3612 },
+            { "TextStart": 24, "TextEnd": 27, "StartMS": 3652, "EndMS": 3812 },
+            { "TextStart": 27, "TextEnd": 30, "StartMS": 3812, "EndMS": 3932 },
+            { "TextStart": 30, "TextEnd": 33, "StartMS": 3932, "EndMS": 4052 },
+            { "TextStart": 33, "TextEnd": 36, "StartMS": 4052, "EndMS": 4132 },
+            { "TextStart": 36, "TextEnd": 39, "StartMS": 4132, "EndMS": 4292 },
+            { "TextStart": 39, "TextEnd": 42, "StartMS": 4292, "EndMS": 4452 },
+            { "TextStart": 42, "TextEnd": 45, "StartMS": 4532, "EndMS": 4692 },
+            { "TextStart": 45, "TextEnd": 48, "StartMS": 4692, "EndMS": 4812 },
+            { "TextStart": 48, "TextEnd": 51, "StartMS": 4812, "EndMS": 4932 },
+            { "TextStart": 51, "TextEnd": 54, "StartMS": 4932, "EndMS": 5132 },
+            { "TextStart": 54, "TextEnd": 57, "StartMS": 5132, "EndMS": 5252 },
+            { "TextStart": 57, "TextEnd": 60, "StartMS": 5252, "EndMS": 5332 },
+            { "TextStart": 60, "TextEnd": 63, "StartMS": 5332, "EndMS": 5412 },
+            { "TextStart": 63, "TextEnd": 66, "StartMS": 5412, "EndMS": 5492 },
+            { "TextStart": 66, "TextEnd": 69, "StartMS": 5492, "EndMS": 5572 },
+            { "TextStart": 69, "TextEnd": 72, "StartMS": 5572, "EndMS": 5652 },
+            { "TextStart": 72, "TextEnd": 75, "StartMS": 5652, "EndMS": 5732 },
+            { "TextStart": 75, "TextEnd": 78, "StartMS": 5732, "EndMS": 5812 },
+            { "TextStart": 78, "TextEnd": 81, "StartMS": 5812, "EndMS": 5972 },
+            { "TextStart": 81, "TextEnd": 84, "StartMS": 5972, "EndMS": 6092 },
+            { "TextStart": 84, "TextEnd": 87, "StartMS": 6092, "EndMS": 6252 },
+            { "TextStart": 90, "TextEnd": 93, "StartMS": 6452, "EndMS": 6572 },
+            { "TextStart": 93, "TextEnd": 96, "StartMS": 6572, "EndMS": 6692 },
+            { "TextStart": 99, "TextEnd": 102, "StartMS": 6852, "EndMS": 6972 },
+            {
+              "TextStart": 102,
+              "TextEnd": 105,
+              "StartMS": 6972,
+              "EndMS": 7092
+            },
+            {
+              "TextStart": 105,
+              "TextEnd": 108,
+              "StartMS": 7092,
+              "EndMS": 7212
+            },
+            {
+              "TextStart": 108,
+              "TextEnd": 111,
+              "StartMS": 7212,
+              "EndMS": 7332
+            },
+            {
+              "TextStart": 111,
+              "TextEnd": 114,
+              "StartMS": 7332,
+              "EndMS": 7492
+            },
+            {
+              "TextStart": 114,
+              "TextEnd": 117,
+              "StartMS": 7532,
+              "EndMS": 7692
+            },
+            {
+              "TextStart": 117,
+              "TextEnd": 120,
+              "StartMS": 7692,
+              "EndMS": 7852
+            },
+            {
+              "TextStart": 120,
+              "TextEnd": 123,
+              "StartMS": 7852,
+              "EndMS": 8012
+            },
+            {
+              "TextStart": 123,
+              "TextEnd": 126,
+              "StartMS": 8012,
+              "EndMS": 8212
+            },
+            {
+              "TextStart": 126,
+              "TextEnd": 129,
+              "StartMS": 8332,
+              "EndMS": 8452
+            },
+            {
+              "TextStart": 129,
+              "TextEnd": 132,
+              "StartMS": 8452,
+              "EndMS": 8572
+            },
+            {
+              "TextStart": 132,
+              "TextEnd": 135,
+              "StartMS": 8572,
+              "EndMS": 8772
+            },
+            {
+              "TextStart": 135,
+              "TextEnd": 138,
+              "StartMS": 8772,
+              "EndMS": 8892
+            },
+            {
+              "TextStart": 138,
+              "TextEnd": 141,
+              "StartMS": 8892,
+              "EndMS": 9092
+            },
+            {
+              "TextStart": 141,
+              "TextEnd": 144,
+              "StartMS": 9092,
+              "EndMS": 9212
+            },
+            {
+              "TextStart": 144,
+              "TextEnd": 147,
+              "StartMS": 9212,
+              "EndMS": 9372
+            },
+            {
+              "TextStart": 147,
+              "TextEnd": 150,
+              "StartMS": 9372,
+              "EndMS": 9572
+            },
+            {
+              "TextStart": 150,
+              "TextEnd": 153,
+              "StartMS": 9572,
+              "EndMS": 9732
+            },
+            {
+              "TextStart": 153,
+              "TextEnd": 156,
+              "StartMS": 10212,
+              "EndMS": 10532
+            },
+            {
+              "TextStart": 156,
+              "TextEnd": 159,
+              "StartMS": 10892,
+              "EndMS": 11092
+            },
+            {
+              "TextStart": 159,
+              "TextEnd": 162,
+              "StartMS": 11172,
+              "EndMS": 11292
+            },
+            {
+              "TextStart": 162,
+              "TextEnd": 165,
+              "StartMS": 11332,
+              "EndMS": 11492
+            },
+            {
+              "TextStart": 165,
+              "TextEnd": 168,
+              "StartMS": 11492,
+              "EndMS": 11572
+            },
+            {
+              "TextStart": 168,
+              "TextEnd": 171,
+              "StartMS": 11572,
+              "EndMS": 11732
+            },
+            {
+              "TextStart": 171,
+              "TextEnd": 174,
+              "StartMS": 11732,
+              "EndMS": 11892
+            },
+            {
+              "TextStart": 174,
+              "TextEnd": 177,
+              "StartMS": 11892,
+              "EndMS": 12052
+            },
+            {
+              "TextStart": 181,
+              "TextEnd": 184,
+              "StartMS": 12132,
+              "EndMS": 12372
+            },
+            {
+              "TextStart": 187,
+              "TextEnd": 190,
+              "StartMS": 12372,
+              "EndMS": 12532
+            },
+            {
+              "TextStart": 190,
+              "TextEnd": 193,
+              "StartMS": 12532,
+              "EndMS": 12612
+            },
+            {
+              "TextStart": 193,
+              "TextEnd": 196,
+              "StartMS": 12732,
+              "EndMS": 12932
+            },
+            {
+              "TextStart": 196,
+              "TextEnd": 199,
+              "StartMS": 12932,
+              "EndMS": 13132
+            },
+            {
+              "TextStart": 199,
+              "TextEnd": 202,
+              "StartMS": 13132,
+              "EndMS": 13292
+            },
+            {
+              "TextStart": 202,
+              "TextEnd": 205,
+              "StartMS": 13292,
+              "EndMS": 13372
+            },
+            {
+              "TextStart": 205,
+              "TextEnd": 208,
+              "StartMS": 13372,
+              "EndMS": 13532
+            },
+            {
+              "TextStart": 208,
+              "TextEnd": 211,
+              "StartMS": 13532,
+              "EndMS": 13652
+            },
+            {
+              "TextStart": 214,
+              "TextEnd": 217,
+              "StartMS": 13652,
+              "EndMS": 13812
+            },
+            {
+              "TextStart": 217,
+              "TextEnd": 220,
+              "StartMS": 13812,
+              "EndMS": 13932
+            },
+            {
+              "TextStart": 220,
+              "TextEnd": 223,
+              "StartMS": 13932,
+              "EndMS": 14092
+            },
+            {
+              "TextStart": 223,
+              "TextEnd": 226,
+              "StartMS": 14132,
+              "EndMS": 14212
+            },
+            {
+              "TextStart": 226,
+              "TextEnd": 229,
+              "StartMS": 14292,
+              "EndMS": 14332
+            },
+            {
+              "TextStart": 229,
+              "TextEnd": 232,
+              "StartMS": 14452,
+              "EndMS": 14612
+            },
+            {
+              "TextStart": 232,
+              "TextEnd": 235,
+              "StartMS": 14612,
+              "EndMS": 14652
+            },
+            {
+              "TextStart": 235,
+              "TextEnd": 238,
+              "StartMS": 14652,
+              "EndMS": 14812
+            },
+            {
+              "TextStart": 238,
+              "TextEnd": 241,
+              "StartMS": 14812,
+              "EndMS": 14932
+            },
+            {
+              "TextStart": 241,
+              "TextEnd": 244,
+              "StartMS": 14932,
+              "EndMS": 15012
+            },
+            {
+              "TextStart": 244,
+              "TextEnd": 247,
+              "StartMS": 15012,
+              "EndMS": 15092
+            },
+            {
+              "TextStart": 247,
+              "TextEnd": 250,
+              "StartMS": 15092,
+              "EndMS": 15212
+            },
+            {
+              "TextStart": 250,
+              "TextEnd": 253,
+              "StartMS": 15212,
+              "EndMS": 15332
+            },
+            {
+              "TextStart": 253,
+              "TextEnd": 256,
+              "StartMS": 15332,
+              "EndMS": 15452
+            },
+            {
+              "TextStart": 256,
+              "TextEnd": 259,
+              "StartMS": 15452,
+              "EndMS": 15532
+            },
+            {
+              "TextStart": 260,
+              "TextEnd": 275,
+              "StartMS": 15572,
+              "EndMS": 15812
+            },
+            {
+              "TextStart": 276,
+              "TextEnd": 279,
+              "StartMS": 15932,
+              "EndMS": 16212
+            },
+            {
+              "TextStart": 279,
+              "TextEnd": 282,
+              "StartMS": 16772,
+              "EndMS": 16932
+            },
+            {
+              "TextStart": 282,
+              "TextEnd": 285,
+              "StartMS": 17132,
+              "EndMS": 17292
+            },
+            {
+              "TextStart": 285,
+              "TextEnd": 288,
+              "StartMS": 17292,
+              "EndMS": 17332
+            },
+            {
+              "TextStart": 288,
+              "TextEnd": 291,
+              "StartMS": 17372,
+              "EndMS": 17492
+            },
+            {
+              "TextStart": 291,
+              "TextEnd": 294,
+              "StartMS": 17492,
+              "EndMS": 17612
+            },
+            {
+              "TextStart": 297,
+              "TextEnd": 300,
+              "StartMS": 17692,
+              "EndMS": 17812
+            },
+            {
+              "TextStart": 300,
+              "TextEnd": 303,
+              "StartMS": 17812,
+              "EndMS": 17932
+            },
+            {
+              "TextStart": 307,
+              "TextEnd": 310,
+              "StartMS": 18132,
+              "EndMS": 18332
+            },
+            {
+              "TextStart": 310,
+              "TextEnd": 313,
+              "StartMS": 18332,
+              "EndMS": 18412
+            },
+            {
+              "TextStart": 316,
+              "TextEnd": 319,
+              "StartMS": 18732,
+              "EndMS": 18932
+            },
+            {
+              "TextStart": 322,
+              "TextEnd": 325,
+              "StartMS": 18932,
+              "EndMS": 19092
+            },
+            {
+              "TextStart": 325,
+              "TextEnd": 328,
+              "StartMS": 19092,
+              "EndMS": 19212
+            },
+            {
+              "TextStart": 328,
+              "TextEnd": 331,
+              "StartMS": 19252,
+              "EndMS": 19412
+            },
+            {
+              "TextStart": 331,
+              "TextEnd": 334,
+              "StartMS": 19412,
+              "EndMS": 19532
+            },
+            {
+              "TextStart": 334,
+              "TextEnd": 337,
+              "StartMS": 19572,
+              "EndMS": 19692
+            },
+            {
+              "TextStart": 337,
+              "TextEnd": 340,
+              "StartMS": 19732,
+              "EndMS": 19812
+            },
+            {
+              "TextStart": 343,
+              "TextEnd": 346,
+              "StartMS": 20212,
+              "EndMS": 20452
+            },
+            {
+              "TextStart": 346,
+              "TextEnd": 349,
+              "StartMS": 20492,
+              "EndMS": 20692
+            },
+            {
+              "TextStart": 352,
+              "TextEnd": 355,
+              "StartMS": 20692,
+              "EndMS": 20852
+            },
+            {
+              "TextStart": 355,
+              "TextEnd": 358,
+              "StartMS": 20892,
+              "EndMS": 21092
+            },
+            {
+              "TextStart": 358,
+              "TextEnd": 361,
+              "StartMS": 21132,
+              "EndMS": 21292
+            },
+            {
+              "TextStart": 361,
+              "TextEnd": 364,
+              "StartMS": 21332,
+              "EndMS": 21532
+            },
+            {
+              "TextStart": 364,
+              "TextEnd": 367,
+              "StartMS": 21652,
+              "EndMS": 21812
+            },
+            {
+              "TextStart": 367,
+              "TextEnd": 370,
+              "StartMS": 21812,
+              "EndMS": 22012
+            },
+            {
+              "TextStart": 370,
+              "TextEnd": 373,
+              "StartMS": 22052,
+              "EndMS": 22212
+            },
+            {
+              "TextStart": 373,
+              "TextEnd": 376,
+              "StartMS": 22212,
+              "EndMS": 22332
+            },
+            {
+              "TextStart": 376,
+              "TextEnd": 379,
+              "StartMS": 22332,
+              "EndMS": 22532
+            },
+            {
+              "TextStart": 379,
+              "TextEnd": 382,
+              "StartMS": 22532,
+              "EndMS": 22732
+            }
+          ]
+        },
+        {
+          "Text": "ごすごぜそぞささざせわよっゐゑぢっをたんしぎぢっばぱぼふ。げな。はそぞ。ゔゕさざひびずゖさざぎァアぼィ。げ。げ。よてよてイるゥウェんエォオカガキギクぢグ。ケ。",
+          "StartMS": 22941,
+          "EndMS": 35032,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 23101, "EndMS": 23181 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 23181, "EndMS": 23261 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 23261, "EndMS": 23381 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 23381, "EndMS": 23501 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 23501,
+              "EndMS": 23621
+            },
+            {
+              "TextStart": 15,
+              "TextEnd": 18,
+              "StartMS": 23621,
+              "EndMS": 23741
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 23821,
+              "EndMS": 23861
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 23901,
+              "EndMS": 24021
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 24021,
+              "EndMS": 24101
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 24101,
+              "EndMS": 24221
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 24221,
+              "EndMS": 24381
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 24381,
+              "EndMS": 24541
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 24541,
+              "EndMS": 24701
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 24701,
+              "EndMS": 24861
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 24861,
+              "EndMS": 24941
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 25061,
+              "EndMS": 25101
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 25141,
+              "EndMS": 25181
+            },
+            {
+              "TextStart": 51,
+              "TextEnd": 54,
+              "StartMS": 25181,
+              "EndMS": 25341
+            },
+            {
+              "TextStart": 54,
+              "TextEnd": 57,
+              "StartMS": 25341,
+              "EndMS": 25461
+            },
+            {
+              "TextStart": 57,
+              "TextEnd": 60,
+              "StartMS": 25461,
+              "EndMS": 25581
+            },
+            {
+              "TextStart": 60,
+              "TextEnd": 63,
+              "StartMS": 25581,
+              "EndMS": 25701
+            },
+            {
+              "TextStart": 63,
+              "TextEnd": 66,
+              "StartMS": 25701,
+              "EndMS": 25821
+            },
+            {
+              "TextStart": 66,
+              "TextEnd": 69,
+              "StartMS": 25821,
+              "EndMS": 25861
+            },
+            {
+              "TextStart": 69,
+              "TextEnd": 72,
+              "StartMS": 25861,
+              "EndMS": 25941
+            },
+            {
+              "TextStart": 72,
+              "TextEnd": 75,
+              "StartMS": 25941,
+              "EndMS": 26021
+            },
+            {
+              "TextStart": 75,
+              "TextEnd": 78,
+              "StartMS": 26181,
+              "EndMS": 26261
+            },
+            {
+              "TextStart": 78,
+              "TextEnd": 81,
+              "StartMS": 26301,
+              "EndMS": 26421
+            },
+            {
+              "TextStart": 81,
+              "TextEnd": 84,
+              "StartMS": 26421,
+              "EndMS": 26541
+            },
+            {
+              "TextStart": 87,
+              "TextEnd": 90,
+              "StartMS": 26741,
+              "EndMS": 26821
+            },
+            {
+              "TextStart": 90,
+              "TextEnd": 93,
+              "StartMS": 26821,
+              "EndMS": 26981
+            },
+            {
+              "TextStart": 96,
+              "TextEnd": 99,
+              "StartMS": 27021,
+              "EndMS": 27181
+            },
+            {
+              "TextStart": 99,
+              "TextEnd": 102,
+              "StartMS": 27181,
+              "EndMS": 27301
+            },
+            {
+              "TextStart": 102,
+              "TextEnd": 105,
+              "StartMS": 27301,
+              "EndMS": 27461
+            },
+            {
+              "TextStart": 108,
+              "TextEnd": 111,
+              "StartMS": 27461,
+              "EndMS": 27581
+            },
+            {
+              "TextStart": 111,
+              "TextEnd": 114,
+              "StartMS": 27581,
+              "EndMS": 27701
+            },
+            {
+              "TextStart": 114,
+              "TextEnd": 117,
+              "StartMS": 27701,
+              "EndMS": 27821
+            },
+            {
+              "TextStart": 117,
+              "TextEnd": 120,
+              "StartMS": 27821,
+              "EndMS": 27941
+            },
+            {
+              "TextStart": 120,
+              "TextEnd": 123,
+              "StartMS": 27941,
+              "EndMS": 28061
+            },
+            {
+              "TextStart": 123,
+              "TextEnd": 126,
+              "StartMS": 28061,
+              "EndMS": 28181
+            },
+            {
+              "TextStart": 126,
+              "TextEnd": 129,
+              "StartMS": 28181,
+              "EndMS": 28461
+            },
+            {
+              "TextStart": 129,
+              "TextEnd": 132,
+              "StartMS": 28701,
+              "EndMS": 28941
+            },
+            {
+              "TextStart": 132,
+              "TextEnd": 135,
+              "StartMS": 28941,
+              "EndMS": 29061
+            },
+            {
+              "TextStart": 135,
+              "TextEnd": 138,
+              "StartMS": 29061,
+              "EndMS": 29141
+            },
+            {
+              "TextStart": 138,
+              "TextEnd": 141,
+              "StartMS": 29141,
+              "EndMS": 29221
+            },
+            {
+              "TextStart": 141,
+              "TextEnd": 144,
+              "StartMS": 29221,
+              "EndMS": 29381
+            },
+            {
+              "TextStart": 144,
+              "TextEnd": 147,
+              "StartMS": 29381,
+              "EndMS": 29461
+            },
+            {
+              "TextStart": 147,
+              "TextEnd": 150,
+              "StartMS": 29501,
+              "EndMS": 29661
+            },
+            {
+              "TextStart": 150,
+              "TextEnd": 153,
+              "StartMS": 29661,
+              "EndMS": 29861
+            },
+            {
+              "TextStart": 156,
+              "TextEnd": 159,
+              "StartMS": 30021,
+              "EndMS": 30181
+            },
+            {
+              "TextStart": 162,
+              "TextEnd": 165,
+              "StartMS": 30781,
+              "EndMS": 31021
+            },
+            {
+              "TextStart": 168,
+              "TextEnd": 171,
+              "StartMS": 31021,
+              "EndMS": 31061
+            },
+            {
+              "TextStart": 171,
+              "TextEnd": 174,
+              "StartMS": 31181,
+              "EndMS": 31221
+            },
+            {
+              "TextStart": 174,
+              "TextEnd": 177,
+              "StartMS": 31301,
+              "EndMS": 31421
+            },
+            {
+              "TextStart": 177,
+              "TextEnd": 180,
+              "StartMS": 31421,
+              "EndMS": 31541
+            },
+            {
+              "TextStart": 180,
+              "TextEnd": 183,
+              "StartMS": 31541,
+              "EndMS": 31621
+            },
+            {
+              "TextStart": 183,
+              "TextEnd": 186,
+              "StartMS": 31661,
+              "EndMS": 31821
+            },
+            {
+              "TextStart": 186,
+              "TextEnd": 189,
+              "StartMS": 31821,
+              "EndMS": 31901
+            },
+            {
+              "TextStart": 189,
+              "TextEnd": 192,
+              "StartMS": 31901,
+              "EndMS": 31981
+            },
+            {
+              "TextStart": 192,
+              "TextEnd": 195,
+              "StartMS": 31981,
+              "EndMS": 32101
+            },
+            {
+              "TextStart": 195,
+              "TextEnd": 198,
+              "StartMS": 32101,
+              "EndMS": 32181
+            },
+            {
+              "TextStart": 198,
+              "TextEnd": 201,
+              "StartMS": 32181,
+              "EndMS": 32341
+            },
+            {
+              "TextStart": 201,
+              "TextEnd": 204,
+              "StartMS": 32341,
+              "EndMS": 32461
+            },
+            {
+              "TextStart": 204,
+              "TextEnd": 207,
+              "StartMS": 32461,
+              "EndMS": 32661
+            },
+            {
+              "TextStart": 207,
+              "TextEnd": 210,
+              "StartMS": 32661,
+              "EndMS": 32781
+            },
+            {
+              "TextStart": 210,
+              "TextEnd": 213,
+              "StartMS": 32781,
+              "EndMS": 32941
+            },
+            {
+              "TextStart": 213,
+              "TextEnd": 216,
+              "StartMS": 32941,
+              "EndMS": 33101
+            },
+            {
+              "TextStart": 216,
+              "TextEnd": 219,
+              "StartMS": 33101,
+              "EndMS": 33261
+            },
+            {
+              "TextStart": 219,
+              "TextEnd": 222,
+              "StartMS": 33261,
+              "EndMS": 33341
+            },
+            {
+              "TextStart": 222,
+              "TextEnd": 225,
+              "StartMS": 33341,
+              "EndMS": 33461
+            },
+            {
+              "TextStart": 225,
+              "TextEnd": 228,
+              "StartMS": 33461,
+              "EndMS": 33581
+            },
+            {
+              "TextStart": 231,
+              "TextEnd": 234,
+              "StartMS": 33741,
+              "EndMS": 34061
+            }
+          ]
+        },
+        {
+          "Text": "にごコゴサ。ゎぜそぞにごコゴサガぽまザシガジぼわ",
+          "StartMS": 35032,
+          "EndMS": 39452,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 35112, "EndMS": 35272 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 35272, "EndMS": 35392 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 35392, "EndMS": 35512 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 35512, "EndMS": 35632 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 35632,
+              "EndMS": 35832
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 36352,
+              "EndMS": 36632
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 36672,
+              "EndMS": 36872
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 36872,
+              "EndMS": 37032
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 37032,
+              "EndMS": 37192
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 37192,
+              "EndMS": 37312
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 37312,
+              "EndMS": 37472
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 37472,
+              "EndMS": 37632
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 37632,
+              "EndMS": 37712
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 37712,
+              "EndMS": 37792
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 37872,
+              "EndMS": 37952
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 38112,
+              "EndMS": 38272
+            },
+            {
+              "TextStart": 51,
+              "TextEnd": 54,
+              "StartMS": 38272,
+              "EndMS": 38392
+            },
+            {
+              "TextStart": 54,
+              "TextEnd": 57,
+              "StartMS": 38432,
+              "EndMS": 38592
+            },
+            {
+              "TextStart": 57,
+              "TextEnd": 60,
+              "StartMS": 38592,
+              "EndMS": 38752
+            },
+            {
+              "TextStart": 60,
+              "TextEnd": 63,
+              "StartMS": 38752,
+              "EndMS": 38912
+            },
+            {
+              "TextStart": 63,
+              "TextEnd": 66,
+              "StartMS": 38912,
+              "EndMS": 39032
+            },
+            {
+              "TextStart": 66,
+              "TextEnd": 69,
+              "StartMS": 39032,
+              "EndMS": 39192
+            },
+            { "TextStart": 69, "TextEnd": 72, "StartMS": 39192, "EndMS": 39392 }
+          ]
+        }
+      ]
+    },
+    {
+      "read": 37458,
+      "end": 67011,
+      "rejected": false,
+      "segments": [
+        {
+          "Text": "コゴサガぽまザシガジぼわスズゅゆふぢセゼソ。ぶ。",
+          "StartMS": 0,
+          "EndMS": 5312,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 40, "EndMS": 160 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 160, "EndMS": 280 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 280, "EndMS": 360 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 480, "EndMS": 560 },
+            { "TextStart": 12, "TextEnd": 15, "StartMS": 680, "EndMS": 840 },
+            { "TextStart": 15, "TextEnd": 18, "StartMS": 840, "EndMS": 920 },
+            { "TextStart": 18, "TextEnd": 21, "StartMS": 960, "EndMS": 1160 },
+            { "TextStart": 21, "TextEnd": 24, "StartMS": 1160, "EndMS": 1320 },
+            { "TextStart": 24, "TextEnd": 27, "StartMS": 1320, "EndMS": 1480 },
+            { "TextStart": 27, "TextEnd": 30, "StartMS": 1480, "EndMS": 1600 },
+            { "TextStart": 30, "TextEnd": 33, "StartMS": 1600, "EndMS": 1800 },
+            { "TextStart": 33, "TextEnd": 36, "StartMS": 1800, "EndMS": 2000 },
+            { "TextStart": 36, "TextEnd": 39, "StartMS": 2200, "EndMS": 2280 },
+            { "TextStart": 39, "TextEnd": 42, "StartMS": 2360, "EndMS": 2440 },
+            { "TextStart": 42, "TextEnd": 45, "StartMS": 2520, "EndMS": 2640 },
+            { "TextStart": 45, "TextEnd": 48, "StartMS": 2640, "EndMS": 2800 },
+            { "TextStart": 48, "TextEnd": 51, "StartMS": 3040, "EndMS": 3200 },
+            { "TextStart": 51, "TextEnd": 54, "StartMS": 3240, "EndMS": 3320 },
+            { "TextStart": 54, "TextEnd": 57, "StartMS": 3440, "EndMS": 3480 },
+            { "TextStart": 57, "TextEnd": 60, "StartMS": 3600, "EndMS": 3640 },
+            { "TextStart": 60, "TextEnd": 63, "StartMS": 3760, "EndMS": 3840 },
+            { "TextStart": 66, "TextEnd": 69, "StartMS": 4040, "EndMS": 4280 }
+          ]
+        },
+        {
+          "Text": "ゎゾタダよぢセチ。ゾタダごすヂッ。",
+          "StartMS": 5562,
+          "EndMS": 9132,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 5682, "EndMS": 5802 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 5882, "EndMS": 6002 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 6002, "EndMS": 6082 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 6082, "EndMS": 6242 },
+            { "TextStart": 12, "TextEnd": 15, "StartMS": 6282, "EndMS": 6402 },
+            { "TextStart": 15, "TextEnd": 18, "StartMS": 6402, "EndMS": 6522 },
+            { "TextStart": 18, "TextEnd": 21, "StartMS": 6522, "EndMS": 6602 },
+            { "TextStart": 21, "TextEnd": 24, "StartMS": 6682, "EndMS": 6842 },
+            { "TextStart": 27, "TextEnd": 30, "StartMS": 7322, "EndMS": 7522 },
+            { "TextStart": 30, "TextEnd": 33, "StartMS": 7522, "EndMS": 7602 },
+            { "TextStart": 33, "TextEnd": 36, "StartMS": 7602, "EndMS": 7762 },
+            { "TextStart": 36, "TextEnd": 39, "StartMS": 7842, "EndMS": 8002 },
+            { "TextStart": 39, "TextEnd": 42, "StartMS": 8002, "EndMS": 8162 },
+            { "TextStart": 42, "TextEnd": 45, "StartMS": 8202, "EndMS": 8322 },
+            { "TextStart": 45, "TextEnd": 48, "StartMS": 8322, "EndMS": 8442 }
+          ]
+        },
+        {
+          "Text": "エツヅぎテカデトすケツ。にドナずニ ヌヌ よネ。け。ノノをゥウチ。",
+          "StartMS": 16181,
+          "EndMS": 22082,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 16381, "EndMS": 16541 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 16541, "EndMS": 16701 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 16701, "EndMS": 16781 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 16781, "EndMS": 17061 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 17181,
+              "EndMS": 17221
+            },
+            {
+              "TextStart": 15,
+              "TextEnd": 18,
+              "StartMS": 17341,
+              "EndMS": 17421
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 17541,
+              "EndMS": 17581
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 17621,
+              "EndMS": 17661
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 17781,
+              "EndMS": 17901
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 17941,
+              "EndMS": 17981
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 18101,
+              "EndMS": 18141
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 18381,
+              "EndMS": 18581
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 18581,
+              "EndMS": 18661
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 18661,
+              "EndMS": 18781
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 18781,
+              "EndMS": 18901
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 18901,
+              "EndMS": 19021
+            },
+            {
+              "TextStart": 52,
+              "TextEnd": 58,
+              "StartMS": 19101,
+              "EndMS": 19301
+            },
+            {
+              "TextStart": 59,
+              "TextEnd": 62,
+              "StartMS": 19381,
+              "EndMS": 19461
+            },
+            {
+              "TextStart": 62,
+              "TextEnd": 65,
+              "StartMS": 19461,
+              "EndMS": 19581
+            },
+            {
+              "TextStart": 68,
+              "TextEnd": 71,
+              "StartMS": 19901,
+              "EndMS": 20021
+            },
+            {
+              "TextStart": 74,
+              "TextEnd": 77,
+              "StartMS": 20341,
+              "EndMS": 20461
+            },
+            {
+              "TextStart": 77,
+              "TextEnd": 80,
+              "StartMS": 20501,
+              "EndMS": 20581
+            },
+            {
+              "TextStart": 80,
+              "TextEnd": 83,
+              "StartMS": 20621,
+              "EndMS": 20781
+            },
+            {
+              "TextStart": 83,
+              "TextEnd": 86,
+              "StartMS": 20781,
+              "EndMS": 20901
+            },
+            {
+              "TextStart": 86,
+              "TextEnd": 89,
+              "StartMS": 20901,
+              "EndMS": 21021
+            },
+            { "TextStart": 89, "TextEnd": 92, "StartMS": 21021, "EndMS": 21221 }
+          ]
+        },
+        {
+          "Text": "をぎほハご。るバそパヒゾタダビよっ ピむ フゐブ。よプっごドヘベた。ペホボづふチ。",
+          "StartMS": 22082,
+          "EndMS": 29552,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 22082, "EndMS": 22162 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 22162, "EndMS": 22282 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 22282, "EndMS": 22402 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 22402, "EndMS": 22442 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 22482,
+              "EndMS": 22642
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 22642,
+              "EndMS": 22842
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 22882,
+              "EndMS": 23002
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 23002,
+              "EndMS": 23162
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 23282,
+              "EndMS": 23482
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 23482,
+              "EndMS": 23602
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 23762,
+              "EndMS": 23962
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 23962,
+              "EndMS": 24082
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 24082,
+              "EndMS": 24322
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 24362,
+              "EndMS": 24602
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 24602,
+              "EndMS": 24722
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 24722,
+              "EndMS": 24922
+            },
+            {
+              "TextStart": 52,
+              "TextEnd": 58,
+              "StartMS": 25042,
+              "EndMS": 25162
+            },
+            {
+              "TextStart": 59,
+              "TextEnd": 62,
+              "StartMS": 25322,
+              "EndMS": 25442
+            },
+            {
+              "TextStart": 62,
+              "TextEnd": 65,
+              "StartMS": 25442,
+              "EndMS": 25562
+            },
+            {
+              "TextStart": 65,
+              "TextEnd": 68,
+              "StartMS": 25642,
+              "EndMS": 25762
+            },
+            {
+              "TextStart": 71,
+              "TextEnd": 74,
+              "StartMS": 25962,
+              "EndMS": 26162
+            },
+            {
+              "TextStart": 74,
+              "TextEnd": 77,
+              "StartMS": 26162,
+              "EndMS": 26282
+            },
+            {
+              "TextStart": 77,
+              "TextEnd": 80,
+              "StartMS": 26282,
+              "EndMS": 26362
+            },
+            {
+              "TextStart": 80,
+              "TextEnd": 83,
+              "StartMS": 26362,
+              "EndMS": 26522
+            },
+            {
+              "TextStart": 83,
+              "TextEnd": 86,
+              "StartMS": 26522,
+              "EndMS": 26602
+            },
+            {
+              "TextStart": 86,
+              "TextEnd": 89,
+              "StartMS": 26602,
+              "EndMS": 26722
+            },
+            {
+              "TextStart": 89,
+              "TextEnd": 92,
+              "StartMS": 26722,
+              "EndMS": 26882
+            },
+            {
+              "TextStart": 92,
+              "TextEnd": 95,
+              "StartMS": 26882,
+              "EndMS": 27002
+            },
+            {
+              "TextStart": 98,
+              "TextEnd": 101,
+              "StartMS": 27762,
+              "EndMS": 27962
+            },
+            {
+              "TextStart": 101,
+              "TextEnd": 104,
+              "StartMS": 27962,
+              "EndMS": 28082
+            },
+            {
+              "TextStart": 104,
+              "TextEnd": 107,
+              "StartMS": 28082,
+              "EndMS": 28202
+            },
+            {
+              "TextStart": 107,
+              "TextEnd": 110,
+              "StartMS": 28202,
+              "EndMS": 28282
+            },
+            {
+              "TextStart": 110,
+              "TextEnd": 113,
+              "StartMS": 28282,
+              "EndMS": 28482
+            },
+            {
+              "TextStart": 113,
+              "TextEnd": 116,
+              "StartMS": 28482,
+              "EndMS": 28682
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "replacement": [
+    {
+      "start_offset_ms": 2000,
+      "end_offset_ms": 39458,
+      "read_start_ms": 0,
+      "segments": [
+        {
+          "Text": "ぁあぃいぅうぇぁうえ ぉおかがきぎくぐ。",
+          "StartMS": 0,
+          "EndMS": 2452,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 30, "StartMS": 80, "EndMS": 520 },
+            { "TextStart": 31, "TextEnd": 34, "StartMS": 720, "EndMS": 880 },
+            { "TextStart": 34, "TextEnd": 37, "StartMS": 880, "EndMS": 960 },
+            { "TextStart": 37, "TextEnd": 40, "StartMS": 960, "EndMS": 1120 },
+            { "TextStart": 40, "TextEnd": 43, "StartMS": 1120, "EndMS": 1240 },
+            { "TextStart": 43, "TextEnd": 46, "StartMS": 1240, "EndMS": 1320 },
+            { "TextStart": 46, "TextEnd": 49, "StartMS": 1320, "EndMS": 1440 },
+            { "TextStart": 49, "TextEnd": 52, "StartMS": 1440, "EndMS": 1560 },
+            { "TextStart": 52, "TextEnd": 55, "StartMS": 1560, "EndMS": 1720 }
+          ]
+        },
+        {
+          "Text": "け。げ。こごさざしじすごずせぜそぞただちぢっつづてぎでとど。げな。にごぜそぞせぬねのさざはそぎばぱひびごぴぴぴごたふぎ。 ぶ。にごぷさへびべぺ。ぜそぞせたほたぼふちぎにごぽま みぁむめぅ ぼもゃやゅゆ。げな。 やゃ。ょ。よごらりぎど。げげ。こごるるにごれろずゎ",
+          "StartMS": 2452,
+          "EndMS": 22941,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 2612, "EndMS": 2772 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 2812, "EndMS": 3052 },
+            { "TextStart": 12, "TextEnd": 15, "StartMS": 3052, "EndMS": 3212 },
+            { "TextStart": 15, "TextEnd": 18, "StartMS": 3212, "EndMS": 3332 },
+            { "TextStart": 18, "TextEnd": 21, "StartMS": 3332, "EndMS": 3492 },
+            { "TextStart": 21, "TextEnd": 24, "StartMS": 3492, "EndMS": 3612 },
+            { "TextStart": 24, "TextEnd": 27, "StartMS": 3652, "EndMS": 3812 },
+            { "TextStart": 27, "TextEnd": 30, "StartMS": 3812, "EndMS": 3932 },
+            { "TextStart": 30, "TextEnd": 33, "StartMS": 3932, "EndMS": 4052 },
+            { "TextStart": 33, "TextEnd": 36, "StartMS": 4052, "EndMS": 4132 },
+            { "TextStart": 36, "TextEnd": 39, "StartMS": 4132, "EndMS": 4292 },
+            { "TextStart": 39, "TextEnd": 42, "StartMS": 4292, "EndMS": 4452 },
+            { "TextStart": 42, "TextEnd": 45, "StartMS": 4532, "EndMS": 4692 },
+            { "TextStart": 45, "TextEnd": 48, "StartMS": 4692, "EndMS": 4812 },
+            { "TextStart": 48, "TextEnd": 51, "StartMS": 4812, "EndMS": 4932 },
+            { "TextStart": 51, "TextEnd": 54, "StartMS": 4932, "EndMS": 5132 },
+            { "TextStart": 54, "TextEnd": 57, "StartMS": 5132, "EndMS": 5252 },
+            { "TextStart": 57, "TextEnd": 60, "StartMS": 5252, "EndMS": 5332 },
+            { "TextStart": 60, "TextEnd": 63, "StartMS": 5332, "EndMS": 5412 },
+            { "TextStart": 63, "TextEnd": 66, "StartMS": 5412, "EndMS": 5492 },
+            { "TextStart": 66, "TextEnd": 69, "StartMS": 5492, "EndMS": 5572 },
+            { "TextStart": 69, "TextEnd": 72, "StartMS": 5572, "EndMS": 5652 },
+            { "TextStart": 72, "TextEnd": 75, "StartMS": 5652, "EndMS": 5732 },
+            { "TextStart": 75, "TextEnd": 78, "StartMS": 5732, "EndMS": 5812 },
+            { "TextStart": 78, "TextEnd": 81, "StartMS": 5812, "EndMS": 5972 },
+            { "TextStart": 81, "TextEnd": 84, "StartMS": 5972, "EndMS": 6092 },
+            { "TextStart": 84, "TextEnd": 87, "StartMS": 6092, "EndMS": 6252 },
+            { "TextStart": 90, "TextEnd": 93, "StartMS": 6452, "EndMS": 6572 },
+            { "TextStart": 93, "TextEnd": 96, "StartMS": 6572, "EndMS": 6692 },
+            { "TextStart": 99, "TextEnd": 102, "StartMS": 6852, "EndMS": 6972 },
+            {
+              "TextStart": 102,
+              "TextEnd": 105,
+              "StartMS": 6972,
+              "EndMS": 7092
+            },
+            {
+              "TextStart": 105,
+              "TextEnd": 108,
+              "StartMS": 7092,
+              "EndMS": 7212
+            },
+            {
+              "TextStart": 108,
+              "TextEnd": 111,
+              "StartMS": 7212,
+              "EndMS": 7332
+            },
+            {
+              "TextStart": 111,
+              "TextEnd": 114,
+              "StartMS": 7332,
+              "EndMS": 7492
+            },
+            {
+              "TextStart": 114,
+              "TextEnd": 117,
+              "StartMS": 7532,
+              "EndMS": 7692
+            },
+            {
+              "TextStart": 117,
+              "TextEnd": 120,
+              "StartMS": 7692,
+              "EndMS": 7852
+            },
+            {
+              "TextStart": 120,
+              "TextEnd": 123,
+              "StartMS": 7852,
+              "EndMS": 8012
+            },
+            {
+              "TextStart": 123,
+              "TextEnd": 126,
+              "StartMS": 8012,
+              "EndMS": 8212
+            },
+            {
+              "TextStart": 126,
+              "TextEnd": 129,
+              "StartMS": 8332,
+              "EndMS": 8452
+            },
+            {
+              "TextStart": 129,
+              "TextEnd": 132,
+              "StartMS": 8452,
+              "EndMS": 8572
+            },
+            {
+              "TextStart": 132,
+              "TextEnd": 135,
+              "StartMS": 8572,
+              "EndMS": 8772
+            },
+            {
+              "TextStart": 135,
+              "TextEnd": 138,
+              "StartMS": 8772,
+              "EndMS": 8892
+            },
+            {
+              "TextStart": 138,
+              "TextEnd": 141,
+              "StartMS": 8892,
+              "EndMS": 9092
+            },
+            {
+              "TextStart": 141,
+              "TextEnd": 144,
+              "StartMS": 9092,
+              "EndMS": 9212
+            },
+            {
+              "TextStart": 144,
+              "TextEnd": 147,
+              "StartMS": 9212,
+              "EndMS": 9372
+            },
+            {
+              "TextStart": 147,
+              "TextEnd": 150,
+              "StartMS": 9372,
+              "EndMS": 9572
+            },
+            {
+              "TextStart": 150,
+              "TextEnd": 153,
+              "StartMS": 9572,
+              "EndMS": 9732
+            },
+            {
+              "TextStart": 153,
+              "TextEnd": 156,
+              "StartMS": 10212,
+              "EndMS": 10532
+            },
+            {
+              "TextStart": 156,
+              "TextEnd": 159,
+              "StartMS": 10892,
+              "EndMS": 11092
+            },
+            {
+              "TextStart": 159,
+              "TextEnd": 162,
+              "StartMS": 11172,
+              "EndMS": 11292
+            },
+            {
+              "TextStart": 162,
+              "TextEnd": 165,
+              "StartMS": 11332,
+              "EndMS": 11492
+            },
+            {
+              "TextStart": 165,
+              "TextEnd": 168,
+              "StartMS": 11492,
+              "EndMS": 11572
+            },
+            {
+              "TextStart": 168,
+              "TextEnd": 171,
+              "StartMS": 11572,
+              "EndMS": 11732
+            },
+            {
+              "TextStart": 171,
+              "TextEnd": 174,
+              "StartMS": 11732,
+              "EndMS": 11892
+            },
+            {
+              "TextStart": 174,
+              "TextEnd": 177,
+              "StartMS": 11892,
+              "EndMS": 12052
+            },
+            {
+              "TextStart": 181,
+              "TextEnd": 184,
+              "StartMS": 12132,
+              "EndMS": 12372
+            },
+            {
+              "TextStart": 187,
+              "TextEnd": 190,
+              "StartMS": 12372,
+              "EndMS": 12532
+            },
+            {
+              "TextStart": 190,
+              "TextEnd": 193,
+              "StartMS": 12532,
+              "EndMS": 12612
+            },
+            {
+              "TextStart": 193,
+              "TextEnd": 196,
+              "StartMS": 12732,
+              "EndMS": 12932
+            },
+            {
+              "TextStart": 196,
+              "TextEnd": 199,
+              "StartMS": 12932,
+              "EndMS": 13132
+            },
+            {
+              "TextStart": 199,
+              "TextEnd": 202,
+              "StartMS": 13132,
+              "EndMS": 13292
+            },
+            {
+              "TextStart": 202,
+              "TextEnd": 205,
+              "StartMS": 13292,
+              "EndMS": 13372
+            },
+            {
+              "TextStart": 205,
+              "TextEnd": 208,
+              "StartMS": 13372,
+              "EndMS": 13532
+            },
+            {
+              "TextStart": 208,
+              "TextEnd": 211,
+              "StartMS": 13532,
+              "EndMS": 13652
+            },
+            {
+              "TextStart": 214,
+              "TextEnd": 217,
+              "StartMS": 13652,
+              "EndMS": 13812
+            },
+            {
+              "TextStart": 217,
+              "TextEnd": 220,
+              "StartMS": 13812,
+              "EndMS": 13932
+            },
+            {
+              "TextStart": 220,
+              "TextEnd": 223,
+              "StartMS": 13932,
+              "EndMS": 14092
+            },
+            {
+              "TextStart": 223,
+              "TextEnd": 226,
+              "StartMS": 14132,
+              "EndMS": 14212
+            },
+            {
+              "TextStart": 226,
+              "TextEnd": 229,
+              "StartMS": 14292,
+              "EndMS": 14332
+            },
+            {
+              "TextStart": 229,
+              "TextEnd": 232,
+              "StartMS": 14452,
+              "EndMS": 14612
+            },
+            {
+              "TextStart": 232,
+              "TextEnd": 235,
+              "StartMS": 14612,
+              "EndMS": 14652
+            },
+            {
+              "TextStart": 235,
+              "TextEnd": 238,
+              "StartMS": 14652,
+              "EndMS": 14812
+            },
+            {
+              "TextStart": 238,
+              "TextEnd": 241,
+              "StartMS": 14812,
+              "EndMS": 14932
+            },
+            {
+              "TextStart": 241,
+              "TextEnd": 244,
+              "StartMS": 14932,
+              "EndMS": 15012
+            },
+            {
+              "TextStart": 244,
+              "TextEnd": 247,
+              "StartMS": 15012,
+              "EndMS": 15092
+            },
+            {
+              "TextStart": 247,
+              "TextEnd": 250,
+              "StartMS": 15092,
+              "EndMS": 15212
+            },
+            {
+              "TextStart": 250,
+              "TextEnd": 253,
+              "StartMS": 15212,
+              "EndMS": 15332
+            },
+            {
+              "TextStart": 253,
+              "TextEnd": 256,
+              "StartMS": 15332,
+              "EndMS": 15452
+            },
+            {
+              "TextStart": 256,
+              "TextEnd": 259,
+              "StartMS": 15452,
+              "EndMS": 15532
+            },
+            {
+              "TextStart": 260,
+              "TextEnd": 275,
+              "StartMS": 15572,
+              "EndMS": 15812
+            },
+            {
+              "TextStart": 276,
+              "TextEnd": 279,
+              "StartMS": 15932,
+              "EndMS": 16212
+            },
+            {
+              "TextStart": 279,
+              "TextEnd": 282,
+              "StartMS": 16772,
+              "EndMS": 16932
+            },
+            {
+              "TextStart": 282,
+              "TextEnd": 285,
+              "StartMS": 17132,
+              "EndMS": 17292
+            },
+            {
+              "TextStart": 285,
+              "TextEnd": 288,
+              "StartMS": 17292,
+              "EndMS": 17332
+            },
+            {
+              "TextStart": 288,
+              "TextEnd": 291,
+              "StartMS": 17372,
+              "EndMS": 17492
+            },
+            {
+              "TextStart": 291,
+              "TextEnd": 294,
+              "StartMS": 17492,
+              "EndMS": 17612
+            },
+            {
+              "TextStart": 297,
+              "TextEnd": 300,
+              "StartMS": 17692,
+              "EndMS": 17812
+            },
+            {
+              "TextStart": 300,
+              "TextEnd": 303,
+              "StartMS": 17812,
+              "EndMS": 17932
+            },
+            {
+              "TextStart": 307,
+              "TextEnd": 310,
+              "StartMS": 18132,
+              "EndMS": 18332
+            },
+            {
+              "TextStart": 310,
+              "TextEnd": 313,
+              "StartMS": 18332,
+              "EndMS": 18412
+            },
+            {
+              "TextStart": 316,
+              "TextEnd": 319,
+              "StartMS": 18732,
+              "EndMS": 18932
+            },
+            {
+              "TextStart": 322,
+              "TextEnd": 325,
+              "StartMS": 18932,
+              "EndMS": 19092
+            },
+            {
+              "TextStart": 325,
+              "TextEnd": 328,
+              "StartMS": 19092,
+              "EndMS": 19212
+            },
+            {
+              "TextStart": 328,
+              "TextEnd": 331,
+              "StartMS": 19252,
+              "EndMS": 19412
+            },
+            {
+              "TextStart": 331,
+              "TextEnd": 334,
+              "StartMS": 19412,
+              "EndMS": 19532
+            },
+            {
+              "TextStart": 334,
+              "TextEnd": 337,
+              "StartMS": 19572,
+              "EndMS": 19692
+            },
+            {
+              "TextStart": 337,
+              "TextEnd": 340,
+              "StartMS": 19732,
+              "EndMS": 19812
+            },
+            {
+              "TextStart": 343,
+              "TextEnd": 346,
+              "StartMS": 20212,
+              "EndMS": 20452
+            },
+            {
+              "TextStart": 346,
+              "TextEnd": 349,
+              "StartMS": 20492,
+              "EndMS": 20692
+            },
+            {
+              "TextStart": 352,
+              "TextEnd": 355,
+              "StartMS": 20692,
+              "EndMS": 20852
+            },
+            {
+              "TextStart": 355,
+              "TextEnd": 358,
+              "StartMS": 20892,
+              "EndMS": 21092
+            },
+            {
+              "TextStart": 358,
+              "TextEnd": 361,
+              "StartMS": 21132,
+              "EndMS": 21292
+            },
+            {
+              "TextStart": 361,
+              "TextEnd": 364,
+              "StartMS": 21332,
+              "EndMS": 21532
+            },
+            {
+              "TextStart": 364,
+              "TextEnd": 367,
+              "StartMS": 21652,
+              "EndMS": 21812
+            },
+            {
+              "TextStart": 367,
+              "TextEnd": 370,
+              "StartMS": 21812,
+              "EndMS": 22012
+            },
+            {
+              "TextStart": 370,
+              "TextEnd": 373,
+              "StartMS": 22052,
+              "EndMS": 22212
+            },
+            {
+              "TextStart": 373,
+              "TextEnd": 376,
+              "StartMS": 22212,
+              "EndMS": 22332
+            },
+            {
+              "TextStart": 376,
+              "TextEnd": 379,
+              "StartMS": 22332,
+              "EndMS": 22532
+            },
+            {
+              "TextStart": 379,
+              "TextEnd": 382,
+              "StartMS": 22532,
+              "EndMS": 22732
+            }
+          ]
+        },
+        {
+          "Text": "ごすごぜそぞささざせわよっゐゑぢっをたんしぎぢっばぱぼふ。げな。はそぞ。ゔゕさざひびずゖさざぎァアぼィ。げ。げ。よてよてイるゥウェんエォオカガキギクぢグ。ケ。",
+          "StartMS": 22941,
+          "EndMS": 35032,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 23101, "EndMS": 23181 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 23181, "EndMS": 23261 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 23261, "EndMS": 23381 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 23381, "EndMS": 23501 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 23501,
+              "EndMS": 23621
+            },
+            {
+              "TextStart": 15,
+              "TextEnd": 18,
+              "StartMS": 23621,
+              "EndMS": 23741
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 23821,
+              "EndMS": 23861
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 23901,
+              "EndMS": 24021
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 24021,
+              "EndMS": 24101
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 24101,
+              "EndMS": 24221
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 24221,
+              "EndMS": 24381
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 24381,
+              "EndMS": 24541
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 24541,
+              "EndMS": 24701
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 24701,
+              "EndMS": 24861
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 24861,
+              "EndMS": 24941
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 25061,
+              "EndMS": 25101
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 25141,
+              "EndMS": 25181
+            },
+            {
+              "TextStart": 51,
+              "TextEnd": 54,
+              "StartMS": 25181,
+              "EndMS": 25341
+            },
+            {
+              "TextStart": 54,
+              "TextEnd": 57,
+              "StartMS": 25341,
+              "EndMS": 25461
+            },
+            {
+              "TextStart": 57,
+              "TextEnd": 60,
+              "StartMS": 25461,
+              "EndMS": 25581
+            },
+            {
+              "TextStart": 60,
+              "TextEnd": 63,
+              "StartMS": 25581,
+              "EndMS": 25701
+            },
+            {
+              "TextStart": 63,
+              "TextEnd": 66,
+              "StartMS": 25701,
+              "EndMS": 25821
+            },
+            {
+              "TextStart": 66,
+              "TextEnd": 69,
+              "StartMS": 25821,
+              "EndMS": 25861
+            },
+            {
+              "TextStart": 69,
+              "TextEnd": 72,
+              "StartMS": 25861,
+              "EndMS": 25941
+            },
+            {
+              "TextStart": 72,
+              "TextEnd": 75,
+              "StartMS": 25941,
+              "EndMS": 26021
+            },
+            {
+              "TextStart": 75,
+              "TextEnd": 78,
+              "StartMS": 26181,
+              "EndMS": 26261
+            },
+            {
+              "TextStart": 78,
+              "TextEnd": 81,
+              "StartMS": 26301,
+              "EndMS": 26421
+            },
+            {
+              "TextStart": 81,
+              "TextEnd": 84,
+              "StartMS": 26421,
+              "EndMS": 26541
+            },
+            {
+              "TextStart": 87,
+              "TextEnd": 90,
+              "StartMS": 26741,
+              "EndMS": 26821
+            },
+            {
+              "TextStart": 90,
+              "TextEnd": 93,
+              "StartMS": 26821,
+              "EndMS": 26981
+            },
+            {
+              "TextStart": 96,
+              "TextEnd": 99,
+              "StartMS": 27021,
+              "EndMS": 27181
+            },
+            {
+              "TextStart": 99,
+              "TextEnd": 102,
+              "StartMS": 27181,
+              "EndMS": 27301
+            },
+            {
+              "TextStart": 102,
+              "TextEnd": 105,
+              "StartMS": 27301,
+              "EndMS": 27461
+            },
+            {
+              "TextStart": 108,
+              "TextEnd": 111,
+              "StartMS": 27461,
+              "EndMS": 27581
+            },
+            {
+              "TextStart": 111,
+              "TextEnd": 114,
+              "StartMS": 27581,
+              "EndMS": 27701
+            },
+            {
+              "TextStart": 114,
+              "TextEnd": 117,
+              "StartMS": 27701,
+              "EndMS": 27821
+            },
+            {
+              "TextStart": 117,
+              "TextEnd": 120,
+              "StartMS": 27821,
+              "EndMS": 27941
+            },
+            {
+              "TextStart": 120,
+              "TextEnd": 123,
+              "StartMS": 27941,
+              "EndMS": 28061
+            },
+            {
+              "TextStart": 123,
+              "TextEnd": 126,
+              "StartMS": 28061,
+              "EndMS": 28181
+            },
+            {
+              "TextStart": 126,
+              "TextEnd": 129,
+              "StartMS": 28181,
+              "EndMS": 28461
+            },
+            {
+              "TextStart": 129,
+              "TextEnd": 132,
+              "StartMS": 28701,
+              "EndMS": 28941
+            },
+            {
+              "TextStart": 132,
+              "TextEnd": 135,
+              "StartMS": 28941,
+              "EndMS": 29061
+            },
+            {
+              "TextStart": 135,
+              "TextEnd": 138,
+              "StartMS": 29061,
+              "EndMS": 29141
+            },
+            {
+              "TextStart": 138,
+              "TextEnd": 141,
+              "StartMS": 29141,
+              "EndMS": 29221
+            },
+            {
+              "TextStart": 141,
+              "TextEnd": 144,
+              "StartMS": 29221,
+              "EndMS": 29381
+            },
+            {
+              "TextStart": 144,
+              "TextEnd": 147,
+              "StartMS": 29381,
+              "EndMS": 29461
+            },
+            {
+              "TextStart": 147,
+              "TextEnd": 150,
+              "StartMS": 29501,
+              "EndMS": 29661
+            },
+            {
+              "TextStart": 150,
+              "TextEnd": 153,
+              "StartMS": 29661,
+              "EndMS": 29861
+            },
+            {
+              "TextStart": 156,
+              "TextEnd": 159,
+              "StartMS": 30021,
+              "EndMS": 30181
+            },
+            {
+              "TextStart": 162,
+              "TextEnd": 165,
+              "StartMS": 30781,
+              "EndMS": 31021
+            },
+            {
+              "TextStart": 168,
+              "TextEnd": 171,
+              "StartMS": 31021,
+              "EndMS": 31061
+            },
+            {
+              "TextStart": 171,
+              "TextEnd": 174,
+              "StartMS": 31181,
+              "EndMS": 31221
+            },
+            {
+              "TextStart": 174,
+              "TextEnd": 177,
+              "StartMS": 31301,
+              "EndMS": 31421
+            },
+            {
+              "TextStart": 177,
+              "TextEnd": 180,
+              "StartMS": 31421,
+              "EndMS": 31541
+            },
+            {
+              "TextStart": 180,
+              "TextEnd": 183,
+              "StartMS": 31541,
+              "EndMS": 31621
+            },
+            {
+              "TextStart": 183,
+              "TextEnd": 186,
+              "StartMS": 31661,
+              "EndMS": 31821
+            },
+            {
+              "TextStart": 186,
+              "TextEnd": 189,
+              "StartMS": 31821,
+              "EndMS": 31901
+            },
+            {
+              "TextStart": 189,
+              "TextEnd": 192,
+              "StartMS": 31901,
+              "EndMS": 31981
+            },
+            {
+              "TextStart": 192,
+              "TextEnd": 195,
+              "StartMS": 31981,
+              "EndMS": 32101
+            },
+            {
+              "TextStart": 195,
+              "TextEnd": 198,
+              "StartMS": 32101,
+              "EndMS": 32181
+            },
+            {
+              "TextStart": 198,
+              "TextEnd": 201,
+              "StartMS": 32181,
+              "EndMS": 32341
+            },
+            {
+              "TextStart": 201,
+              "TextEnd": 204,
+              "StartMS": 32341,
+              "EndMS": 32461
+            },
+            {
+              "TextStart": 204,
+              "TextEnd": 207,
+              "StartMS": 32461,
+              "EndMS": 32661
+            },
+            {
+              "TextStart": 207,
+              "TextEnd": 210,
+              "StartMS": 32661,
+              "EndMS": 32781
+            },
+            {
+              "TextStart": 210,
+              "TextEnd": 213,
+              "StartMS": 32781,
+              "EndMS": 32941
+            },
+            {
+              "TextStart": 213,
+              "TextEnd": 216,
+              "StartMS": 32941,
+              "EndMS": 33101
+            },
+            {
+              "TextStart": 216,
+              "TextEnd": 219,
+              "StartMS": 33101,
+              "EndMS": 33261
+            },
+            {
+              "TextStart": 219,
+              "TextEnd": 222,
+              "StartMS": 33261,
+              "EndMS": 33341
+            },
+            {
+              "TextStart": 222,
+              "TextEnd": 225,
+              "StartMS": 33341,
+              "EndMS": 33461
+            },
+            {
+              "TextStart": 225,
+              "TextEnd": 228,
+              "StartMS": 33461,
+              "EndMS": 33581
+            },
+            {
+              "TextStart": 231,
+              "TextEnd": 234,
+              "StartMS": 33741,
+              "EndMS": 34061
+            }
+          ]
+        },
+        {
+          "Text": "にごコゴサ。ゎぜそぞにごコゴサガぽまザシガジぼわ",
+          "StartMS": 35032,
+          "EndMS": 39452,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 35112, "EndMS": 35272 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 35272, "EndMS": 35392 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 35392, "EndMS": 35512 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 35512, "EndMS": 35632 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 35632,
+              "EndMS": 35832
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 36352,
+              "EndMS": 36632
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 36672,
+              "EndMS": 36872
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 36872,
+              "EndMS": 37032
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 37032,
+              "EndMS": 37192
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 37192,
+              "EndMS": 37312
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 37312,
+              "EndMS": 37472
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 37472,
+              "EndMS": 37632
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 37632,
+              "EndMS": 37712
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 37712,
+              "EndMS": 37792
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 37872,
+              "EndMS": 37952
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 38112,
+              "EndMS": 38272
+            },
+            {
+              "TextStart": 51,
+              "TextEnd": 54,
+              "StartMS": 38272,
+              "EndMS": 38392
+            },
+            {
+              "TextStart": 54,
+              "TextEnd": 57,
+              "StartMS": 38432,
+              "EndMS": 38592
+            },
+            {
+              "TextStart": 57,
+              "TextEnd": 60,
+              "StartMS": 38592,
+              "EndMS": 38752
+            },
+            {
+              "TextStart": 60,
+              "TextEnd": 63,
+              "StartMS": 38752,
+              "EndMS": 38912
+            },
+            {
+              "TextStart": 63,
+              "TextEnd": 66,
+              "StartMS": 38912,
+              "EndMS": 39032
+            },
+            {
+              "TextStart": 66,
+              "TextEnd": 69,
+              "StartMS": 39032,
+              "EndMS": 39192
+            },
+            { "TextStart": 69, "TextEnd": 72, "StartMS": 39192, "EndMS": 39392 }
+          ]
+        }
+      ]
+    },
+    {
+      "start_offset_ms": 39458,
+      "end_offset_ms": 67011,
+      "read_start_ms": 37458,
+      "segments": [
+        {
+          "Text": "コゴサガぽまザシガジぼわスズゅゆふぢセゼソ。ぶ。",
+          "StartMS": 37458,
+          "EndMS": 42770,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 37498, "EndMS": 37618 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 37618, "EndMS": 37738 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 37738, "EndMS": 37818 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 37938, "EndMS": 38018 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 38138,
+              "EndMS": 38298
+            },
+            {
+              "TextStart": 15,
+              "TextEnd": 18,
+              "StartMS": 38298,
+              "EndMS": 38378
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 38418,
+              "EndMS": 38618
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 38618,
+              "EndMS": 38778
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 38778,
+              "EndMS": 38938
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 38938,
+              "EndMS": 39058
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 39058,
+              "EndMS": 39258
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 39258,
+              "EndMS": 39458
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 39658,
+              "EndMS": 39738
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 39818,
+              "EndMS": 39898
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 39978,
+              "EndMS": 40098
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 40098,
+              "EndMS": 40258
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 40498,
+              "EndMS": 40658
+            },
+            {
+              "TextStart": 51,
+              "TextEnd": 54,
+              "StartMS": 40698,
+              "EndMS": 40778
+            },
+            {
+              "TextStart": 54,
+              "TextEnd": 57,
+              "StartMS": 40898,
+              "EndMS": 40938
+            },
+            {
+              "TextStart": 57,
+              "TextEnd": 60,
+              "StartMS": 41058,
+              "EndMS": 41098
+            },
+            {
+              "TextStart": 60,
+              "TextEnd": 63,
+              "StartMS": 41218,
+              "EndMS": 41298
+            },
+            { "TextStart": 66, "TextEnd": 69, "StartMS": 41498, "EndMS": 41738 }
+          ]
+        },
+        {
+          "Text": "ゎゾタダよぢセチ。ゾタダごすヂッ。",
+          "StartMS": 43020,
+          "EndMS": 46590,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 43140, "EndMS": 43260 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 43340, "EndMS": 43460 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 43460, "EndMS": 43540 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 43540, "EndMS": 43700 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 43740,
+              "EndMS": 43860
+            },
+            {
+              "TextStart": 15,
+              "TextEnd": 18,
+              "StartMS": 43860,
+              "EndMS": 43980
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 43980,
+              "EndMS": 44060
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 44140,
+              "EndMS": 44300
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 44780,
+              "EndMS": 44980
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 44980,
+              "EndMS": 45060
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 45060,
+              "EndMS": 45220
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 45300,
+              "EndMS": 45460
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 45460,
+              "EndMS": 45620
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 45660,
+              "EndMS": 45780
+            },
+            { "TextStart": 45, "TextEnd": 48, "StartMS": 45780, "EndMS": 45900 }
+          ]
+        },
+        {
+          "Text": "エツヅぎテカデトすケツ。にドナずニ ヌヌ よネ。け。ノノをゥウチ。",
+          "StartMS": 53639,
+          "EndMS": 59540,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 53839, "EndMS": 53999 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 53999, "EndMS": 54159 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 54159, "EndMS": 54239 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 54239, "EndMS": 54519 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 54639,
+              "EndMS": 54679
+            },
+            {
+              "TextStart": 15,
+              "TextEnd": 18,
+              "StartMS": 54799,
+              "EndMS": 54879
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 54999,
+              "EndMS": 55039
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 55079,
+              "EndMS": 55119
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 55239,
+              "EndMS": 55359
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 55399,
+              "EndMS": 55439
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 55559,
+              "EndMS": 55599
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 55839,
+              "EndMS": 56039
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 56039,
+              "EndMS": 56119
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 56119,
+              "EndMS": 56239
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 56239,
+              "EndMS": 56359
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 56359,
+              "EndMS": 56479
+            },
+            {
+              "TextStart": 52,
+              "TextEnd": 58,
+              "StartMS": 56559,
+              "EndMS": 56759
+            },
+            {
+              "TextStart": 59,
+              "TextEnd": 62,
+              "StartMS": 56839,
+              "EndMS": 56919
+            },
+            {
+              "TextStart": 62,
+              "TextEnd": 65,
+              "StartMS": 56919,
+              "EndMS": 57039
+            },
+            {
+              "TextStart": 68,
+              "TextEnd": 71,
+              "StartMS": 57359,
+              "EndMS": 57479
+            },
+            {
+              "TextStart": 74,
+              "TextEnd": 77,
+              "StartMS": 57799,
+              "EndMS": 57919
+            },
+            {
+              "TextStart": 77,
+              "TextEnd": 80,
+              "StartMS": 57959,
+              "EndMS": 58039
+            },
+            {
+              "TextStart": 80,
+              "TextEnd": 83,
+              "StartMS": 58079,
+              "EndMS": 58239
+            },
+            {
+              "TextStart": 83,
+              "TextEnd": 86,
+              "StartMS": 58239,
+              "EndMS": 58359
+            },
+            {
+              "TextStart": 86,
+              "TextEnd": 89,
+              "StartMS": 58359,
+              "EndMS": 58479
+            },
+            { "TextStart": 89, "TextEnd": 92, "StartMS": 58479, "EndMS": 58679 }
+          ]
+        },
+        {
+          "Text": "をぎほハご。るバそパヒゾタダビよっ ピむ フゐブ。よプっごドヘベた。ペホボづふチ。",
+          "StartMS": 59540,
+          "EndMS": 67010,
+          "Final": true,
+          "Words": [
+            { "TextStart": 0, "TextEnd": 3, "StartMS": 59540, "EndMS": 59620 },
+            { "TextStart": 3, "TextEnd": 6, "StartMS": 59620, "EndMS": 59740 },
+            { "TextStart": 6, "TextEnd": 9, "StartMS": 59740, "EndMS": 59860 },
+            { "TextStart": 9, "TextEnd": 12, "StartMS": 59860, "EndMS": 59900 },
+            {
+              "TextStart": 12,
+              "TextEnd": 15,
+              "StartMS": 59940,
+              "EndMS": 60100
+            },
+            {
+              "TextStart": 18,
+              "TextEnd": 21,
+              "StartMS": 60100,
+              "EndMS": 60300
+            },
+            {
+              "TextStart": 21,
+              "TextEnd": 24,
+              "StartMS": 60340,
+              "EndMS": 60460
+            },
+            {
+              "TextStart": 24,
+              "TextEnd": 27,
+              "StartMS": 60460,
+              "EndMS": 60620
+            },
+            {
+              "TextStart": 27,
+              "TextEnd": 30,
+              "StartMS": 60740,
+              "EndMS": 60940
+            },
+            {
+              "TextStart": 30,
+              "TextEnd": 33,
+              "StartMS": 60940,
+              "EndMS": 61060
+            },
+            {
+              "TextStart": 33,
+              "TextEnd": 36,
+              "StartMS": 61220,
+              "EndMS": 61420
+            },
+            {
+              "TextStart": 36,
+              "TextEnd": 39,
+              "StartMS": 61420,
+              "EndMS": 61540
+            },
+            {
+              "TextStart": 39,
+              "TextEnd": 42,
+              "StartMS": 61540,
+              "EndMS": 61780
+            },
+            {
+              "TextStart": 42,
+              "TextEnd": 45,
+              "StartMS": 61820,
+              "EndMS": 62060
+            },
+            {
+              "TextStart": 45,
+              "TextEnd": 48,
+              "StartMS": 62060,
+              "EndMS": 62180
+            },
+            {
+              "TextStart": 48,
+              "TextEnd": 51,
+              "StartMS": 62180,
+              "EndMS": 62380
+            },
+            {
+              "TextStart": 52,
+              "TextEnd": 58,
+              "StartMS": 62500,
+              "EndMS": 62620
+            },
+            {
+              "TextStart": 59,
+              "TextEnd": 62,
+              "StartMS": 62780,
+              "EndMS": 62900
+            },
+            {
+              "TextStart": 62,
+              "TextEnd": 65,
+              "StartMS": 62900,
+              "EndMS": 63020
+            },
+            {
+              "TextStart": 65,
+              "TextEnd": 68,
+              "StartMS": 63100,
+              "EndMS": 63220
+            },
+            {
+              "TextStart": 71,
+              "TextEnd": 74,
+              "StartMS": 63420,
+              "EndMS": 63620
+            },
+            {
+              "TextStart": 74,
+              "TextEnd": 77,
+              "StartMS": 63620,
+              "EndMS": 63740
+            },
+            {
+              "TextStart": 77,
+              "TextEnd": 80,
+              "StartMS": 63740,
+              "EndMS": 63820
+            },
+            {
+              "TextStart": 80,
+              "TextEnd": 83,
+              "StartMS": 63820,
+              "EndMS": 63980
+            },
+            {
+              "TextStart": 83,
+              "TextEnd": 86,
+              "StartMS": 63980,
+              "EndMS": 64060
+            },
+            {
+              "TextStart": 86,
+              "TextEnd": 89,
+              "StartMS": 64060,
+              "EndMS": 64180
+            },
+            {
+              "TextStart": 89,
+              "TextEnd": 92,
+              "StartMS": 64180,
+              "EndMS": 64340
+            },
+            {
+              "TextStart": 92,
+              "TextEnd": 95,
+              "StartMS": 64340,
+              "EndMS": 64460
+            },
+            {
+              "TextStart": 98,
+              "TextEnd": 101,
+              "StartMS": 65220,
+              "EndMS": 65420
+            },
+            {
+              "TextStart": 101,
+              "TextEnd": 104,
+              "StartMS": 65420,
+              "EndMS": 65540
+            },
+            {
+              "TextStart": 104,
+              "TextEnd": 107,
+              "StartMS": 65540,
+              "EndMS": 65660
+            },
+            {
+              "TextStart": 107,
+              "TextEnd": 110,
+              "StartMS": 65660,
+              "EndMS": 65740
+            },
+            {
+              "TextStart": 110,
+              "TextEnd": 113,
+              "StartMS": 65740,
+              "EndMS": 65940
+            },
+            {
+              "TextStart": 113,
+              "TextEnd": 116,
+              "StartMS": 65940,
+              "EndMS": 66140
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

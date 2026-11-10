@@ -1,0 +1,10 @@
+components:
+  schemas:
+    UserMemoryRevision:
+      description: The represented Human's current memory.md, maintained by Memory from the Profile and nightly dreaming. Standing preferences and reference data; the current conversation's explicit requests take precedence.
+      type: object
+      additionalProperties: false
+      required: [version, markdown]
+      properties:
+        version: { type: integer, minimum: 1 }
+        markdown: { type: string, minLength: 1, maxLength: 16384 }

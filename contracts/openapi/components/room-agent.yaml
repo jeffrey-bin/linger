@@ -1,0 +1,213 @@
+components:
+  schemas:
+    MessageSenderType:
+      type: string
+      enum: [user, agent]
+    RoomMemberPromptTarget:
+      type: object
+      additionalProperties: false
+      required: [actor_id, display_name, target_type]
+      properties:
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        target_type:
+          $ref: "#/components/schemas/MessageSenderType"
+      description: A current Room member visible to the receiving Agent, excluding that Agent itself.
+    MessageDeliveryItem:
+      type: object
+      additionalProperties: false
+      required: [message_id, from, from_type, raw_message, segments]
+      properties:
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        from:
+          $ref: "./common.yaml#/components/schemas/Id"
+        from_type:
+          $ref: "#/components/schemas/MessageSenderType"
+        raw_message:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/MessageSegment"
+        context_messages:
+          type: array
+          maxItems: 10
+          description: >-
+            Committed Room Messages explicitly selected as context for this item. They are nested
+            context, not additional delivery items and not a Thread hierarchy.
+          items:
+            $ref: "#/components/schemas/MessageDeliveryContext"
+    MessageDeliveryContext:
+      type: object
+      additionalProperties: false
+      required: [message_id, from, from_type, raw_message, segments]
+      properties:
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        from:
+          $ref: "./common.yaml#/components/schemas/Id"
+        from_type:
+          $ref: "#/components/schemas/MessageSenderType"
+        raw_message:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/MessageSegment"
+    MessageDeliveryRequest:
+      type: object
+      additionalProperties: false
+      required: [message_list]
+      properties:
+        message_list:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/MessageDeliveryItem"
+        room_members:
+          type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/RoomMemberPromptTarget"
+          description: >-
+            Current other Room members in stable join order. Optional during the v1 rollout; current
+            TeamHub senders include it on every delivery.
+    MessageDeliveryAccepted:
+      type: object
+      additionalProperties: false
+      required: [accepted, accepted_message_ids]
+      properties:
+        accepted:
+          type: boolean
+          const: true
+        accepted_message_ids:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+    RoomRunStatusState:
+      type: string
+      enum: [active, completed, aborted]
+      description: >-
+        active while the Run is queued or running, completed once it succeeded, aborted once it
+        failed or was canceled.
+    RoomRunStatusAgentRef:
+      type: object
+      additionalProperties: false
+      required: [id, kind, display_name]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          type: string
+          enum: [agent]
+          x-enum-varnames: [RoomRunStatusAgentRefKindAgent]
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+    RoomRunStatus:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          run_id,
+          room_id,
+          agent,
+          status,
+          replied,
+          event_ordinal,
+          created_at,
+          updated_at,
+        ]
+      properties:
+        run_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The Room or Thread that shows this Run's status.
+        replied:
+          type: boolean
+          description: >-
+            The active Run's latest output is the Agent's final reply and nothing it must still answer
+            or do came after it, while its native turn may still be ending. Clients show the Agent as
+            no longer working; the Room list leaves the Run out the same way.
+        agent:
+          $ref: "#/components/schemas/RoomRunStatusAgentRef"
+        status:
+          $ref: "#/components/schemas/RoomRunStatusState"
+        event_ordinal:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Ordinal of the Run's last committed Runtime presentation event; 0 before the first.
+            It only grows, so clients use it to deduplicate and to fetch newer events.
+        stop_reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: The reason TeamHub recorded when the Run was canceled, such as task_terminal.
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoomRunStatusList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomRunStatus"
+    RuntimePresentationEventRecord:
+      type: object
+      additionalProperties: false
+      required: [event_ordinal, segment_id, event]
+      properties:
+        event_ordinal:
+          $ref: "./agent-runtime-state.yaml#/components/schemas/AgentRuntimePositiveInt64"
+        segment_id:
+          type: string
+          minLength: 8
+          maxLength: 128
+          pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          description: Stable TeamHub identity of the presentation Segment containing this event.
+        event:
+          $ref: "./agent-runtime-state.yaml#/components/schemas/AgentRuntimePersistedPresentationEvent"
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: >-
+            Optional placement binding for a formal Message created by this Segment. Segment
+            identity and history do not depend on this field.
+    RuntimePresentationEventPage:
+      type: object
+      additionalProperties: false
+      required: [items, published_through_ordinal, has_more]
+      description: published_through_ordinal is the Run's last committed event ordinal when the page was read.
+      properties:
+        items:
+          type: array
+          maxItems: 200
+          items:
+            $ref: "#/components/schemas/RuntimePresentationEventRecord"
+        published_through_ordinal:
+          $ref: "./agent-runtime-state.yaml#/components/schemas/AgentRuntimeInt64"
+        has_more:
+          type: boolean

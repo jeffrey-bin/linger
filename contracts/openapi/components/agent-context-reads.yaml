@@ -1,0 +1,42 @@
+schemas:
+  AgentRoomMembersRequest:
+    type: object
+    additionalProperties: false
+    required: [inbox_id]
+    properties:
+      inbox_id: { type: string, minLength: 1, maxLength: 512 }
+  AgentContextMember:
+    type: object
+    additionalProperties: false
+    required: [actor_id, kind, display_name]
+    properties:
+      actor_id: { $ref: "./common.yaml#/components/schemas/Id" }
+      kind: { type: string, enum: [human, agent] }
+      display_name: { type: string }
+      agent_type:
+        type: string
+        enum: [general, anotherme]
+        description: Current registered Agent type; omitted for Human members.
+      description:
+        type: string
+        description: Current Agent capability description, treated as untrusted data; omitted for Human members.
+  AgentRoomMembersResponse:
+    type: object
+    additionalProperties: false
+    required: [inbox_id, room_id, membership_revision, members]
+    properties:
+      inbox_id: { type: string }
+      room_id: { $ref: "./common.yaml#/components/schemas/Id" }
+      membership_revision: { type: integer, format: int64, minimum: 0 }
+      members:
+        type: array
+        items: { $ref: "#/schemas/AgentContextMember" }
+  AgentTeamMdResponse:
+    type: object
+    additionalProperties: false
+    required: [room_id, raw_markdown, revision, updated_at]
+    properties:
+      room_id: { $ref: "./common.yaml#/components/schemas/Id" }
+      raw_markdown: { type: string }
+      revision: { type: integer, format: int64, minimum: 1 }
+      updated_at: { type: string, format: date-time }

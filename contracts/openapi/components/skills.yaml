@@ -1,0 +1,218 @@
+components:
+  schemas:
+    SkillManifest:
+      type: object
+      additionalProperties: false
+      required:
+        - tenant_id
+        - skill_id
+        - manifest_version
+        - name
+        - description
+        - config_schema
+        - package_name
+        - package_sha256
+        - file_count
+        - size_bytes
+        - availability
+        - access_scope
+        - created_by_actor_id
+        - updated_by_actor_id
+        - created_at
+        - updated_at
+      properties:
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        skill_id:
+          $ref: "./common.yaml#/components/schemas/SkillIdentifier"
+        manifest_version:
+          $ref: "./common.yaml#/components/schemas/ManifestVersion"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Skill name, the same as package_name.
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        config_schema:
+          type: object
+          additionalProperties: true
+          description: >-
+            JSON Schema describing non-secret configuration. It is TeamHub policy metadata and is
+            not inferred from or merged with files in the Package.
+        package_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          description: Agent Skills frontmatter name and logical Package directory name.
+        package_sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+          description: >-
+            Deterministic digest of normalized paths and file content hashes. ZIP ordering,
+            timestamps, compression, and an optional single wrapper directory do not affect it.
+        file_count:
+          type: integer
+          minimum: 1
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 1
+        availability:
+          $ref: "#/components/schemas/SkillManifestAvailability"
+        access_scope:
+          type: string
+          enum: [platform, tenant, owner]
+          x-enum-varnames:
+            [
+              SkillManifestAccessScopePlatform,
+              SkillManifestAccessScopeTenant,
+              SkillManifestAccessScopeOwner,
+            ]
+          description: Authorization scope of the stable Skill identity.
+        owner_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Present only when access_scope is owner.
+        created_by_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        updated_by_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The creator; a sealed Manifest never changes.
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+          description: The seal time; a sealed Manifest never changes.
+    SkillManifestAvailability:
+      type: string
+      enum: [active, disabled]
+      x-enum-varnames:
+        [SkillManifestAvailabilityActive, SkillManifestAvailabilityDisabled]
+      description: >-
+        Mutable Tenant-market availability kept outside the immutable Package payload. Disabled
+        versions remain visible but cannot be selected for an enabled Binding or new Run Snapshot.
+    SkillManifestPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SkillManifest"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    AgentSkillPackageUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [package]
+      properties:
+        package:
+          type: string
+          format: binary
+          description: >-
+            A Skill ZIP with root SKILL.md, or a single SKILL.md / skill.md file.
+            TeamHub derives identity and the next Manifest version from the package.
+    AgentSkillBindingPutRequest:
+      type: object
+      additionalProperties: false
+      required: [manifest_version, enabled, config, expected_binding_version]
+      properties:
+        replace_skill_id:
+          $ref: "./common.yaml#/components/schemas/SkillIdentifier"
+          description: Optional current binding to replace atomically, including rollback from a private fork to the original shared Skill.
+        expected_binding_version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Exact Agent binding revision read before editing. Conflict never overwrites another window.
+        manifest_version:
+          $ref: "./common.yaml#/components/schemas/ManifestVersion"
+        enabled:
+          type: boolean
+        config:
+          type: object
+          additionalProperties: true
+          description: Must not contain passwords, API keys, tokens, or other secrets.
+    AgentSkillBinding:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          tenant_id,
+          agent_actor_id,
+          binding_version,
+          skill,
+          enabled,
+          config,
+          updated_by_actor_id,
+          updated_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        agent_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        binding_version:
+          type: integer
+          format: int64
+          minimum: 1
+        skill:
+          $ref: "./common.yaml#/components/schemas/SkillRef"
+        enabled:
+          type: boolean
+        config:
+          type: object
+          additionalProperties: true
+          description: Frozen non-secret configuration validated against the selected Package Version.
+        updated_by_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentSkillBindingList:
+      type: object
+      additionalProperties: false
+      required: [agent_actor_id, binding_version, items]
+      properties:
+        agent_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        binding_version:
+          type: integer
+          format: int64
+          minimum: 1
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentSkillBinding"
+    AgentSkillRegistration:
+      type: object
+      additionalProperties: false
+      required: [name, skill_id, manifest_version]
+      properties:
+        is_default:
+          type: boolean
+          readOnly: true
+          description: Managed platform default; not an explicit, editable or removable Agent binding.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        skill_id:
+          $ref: "./common.yaml#/components/schemas/SkillIdentifier"
+        manifest_version:
+          $ref: "./common.yaml#/components/schemas/ManifestVersion"
+        description:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          readOnly: true
+          description: Current sealed Manifest description for Human-facing Agent directory responses.
+      description: >-
+        Initial enabled Agent binding to one existing sealed Skill Manifest version. Configuration
+        defaults to an empty object. Agent registration does not upload or create a Skill Package.

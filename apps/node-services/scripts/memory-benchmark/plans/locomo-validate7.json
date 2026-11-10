@@ -1,0 +1,15 @@
+{
+  "benchmark": "locomo",
+  "dataset_sha256": "79fa87e90f04081343b8c8debecb80a9a6842b76a7aa537dc9fdf651ea698ff4",
+  "seed": 20261009,
+  "subset_of": "locomo-amb120",
+  "case_ids": [
+    "conv-26:11",
+    "conv-26:39",
+    "conv-26:49",
+    "conv-26:67",
+    "conv-26:2",
+    "conv-26:50",
+    "conv-26:88"
+  ]
+}

@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src app:; form-action app:"
+    />
+    <title>Linger</title>
+    <style>
+      :root {
+        --canvas: #f6f6f6;
+        --surface: #ffffff;
+        --ink: #202020;
+        --body: #404040;
+        --muted: #737373;
+        --border: #e5e5e5;
+        --border-strong: #d4d4d4;
+        --action: #202020;
+        --action-hover: #303030;
+        --danger: #d92d20;
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--canvas);
+        color: var(--body);
+        font:
+          14px/1.55 Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "PingFang SC",
+          "Microsoft YaHei",
+          "Noto Sans CJK SC",
+          system-ui,
+          sans-serif;
+      }
+      main {
+        width: min(420px, 100%);
+        padding: 36px 32px 28px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+      }
+      .mark {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        margin-bottom: 20px;
+      }
+      .mark img {
+        width: 52px;
+        height: 52px;
+      }
+      .mark .badge {
+        position: absolute;
+        right: -2px;
+        bottom: 2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid var(--surface);
+        background: #a3a3a3;
+      }
+      [data-mode="setup"] .badge,
+      [data-mode="updating"] .badge,
+      [data-mode="updating"] .actions,
+      [data-mode="starting"] .badge,
+      [data-mode="starting"] .actions,
+      [data-mode="failed"] #edit,
+      [data-mode="failed"] .countdown {
+        display: none;
+      }
+      /* Show Logs and Save Diagnostics belong to the start failure only. */
+      body:not([data-mode="failed"]) .failed-only {
+        display: none;
+      }
+      [data-mode="failed"] #reason {
+        max-height: 40vh;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+      h1 {
+        margin: 0 0 6px;
+        color: var(--ink);
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .host {
+        color: var(--body);
+        font-weight: 500;
+        word-break: break-all;
+      }
+      .code {
+        display: inline-block;
+        margin-top: 14px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: #f3f3f3;
+        color: var(--muted);
+        font:
+          12px/1.6 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+      }
+      .code:empty {
+        display: none;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      button,
+      .link {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      button.primary {
+        border: 0;
+        background: var(--action);
+        color: #fff;
+      }
+      button.primary:hover {
+        background: var(--action-hover);
+      }
+      .link {
+        padding: 0 4px;
+        border: 0;
+        background: none;
+        color: var(--body);
+      }
+      .link:hover {
+        color: var(--ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .countdown {
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      form {
+        display: none;
+        margin-top: 24px;
+      }
+      [data-mode="setup"] form,
+      .editing form {
+        display: block;
+      }
+      .editing .actions,
+      [data-mode="setup"] .actions {
+        display: none;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--body);
+        font-size: 13px;
+        font-weight: 500;
+      }
+      input {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        color: var(--ink);
+        font: inherit;
+        outline: none;
+      }
+      input:focus {
+        border-color: var(--ink);
+        box-shadow: 0 0 0 3px rgba(32, 32, 32, 0.08);
+      }
+      form .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      form .row button {
+        flex: none;
+      }
+      .hint {
+        margin-top: 8px;
+        font-size: 12px;
+      }
+      .invalid {
+        color: var(--danger);
+      }
+      button:focus-visible,
+      .link:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body data-mode="offline">
+    <main>
+      <div class="mark">
+        <img src="app://offline/logo.png" alt="" /><span class="badge"></span>
+      </div>
+      <h1 id="title">Can't reach the server</h1>
+      <p id="reason">
+        Linger can't reach <span class="host" id="host"></span>. Check your
+        network or VPN and make sure the server is running.
+      </p>
+      <span class="code" id="code"></span>
+      <div class="actions">
+        <button class="primary" id="retry" type="button">Try Again</button>
+        <button class="link" id="edit" type="button">Change Server</button>
+        <button class="link failed-only" id="logs" type="button">
+          Show Logs
+        </button>
+        <button class="link failed-only" id="diagnostics" type="button">
+          Save Diagnostics
+        </button>
+        <span class="countdown" id="countdown"></span>
+      </div>
+      <form action="app://offline/connect" method="get" id="form">
+        <label for="server">Server address</label>
+        <input
+          id="server"
+          name="server"
+          placeholder="https://linger.example.com"
+          autocomplete="url"
+          spellcheck="false"
+          required
+        />
+        <p class="hint" id="hint">The address of your team's Linger server.</p>
+        <div class="row">
+          <button class="primary" type="submit">Connect</button>
+          <button class="link" id="cancel" type="button">Cancel</button>
+        </div>
+      </form>
+    </main>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const params = new URLSearchParams(location.search);
+      const server = params.get("server") ?? "";
+      const error = params.get("error") ?? "";
+      const connect = (value) => {
+        location.href =
+          "app://offline/connect?server=" + encodeURIComponent(value);
+      };
+      $("server").value = server;
+      const local = ["updating", "starting", "failed"].find((mode) =>
+        params.has(mode),
+      );
+      if (local === "updating") {
+        document.body.dataset.mode = "updating";
+        $("title").textContent = "Updating Linger";
+        $("reason").textContent =
+          "Linger is restarting on this computer with the new version. This takes about a minute.";
+      } else if (local === "starting") {
+        document.body.dataset.mode = "starting";
+        $("title").textContent = "Starting Linger";
+        $("reason").textContent =
+          "Linger is starting on this computer. This takes about a minute.";
+      } else if (local === "failed") {
+        document.body.dataset.mode = "failed";
+        $("title").textContent = "Linger couldn't start on this computer";
+        $("reason").textContent = params.get("failed");
+      } else if (!server) {
+        document.body.dataset.mode = "setup";
+        $("title").textContent = "Connect to Linger";
+        $("reason").textContent =
+          "Enter your team's server address, then sign in.";
+        $("server").focus();
+      } else {
+        $("host").textContent = new URL(server).host;
+        $("code").textContent = error;
+      }
+      if (error && !error.startsWith("ERR_")) {
+        $("hint").textContent = error;
+        $("hint").classList.add("invalid");
+        if (server) document.body.classList.add("editing");
+      }
+      $("retry").addEventListener("click", () => {
+        if (local === "failed") location.href = "app://offline/restart";
+        else connect(server);
+      });
+      // Opens the log folder or saves the diagnostics zip and shows it.
+      $("logs").addEventListener("click", () => {
+        location.href = "app://offline/logs";
+      });
+      $("diagnostics").addEventListener("click", () => {
+        location.href = "app://offline/diagnostics";
+      });
+      $("edit").addEventListener("click", () => {
+        document.body.classList.add("editing");
+        $("server").select();
+      });
+      $("cancel").addEventListener("click", () =>
+        document.body.classList.remove("editing"),
+      );
+      // Retry on its own while the user is not editing.
+      if (server && !local) {
+        let left = 15;
+        const tick = () => {
+          if (document.body.classList.contains("editing")) {
+            $("countdown").textContent = "";
+            return;
+          }
+          left -= 1;
+          if (left <= 0) return connect(server);
+          $("countdown").textContent = "Retrying in " + left + "s";
+        };
+        tick();
+        setInterval(tick, 1000);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "boundary": 35953,
+  "word_gap_ms": -1569,
+  "left": {
+    "StartMS": 35402,
+    "EndMS": 35952,
+    "Final": true,
+    "Text": "ぁ",
+    "Words": [
+      { "TextStart": 0, "TextEnd": 3, "StartMS": 35522, "EndMS": 35562 }
+    ]
+  },
+  "right": {
+    "StartMS": 33953,
+    "EndMS": 36425,
+    "Final": true,
+    "Text": "あぃい ぅうぇ えぉおかがきあぎぇ くぉお あぐぇぃぅが。",
+    "Words": [
+      { "TextStart": 0, "TextEnd": 9, "StartMS": 33993, "EndMS": 34113 },
+      { "TextStart": 10, "TextEnd": 19, "StartMS": 34113, "EndMS": 34233 },
+      { "TextStart": 20, "TextEnd": 47, "StartMS": 34273, "EndMS": 34633 },
+      { "TextStart": 48, "TextEnd": 57, "StartMS": 34833, "EndMS": 34953 },
+      { "TextStart": 58, "TextEnd": 76, "StartMS": 35153, "EndMS": 35513 }
+    ]
+  }
+}

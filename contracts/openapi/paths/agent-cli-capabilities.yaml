@@ -1,0 +1,126 @@
+knowledgeSearch:
+  post:
+    operationId: searchAgentKnowledge
+    summary: searchAgentKnowledge
+    description: Uses current Agent business authority; no Runtime session or Run is required.
+    security:
+      - agentBearer: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/agent-cli-capabilities.yaml#/components/schemas/AgentKnowledgeSearchRequest
+    responses:
+      "200":
+        description: Authorized domain result.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/agent-cli-capabilities.yaml#/components/schemas/AgentCapabilityResult
+      default:
+        $ref: ../components/agent-api-errors.yaml#/components/responses/InternalError
+knowledgeRead:
+  post:
+    operationId: readAgentKnowledge
+    summary: readAgentKnowledge
+    description: Uses current Agent business authority; no Runtime session or Run is required.
+    security:
+      - agentBearer: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/agent-cli-capabilities.yaml#/components/schemas/AgentKnowledgeReadRequest
+    responses:
+      "200":
+        description: Authorized domain result.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/agent-cli-capabilities.yaml#/components/schemas/AgentCapabilityResult
+      default:
+        $ref: ../components/agent-api-errors.yaml#/components/responses/InternalError
+trackingItemsList:
+  post:
+    operationId: listAgentTrackingItems
+    summary: listAgentTrackingItems
+    description:
+      Lists the owner Human's current Tracking Items with current Agent business
+      authority; no Runtime session or Run is required.
+    security:
+      - agentBearer: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/agent-cli-capabilities.yaml#/components/schemas/AgentEmptyRequest
+    responses:
+      "200":
+        description: The Memory Tracking Item list.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/agent-cli-capabilities.yaml#/components/schemas/AgentCapabilityResult
+      default:
+        $ref: ../components/agent-api-errors.yaml#/components/responses/InternalError
+skillPackage:
+  post:
+    operationId: publishAgentSkillPackage
+    summary: Publish a local Skill package into this Agent's ordinary Skill bindings
+    description: A stable Agent bearer publishes for its Human Sponsor. X-Package-SHA256 is the archive digest and X-TeamHub-Operation-Id is the stable operation identity. Builders must use staged Build Skills followed by Human confirmation.
+    security:
+      - agentBearer: []
+    requestBody:
+      required: true
+      content:
+        application/zip:
+          schema:
+            type: string
+            format: binary
+    responses:
+      "201":
+        description: Immutable package version and ordinary Agent binding.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/agent-cli-capabilities.yaml#/components/schemas/AgentCapabilityResult
+      default:
+        $ref: ../components/agent-api-errors.yaml#/components/responses/InternalError
+skillPackageDownload:
+  parameters:
+    - name: manifestId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+        pattern: ^[A-Za-z0-9][A-Za-z0-9_-]*$
+  get:
+    operationId: getAgentSkillPackage
+    summary: Download one immutable Skill package this Agent may read
+    description: >-
+      The Agent's Computer fetches the Skill packages its Context View names with
+      the Agent credential it already holds, and checks each package against the
+      digest the view names. Same visibility as the Agent Service download.
+    security:
+      - agentBearer: []
+    responses:
+      "200":
+        description: Deterministic ZIP of the sealed package.
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
+      "401":
+        $ref: ../components/agent-api-errors.yaml#/components/responses/Unauthenticated
+      "403":
+        $ref: ../components/agent-api-errors.yaml#/components/responses/Forbidden
+      "404":
+        $ref: ../components/agent-api-errors.yaml#/components/responses/NotFound
+      default:
+        $ref: ../components/agent-api-errors.yaml#/components/responses/InternalError

@@ -1,0 +1,76 @@
+/* Another Me's working state on a page still to come, editorial and quiet:
+   Another Me's own avatar and one serif line that fades gently between full
+   and 55% opacity. No border or shadow. */
+.wiki-working-avatar {
+  display: inline-flex;
+  flex: none;
+}
+.wiki-working-center {
+  display: flex;
+  min-height: 460px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 40px;
+  text-align: center;
+}
+.wiki-working-center-title {
+  margin-top: 20px;
+  color: var(--app-ink);
+  font-family: var(--app-font-slab);
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  animation: wiki-working-fade 3s ease-in-out infinite;
+}
+/* The line above content being written: the page's own sans type, still. Only
+   the avatar moves, drifting up and down by 2px. */
+.wiki-working-line {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  color: var(--app-body);
+  font-size: 14px;
+}
+.wiki-working-line-avatar {
+  display: inline-flex;
+  flex: none;
+  animation: wiki-working-float 3s ease-in-out infinite;
+}
+.wiki-working-line-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@keyframes wiki-working-fade {
+  50% {
+    opacity: 0.55;
+  }
+}
+@keyframes wiki-working-float {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wiki-working-center-title,
+  .wiki-working-line-avatar {
+    animation: none;
+  }
+}
+
+/* The preview page reads like a published Wiki page: the body starts on the
+   title's left edge, without the read-only renderer's own padding. */
+.wiki-preview-body .read-only-blocknote-document--knowledge {
+  padding: 0 0 48px;
+}
+.wiki-preview-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--app-info);
+}

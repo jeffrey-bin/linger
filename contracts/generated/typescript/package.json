@@ -1,0 +1,46 @@
+{
+  "name": "@linger/wire-contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./runner-gateway/schema": {
+      "types": "./src/generated/runner-gateway/schema.ts",
+      "linger-production": "./dist/generated/runner-gateway/schema.js",
+      "default": "./src/generated/runner-gateway/schema.ts"
+    },
+    "./runner-gateway/validator": {
+      "types": "./src/generated/runner-gateway/validator.ts",
+      "linger-production": "./dist/generated/runner-gateway/validator.js",
+      "default": "./src/generated/runner-gateway/validator.ts"
+    },
+    "./*/types": {
+      "types": "./src/generated/*/types.ts",
+      "linger-production": "./dist/generated/*/types.js",
+      "default": "./src/generated/*/types.ts"
+    },
+    "./*/client": {
+      "types": "./src/*/client.ts",
+      "linger-production": "./dist/*/client.js",
+      "default": "./src/*/client.ts"
+    },
+    "./*/server": {
+      "types": "./src/*/server.ts",
+      "linger-production": "./dist/*/server.js",
+      "default": "./src/*/server.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "hono": "^4.12.31"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

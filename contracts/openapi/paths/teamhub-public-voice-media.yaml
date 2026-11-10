@@ -1,0 +1,432 @@
+roomVoiceSessions:
+  get:
+    tags: [Capture]
+    operationId: getActiveVoiceSession
+    summary: Read the recording session the caller's login session has open in one Room.
+    description: Only hardware_control sessions are resumed here, never dictation; sessions of the caller's other login sessions are not found.
+    responses:
+      "200":
+        description: Active VoiceSession projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceSession"
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+  post:
+    tags: [Capture]
+    operationId: createVoiceSession
+    summary: Create one Voice media session owned by the caller's login session.
+    description: A login session holds at most one active VoiceSession, so a repeated submission gets 409; the same Account's other login sessions keep their own. Logout, a password change or expiry of the login session closes it, saving a running recording first.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/voice-media.yaml#/components/schemas/VoiceSessionCreateRequest"
+    responses:
+      "201":
+        description: VoiceSession created.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceSession"
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+      "503":
+        {
+          $ref: "../components/common.yaml#/components/responses/ServiceUnavailable",
+        }
+
+voiceSession:
+  get:
+    tags: [Capture]
+    operationId: getVoiceSession
+    summary: Read one TeamHub-authoritative VoiceSession.
+    description: Every route addressed by a VoiceSession ID is not found for any login session other than the one that created it, including the same Account's.
+    responses:
+      "200":
+        description: Current VoiceSession projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceSession"
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+  delete:
+    tags: [Capture]
+    operationId: closeVoiceSession
+    summary: Close the VoiceSession and revoke its publisher.
+    description: A repeated submission returns the closed VoiceSession.
+    responses:
+      "200":
+        description: VoiceSession closed or already closed.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceSession"
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+
+voiceSessionCredentials:
+  post:
+    tags: [Capture]
+    operationId: createVoiceSessionCredential
+    summary: Reauthorize and issue one short-lived publisher credential.
+    responses:
+      "201":
+        description: Fresh publisher credential.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceConnectionCredential"
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+      "503":
+        {
+          $ref: "../components/common.yaml#/components/responses/ServiceUnavailable",
+        }
+
+voiceSessionDictationCommit:
+  post:
+    tags: [Capture]
+    operationId: commitVoiceDictationTurn
+    summary: Ask the authenticated owner's active chat dictation Runtime to finalize its current turn.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/voice-media.yaml#/components/schemas/VoiceDictationCommitRequest"
+    responses:
+      "202":
+        description: Processing request delivered to the media plane; confirmed text arrives through the Voice event feed.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceDictationCommitReceipt"
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+      "503":
+        {
+          $ref: "../components/common.yaml#/components/responses/ServiceUnavailable",
+        }
+
+voiceSessionTranscriptEvents:
+  get:
+    tags: [Capture]
+    operationId: listVoiceTranscriptEvents
+    summary: Incrementally read TeamHub-accepted Hardware Voice transcript and command events.
+    description: Bootstrap read. The page, the partial and event_cursor come from one database snapshot; subscribe to the event feed after event_cursor instead of polling this route.
+    parameters:
+      - name: after_updated_at
+        in: query
+        schema:
+          $ref: "../components/common.yaml#/components/schemas/Timestamp"
+      - name: after_id
+        in: query
+        schema:
+          $ref: "../components/common.yaml#/components/schemas/Id"
+    responses:
+      "200":
+        description: Ordered accepted events after the supplied cursor.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceTranscriptEventPage"
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+
+voiceSessionCaptures:
+  post:
+    tags: [Capture]
+    operationId: startVoiceCapture
+    summary: Start one service-recorded Capture on the VoiceSession.
+    description: A VoiceSession records one Capture at a time, so a repeated submission gets 409 VOICE_CAPTURE_CONFLICT while the first Capture is active.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/voice-media.yaml#/components/schemas/VoiceCaptureStartRequest"
+    responses:
+      "202":
+        description: Capture start intent accepted and reconciled with the media plane.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceCapture"
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+      "503":
+        {
+          $ref: "../components/common.yaml#/components/responses/ServiceUnavailable",
+        }
+
+voiceCapture:
+  get:
+    tags: [Capture]
+    operationId: getVoiceCapture
+    summary: Read one LiveKit-backed Capture projection.
+    description: Only the person who recorded the Capture reads it, from any of their login sessions.
+    responses:
+      "200":
+        description: Current Capture projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceCapture"
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+
+voiceCaptureTranscriptRetry:
+  post:
+    tags: [Capture]
+    operationId: retryVoiceCaptureTranscript
+    summary: Retry persisted archive transcription without repeating voice commands.
+    description: Only the person who recorded the Capture may retry, from any of their login sessions.
+    responses:
+      "202":
+        description: Current Capture recovery projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceCapture"
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+
+voiceCaptureQuestions:
+  get:
+    tags: [Capture]
+    operationId: listVoiceCaptureQuestions
+    summary: List the caller's private questions about one of their recordings, oldest first.
+    responses:
+      "200":
+        description: Answered questions.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceCaptureQuestionList"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+  post:
+    tags: [Capture]
+    operationId: askVoiceCaptureQuestion
+    summary: Answer a private question from the recording's confirmed transcript so far, or recognize a request for the caller's Another Me to act and keep it as a task request.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/voice-media.yaml#/components/schemas/VoiceCaptureQuestionRequest"
+    responses:
+      "200":
+        description: The saved answer with its transcript sources and cutoff, or a task request still to be sent as a Task.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceCaptureQuestion"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+voiceCaptureQuestionTask:
+  post:
+    tags: [Capture]
+    operationId: sendVoiceCaptureQuestionTask
+    summary: Hand a task request from the caller's recording Ask to their Another Me. A hidden Message in the recording's Direct Room mentions Another Me and attaches recording-context.md (the request, earlier Ask exchanges and the transcript so far); Another Me's Meta then creates the background Task itself. Sending a request again returns it unchanged.
+    responses:
+      "200":
+        description: The task request, now sent.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceCaptureQuestion"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+
+voiceCaptureStop:
+  post:
+    tags: [Capture]
+    operationId: stopVoiceCapture
+    summary: Freeze the Capture end and stop its active recording epoch.
+    description: Only the login session whose VoiceSession records the Capture may stop it. A repeated submission returns the Capture in its current state.
+    responses:
+      "202":
+        description: Stop accepted; media materialization continues asynchronously.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceCapture"
+      "400":
+        { $ref: "../components/common.yaml#/components/responses/BadRequest" }
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+      "409":
+        { $ref: "../components/common.yaml#/components/responses/Conflict" }
+      "503":
+        {
+          $ref: "../components/common.yaml#/components/responses/ServiceUnavailable",
+        }
+
+roomActiveVoiceCapture:
+  get:
+    tags: [Capture]
+    operationId: getActiveVoiceCapture
+    summary: Read the active LiveKit-backed Capture in one Room.
+    responses:
+      "200":
+        description: Active Capture projection, or null when no recording is active in the authorized Room.
+        content:
+          application/json:
+            schema:
+              nullable: true
+              allOf:
+                - $ref: "../components/voice-media.yaml#/components/schemas/VoiceCapture"
+      "401":
+        {
+          $ref: "../components/common.yaml#/components/responses/Unauthenticated",
+        }
+      "404":
+        { $ref: "../components/common.yaml#/components/responses/NotFound" }
+tenantVoiceMediaPolicy:
+  get:
+    tags: [Capture]
+    operationId: getVoiceMediaPolicy
+    summary: Resolve the caller's pinned active backend or rollout cohort.
+    description: active_room_id is the Room of the newest recording session the caller's login session has open, and is absent when it has none.
+    responses:
+      "200":
+        description: Hardware Voice backend for this Human Actor.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceMediaPolicy"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+
+voiceSessionEvents:
+  get:
+    tags: [Capture]
+    operationId: listVoiceEvents
+    summary: Read transcript events after an opaque session-scoped cursor with the current VoiceSession and Capture snapshot.
+    parameters:
+      - name: after
+        in: query
+        schema: { type: string, maxLength: 256 }
+    responses:
+      "200":
+        description: At most 100 transcript events, then the current authorized VoiceSession and Captures on the last page. An absent cursor starts at the first transcript event.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/voice-media.yaml#/components/schemas/VoiceEventPage"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+voiceSessionEventsStream:
+  get:
+    tags: [Capture]
+    operationId: streamVoiceEvents
+    summary: Stream transcript events, current VoiceSession and Capture snapshots, and coalesced latest partial snapshots.
+    parameters:
+      - name: after
+        in: query
+        schema: { type: string, maxLength: 256 }
+      - name: Last-Event-ID
+        in: header
+        schema: { type: string, maxLength: 256 }
+    responses:
+      "200":
+        description: "Credentialed SSE. voice.events data is VoiceEventPage and id is next_cursor; the first page after connect carries the current VoiceSession and Captures, later pages carry new transcript events and only the session and Captures that changed. Reconnect uses Last-Event-ID in preference to after. voice.partial data is VoiceTranscriptEventPage with empty items and the latest partial (absent text clears it); partial frames have no id. voice.ready follows the snapshot and heartbeats renew liveness. session.expired and access.revoked terminate the stream. On failure read the same pages over HTTP; SSE is not storage authority."
+        content:
+          text/event-stream:
+            schema: { type: string }
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"

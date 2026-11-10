@@ -1,0 +1,774 @@
+components:
+  schemas:
+    MessageCardActorRef:
+      type: object
+      additionalProperties: false
+      required: [id, kind, display_name]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          $ref: "./common.yaml#/components/schemas/ActorKind"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+      description: Room-scoped card identity. The enclosing Message already supplies Tenant authority.
+    MessageCardHumanActorRef:
+      type: object
+      additionalProperties: false
+      required: [id, kind, display_name]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          type: string
+          const: human
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+      description: Human-only Room-scoped identity for card decision ownership and attribution.
+    WorkItemCardSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        [id, number, kind, title, description, priority, state, assignees]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        number:
+          type: integer
+          format: int64
+          minimum: 1
+        kind:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemKind"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+        priority:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemPriority"
+        state:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemState"
+        resolution:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemResolution"
+        assignees:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/MessageCardActorRef"
+    RoomCreationProposal:
+      type: object
+      additionalProperties: false
+      required: [name, member_ids, origin_room_id, initial_message_segments]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+        member_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+        origin_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        initial_message_segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/MessageSegment"
+    DecisionQuestionInput:
+      type: string
+      enum: [radio, checkbox]
+    DecisionQuestionOption:
+      type: object
+      additionalProperties: false
+      required: [id, label]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        label:
+          type: string
+          minLength: 1
+          maxLength: 200
+    DecisionQuestion:
+      type: object
+      additionalProperties: false
+      required: [id, prompt, input, options]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        input:
+          $ref: "#/components/schemas/DecisionQuestionInput"
+        options:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/DecisionQuestionOption"
+    DecisionAnswerValue:
+      description: >-
+        A radio or checkbox answer names option ids. Any other value is the
+        Human's own written answer, which every option question accepts, so a
+        checkbox answer holds up to 20 options and one written answer.
+      oneOf:
+        - type: string
+          maxLength: 10000
+        - type: array
+          maxItems: 21
+          items:
+            type: string
+            minLength: 1
+            maxLength: 200
+    RuntimePermissionDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of a runtime_permission decision: a tool call that needs the
+        sponsor's approval. title is built by rules from the call and host
+        evidence, never by the judge model; tool and input are the full call.
+      required: [kind, title, rationale, tool, input]
+      properties:
+        kind:
+          type: string
+          enum: [code, gui]
+          description: gui for browser and desktop actions, code for the rest.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        rationale:
+          type: string
+          maxLength: 2001
+          description: The judge model's one-sentence reason for asking.
+        tool:
+          type: string
+          minLength: 1
+          maxLength: 200
+        input:
+          type: string
+          maxLength: 8001
+          description: The shell command or the native tool input as JSON.
+        script:
+          $ref: "#/components/schemas/RuntimePermissionScript"
+        patch:
+          type: string
+          maxLength: 20001
+          description: The diff the action applies to files.
+        page:
+          $ref: "#/components/schemas/RuntimePermissionPage"
+        screenshot:
+          $ref: "#/components/schemas/RuntimePermissionScreenshot"
+    QuestionDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of a question decision: the questions an Agent, its Runtime, or
+        a new Agent's opening asks. The card title is the question card's
+        prompt.
+      required: [questions]
+      properties:
+        questions:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/DecisionQuestion"
+    ProfileSetupDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of an AnotherMe setup decision. A profile_setup_apps card
+        lists the Connected App keys it offers; a profile_setup_sources card
+        has no fields.
+      properties:
+        apps:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 120
+          description: Connected App keys a profile_setup_apps card offers first.
+        more_apps:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 120
+          description: Connected App keys a profile_setup_apps card offers behind "more".
+    RuntimePermissionScript:
+      type: object
+      additionalProperties: false
+      required: [path, body]
+      properties:
+        path:
+          type: string
+          minLength: 1
+        sha256:
+          type: string
+        body:
+          type: string
+          maxLength: 20001
+    RuntimePermissionScreenshot:
+      type: object
+      additionalProperties: false
+      required: [url, width, height]
+      description: >-
+        The screen before a GUI action, with its target marked. Only the card's
+        decision owner can load url.
+      properties:
+        url:
+          type: string
+          minLength: 1
+        width: { type: integer, minimum: 1 }
+        height: { type: integer, minimum: 1 }
+    RuntimePermissionPage:
+      type: object
+      additionalProperties: false
+      required: [url]
+      description: The browser page and target element the host resolved for a GUI action.
+      properties:
+        url:
+          type: string
+          minLength: 1
+        title:
+          type: string
+        target_role:
+          type: string
+        target_name:
+          type: string
+    ConnectorWriteDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of a connector_write decision: one external write a wrapped
+        TeamHub CLI command asked to run. TeamHub builds it from the stored call
+        it will run after approval, so message is what will actually be sent
+        and input is the full call.
+      required: [kind, app, title, account, tool, input]
+      properties:
+        kind:
+          type: string
+          enum: [message, change]
+          x-enum-varnames:
+            [ConnectorConfirmationKindMessage, ConnectorConfirmationKindChange]
+          description: message for mail and chat sends, change for the rest.
+        app:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Connected application key, such as gmail or slack.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        account:
+          type: string
+          maxLength: 300
+          description: The connected account the call acts as.
+        message:
+          $ref: "#/components/schemas/ConnectorConfirmationMessage"
+        fields:
+          type: array
+          maxItems: 20
+          description: Target and key values of a change, in display order.
+          items:
+            $ref: "#/components/schemas/ConnectorConfirmationField"
+        tool:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: The provider tool slug.
+        input:
+          type: string
+          maxLength: 8001
+          description: The full call arguments as JSON.
+    AgentChangeDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of an agent_change decision: an Agent asked to create an Agent
+        or to change an Agent's name, description, or prompt, which
+        requires the Sponsor to approve it.
+      required: [action, agent_name, changes]
+      properties:
+        action:
+          type: string
+          enum: [create, update]
+          x-enum-varnames:
+            [
+              AgentChangeConfirmationActionCreate,
+              AgentChangeConfirmationActionUpdate,
+            ]
+        target_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The Agent being changed; absent when creating one.
+        agent_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: The changed Agent's current name, or the new Agent's name.
+        changes:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/AgentChangeConfirmationChange"
+    AgentChangeConfirmationChange:
+      type: object
+      additionalProperties: false
+      required: [field, after]
+      properties:
+        field:
+          type: string
+          enum: [name, description, prompt]
+          x-enum-varnames:
+            [
+              AgentChangeConfirmationFieldName,
+              AgentChangeConfirmationFieldDescription,
+              AgentChangeConfirmationFieldPrompt,
+            ]
+        before:
+          type: string
+          maxLength: 50000
+          description: The current value; absent when creating an Agent.
+        after:
+          type: string
+          maxLength: 50000
+    ConnectorConfirmationMessage:
+      type: object
+      additionalProperties: false
+      required: [body, format]
+      properties:
+        to:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 320 }
+        cc:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 320 }
+        bcc:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 320 }
+        subject:
+          type: string
+          maxLength: 1000
+        destination:
+          type: string
+          maxLength: 500
+          description: Chat channel, conversation, or thread the message goes to.
+        body:
+          type: string
+          maxLength: 20001
+        format:
+          type: string
+          enum: [text, html, markdown, mrkdwn]
+          x-enum-varnames:
+            [
+              ConnectorConfirmationFormatText,
+              ConnectorConfirmationFormatHtml,
+              ConnectorConfirmationFormatMarkdown,
+              ConnectorConfirmationFormatMrkdwn,
+            ]
+          description: mrkdwn is Slack's own markup, not Markdown.
+        attachments:
+          type: array
+          maxItems: 100
+          items: { type: string, maxLength: 1024 }
+    ConnectorConfirmationField:
+      type: object
+      additionalProperties: false
+      required: [label, value]
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 100
+        value:
+          type: string
+          maxLength: 4001
+    ConnectionAuthDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of a connection_auth decision: the Connected App the Agent
+        needs. connection_id is the Connection the Human chose, once they
+        approved.
+      required: [app_key]
+      properties:
+        app_key:
+          type: string
+          minLength: 1
+          maxLength: 120
+        connection_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    ProviderKeyDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of a provider_key decision: the deployment has no Composio
+        API key, which every Connected App needs. app_key names the app the
+        Agent wanted, when its command said. Saving a key answers it
+        configured.
+      properties:
+        app_key:
+          type: string
+          minLength: 1
+          maxLength: 120
+    BrowserConnectionDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of a browser_connection decision: the Local Computer whose
+        everyday Chrome its owner is asked to connect, taken from the waiting
+        Agent's placement. The owner's own connection answers it connected.
+      required: [computer_id]
+      properties:
+        computer_id:
+          type: string
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+    ComputerPermissionDecisionView:
+      type: object
+      additionalProperties: false
+      description: >-
+        The view of a computer_permission decision: the macOS permissions one
+        app on the owner's Local Computer needs. The card reads their live
+        state from the Computer; once all are granted TeamHub answers it
+        granted.
+      required: [computer_id, subject, permissions]
+      properties:
+        computer_id:
+          type: string
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+        subject:
+          $ref: "./computer-permissions.yaml#/components/schemas/ComputerPermissionSubject"
+        permissions:
+          type: array
+          minItems: 1
+          maxItems: 2
+          uniqueItems: true
+          items:
+            $ref: "./computer-permissions.yaml#/components/schemas/ComputerPermissionId"
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 200
+    RoomCreationDecisionView:
+      description: >-
+        The view of a room_creation decision: the Room TeamHub froze when the
+        Agent asked, and once approved, the Room it created.
+      allOf:
+        - $ref: "#/components/schemas/RoomCreationProposal"
+        - type: object
+          properties:
+            created_room_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+    DecisionKind:
+      type: string
+      enum:
+        [
+          connector_write,
+          agent_change,
+          question,
+          runtime_permission,
+          profile_setup_apps,
+          profile_setup_sources,
+          connection_auth,
+          provider_key,
+          browser_connection,
+          room_creation,
+          computer_permission,
+        ]
+      x-enum-varnames:
+        [
+          DecisionKindConnectorWrite,
+          DecisionKindAgentChange,
+          DecisionKindQuestion,
+          DecisionKindRuntimePermission,
+          DecisionKindProfileSetupApps,
+          DecisionKindProfileSetupSources,
+          DecisionKindConnectionAuth,
+          DecisionKindProviderKey,
+          DecisionKindBrowserConnection,
+          DecisionKindRoomCreation,
+          DecisionKindComputerPermission,
+        ]
+      description: >-
+        profile_setup_apps and profile_setup_sources are the AnotherMe setup
+        cards; only TeamHub opens them, never an Agent.
+    DecisionStatus:
+      type: string
+      enum:
+        [
+          pending,
+          approved,
+          executing,
+          succeeded,
+          failed,
+          unknown,
+          denied,
+          expired,
+          answered,
+          consumed,
+          authorizing,
+        ]
+      x-enum-varnames:
+        [
+          DecisionStatusPending,
+          DecisionStatusApproved,
+          DecisionStatusExecuting,
+          DecisionStatusSucceeded,
+          DecisionStatusFailed,
+          DecisionStatusUnknown,
+          DecisionStatusDenied,
+          DecisionStatusExpired,
+          DecisionStatusAnswered,
+          DecisionStatusConsumed,
+          DecisionStatusAuthorizing,
+        ]
+      description: >-
+        For connector_write and agent_change, approved and executing mean
+        TeamHub is running the approved request, and unknown means a run
+        stopped midway and may have taken effect; TeamHub does not run it
+        again. A question or AnotherMe setup card ends answered. An approved
+        runtime_permission lets the Agent retry that one call until
+        expires_at, and ends consumed once it does. An approved
+        connection_auth is authorizing until the OAuth it started completes
+        (succeeded), fails, or expires. A provider_key ends answered when
+        someone saves a Composio key, denied when its Human declines. A
+        browser_connection ends answered when its owner connects, denied when
+        they decline. A room_creation
+        ends succeeded with its Room created, or denied. A computer_permission
+        ends answered once every permission it asks for is granted, denied when
+        its owner declines.
+    DecisionAnswer:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum:
+            [
+              approve,
+              deny,
+              submit,
+              connected,
+              skipped,
+              done,
+              granted,
+              configured,
+            ]
+          x-enum-varnames:
+            [
+              DecisionAnswerApprove,
+              DecisionAnswerDeny,
+              DecisionAnswerSubmit,
+              DecisionAnswerConnected,
+              DecisionAnswerSkipped,
+              DecisionAnswerDone,
+              DecisionAnswerGranted,
+              DecisionAnswerConfigured,
+            ]
+          description: >-
+            approve or deny for connector_write, agent_change,
+            runtime_permission, connection_auth and room_creation; deny or
+            connected (recorded by TeamHub once the owner connects Chrome) for
+            browser_connection; deny or configured (recorded by TeamHub once
+            a Composio key is saved) for provider_key; deny or granted (recorded by TeamHub once
+            the Computer reports every permission granted) for
+            computer_permission; submit for question; connected or skipped for profile_setup_apps;
+            done or skipped for profile_setup_sources.
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: The reason given with a denial, or a note with a question's answers.
+        connection_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The Connection a connection_auth approval chose.
+        answers:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/DecisionAnswerValue"
+          description: Map of question id to the Human's answer; only with submit.
+        links:
+          type: array
+          maxItems: 5
+          items:
+            type: string
+            format: uri
+            minLength: 1
+            maxLength: 2048
+          description: >-
+            Absolute http(s) URLs a profile_setup_sources "done" answer shares;
+            trimmed and deduplicated by TeamHub.
+        attachment_upload_ids:
+          type: array
+          maxItems: 5
+          uniqueItems: true
+          items:
+            $ref: "./messages.yaml#/components/schemas/AttachmentUploadToken"
+          description: >-
+            Message attachment uploads a profile_setup_sources "done" answer
+            attaches to the Human's message; same rules as message creation.
+    DecisionRequestedMessageCard:
+      type: object
+      additionalProperties: false
+      description: >-
+        A request waiting on one Human's decision. TeamHub runs what the
+        decision approves and reports the result to the requesting Agent.
+        Exactly the view property named by kind is present; both AnotherMe
+        setup kinds use profile_setup.
+      required:
+        - card_type
+        - intent
+        - version
+        - decision_owner
+        - requester
+        - decision_id
+        - kind
+        - title
+        - status
+      properties:
+        card_type:
+          type: string
+          const: personal_notice
+        intent:
+          type: string
+          const: decision_requested
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+        decision_owner:
+          $ref: "#/components/schemas/MessageCardHumanActorRef"
+          description: The Human who decides. Rendered as a leading @ mention.
+        requester:
+          $ref: "#/components/schemas/MessageCardActorRef"
+          description: The Agent waiting on the decision.
+        decision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          $ref: "#/components/schemas/DecisionKind"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: What the card asks; a question card's prompt.
+        status:
+          $ref: "#/components/schemas/DecisionStatus"
+        outcome:
+          type: string
+          maxLength: 2000
+          description: What the run returned or why it did not run, after it finished.
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+          description: >-
+            When a pending card expires; absent for a card that waits until it
+            is answered. For an approved runtime_permission, when the approval
+            lapses.
+        answer:
+          $ref: "#/components/schemas/DecisionAnswer"
+        decided_by:
+          $ref: "#/components/schemas/MessageCardHumanActorRef"
+        decided_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        connector_write:
+          $ref: "#/components/schemas/ConnectorWriteDecisionView"
+        agent_change:
+          $ref: "#/components/schemas/AgentChangeDecisionView"
+        question:
+          $ref: "#/components/schemas/QuestionDecisionView"
+        runtime_permission:
+          $ref: "#/components/schemas/RuntimePermissionDecisionView"
+        profile_setup:
+          $ref: "#/components/schemas/ProfileSetupDecisionView"
+          description: The view of both profile_setup_apps and profile_setup_sources.
+        connection_auth:
+          $ref: "#/components/schemas/ConnectionAuthDecisionView"
+        provider_key:
+          $ref: "#/components/schemas/ProviderKeyDecisionView"
+        browser_connection:
+          $ref: "#/components/schemas/BrowserConnectionDecisionView"
+        room_creation:
+          $ref: "#/components/schemas/RoomCreationDecisionView"
+        computer_permission:
+          $ref: "#/components/schemas/ComputerPermissionDecisionView"
+    DecisionRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_version, decision]
+      description: >-
+        The answer the card's kind takes, with the fields DecisionAnswer
+        describes for it.
+      properties:
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+        decision:
+          type: string
+          enum: [approve, deny, submit, connected, skipped, done]
+          x-enum-varnames:
+            [
+              DecisionRequestApprove,
+              DecisionRequestDeny,
+              DecisionRequestSubmit,
+              DecisionRequestConnected,
+              DecisionRequestSkipped,
+              DecisionRequestDone,
+            ]
+        comment:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: >-
+            A reason with deny (required for room_creation), or a note with
+            submit.
+        connection_id:
+          allOf:
+            - $ref: "./common.yaml#/components/schemas/Id"
+          description: The Connection a connection_auth approval chose; only with its approve.
+        answers:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/DecisionAnswerValue"
+        links:
+          type: array
+          maxItems: 5
+          items:
+            type: string
+            format: uri
+            minLength: 1
+            maxLength: 2048
+        attachment_upload_ids:
+          type: array
+          maxItems: 5
+          uniqueItems: true
+          items:
+            $ref: "./messages.yaml#/components/schemas/AttachmentUploadToken"

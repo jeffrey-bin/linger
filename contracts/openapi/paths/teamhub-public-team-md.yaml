@@ -1,0 +1,22 @@
+roomTeamMd:
+  get:
+    tags: [Rooms]
+    operationId: getRoomTeamMd
+    summary: Read the collaboration protocol document for one Room.
+    description: >-
+      Returns the Room's current teamMD document, parsed by TeamHub so every consumer reads the
+      same structure, plus the verbatim Markdown that Agents read through teamhub room protocol.
+      Responds 404 when the Room has no team.md. Only a current Room member may read it.
+    responses:
+      "200":
+        description: The Room's current collaboration protocol document.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/team-md.yaml#/components/schemas/TeamMdDocument"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"

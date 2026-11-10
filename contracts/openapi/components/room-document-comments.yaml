@@ -1,0 +1,339 @@
+components:
+  schemas:
+    DocumentCommentAnchorStatus:
+      type: string
+      enum: [pending, attached, orphaned]
+    DocumentCommentTextSegment:
+      type: object
+      additionalProperties: false
+      required: [type, content]
+      properties:
+        type:
+          type: string
+          const: text
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    DocumentCommentReferenceSegment:
+      type: object
+      additionalProperties: false
+      required: [type, content, actor_id]
+      properties:
+        type:
+          type: string
+          const: reference
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: In a Human comment, an Agent to wake; in an Agent reply, the Space's Human, shown as a name only.
+    DocumentCommentSegment:
+      oneOf:
+        - $ref: "#/components/schemas/DocumentCommentTextSegment"
+        - $ref: "#/components/schemas/DocumentCommentReferenceSegment"
+      discriminator:
+        propertyName: type
+        mapping:
+          text: "#/components/schemas/DocumentCommentTextSegment"
+          reference: "#/components/schemas/DocumentCommentReferenceSegment"
+    DocumentCommentContentRequest:
+      type: object
+      additionalProperties: false
+      required: [segments]
+      properties:
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/DocumentCommentSegment"
+      description: Ordered structured content; concatenated segment content is the readable body.
+    DocumentCommentDurableHeadSelector:
+      type: object
+      additionalProperties: false
+      required: [persisted_seq, state_hash, state_hash_version]
+      properties:
+        persisted_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        state_hash:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        state_hash_version:
+          type: integer
+          const: 1
+      description: Exact committed Draft head accepted by the Human before invoking an Agent.
+    DocumentCommentCurrentContextSelector:
+      type: object
+      additionalProperties: false
+      required: [binding_kind, context_id]
+      properties:
+        binding_kind:
+          type: string
+          const: room
+        context_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+      description: Exact active Room Binding in which this Comment mutation is authored; it also admits that Room's member Agents as references.
+    DocumentCommentReplyCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [segments]
+      properties:
+        parent_comment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/DocumentCommentSegment"
+        durable_head:
+          $ref: "#/components/schemas/DocumentCommentDurableHeadSelector"
+        current_context:
+          $ref: "#/components/schemas/DocumentCommentCurrentContextSelector"
+    DocumentCommentUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_version, segments]
+      properties:
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/DocumentCommentSegment"
+        durable_head:
+          $ref: "#/components/schemas/DocumentCommentDurableHeadSelector"
+        current_context:
+          $ref: "#/components/schemas/DocumentCommentCurrentContextSelector"
+    DocumentCommentVersionRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_version]
+      properties:
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+    DocumentCommentThreadResolutionRequest:
+      type: object
+      additionalProperties: false
+      required: [resolved]
+      properties:
+        resolved:
+          type: boolean
+      description: Desired Thread resolution state; reopening clears resolver evidence.
+    DocumentCommentAnchorAttachmentRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_persisted_seq, expected_full_state_fingerprint]
+      properties:
+        expected_persisted_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        expected_full_state_fingerprint:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    DocumentCommentAnchorAttachmentResult:
+      type: object
+      additionalProperties: false
+      required: [status, revision_id, thread]
+      properties:
+        status:
+          type: string
+          enum: [attached, already_attached]
+        revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        thread:
+          $ref: "#/components/schemas/DocumentCommentThread"
+    DocumentCommentAnchorInput:
+      type: object
+      additionalProperties: false
+      required: [quoted_text, block_id, context_before, context_after]
+      properties:
+        quoted_text:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        block_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        context_before:
+          type: string
+          maxLength: 2000
+        context_after:
+          type: string
+          maxLength: 2000
+    DocumentCommentThreadCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [initial_comment]
+      oneOf:
+        - required: [anchor]
+        - required: [document_version_id]
+      properties:
+        anchor:
+          $ref: "#/components/schemas/DocumentCommentAnchorInput"
+        document_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Exact immutable Version targeted by a whole-Document comment. Mutually exclusive with anchor.
+        initial_comment:
+          $ref: "#/components/schemas/DocumentCommentContentRequest"
+        durable_head:
+          $ref: "#/components/schemas/DocumentCommentDurableHeadSelector"
+        current_context:
+          $ref: "#/components/schemas/DocumentCommentCurrentContextSelector"
+    DocumentCommentAnchor:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          kind,
+          quoted_text,
+          block_id,
+          context_before,
+          context_after,
+          created_by,
+          created_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          type: string
+          enum: [selection, document_version]
+        document_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        quoted_text:
+          type: string
+        block_id:
+          type: string
+        context_before:
+          type: string
+        context_after:
+          type: string
+        created_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentComment:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - thread_id
+        - author
+        - body
+        - segments
+        - version_number
+        - reactions
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        parent_comment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        author:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        body:
+          type: string
+          maxLength: 50000
+        segments:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/DocumentCommentSegment"
+        version_number:
+          type: integer
+          format: int64
+          minimum: 1
+        reactions:
+          type: array
+          maxItems: 1000
+          items:
+            type: object
+            additionalProperties: false
+            required: [emoji, actor_ids, created_at]
+            properties:
+              emoji:
+                type: string
+                minLength: 1
+                maxLength: 64
+              actor_ids:
+                type: array
+                minItems: 1
+                items:
+                  $ref: "./common.yaml#/components/schemas/Id"
+              created_at:
+                $ref: "./common.yaml#/components/schemas/Timestamp"
+        deleted_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentCommentThread:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - document_id
+        - anchor_status
+        - resolved
+        - anchor
+        - comments
+        - created_by
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        anchor_status:
+          $ref: "#/components/schemas/DocumentCommentAnchorStatus"
+        resolved:
+          type: boolean
+        anchor:
+          $ref: "#/components/schemas/DocumentCommentAnchor"
+        comments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/DocumentComment"
+        created_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        resolved_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        resolved_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentCommentThreadPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentCommentThread"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"

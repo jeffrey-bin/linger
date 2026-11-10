@@ -1,0 +1,16 @@
+agentIdentity:
+  get:
+    tags: [Agent Identity]
+    operationId: getAgentIdentity
+    summary: Resolve the active Agent's TeamHub collaboration identity.
+    responses:
+      "200":
+        description: Active AgentManagement identity, mapped TeamHub Agent Actor, and trusted Human sponsor.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-projections.yaml#/components/schemas/AgentIdentity"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"

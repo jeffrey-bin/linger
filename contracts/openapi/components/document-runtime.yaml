@@ -1,0 +1,477 @@
+components:
+  schemas:
+    ComputedDocumentState:
+      type: object
+      additionalProperties: false
+      required:
+        - state_bytes
+        - bytes_sha256
+        - state_vector
+        - state_hash
+        - state_hash_version
+        - complete_references
+        - warnings
+      properties:
+        state_bytes:
+          $ref: "document-internal.yaml#/components/schemas/DocumentStateBytes"
+        bytes_sha256:
+          $ref: "document-internal.yaml#/components/schemas/Sha256"
+        state_vector:
+          $ref: "document-internal.yaml#/components/schemas/StateVector"
+        state_hash:
+          $ref: "document-internal.yaml#/components/schemas/Sha256"
+        state_hash_version:
+          $ref: "document-internal.yaml#/components/schemas/StateHashVersion"
+        complete_references:
+          $ref: "document-internal.yaml#/components/schemas/CompleteReferences"
+        warnings:
+          type: array
+          maxItems: 256
+          items:
+            type: string
+            maxLength: 1024
+    DocumentDuplicateAssetMapping:
+      type: object
+      additionalProperties: false
+      required: [source_asset_id, target_asset_id]
+      properties:
+        source_asset_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        target_asset_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+    DocumentSemanticBlocks:
+      type: array
+      minItems: 1
+      maxItems: 2048
+      items:
+        type: object
+        additionalProperties: true
+    ReplaceDocumentBodyBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, blocks]
+      properties:
+        kind: { type: string, const: replace_body_blocks }
+        blocks:
+          $ref: "#/components/schemas/DocumentSemanticBlocks"
+    ReplaceDocumentBodyHTMLSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, html]
+      properties:
+        kind: { type: string, const: replace_body_html }
+        html:
+          {
+            type: string,
+            minLength: 1,
+            maxLength: 1048576,
+            x-max-encoded-bytes: 1048576,
+          }
+    SetDocumentTitleSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, title]
+      properties:
+        kind:
+          type: string
+          const: set_title
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+    AppendDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, blocks]
+      properties:
+        kind:
+          type: string
+          const: append_blocks
+        blocks:
+          $ref: "#/components/schemas/DocumentSemanticBlocks"
+    InsertDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, position, stable_block_id, blocks]
+      properties:
+        kind:
+          type: string
+          const: insert_blocks
+        position:
+          type: string
+          enum: [before, after]
+        stable_block_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        blocks:
+          $ref: "#/components/schemas/DocumentSemanticBlocks"
+    ReplaceDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, stable_block_ids, blocks]
+      properties:
+        kind:
+          type: string
+          const: replace_blocks
+        stable_block_ids:
+          type: array
+          minItems: 1
+          maxItems: 2048
+          items:
+            $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        blocks:
+          type: array
+          maxItems: 2048
+          items:
+            type: object
+            additionalProperties: true
+    UpdateDocumentBlockSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, stable_block_id, block]
+      properties:
+        kind:
+          type: string
+          const: update_block
+        stable_block_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        block:
+          type: object
+          additionalProperties: true
+    DeleteDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, stable_block_ids]
+      properties:
+        kind:
+          type: string
+          const: delete_blocks
+        stable_block_ids:
+          type: array
+          minItems: 1
+          maxItems: 2048
+          items:
+            $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+    ReplaceDocumentCommentTextSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, thread_id, replacement]
+      properties:
+        kind:
+          type: string
+          const: replace_comment_text
+        thread_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        replacement:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    EditNativeDocumentSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, parser_version, command]
+      description: One Native Document edit, resolved against the frozen mutation state. Action-specific fields are validated before admission and computation.
+      properties:
+        kind:
+          type: string
+          const: edit_document
+        parser_version:
+          type: string
+          const: markdown-v1
+        command:
+          type: string
+          enum:
+            [
+              append,
+              str_replace,
+              block_insert_before,
+              block_insert_after,
+              block_replace,
+              block_delete,
+              set_title,
+              image_insert_after,
+              image_replace,
+              file_insert_after,
+            ]
+        content:
+          type: string
+          maxLength: 262144
+        pattern:
+          type: string
+          minLength: 1
+          maxLength: 262144
+        block_id:
+          type: string
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+        start_block_id:
+          type: string
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+        end_block_id:
+          type: string
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        asset_id:
+          type: string
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+          description: Image and file commands only. An available Asset of this Document, an image for image commands; admission pins it for this mutation.
+        caption:
+          type: string
+          maxLength: 1000
+          description: Optional single-line image caption for image commands.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Optional single-line file name shown on the block, for file_insert_after.
+    DocumentSemanticOperations:
+      type: array
+      minItems: 1
+      maxItems: 64
+      description: Targeted operations are limited to 256 KiB encoded JSON. A single replace_body_html or replace_body_blocks operation permits up to 1 MiB body and 8 MiB encoded JSON; it cannot be combined with other operations.
+      x-max-encoded-bytes: 8388608
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/EditNativeDocumentSemanticOperation"
+          - $ref: "#/components/schemas/ReplaceDocumentBodyBlocksSemanticOperation"
+          - $ref: "#/components/schemas/ReplaceDocumentBodyHTMLSemanticOperation"
+          - $ref: "#/components/schemas/SetDocumentTitleSemanticOperation"
+          - $ref: "#/components/schemas/InsertDocumentBlocksSemanticOperation"
+          - $ref: "#/components/schemas/AppendDocumentBlocksSemanticOperation"
+          - $ref: "#/components/schemas/ReplaceDocumentBlocksSemanticOperation"
+          - $ref: "#/components/schemas/UpdateDocumentBlockSemanticOperation"
+          - $ref: "#/components/schemas/DeleteDocumentBlocksSemanticOperation"
+          - $ref: "#/components/schemas/ReplaceDocumentCommentTextSemanticOperation"
+        discriminator:
+          propertyName: kind
+          mapping:
+            edit_document: "#/components/schemas/EditNativeDocumentSemanticOperation"
+            replace_body_blocks: "#/components/schemas/ReplaceDocumentBodyBlocksSemanticOperation"
+            replace_body_html: "#/components/schemas/ReplaceDocumentBodyHTMLSemanticOperation"
+            set_title: "#/components/schemas/SetDocumentTitleSemanticOperation"
+            insert_blocks: "#/components/schemas/InsertDocumentBlocksSemanticOperation"
+            append_blocks: "#/components/schemas/AppendDocumentBlocksSemanticOperation"
+            replace_blocks: "#/components/schemas/ReplaceDocumentBlocksSemanticOperation"
+            update_block: "#/components/schemas/UpdateDocumentBlockSemanticOperation"
+            delete_blocks: "#/components/schemas/DeleteDocumentBlocksSemanticOperation"
+            replace_comment_text: "#/components/schemas/ReplaceDocumentCommentTextSemanticOperation"
+    DisconnectDocumentConnectionsRequest:
+      description: An actor_id closes only that Actor's connections; without it every connection of the Document closes.
+      type: object
+      additionalProperties: false
+      properties:
+        actor_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+    ImportDocumentRequest:
+      description: >-
+        A text source (markdown, plain_text, sanitized_html) becomes a new
+        state that may place the allowed Assets; blank needs no source; a
+        document_state source is an existing state remapped to new Asset IDs
+        without its Comment threads.
+      type: object
+      additionalProperties: false
+      required: [operation_id, schema_version, source_kind]
+      properties:
+        operation_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        schema_version:
+          $ref: "document-internal.yaml#/components/schemas/SchemaVersion"
+        source_kind:
+          type: string
+          enum: [blank, markdown, plain_text, sanitized_html, document_state]
+        source_bytes:
+          $ref: "document-internal.yaml#/components/schemas/DocumentSourceBytes"
+        allowed_document_asset_ids:
+          type: array
+          maxItems: 4096
+          uniqueItems: true
+          items:
+            $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        asset_mappings:
+          type: array
+          maxItems: 4096
+          items:
+            $ref: "#/components/schemas/DocumentDuplicateAssetMapping"
+    ExportDocumentRequest:
+      type: object
+      additionalProperties: false
+      required: [revision_id, schema_version, state, asset_manifest, format]
+      properties:
+        revision_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        schema_version:
+          $ref: "document-internal.yaml#/components/schemas/SchemaVersion"
+        state:
+          $ref: "#/components/schemas/ComputedDocumentState"
+        asset_manifest:
+          $ref: "document-internal.yaml#/components/schemas/ManifestEntries"
+        format:
+          type: string
+          enum: [markdown, plain_text, html, blocks]
+    ExportDocumentResult:
+      type: object
+      additionalProperties: false
+      required:
+        [media_type, bytes, size_bytes, sha256, complete_references, warnings]
+      properties:
+        media_type:
+          type: string
+          enum: [text/markdown, text/plain, text/html, application/json]
+        bytes:
+          $ref: "document-internal.yaml#/components/schemas/DocumentSourceBytes"
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 33554432
+        sha256:
+          $ref: "document-internal.yaml#/components/schemas/Sha256"
+        complete_references:
+          $ref: "document-internal.yaml#/components/schemas/CompleteReferences"
+        warnings:
+          type: array
+          maxItems: 256
+          items:
+            type: string
+            maxLength: 1024
+    SemanticDocumentChange:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+        - schema_version
+        - current_title
+        - allowed_document_asset_ids
+        - operations
+      properties:
+        kind:
+          type: string
+          const: semantic
+        schema_version:
+          type: string
+          const: blocknote-semantic-v1
+        current_title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        allowed_document_asset_ids:
+          type: array
+          maxItems: 4096
+          uniqueItems: true
+          items:
+            $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        operations:
+          $ref: "#/components/schemas/DocumentSemanticOperations"
+    RestoreDocumentChange:
+      description: Replaces the body with a History Revision's state.
+      type: object
+      additionalProperties: false
+      required: [kind, target_state_bytes, target_state_bytes_sha256]
+      properties:
+        kind:
+          type: string
+          const: restore
+        target_state_bytes:
+          $ref: "document-internal.yaml#/components/schemas/DocumentStateBytes"
+        target_state_bytes_sha256:
+          $ref: "document-internal.yaml#/components/schemas/Sha256"
+    CommentAnchorDocumentChange:
+      description: >-
+        Marks a Comment thread on the selection a read-only commenter quoted;
+        an editable session writes the mark itself.
+      type: object
+      additionalProperties: false
+      required:
+        [kind, thread_id, quoted_text, block_id, context_before, context_after]
+      properties:
+        kind:
+          type: string
+          const: comment_anchor
+        thread_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        quoted_text:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        block_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        context_before:
+          type: string
+          maxLength: 2000
+        context_after:
+          type: string
+          maxLength: 2000
+    DocumentChange:
+      oneOf:
+        - $ref: "#/components/schemas/SemanticDocumentChange"
+        - $ref: "#/components/schemas/RestoreDocumentChange"
+        - $ref: "#/components/schemas/CommentAnchorDocumentChange"
+      discriminator:
+        propertyName: kind
+        mapping:
+          semantic: "#/components/schemas/SemanticDocumentChange"
+          restore: "#/components/schemas/RestoreDocumentChange"
+          comment_anchor: "#/components/schemas/CommentAnchorDocumentChange"
+    ApplyDocumentChangeRequest:
+      type: object
+      additionalProperties: false
+      required: [operation_id, actor_id, change]
+      properties:
+        operation_id:
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        actor_id:
+          description: The Actor recorded as the body's editor for this change.
+          $ref: "document-internal.yaml#/components/schemas/DocumentInternalId"
+        expected_seq:
+          description: When present, the change applies only to the body at this sequence.
+          $ref: "document-internal.yaml#/components/schemas/PersistedSequence"
+        change:
+          $ref: "#/components/schemas/DocumentChange"
+    ApplyDocumentChangeResult:
+      oneOf:
+        - $ref: "#/components/schemas/AppliedDocumentChangeResult"
+        - $ref: "#/components/schemas/ConflictedDocumentChangeResult"
+      discriminator:
+        propertyName: status
+        mapping:
+          applied: "#/components/schemas/AppliedDocumentChangeResult"
+          conflicted: "#/components/schemas/ConflictedDocumentChangeResult"
+    AppliedDocumentChangeResult:
+      type: object
+      additionalProperties: false
+      required: [status, seq, state_hash, title, complete_references]
+      properties:
+        status:
+          type: string
+          const: applied
+        seq:
+          $ref: "document-internal.yaml#/components/schemas/PersistedSequence"
+        state_hash:
+          $ref: "document-internal.yaml#/components/schemas/Sha256"
+        title:
+          description: The title after a semantic change; other changes return the current title they were given or an empty string.
+          type: string
+          maxLength: 255
+        complete_references:
+          $ref: "document-internal.yaml#/components/schemas/CompleteReferences"
+    ConflictedDocumentChangeResult:
+      type: object
+      additionalProperties: false
+      required: [status, reason]
+      properties:
+        status:
+          type: string
+          const: conflicted
+        reason:
+          type: string
+          enum:
+            - stale_head
+            - text_not_found
+            - ambiguous_text
+            - missing_block
+            - duplicate_target
+            - noncontiguous_blocks
+            - invalid_structure
+            - missing_comment_selection
+            - ambiguous_comment_selection

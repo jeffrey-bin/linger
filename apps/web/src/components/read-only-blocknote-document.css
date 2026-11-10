@@ -1,0 +1,164 @@
+.read-only-blocknote-document {
+  width: 100%;
+  max-width: var(--app-content-width, 708px);
+  min-height: 100%;
+  margin-inline: auto;
+  padding: 32px 24px 48px;
+  color: var(--app-ink);
+}
+
+.read-only-blocknote-document .bn-container,
+.read-only-blocknote-document .bn-editor {
+  background: transparent;
+  font-family: inherit;
+}
+
+.read-only-blocknote-document .bn-editor {
+  min-height: 0;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Town docs scale, matching the Room Document editor and Wiki reading. */
+.read-only-blocknote-document:not([data-knowledge-presentation])
+  .bn-editor
+  [data-content-type="heading"] {
+  padding-top: 0;
+}
+
+.read-only-blocknote-document:not([data-knowledge-presentation])
+  .bn-editor
+  :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 580;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.read-only-blocknote-document:not([data-knowledge-presentation]) .bn-editor h1 {
+  margin-top: 32px;
+  font-size: 26px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.read-only-blocknote-document:not([data-knowledge-presentation]) .bn-editor h2 {
+  margin-top: 28px;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+.read-only-blocknote-document:not([data-knowledge-presentation]) .bn-editor h3 {
+  margin-top: 20px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.read-only-blocknote-document:not([data-knowledge-presentation])
+  .bn-editor
+  > .bn-block-group
+  > .bn-block-outer:first-child
+  :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 0;
+}
+
+.read-only-blocknote-document--knowledge {
+  max-width: calc(768px + 56px);
+  min-height: 0;
+  padding: 24px 28px 48px;
+  color: var(--app-body);
+}
+
+.read-only-blocknote-document .bn-editor a {
+  color: var(--app-link);
+  text-decoration-line: none;
+  text-underline-offset: 3px;
+}
+
+.read-only-blocknote-document .bn-editor a:hover {
+  text-decoration-line: underline;
+}
+
+.read-only-blocknote-document .bn-editor ::selection {
+  background: color-mix(in srgb, var(--app-link) 22%, transparent);
+}
+
+.read-only-blocknote-document
+  .bn-block-content:has(.ProseMirror-trailingBreak:only-child)::after {
+  content: "" !important;
+}
+
+@media (max-width: 40rem) {
+  .read-only-blocknote-document {
+    padding: 24px 18px 40px;
+  }
+
+  .read-only-blocknote-document--knowledge {
+    padding: 20px 18px 40px;
+  }
+}
+
+.bn-root.read-only-blocknote-document__view {
+  --bn-colors-editor-text: var(--app-ink);
+  --bn-colors-editor-background: transparent;
+  --bn-colors-menu-text: var(--app-ink);
+  --bn-colors-menu-background: hsl(var(--town-popover));
+  --bn-colors-tooltip-text: hsl(var(--town-primary-foreground));
+  --bn-colors-tooltip-background: hsl(var(--town-primary));
+  --bn-colors-hovered-text: var(--app-ink);
+  --bn-colors-hovered-background: hsl(var(--town-accent));
+  --bn-colors-selected-text: hsl(var(--town-primary-foreground));
+  --bn-colors-selected-background: hsl(var(--town-primary));
+  --bn-colors-disabled-text: var(--app-subtle);
+  --bn-colors-disabled-background: hsl(var(--town-muted));
+  --bn-colors-shadow: hsl(var(--town-foreground) / 0.08);
+  --bn-colors-border: hsl(var(--town-border));
+  --bn-colors-side-menu: var(--app-subtle);
+  --bn-font-family: var(--app-font-sans);
+  --bn-border-radius: 6px;
+  --bn-shadow-medium: var(--town-shadow-md);
+  --bn-shadow-light: var(--town-shadow-sm);
+}
+
+.read-only-blocknote-document
+  .bn-editor
+  [data-content-type="table"]
+  :is(th, td) {
+  border-color: hsl(var(--town-border));
+}
+
+.read-only-blocknote-document
+  .bn-editor
+  [data-content-type="quote"]
+  blockquote {
+  border-left-color: hsl(var(--town-border-hover));
+  color: var(--app-muted);
+}
+
+.read-only-blocknote-document .bn-editor [data-content-type="divider"] hr {
+  border-top-color: hsl(var(--town-border));
+}
+
+/* Inline code reads in the body font; code blocks stay monospace. */
+.read-only-blocknote-document .bn-editor .bn-inline-content code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: hsl(var(--town-muted));
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Space consecutive paragraphs; list items and headings keep their own rhythm. */
+.read-only-blocknote-document
+  .bn-block-outer:has(
+    > .bn-block > .bn-block-content[data-content-type="paragraph"]
+  )
+  + .bn-block-outer:not(.knowledge-change-log-entry):has(
+    > .bn-block > .bn-block-content[data-content-type="paragraph"]
+  ) {
+  margin-top: 0.75em;
+}

@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+    />
+    <title>Linger</title>
+    <style>
+      :root {
+        --canvas: #f6f6f6;
+        --ink: #202020;
+        --body: #404040;
+        --muted: #737373;
+        --border: #e5e5e5;
+        --hover: rgba(0, 0, 0, 0.06);
+        --active: rgba(0, 0, 0, 0.1);
+        --danger-hover: #e81123;
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 0 8px;
+        background: var(--canvas);
+        border-bottom: 1px solid var(--border);
+        color: var(--body);
+        font:
+          13px/1 Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "PingFang SC",
+          "Microsoft YaHei",
+          "Noto Sans CJK SC",
+          system-ui,
+          sans-serif;
+        -webkit-app-region: drag;
+      }
+      body.blurred .dim-when-blurred {
+        opacity: 0.55;
+      }
+      body[data-platform="win32"] {
+        padding-right: 146px;
+      }
+      button {
+        -webkit-app-region: no-drag;
+        display: inline-grid;
+        place-items: center;
+        height: 28px;
+        min-width: 28px;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--body);
+        font: inherit;
+        cursor: default;
+      }
+      button:hover:not(:disabled) {
+        background: var(--hover);
+        color: var(--ink);
+      }
+      button:active:not(:disabled) {
+        background: var(--active);
+      }
+      button:disabled {
+        color: #c4c4c4;
+      }
+      button:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: -2px;
+      }
+      svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .nav {
+        display: flex;
+        gap: 2px;
+      }
+      .spinning svg {
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .title {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+        gap: 8px;
+        padding: 0 12px;
+        white-space: nowrap;
+      }
+      .title strong {
+        color: var(--ink);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .title span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .controls {
+        display: none;
+        margin-left: 6px;
+        gap: 2px;
+      }
+      body[data-platform="linux"] .controls {
+        display: flex;
+      }
+      .controls button {
+        width: 32px;
+        height: 28px;
+      }
+      .controls svg {
+        width: 14px;
+        height: 14px;
+        stroke-width: 1.5;
+      }
+      .controls .close:hover {
+        background: var(--danger-hover);
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body data-platform="linux">
+    <div class="nav dim-when-blurred">
+      <button id="back" title="Back" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
+      </button>
+      <button id="forward" title="Forward" aria-label="Forward">
+        <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>
+      </button>
+      <button id="reload" title="Reload" aria-label="Reload">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+          <path d="M21 3v5h-5" />
+        </svg>
+      </button>
+    </div>
+    <div class="title dim-when-blurred">
+      <strong>Linger</strong><span id="host"></span>
+    </div>
+    <div class="controls">
+      <button id="minimize" title="Minimize" aria-label="Minimize">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14" /></svg>
+      </button>
+      <button id="maximize" title="Maximize" aria-label="Maximize">
+        <svg viewBox="0 0 24 24" id="maximize-icon">
+          <rect x="5" y="5" width="14" height="14" rx="1.5" />
+        </svg>
+      </button>
+      <button id="close" class="close" title="Close" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <script>
+      const shell = window.lingerShell;
+      const $ = (id) => document.getElementById(id);
+      const restoreIcon =
+        '<rect x="5" y="8" width="11" height="11" rx="1.5"/><path d="M8 8V6.5A1.5 1.5 0 0 1 9.5 5h8A1.5 1.5 0 0 1 19 6.5v8a1.5 1.5 0 0 1-1.5 1.5H16"/>';
+      const maximizeIcon =
+        '<rect x="5" y="5" width="14" height="14" rx="1.5"/>';
+
+      const render = (state) => {
+        const body = document.body;
+        body.dataset.platform = state.platform;
+        body.classList.toggle("blurred", !state.focused);
+        $("host").textContent = state.title;
+        $("back").disabled = !state.canGoBack;
+        $("forward").disabled = !state.canGoForward;
+        $("reload").classList.toggle("spinning", state.loading);
+        $("maximize").title = state.maximized ? "Restore" : "Maximize";
+        $("maximize-icon").innerHTML = state.maximized
+          ? restoreIcon
+          : maximizeIcon;
+      };
+      for (const name of ["back", "forward", "reload", "minimize", "close"])
+        $(name).addEventListener("click", () => shell.command(name));
+      $("maximize").addEventListener("click", () => shell.command("maximize"));
+      document.body.addEventListener("dblclick", (event) => {
+        if (event.target === document.body || event.target.closest(".title"))
+          if (document.body.dataset.platform === "linux")
+            shell.command("maximize");
+      });
+      shell.onState(render);
+      shell.getState().then(render);
+    </script>
+  </body>
+</html>

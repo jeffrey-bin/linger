@@ -1,0 +1,1871 @@
+components:
+  schemas:
+    AgentRuntimeCommandId:
+      type: string
+      minLength: 8
+      maxLength: 256
+      pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    AgentRuntimeInt64:
+      type: string
+      pattern: "^(0|[1-9][0-9]*)$"
+      maxLength: 19
+    AgentRuntimePositiveInt64:
+      type: string
+      pattern: "^[1-9][0-9]*$"
+      maxLength: 19
+    AgentServiceEpoch:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: >-
+        The epoch a starting Agent Service process opened. Every Runtime write
+        names it; a write naming an earlier epoch is rejected with CONTEXT_FENCED.
+    StartAgentServiceEpochRequest:
+      type: object
+      additionalProperties: false
+      required: [epoch]
+      properties:
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+    AgentServiceEpochStart:
+      type: object
+      additionalProperties: false
+      required: [interrupted_run_ids, waiting_context_keys]
+      properties:
+        interrupted_run_ids:
+          type: array
+          items:
+            type: string
+        waiting_context_keys:
+          type: array
+          maxItems: 1000
+          description: Contexts with a queued Run or Message steer, for the new process to take up at once.
+          items:
+            $ref: "#/components/schemas/AgentRuntimeContextKey"
+    AnotherMePlacement:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          tenant_id,
+          owner_actor_id,
+          agent_id,
+          agent_actor_id,
+          computer_id,
+          local_runtime_type,
+          status,
+        ]
+      description: Where one Human's Another Me runs; background model calls for that Human run on this Computer.
+      properties:
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        owner_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The Agent Service Agent id the Computer knows the Another Me by.
+        agent_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        local_runtime_type:
+          $ref: "./domain.yaml#/components/schemas/LocalRuntimeType"
+        status:
+          type: string
+          enum: [active, updating]
+    AnotherMePlacementList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/AnotherMePlacement"
+    AgentRuntimeConfigSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - agent_id
+        - actor_id
+        - tenant_id
+        - configuration_revision
+        - runtime_configuration_revision
+        - content_hash
+        - agent
+        - runtime
+        - resources
+        - permission_review
+      properties:
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        configuration_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        runtime_configuration_revision:
+          allOf:
+            - $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+          description: >-
+            The configuration revision of the last Runtime or placement change.
+            Later revisions changed only the profile, which a running Runtime
+            adopts in place from its next claim.
+        permission_review:
+          type: boolean
+          description: >-
+            TeamHub has a Runtime permission judge, so Runs declare permission
+            review and the Agent is taught the tool approval protocol. A
+            deployment fact, excluded from content_hash.
+        content_hash:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        agent:
+          type: object
+          additionalProperties: false
+          required: [name, instructions]
+          properties:
+            name:
+              type: string
+              minLength: 1
+              maxLength: 120
+            instructions:
+              type: string
+              minLength: 1
+              maxLength: 50000
+        runtime:
+          $ref: "#/components/schemas/AgentRuntimeSettingsSnapshot"
+        resources:
+          $ref: "#/components/schemas/AgentRuntimeResourceSnapshot"
+    AgentRuntimeDeletionSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - agent_id
+        - actor_id
+        - tenant_id
+        - configuration_revision
+        - runtime
+        - contexts
+      properties:
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        configuration_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        runtime:
+          $ref: "#/components/schemas/AgentRuntimeSettingsSnapshot"
+        contexts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentExecutionContext"
+    AgentRuntimeSettingsSnapshot:
+      type: object
+      additionalProperties: false
+      required: [type, model, placement]
+      properties:
+        type:
+          type: string
+          const: local
+        model:
+          type: string
+          minLength: 1
+          maxLength: 120
+        reasoning_effort:
+          $ref: "./domain.yaml#/components/schemas/AgentReasoningEffort"
+        placement:
+          type: object
+          additionalProperties: false
+          required:
+            - tenant_id
+            - owner_actor_id
+            - computer_id
+            - runtime_type
+            - workspace_grant_id
+            - assignment_revision
+          properties:
+            tenant_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            owner_actor_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            computer_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            runtime_type:
+              $ref: "./domain.yaml#/components/schemas/LocalRuntimeType"
+            workspace_grant_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            assignment_revision:
+              $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+    AgentRuntimeResourceSnapshot:
+      type: object
+      additionalProperties: false
+      required: [skills, mcp_servers]
+      properties:
+        skills:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - skill_id
+              - manifest_version
+              - name
+              - package_name
+              - package_sha256
+              - config
+            properties:
+              skill_id:
+                $ref: "./common.yaml#/components/schemas/SkillIdentifier"
+              manifest_version:
+                type: string
+              name:
+                type: string
+              package_name:
+                type: string
+              package_sha256:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+              config:
+                type: object
+                additionalProperties: true
+        mcp_servers:
+          type: array
+          maxItems: 20
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [mcp_id, manifest_version, name, transport, url, allowed_tools]
+            properties:
+              mcp_id:
+                $ref: "./common.yaml#/components/schemas/Id"
+              manifest_version:
+                type: string
+              name:
+                type: string
+              transport:
+                type: string
+                const: streamable_http
+              url:
+                type: string
+                format: uri
+              allowed_tools:
+                type: array
+                items:
+                  type: string
+    AgentRuntimeContextKey:
+      type: string
+      minLength: 1
+      maxLength: 1000
+    AgentRuntimeContextRef:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [kind, agent_id, room_id]
+          properties:
+            kind:
+              type: string
+              const: meta
+            agent_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            room_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+        - type: object
+          additionalProperties: false
+          required: [kind, agent_id, task_id]
+          properties:
+            kind:
+              type: string
+              const: alter_ego
+            agent_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            task_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+        - type: object
+          additionalProperties: false
+          required: [kind, agent_id, document_id]
+          properties:
+            kind:
+              type: string
+              const: document
+            agent_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            document_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+    AgentExecutionContext:
+      type: object
+      additionalProperties: false
+      required:
+        - ref
+        - context_key
+        - tenant_id
+        - agent_actor_id
+        - target_residency
+        - state_revision
+        - next_input_sequence
+      properties:
+        ref:
+          $ref: "#/components/schemas/AgentRuntimeContextRef"
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        agent_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_kind:
+          type: string
+          enum: [direct, collaboration]
+          description: >-
+            Trusted TeamHub Room shape. Present only for a Room-bound Meta
+            Context and derived from TeamHub Room authority.
+        target_residency:
+          type: string
+          enum: [active, suspended]
+        state_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        next_input_sequence:
+          $ref: "#/components/schemas/AgentRuntimeInt64"
+        terminal_reason:
+          type: string
+          enum: [room_deleted, context_deleted]
+        terminated_at:
+          type: string
+          format: date-time
+        membership_epoch_id:
+          type: string
+          minLength: 1
+          description: >-
+            The Room membership a Room-bound Meta Context is bound to. A new
+            membership rebinds the Context; the Agent Service restarts what it
+            prepared under the previous one.
+        shared_task_scope:
+          $ref: "#/components/schemas/AgentRuntimeSharedTaskScope"
+    AgentRuntimeSharedTaskScope:
+      type: object
+      additionalProperties: false
+      description: >-
+        Trusted identity of the shared Task directory this Context reads or
+        writes. Present for a Room-bound Meta Context (role meta, no task_id)
+        and for an alter_ego Context whose current Task generation is
+        coordinated by a Room-bound Meta Context of the same Agent (role
+        alter_ego, task_id required). The origin Room is that frozen
+        coordinator's Room, never the Task Room.
+      required: [version, tenant_id, agent_id, origin_room_id, role]
+      properties:
+        version:
+          type: integer
+          enum: [1]
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        origin_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        role:
+          type: string
+          enum: [meta, alter_ego]
+        task_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentExecutionContextList:
+      type: object
+      additionalProperties: false
+      required: [contexts]
+      properties:
+        contexts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentExecutionContext"
+    ReconcileAgentExecutionContextsRequest:
+      type: object
+      additionalProperties: false
+      required: [limit]
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        cursor:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    ReconcileAgentExecutionContextsResult:
+      type: object
+      additionalProperties: false
+      required:
+        - examined_count
+        - existing_count
+        - created_count
+        - created_context_keys
+      properties:
+        examined_count:
+          type: integer
+          minimum: 0
+        existing_count:
+          type: integer
+          minimum: 0
+        created_count:
+          type: integer
+          minimum: 0
+        created_context_keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentRuntimeContextKey"
+        next_cursor:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    EnsureAgentExecutionContextRequest:
+      type: object
+      additionalProperties: false
+      required: [ref, target_residency]
+      properties:
+        ref:
+          $ref: "#/components/schemas/AgentRuntimeContextRef"
+        target_residency:
+          type: string
+          enum: [active, suspended]
+    EnsureAgentExecutionContextResult:
+      type: object
+      additionalProperties: false
+      required: [created, context]
+      properties:
+        created:
+          type: boolean
+        context:
+          $ref: "#/components/schemas/AgentExecutionContext"
+    SetAgentExecutionContextResidencyRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, expected_revision, target_residency]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        expected_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        target_residency:
+          type: string
+          enum: [active, suspended]
+    DeleteAgentExecutionContextRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, expected_revision]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        expected_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+    AgentRuntimeDeletedResult:
+      type: object
+      additionalProperties: false
+      required: [deleted]
+      properties:
+        deleted:
+          type: boolean
+    AgentRuntimeInput:
+      type: object
+      additionalProperties: false
+      required: [input_id, payload, source_kind]
+      properties:
+        input_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        payload:
+          type: object
+          additionalProperties: true
+        source_kind:
+          type: string
+          enum: [inbox, trusted_turn, internal]
+        source_message_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        source_inbox_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    StoredAgentRuntimeInput:
+      type: object
+      additionalProperties: false
+      required: [input_id, payload, source_kind, sequence, status]
+      properties:
+        input_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        payload:
+          type: object
+          additionalProperties: true
+        source_kind:
+          type: string
+          enum: [inbox, trusted_turn, internal]
+        source_message_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        source_inbox_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        sequence:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        status:
+          type: string
+          enum: [steering, handled]
+        selection_result:
+          type: object
+          additionalProperties: true
+        steer_group_id:
+          type: string
+        local_run_id:
+          type: string
+        steer_outcome:
+          type: string
+          enum: [applied, uncertain]
+        created_at:
+          type: string
+          format: date-time
+    AgentRuntimeAcceptedContextState:
+      type: object
+      additionalProperties: false
+      required: [state_revision, target_residency, next_input_sequence]
+      description: >-
+        The Context state the accepting transaction committed. The Agent Service applies it to
+        its Context record instead of reading the Context again.
+      properties:
+        state_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        target_residency:
+          type: string
+          enum: [active, suspended]
+        next_input_sequence:
+          $ref: "#/components/schemas/AgentRuntimeInt64"
+    AcceptAgentTrustedNotificationRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, execution_run_ref, input]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        execution_run_ref:
+          type: string
+          minLength: 1
+          maxLength: 128
+        input:
+          $ref: "#/components/schemas/AgentRuntimeInput"
+    AcceptAgentTrustedNotificationResult:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [committed, already_accepted]
+        steer_group_id:
+          type: string
+          minLength: 1
+    ClearAgentRuntimeSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, configuration_revision]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        configuration_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        expected_current_configuration_revision:
+          allOf:
+            - $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+          description: Loaded registration revision for automatic stale-session clearing. Requires the same active registration and rejects a Session compatible through proven profile initialization. Omit only for an explicit Session reset.
+    ClearAgentRuntimeSessionResult:
+      type: object
+      additionalProperties: false
+      required: [cleared]
+      properties:
+        cleared:
+          type: boolean
+    SubmitAgentTrustedTurnRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, inputs]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        inputs:
+          type: array
+          minItems: 1
+          maxItems: 1024
+          items:
+            $ref: "#/components/schemas/AgentRuntimeInput"
+    SubmitAgentTrustedTurnResult:
+      type: object
+      additionalProperties: false
+      required: [run_id]
+      properties:
+        run_id:
+          type: string
+        created:
+          type: boolean
+          description: True only when this request created the Local Run; false when its inputs already had one.
+        context:
+          description: Present only when this request created the Local Run.
+          $ref: "#/components/schemas/AgentRuntimeAcceptedContextState"
+    AgentLocalRun:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          run_id,
+          context_key,
+          status,
+          attempt_count,
+          initial_input_ids,
+          steer_input_ids,
+        ]
+      properties:
+        cancellation_requested:
+          type: boolean
+        run_id:
+          type: string
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        status:
+          type: string
+          enum: [queued, running, succeeded, failed, canceled]
+        attempt_count:
+          type: integer
+          minimum: 0
+        initial_input_ids:
+          type: array
+          items:
+            type: string
+        steer_input_ids:
+          type: array
+          items:
+            type: string
+        terminal:
+          type: object
+          additionalProperties: true
+    ClaimAgentLocalRunRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, claim_id]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        claim_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Names this claim; a claim repeated after a lost response receives the same Run.
+    ClaimedAgentLocalRun:
+      type: object
+      additionalProperties: false
+      required: [run_id, attempt_count, inputs, continues_context]
+      properties:
+        cancellation_requested:
+          type: boolean
+          description: Current cancellation flag returned atomically with the Run claim. The production authority always returns this field.
+        run_id:
+          type: string
+        attempt_count:
+          type: integer
+          minimum: 1
+        inputs:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/StoredAgentRuntimeInput"
+        profile_update:
+          $ref: "#/components/schemas/AgentProfileUpdate"
+        continues_context:
+          type: boolean
+          description: The Context received input before this Run's first input.
+    AgentProfileUpdate:
+      type: object
+      additionalProperties: false
+      description: >-
+        The Agent's current profile, present when this Context's Runtime Session
+        was started under an older profile. Agent Service puts it
+        before the Run's inputs as one hidden update; TeamHub returns each
+        profile revision to a Session once.
+      required: [configuration_revision, name, instructions]
+      properties:
+        configuration_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        instructions:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    ClaimAgentLocalRunResult:
+      type: object
+      additionalProperties: false
+      required: [claimed]
+      properties:
+        claimed:
+          type: boolean
+        run:
+          $ref: "#/components/schemas/ClaimedAgentLocalRun"
+    RequeueAgentLocalRunRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, run_id]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        run_id:
+          type: string
+    AgentRuntimeSessionCheckpoint:
+      type: object
+      additionalProperties: false
+      required:
+        - expected_revision
+        - provider_kind
+        - schema_version
+        - session
+        - configuration_revision
+      properties:
+        expected_revision:
+          $ref: "#/components/schemas/AgentRuntimeInt64"
+        provider_kind:
+          type: string
+          minLength: 1
+          maxLength: 64
+        schema_version:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        session:
+          type: object
+          additionalProperties: true
+          description: >-
+            Schema 1 stores the provider session directly. Schema 2 strictly stores
+            {nativeSession, executionResources}; nativeSession is the provider object or
+            null before its first thread exists. executionResources contains version=1,
+            optional userProfile, effectiveSha256 and up to 100 exact Skill descriptors
+            (skillId, manifestId, manifestVersion, name, packageName, packageSha256, config,
+            source). No credentials or snapshot tokens. A null nativeSession requires no
+            thread_id; otherwise its threadId matches thread_id. These are loaded version
+            references for execution recovery, never an authorization snapshot.
+        thread_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        configuration_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+    AgentRuntimeSession:
+      type: object
+      additionalProperties: false
+      required:
+        - expected_revision
+        - provider_kind
+        - schema_version
+        - session
+        - configuration_revision
+        - revision
+        - updated_at
+      properties:
+        expected_revision:
+          $ref: "#/components/schemas/AgentRuntimeInt64"
+        provider_kind:
+          type: string
+          minLength: 1
+          maxLength: 64
+        schema_version:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        session:
+          type: object
+          additionalProperties: true
+          description: >-
+            Schema 1 stores the provider session directly. Schema 2 strictly stores
+            {nativeSession, executionResources}; nativeSession is the provider object or
+            null before its first thread exists. executionResources contains version=1,
+            optional userProfile, effectiveSha256 and up to 100 exact Skill descriptors
+            (skillId, manifestId, manifestVersion, name, packageName, packageSha256, config,
+            source). No credentials or snapshot tokens. A null nativeSession requires no
+            thread_id; otherwise its threadId matches thread_id. These are loaded version
+            references for execution recovery, never an authorization snapshot.
+        thread_id:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        configuration_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        compatible_configuration_revision:
+          allOf:
+            - $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+          description: Read-only server proof that the current registration is exactly one revision newer due to this Agent's successful profile initialization. Returned by a fresh Session read, never trusted from provider JSON or checkpoint requests. Does not grant execution authority or alter the stored checkpoint.
+        revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        updated_at:
+          type: string
+          format: date-time
+    FinishAgentLocalRunRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, run_id, terminal]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        run_id:
+          type: string
+        terminal:
+          type: object
+          additionalProperties: true
+          required: [type]
+          properties:
+            type:
+              type: string
+              enum: [succeeded, failed, canceled]
+            failure:
+              $ref: "#/components/schemas/AgentRuntimeExecutionFailure"
+        session:
+          $ref: "#/components/schemas/AgentRuntimeSessionCheckpoint"
+    FinishAgentLocalRunResult:
+      type: object
+      additionalProperties: false
+      required: [run]
+      properties:
+        run:
+          $ref: "#/components/schemas/AgentLocalRun"
+        session:
+          $ref: "#/components/schemas/AgentRuntimeSession"
+    CancelAgentLocalRunRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, run_id]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        run_id:
+          type: string
+    CancelAgentLocalRunResult:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [cancel_requested, canceled, already_terminal, not_found]
+    EnqueueAgentSteerRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, group_id]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        group_id:
+          type: string
+    EnqueueAgentSteerResult:
+      type: object
+      additionalProperties: false
+      required: [run_id]
+      properties:
+        run_id:
+          type: string
+    AssignAgentSteerRunRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, group_id, run_id]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        group_id:
+          type: string
+        run_id:
+          type: string
+    CompleteAgentSteerRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, group_id, run_id, outcome]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        group_id:
+          type: string
+        run_id:
+          type: string
+        outcome:
+          type: string
+          enum: [applied, uncertain]
+    AgentRuntimeSuccessResult:
+      type: object
+      additionalProperties: false
+      required: [success]
+      properties:
+        success:
+          type: boolean
+    CheckpointAgentRuntimeSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, checkpoint]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        checkpoint:
+          $ref: "#/components/schemas/AgentRuntimeSessionCheckpoint"
+    GetAgentRuntimeSessionResult:
+      type: object
+      additionalProperties: false
+      required: [available]
+      properties:
+        available:
+          type: boolean
+        session:
+          $ref: "#/components/schemas/AgentRuntimeSession"
+    ListRecentlyUsedAgentRuntimeContextsResult:
+      type: object
+      additionalProperties: false
+      required: [contexts]
+      properties:
+        contexts:
+          type: array
+          maxItems: 200
+          items:
+            $ref: "#/components/schemas/RecentlyUsedAgentRuntimeContext"
+    RecentlyUsedAgentRuntimeContext:
+      type: object
+      additionalProperties: false
+      required: [context_key]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+    AgentRuntimeWorkState:
+      type: object
+      additionalProperties: false
+      required: [has_queued_runs, has_pending_work]
+      properties:
+        has_queued_runs:
+          type: boolean
+        has_pending_work:
+          type: boolean
+        message_steers:
+          type: array
+          maxItems: 1024
+          description: >-
+            Present on the work-state read. Steers a Message transaction queued
+            for this Context that the Agent Service has not settled, in input
+            order: a targeted Message for the running Run that reads its Inbox,
+            or a native question's answer assigned to the Run that asked it.
+          items:
+            $ref: "#/components/schemas/StoredAgentRuntimeInput"
+    AgentRuntimeWaitingContexts:
+      type: object
+      additionalProperties: false
+      required: [context_keys]
+      properties:
+        context_keys:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/AgentRuntimeContextKey"
+    OpenAgentRuntimeStatusRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, local_run_id, initial_source_ids]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        local_run_id:
+          type: string
+        initial_source_ids:
+          type: array
+          maxItems: 1024
+          items:
+            type: string
+    OpenAgentRuntimeStatusResult:
+      type: object
+      additionalProperties: false
+      required: [opened]
+      properties:
+        opened:
+          type: boolean
+          description: False when the Run's sources resolve to no Room that may show its status.
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The Room or Thread that shows the Run's status.
+    AgentRuntimeWorkingStatusChangedEvent:
+      type: object
+      additionalProperties: false
+      required: [type, status]
+      properties:
+        type:
+          type: string
+          const: status.changed
+        status:
+          type: string
+          enum: [queued, working, thinking]
+        title:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: >-
+            Optional public queue label for queued, or the full provider-visible reasoning
+            summary title for thinking. Omit for working; raw reasoning is never allowed.
+    AgentRuntimeExecutionFailure:
+      type: object
+      additionalProperties: false
+      required: [code]
+      description: >-
+        Public classified failure; contains no native error text, paths, credentials, or task input.
+        Each code is set where the failure is observed, from structured signals only.
+        model_unavailable means the model service refused the selected model for the
+        Runtime's account, so the Agent needs another model or another sign-in.
+        model_not_offered means the Agent's Computer does not offer the selected model for
+        its Runtime, or the model does not support the selected reasoning effort, so the
+        Runtime could not start; the Agent needs a model and reasoning effort that Computer offers.
+        context_too_long means the conversation no longer fits the model's context window.
+        model_service_error means the model service reported a server-side error.
+        timeout means the Runtime hit its local execution deadline.
+        execution_outcome_unknown means a command was dispatched but no validated exit
+        was observed before unexpected transport or Runtime failure. Intentional cancellation,
+        authorization loss or unavailability, and normal retirement do not create this
+        classification. Authorization loss or unavailability includes explicit revocation,
+        authorization checks that fail or time out, and authorization expiry. This code
+        does not currently cover unknown effects caused by control-plane disconnection.
+        It remains a failed Run and must not be automatically replayed; verify its effects
+        before starting another Run. reply_undelivered means a Room Run finished, but every
+        message the Agent tried to post failed, so the Room received no reply from it.
+        interrupted means the Run stopped before it finished for a reason other than a user
+        cancellation, such as a restart or a Runner stopped on its Computer; part of its work
+        may have taken effect and it is not replayed.
+        computer_unavailable means the Agent's Computer could not run it: the Computer is
+        unreachable, the Agent's Runner is stopped there, or the Runtime is not enabled.
+        cleanup_unconfirmed means the Runtime process could not be confirmed stopped.
+        response_too_large means the reply exceeded the Room's size limit.
+        unclassified means no structured signal identified the cause.
+        runtime_type is present when the failure belongs to a selected Runtime; it is
+        absent for failures the Agent Service or TeamHub observes without one.
+      properties:
+        code:
+          type: string
+          enum:
+            [
+              session_not_found,
+              protocol_incompatible,
+              authentication_required,
+              network_error,
+              rate_limited,
+              model_unavailable,
+              model_not_offered,
+              context_too_long,
+              model_service_error,
+              timeout,
+              execution_failed,
+              execution_outcome_unknown,
+              reply_undelivered,
+              interrupted,
+              computer_unavailable,
+              cleanup_unconfirmed,
+              response_too_large,
+              unclassified,
+            ]
+        runtime_type:
+          $ref: "./domain.yaml#/components/schemas/LocalRuntimeType"
+        runtime_version:
+          type: string
+          maxLength: 80
+          pattern: '^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$'
+    AgentRuntimeStoppedStatusChangedEvent:
+      type: object
+      additionalProperties: false
+      required: [type, status, outcome]
+      properties:
+        type:
+          type: string
+          const: status.changed
+        status:
+          type: string
+          const: stopped
+        outcome:
+          type: string
+          enum: [completed, failed, canceled]
+        failure:
+          $ref: "#/components/schemas/AgentRuntimeExecutionFailure"
+        unconfirmed_input_ids:
+          type: array
+          description: Follow-up inputs whose application to this Run could not be confirmed. Does not change the Run outcome.
+          items:
+            type: string
+    AgentRuntimePlanStep:
+      type: object
+      additionalProperties: false
+      required: [content, status]
+      properties:
+        content:
+          type: string
+          maxLength: 50000
+        status:
+          type: string
+          enum: [pending, in_progress, completed, canceled]
+    AgentRuntimePlanUpdatedEvent:
+      type: object
+      additionalProperties: false
+      required: [type, steps]
+      properties:
+        type:
+          type: string
+          const: plan.updated
+        explanation:
+          type: string
+          maxLength: 50000
+        steps:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/AgentRuntimePlanStep"
+    AgentRuntimeActivityId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+      description: >-
+        Opaque identity of one logical activity within a local Run. Provider-native item
+        identifiers must not cross the Runtime adapter boundary.
+    AgentRuntimeActivityKind:
+      type: string
+      description: >-
+        Runtime-neutral kind of an activity. Each Runtime adapter classifies its own tools; a single shell
+        command gets the kind its program shows. Clients present an activity by kind, not by tool name.
+      enum:
+        - command
+        - tool
+        - file_change
+        - search
+        - read
+        - browse
+        - message
+        - message_read
+        - image
+        - delegation
+        - response
+        - interaction
+        - recovery
+        - review
+      # Explicit names keep oapi-codegen from renaming other enums' constants
+      # that share values such as read or message.
+      x-enum-varnames:
+        [
+          AgentRuntimeActivityKindCommand,
+          AgentRuntimeActivityKindTool,
+          AgentRuntimeActivityKindFileChange,
+          AgentRuntimeActivityKindSearch,
+          AgentRuntimeActivityKindRead,
+          AgentRuntimeActivityKindBrowse,
+          AgentRuntimeActivityKindMessage,
+          AgentRuntimeActivityKindMessageRead,
+          AgentRuntimeActivityKindImage,
+          AgentRuntimeActivityKindDelegation,
+          AgentRuntimeActivityKindResponse,
+          AgentRuntimeActivityKindInteraction,
+          AgentRuntimeActivityKindRecovery,
+          AgentRuntimeActivityKindReview,
+        ]
+    AgentRuntimeActivityOutcome:
+      type: string
+      enum: [succeeded, failed, canceled, declined]
+    AgentRuntimeActivityContentBlock:
+      type: object
+      additionalProperties: false
+      required: [format, content]
+      properties:
+        format:
+          type: string
+          enum: [text, code, json]
+        label:
+          type: string
+          minLength: 1
+          maxLength: 80
+        content:
+          type: string
+          minLength: 1
+          maxLength: 4000
+      description: >-
+        One explicitly projected, bounded public detail block. Provider-native payloads must be
+        redacted and normalized before entering this field.
+    AgentRuntimeActivityStartedEvent:
+      type: object
+      additionalProperties: false
+      required: [type, activity_id, kind, title]
+      properties:
+        type:
+          type: string
+          const: activity.started
+        activity_id:
+          $ref: "#/components/schemas/AgentRuntimeActivityId"
+        kind:
+          $ref: "#/components/schemas/AgentRuntimeActivityKind"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        content:
+          type: array
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/AgentRuntimeActivityContentBlock"
+    AgentRuntimeActivityUpdatedEvent:
+      type: object
+      additionalProperties: false
+      required: [type, activity_id, detail]
+      properties:
+        type:
+          type: string
+          const: activity.updated
+        activity_id:
+          $ref: "#/components/schemas/AgentRuntimeActivityId"
+        detail:
+          type: string
+          minLength: 1
+          maxLength: 200
+    AgentRuntimeActivityFinishedEvent:
+      type: object
+      additionalProperties: false
+      required: [type, activity_id, outcome]
+      properties:
+        type:
+          type: string
+          const: activity.finished
+        activity_id:
+          $ref: "#/components/schemas/AgentRuntimeActivityId"
+        outcome:
+          $ref: "#/components/schemas/AgentRuntimeActivityOutcome"
+        content:
+          type: array
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/AgentRuntimeActivityContentBlock"
+    AgentRuntimePresentationOutputCreatedEvent:
+      type: object
+      additionalProperties: false
+      required: [type, output_id, output_kind, surface]
+      properties:
+        type:
+          type: string
+          const: presentation.output_created
+        output_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        output_kind:
+          type: string
+          enum: [message, card]
+        surface:
+          type: string
+          enum: [room_timeline, workspace]
+        continues:
+          type: boolean
+          const: true
+          description: >-
+            Present only when the Agent declared, when sending this output, that more work in the same turn follows.
+            Clients must not treat the linked reply as the turn's final reply.
+    AgentRuntimeOfferedPresentationEvent:
+      oneOf:
+        - $ref: "#/components/schemas/AgentRuntimeWorkingStatusChangedEvent"
+        - $ref: "#/components/schemas/AgentRuntimePlanUpdatedEvent"
+        - $ref: "#/components/schemas/AgentRuntimeActivityStartedEvent"
+        - $ref: "#/components/schemas/AgentRuntimeActivityUpdatedEvent"
+        - $ref: "#/components/schemas/AgentRuntimeActivityFinishedEvent"
+      discriminator:
+        propertyName: type
+        mapping:
+          status.changed: "#/components/schemas/AgentRuntimeWorkingStatusChangedEvent"
+          plan.updated: "#/components/schemas/AgentRuntimePlanUpdatedEvent"
+          activity.started: "#/components/schemas/AgentRuntimeActivityStartedEvent"
+          activity.updated: "#/components/schemas/AgentRuntimeActivityUpdatedEvent"
+          activity.finished: "#/components/schemas/AgentRuntimeActivityFinishedEvent"
+    AgentRuntimePersistedPresentationEvent:
+      oneOf:
+        - $ref: "#/components/schemas/AgentRuntimeWorkingStatusChangedEvent"
+        - $ref: "#/components/schemas/AgentRuntimeStoppedStatusChangedEvent"
+        - $ref: "#/components/schemas/AgentRuntimePlanUpdatedEvent"
+        - $ref: "#/components/schemas/AgentRuntimeActivityStartedEvent"
+        - $ref: "#/components/schemas/AgentRuntimeActivityUpdatedEvent"
+        - $ref: "#/components/schemas/AgentRuntimeActivityFinishedEvent"
+        - $ref: "#/components/schemas/AgentRuntimePresentationOutputCreatedEvent"
+    AgentRuntimeOfferedPresentationEventItem:
+      type: object
+      additionalProperties: false
+      required: [command_id, event]
+      properties:
+        command_id:
+          $ref: "#/components/schemas/AgentRuntimeCommandId"
+          description: Idempotency key of this event; a retried batch returns the stored ordinal.
+        event:
+          $ref: "#/components/schemas/AgentRuntimeOfferedPresentationEvent"
+    OfferAgentRuntimePresentationEventsRequest:
+      type: object
+      additionalProperties: false
+      required: [local_run_id, events]
+      properties:
+        local_run_id:
+          type: string
+        events:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentRuntimeOfferedPresentationEventItem"
+    OfferAgentRuntimePresentationEventsResult:
+      type: object
+      additionalProperties: false
+      required: [accepted, event_ordinal]
+      properties:
+        accepted:
+          type: boolean
+        event_ordinal:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+          description: Ordinal of the batch's last event.
+    AgentRuntimeLocalComputerOwner:
+      type: object
+      additionalProperties: false
+      required: [tenant_id, owner_actor_id]
+      properties:
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        owner_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentRuntimeLocalComputer:
+      type: object
+      additionalProperties: false
+      required:
+        - computer_id
+        - display_name
+        - owner
+        - status
+        - credential_generation
+        - runtimes
+        - runtime_diagnostics
+        - workspace_grants
+      properties:
+        platform:
+          type: string
+          enum: [darwin, linux, win32]
+          description: Last native host platform reported by this Computer. Omission preserves an existing observation; unknown legacy Computers omit this field.
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        display_name:
+          type: string
+        owner:
+          $ref: "#/components/schemas/AgentRuntimeLocalComputerOwner"
+        status:
+          type: string
+          enum: [online, offline, upgrade_required]
+        credential_generation:
+          $ref: "#/components/schemas/AgentRuntimeInt64"
+        last_seen_at:
+          type: string
+          format: date-time
+        capacity:
+          type: integer
+          minimum: 0
+        runtimes:
+          type: array
+          items:
+            type: string
+            enum: [codex, claude, pi]
+        runtime_diagnostics:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        workspace_grants:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    AgentRuntimeComputerDaemonId:
+      type: string
+      pattern: "^[A-Za-z0-9_-]{43}$"
+    AgentRuntimeLocalComputerCredentialRequest:
+      type: object
+      additionalProperties: false
+      required: [computer_id, owner]
+      properties:
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        owner:
+          $ref: "#/components/schemas/AgentRuntimeLocalComputerOwner"
+    ConnectAgentRuntimeLocalComputerRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - computer_id
+        - owner
+        - credential_generation
+        - daemon_id
+        - daemon_public_key
+        - identity_version
+        - status
+        - seen_at
+        - display_name
+        - runtimes
+        - runtime_diagnostics
+        - workspace_grants
+        - daemon_version
+      properties:
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        owner:
+          $ref: "#/components/schemas/AgentRuntimeLocalComputerOwner"
+        credential_generation:
+          $ref: "#/components/schemas/AgentRuntimeInt64"
+        daemon_id:
+          $ref: "#/components/schemas/AgentRuntimeComputerDaemonId"
+        daemon_public_key:
+          type: string
+          format: byte
+          description: Base64-encoded 32-byte Ed25519 public key.
+        identity_version:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+        status:
+          type: string
+          enum: [online, offline]
+          description: offline while the Computer's Agent Runners are reconciled after a new connection.
+        seen_at:
+          type: string
+          format: date-time
+        display_name:
+          type: string
+        platform:
+          type: string
+          enum: [darwin, linux, win32]
+        capacity:
+          type: integer
+          minimum: 0
+        runtimes:
+          type: array
+          items:
+            type: string
+            enum: [codex, claude, pi]
+        runtime_diagnostics:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        workspace_grants:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        daemon_version:
+          type: string
+          minLength: 1
+          maxLength: 64
+        recommended_version:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Computer release this deployment ships; omission keeps the last one.
+    AgentRuntimeRunnerPlacement:
+      type: object
+      additionalProperties: false
+      required:
+        - agent_id
+        - actor_id
+        - tenant_id
+        - owner_actor_id
+        - runtime_type
+        - model
+        - workspace_grant_id
+        - assignment_revision
+      description: An active Agent placed on the Computer; its Agent Runner should be ready there.
+      properties:
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        owner_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        runtime_type:
+          $ref: "./domain.yaml#/components/schemas/LocalRuntimeType"
+        model:
+          type: string
+          minLength: 1
+          maxLength: 120
+        reasoning_effort:
+          $ref: "./domain.yaml#/components/schemas/AgentReasoningEffort"
+        workspace_grant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        assignment_revision:
+          $ref: "#/components/schemas/AgentRuntimePositiveInt64"
+    ConnectAgentRuntimeLocalComputerResult:
+      type: object
+      additionalProperties: false
+      required: [computer, placements]
+      properties:
+        computer:
+          $ref: "#/components/schemas/AgentRuntimeLocalComputer"
+        placements:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/AgentRuntimeRunnerPlacement"
+    TouchAgentRuntimeLocalComputerRequest:
+      type: object
+      additionalProperties: false
+      required: [computer_id, status, seen_at]
+      properties:
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          enum: [online, offline, upgrade_required]
+          description: >-
+            upgrade_required records a Computer that must be reinstalled; an
+            offline touch with daemon_version records one updating itself.
+        seen_at:
+          type: string
+          format: date-time
+        runtimes:
+          type: array
+          items:
+            type: string
+            enum: [codex, claude, pi]
+        runtime_diagnostics:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        active_operations:
+          type: integer
+          minimum: 0
+          description: Operations running on the Computer; an offline Computer runs none.
+        daemon_version:
+          type: string
+          minLength: 1
+          maxLength: 64
+        recommended_version:
+          type: string
+          minLength: 1
+          maxLength: 64
+    RecordAgentLocalRunOperationRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, epoch, run_id, operation_id, runtime_type]
+      properties:
+        context_key:
+          $ref: "#/components/schemas/AgentRuntimeContextKey"
+        epoch:
+          $ref: "#/components/schemas/AgentServiceEpoch"
+        run_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        operation_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        runtime_type:
+          $ref: "./domain.yaml#/components/schemas/LocalRuntimeType"
+        usage:
+          type: array
+          minItems: 1
+          maxItems: 32
+          description: The usage the Operation's terminal reported; absent when the Operation starts.
+          items:
+            type: object
+            additionalProperties: true
+    RemoveAgentRuntimeLocalComputerRequest:
+      $ref: "#/components/schemas/AgentRuntimeLocalComputerCredentialRequest"
+    AgentRuntimeLocalComputerRemovalResult:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [removed, already_removed, not_found, has_agents]
+    AgentMemoryDocument:
+      type: object
+      additionalProperties: false
+      required: [revision, summary, memory, sessions, cursors]
+      properties:
+        revision:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        summary:
+          type: string
+          maxLength: 8000
+        memory:
+          type: string
+          maxLength: 200000
+        cursors:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: false
+            required: [thread_id, through]
+            properties:
+              thread_id:
+                type: string
+              through:
+                type: integer
+                minimum: 0
+        sessions:
+          type: object
+          maxProperties: 30
+          additionalProperties:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                context_key,
+                thread_id,
+                through,
+                summary,
+                raw_memory,
+                updated_revision,
+              ]
+            properties:
+              updated_revision:
+                type: integer
+                minimum: 1
+                maximum: 9007199254740991
+              context_key:
+                type: string
+              thread_id:
+                type: string
+              through:
+                type: integer
+                minimum: 0
+              summary:
+                type: string
+                maxLength: 32000
+              raw_memory:
+                type: string
+                maxLength: 96000
+                description: Candidates extracted since the last consolidation; empty once consolidated.
+        pending:
+          type: object
+          additionalProperties: false
+          required: [stage, prompt]
+          description: An extract stage names its source session; a consolidate stage merges every waiting candidate.
+          properties:
+            stage:
+              type: string
+              enum: [extract, consolidate]
+            prompt:
+              type: string
+              maxLength: 400000
+            source_key:
+              type: string
+            thread_id:
+              type: string
+            through:
+              type: integer
+              minimum: 0
+            attempt:
+              type: integer
+              minimum: 0
+              maximum: 3
+              description: Invalid or timed-out outputs produced for this stage; 3 stops maintenance for this Agent.
+
+    CreateRuntimeHumanInteractionRequest:
+      type: object
+      additionalProperties: false
+      required: [context_key, execution_run_ref, operation_id, request]
+      properties:
+        context_key: { type: string }
+        execution_run_ref: { type: string }
+        operation_id: { type: string }
+        request:
+          type: object
+          additionalProperties: true
+    RuntimeHumanInteractionCreated:
+      type: object
+      additionalProperties: false
+      required: [interaction_id, message_id, status]
+      properties:
+        interaction_id: { type: string }
+        message_id: { type: string }
+        status: { type: string, enum: [pending] }
+    RuntimeHumanInteractionResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [execution_run_ref, operation_id, request_id, interaction_id, payload]
+      properties:
+        operation_id:
+          type: string
+        execution_run_ref: { type: string }
+        request_id: { type: string }
+        interaction_id: { type: string }
+        payload:
+          type: object
+          additionalProperties: true
+    CreateRuntimePermissionReviewRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [context_key, execution_run_ref, operation_id, request_id, action]
+      properties:
+        context_key: { type: string }
+        execution_run_ref: { type: string }
+        operation_id: { type: string }
+        request_id: { type: string, minLength: 1, maxLength: 256 }
+        action:
+          $ref: "#/components/schemas/RuntimePermissionAction"
+        environment:
+          $ref: "#/components/schemas/RuntimePermissionEnvironment"
+        transcript:
+          type: array
+          maxItems: 40
+          description: Daemon-trimmed recent assistant messages and tool calls/results from the Runtime session file. Untrusted evidence; Runtime user turns are excluded.
+          items:
+            $ref: "#/components/schemas/RuntimePermissionTranscriptEntry"
+        evidence:
+          $ref: "#/components/schemas/RuntimePermissionEvidence"
+    RuntimePermissionAction:
+      type: object
+      additionalProperties: false
+      required: [runtime, surface, tool]
+      properties:
+        runtime: { type: string, enum: [claude, codex] }
+        surface:
+          type: string
+          enum: [shell, file_edit, connected_app, browser, computer, web, other]
+        tool: { type: string, minLength: 1, maxLength: 256 }
+        command:
+          type: string
+          maxLength: 65536
+          description: Raw shell command when the tool is a shell.
+        input:
+          type: string
+          maxLength: 262144
+          description: The native tool input as compact JSON.
+        subagent: { type: string, maxLength: 256 }
+    RuntimePermissionEnvironment:
+      type: object
+      additionalProperties: false
+      properties:
+        runtime_version: { type: string, maxLength: 64 }
+        platform: { type: string, maxLength: 64 }
+        sandbox: { type: string, maxLength: 64 }
+        workspace: { type: string, maxLength: 4096 }
+    RuntimePermissionTranscriptEntry:
+      type: object
+      additionalProperties: false
+      required: [kind, text]
+      properties:
+        kind: { type: string, enum: [assistant, tool_call, tool_result] }
+        tool: { type: string, maxLength: 256 }
+        text: { type: string, maxLength: 20000 }
+        truncated: { type: boolean }
+    RuntimePermissionEvidence:
+      type: object
+      additionalProperties: false
+      properties:
+        script:
+          type: object
+          additionalProperties: false
+          required: [path, body]
+          properties:
+            path: { type: string, maxLength: 4096 }
+            sha256: { type: string, maxLength: 128 }
+            body: { type: string, maxLength: 65536 }
+        patch: { type: string, maxLength: 262144 }
+        browser:
+          type: object
+          additionalProperties: false
+          required: [url]
+          properties:
+            url: { type: string, maxLength: 4096 }
+            title: { type: string, maxLength: 1024 }
+            target_role: { type: string, maxLength: 256 }
+            target_name: { type: string, maxLength: 1024 }
+            form_fields: { type: string, maxLength: 20000 }
+        desktop:
+          type: object
+          additionalProperties: false
+          description: >-
+            The window a desktop action targets and the elements its element
+            tokens name in the Agent's latest read of that window.
+          properties:
+            app: { type: string, maxLength: 256 }
+            window_title: { type: string, maxLength: 1024 }
+            targets:
+              type: array
+              maxItems: 16
+              items:
+                type: object
+                additionalProperties: false
+                required: [token, role]
+                properties:
+                  token: { type: string, maxLength: 128 }
+                  role: { type: string, maxLength: 256 }
+                  name: { type: string, maxLength: 1024 }
+        missing:
+          type: array
+          maxItems: 16
+          description: Facts the host could not collect and that the decision depends on.
+          items: { type: string, maxLength: 1024 }
+        screenshot:
+          type: object
+          additionalProperties: false
+          required: [media_type, data, width, height]
+          description: >-
+            The window, screen or page the host captured just before a browser
+            or desktop action. Shown only to the approver; the judge model does
+            not see it.
+          properties:
+            media_type: { type: string, enum: [image/jpeg, image/png] }
+            data:
+              type: string
+              maxLength: 2800000
+              description: Base64 image bytes, at most 2 MiB decoded.
+            width: { type: integer, minimum: 1, maximum: 10000 }
+            height: { type: integer, minimum: 1, maximum: 10000 }
+    RuntimePermissionReviewResult:
+      type: object
+      additionalProperties: false
+      required: [decision, message, policy_version]
+      properties:
+        decision:
+          type: string
+          enum: [allow, needs_approval, deny, unavailable]
+          description: unavailable means the judge failed; the Runtime must not run the call.
+        message:
+          type: string
+          description: Text shown to the Runtime model when the call does not run. Empty for allow.
+        interaction_id:
+          type: string
+          description: The approval card, for needs_approval.
+        policy_version: { type: string }

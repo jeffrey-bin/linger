@@ -1,0 +1,116 @@
+components:
+  schemas:
+    TrackingItemFields:
+      type: object
+      required:
+        [
+          kind,
+          content,
+          due_at,
+          due_text,
+          source_ref,
+          source_date,
+          source_timezone,
+        ]
+      properties:
+        kind: { type: string, enum: [todo, question, meeting] }
+        content: { type: string, minLength: 1, maxLength: 200 }
+        due_at: { type: string, format: date-time, nullable: true }
+        due_text: { type: string, nullable: true, minLength: 1, maxLength: 500 }
+        source_ref: { type: string, minLength: 1, maxLength: 2048 }
+        source_date: { type: string, format: date }
+        source_timezone: { type: string, minLength: 1 }
+    TrackingItemVersion:
+      type: object
+      required: [id, expected_revision]
+      properties:
+        id: { type: string, pattern: "^ti_[a-f0-9]{32}$" }
+        expected_revision: { type: integer, format: int64, minimum: 1 }
+    TrackingItemCreate:
+      allOf:
+        - $ref: "#/components/schemas/TrackingItemFields"
+        - type: object
+          required: [idempotency_key]
+          properties:
+            idempotency_key: { type: string, minLength: 1, maxLength: 200 }
+    TrackingItemUpdate:
+      allOf:
+        - $ref: "#/components/schemas/TrackingItemFields"
+        - $ref: "#/components/schemas/TrackingItemVersion"
+        - type: object
+          required: [status]
+          properties:
+            status: { type: string, enum: [open, done] }
+    TrackingItem:
+      allOf:
+        - $ref: "#/components/schemas/TrackingItemFields"
+        - type: object
+          required: [id, status, created_at, updated_at, revision, routines]
+          properties:
+            id: { type: string }
+            status: { type: string, enum: [open, done] }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+            revision: { type: integer, format: int64 }
+            routines:
+              type: array
+              items:
+                type: object
+                required: [routine_id, purpose]
+                properties:
+                  routine_id: { type: string }
+                  purpose: { type: string }
+    TrackingItemList:
+      type: object
+      additionalProperties: false
+      properties:
+        cursor: { type: string }
+        limit: { type: integer, minimum: 1, maximum: 200, default: 100 }
+        include_closed: { type: boolean, default: false }
+    TrackingItemPage:
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/TrackingItem" }
+        next_cursor: { type: string }
+    TrackingItemChanges:
+      type: object
+      additionalProperties: false
+      required: [create, update, delete, prune]
+      properties:
+        create:
+          type: array
+          maxItems: 200
+          items: { $ref: "#/components/schemas/TrackingItemCreate" }
+        update:
+          type: array
+          maxItems: 200
+          items: { $ref: "#/components/schemas/TrackingItemUpdate" }
+        delete:
+          type: array
+          maxItems: 200
+          items: { $ref: "#/components/schemas/TrackingItemVersion" }
+        prune: { type: boolean }
+    TrackingItemResult:
+      type: object
+      required: [items, deleted]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/TrackingItem" }
+        deleted:
+          type: array
+          items: { type: string }
+    TrackingItemPlanRequest:
+      type: object
+      additionalProperties: false
+      required: [item_ids]
+      properties:
+        item_ids:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items: { type: string, pattern: "^ti_[a-f0-9]{32}$" }
+          description: New or changed open Tracking Items whose Routines AnotherMe should plan.

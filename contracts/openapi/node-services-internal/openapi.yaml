@@ -1,0 +1,2824 @@
+openapi: 3.1.0
+info:
+  title: Linger Node Services Internal API
+  version: 0.1.0
+  description:
+    TeamHub calls into Node Services. Agent management, Memory, and LLM
+    Wiki share the Node Services port 4319; the Document Runtime listens on port
+    4321. Each operation declares the service credential its role accepts.
+servers:
+  - url: http://node-services:4319
+    description: Agent management, Memory, and LLM Wiki roles.
+  - url: http://node-services:4321
+    description: Document Runtime role.
+tags:
+  - name: LLM Wiki
+    description: Stateless Wiki candidate generation.
+  - name: Document Normalization
+    description: Stateless conversion of one immutable source into compiler-ready Markdown.
+paths:
+  /v1/agent-debug/history:read:
+    post:
+      summary: Read one rollout-backed history page for an active Execution Context
+      operationId: readAgentDebugContextHistory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentDebugHistoryRequest"
+      responses:
+        "200":
+          description: Sanitized rollout history page or an explicit availability state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentDebugRuntimeHistory"
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /v1/proactive-events:judge:
+    post:
+      summary: Give the rules Another Me judges one outside event by
+      description:
+        "Another Me judges the event in its own Run with the same rules as
+        its conversation review: tell the Human now, track it for later, or stay
+        silent. TeamHub keeps dedupe, daily limits, quiet hours and the wake
+        queue; this only renders the rules with the Human's learned rules and
+        open items."
+      operationId: judgeProactiveEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProactiveEventJudgeRequest"
+      responses:
+        "200":
+          description: The instructions TeamHub puts before the event.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProactiveEventJudgement"
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /v1/model-calls:
+    post:
+      summary: Answer one stateless prompt on the owner's Agent Runtime
+      description: >-
+        Runs one prompt on the Codex or Claude Runtime of the Computer where the
+        owner's Another Me runs, with the Runtime's default model and the
+        requested reasoning effort. The kind decides its priority, attempts,
+        and default timeout; identical requests under one key share one
+        execution. A structured answer is validated against the output schema
+        and corrected within the kind's attempts. No Context, Run, or tool is
+        involved. Error codes are listed in ModelCallErrorCode.
+      operationId: callModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModelCallRequest"
+      responses:
+        "200":
+          description: The answer and the model the Runtime reported.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelCallResult"
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "409":
+          description:
+            MODEL_OWNER_UNRESOLVED; the call names no owner and the deployment
+            does not have exactly one Another Me, or the owner has no Another Me
+            on a Computer.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/common.yaml#/components/schemas/ErrorResponse
+        "502":
+          description:
+            MODEL_OUTPUT_INVALID or MODEL_CALL_FAILED; the Runtime answered
+            without a valid answer.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/common.yaml#/components/schemas/ErrorResponse
+        "503":
+          description: >-
+            LOCAL_COMPUTER_OFFLINE (retry later; Retry-After is set),
+            MODEL_CALL_PENDING (a background call is still queued or running
+            after the wait limit; retry later with the same request to receive
+            its result; Retry-After is set) or LOCAL_RUNTIME_UNAVAILABLE (the
+            Computer needs an upgrade or a signed-in Codex or Claude Runtime).
+          headers:
+            Retry-After:
+              description:
+                Seconds to wait before retrying, on LOCAL_COMPUTER_OFFLINE or
+                MODEL_CALL_PENDING.
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: ../components/common.yaml#/components/schemas/ErrorResponse
+        "504":
+          description: MODEL_CALL_TIMED_OUT; the Runtime did not answer within timeoutMs.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/common.yaml#/components/schemas/ErrorResponse
+      security:
+        - agentManagementBearer: []
+  /v1/tenants/{tenantId}/owners/{ownerActorId}/local-computers/{computerId}:
+    parameters:
+      - $ref: "#/components/parameters/TenantId"
+      - $ref: "#/components/parameters/OwnerActorId"
+      - $ref: "#/components/parameters/ComputerId"
+    delete:
+      summary: Remove an unassigned Local Computer and revoke its credential
+      operationId: removeLocalComputer
+      responses:
+        "204":
+          description: Local Computer removed.
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /v1/tenants/{tenantId}/owners/{ownerActorId}/local-computers/{computerId}/skill-scans:
+    parameters:
+      - $ref: "#/components/parameters/TenantId"
+      - $ref: "#/components/parameters/OwnerActorId"
+      - $ref: "#/components/parameters/ComputerId"
+    post:
+      summary: Ask an owned Local Computer to scan user-level Runtime Skills
+      operationId: scanLocalComputerSkills
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/local-skills.yaml#/components/schemas/LocalSkillScanCommandRequest
+      responses:
+        "200":
+          description: Sanitized short-lived Skill candidates.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/local-skills.yaml#/components/schemas/LocalSkillScan
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /v1/tenants/{tenantId}/owners/{ownerActorId}/local-computers/{computerId}/browser-connection:
+    parameters:
+      - $ref: "#/components/parameters/TenantId"
+      - $ref: "#/components/parameters/OwnerActorId"
+      - $ref: "#/components/parameters/ComputerId"
+    get:
+      summary: Read which browser this owner's Agents drive on an owned Local Computer
+      operationId: getLocalComputerBrowserConnection
+      responses:
+        "200":
+          description: Current browser connection status without the extension token.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/browser-connection.yaml#/components/schemas/BrowserConnectionStatus
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "502":
+          $ref: ../components/common.yaml#/components/responses/BadGateway
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+    put:
+      summary: Connect browser tools on an owned Local Computer to the user's Chrome
+      description:
+        The Computer verifies the token through the Playwright Extension
+        before it answers, which can take up to one minute. The token is never
+        returned or persisted by Agent Service.
+      operationId: configureLocalComputerBrowserConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/browser-connection.yaml#/components/schemas/BrowserConnectionConfigureCommand
+      responses:
+        "200":
+          description: Current browser connection status without the extension token.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/browser-connection.yaml#/components/schemas/BrowserConnectionStatus
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "502":
+          $ref: ../components/common.yaml#/components/responses/BadGateway
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+    delete:
+      summary: Return browser tools on an owned Local Computer to the isolated browser
+      operationId: disconnectLocalComputerBrowserConnection
+      responses:
+        "200":
+          description: Current browser connection status without the extension token.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/browser-connection.yaml#/components/schemas/BrowserConnectionStatus
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "502":
+          $ref: ../components/common.yaml#/components/responses/BadGateway
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /v1/tenants/{tenantId}/owners/{ownerActorId}/local-computers/{computerId}/permissions:
+    parameters:
+      - $ref: "#/components/parameters/TenantId"
+      - $ref: "#/components/parameters/OwnerActorId"
+      - $ref: "#/components/parameters/ComputerId"
+    get:
+      summary: Read the macOS privacy permissions of an owned Local Computer
+      operationId: getLocalComputerPermissions
+      responses:
+        "200":
+          description: Current permission state; other platforms report no subjects.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/computer-permissions.yaml#/components/schemas/ComputerPermissionStatus
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "502":
+          $ref: ../components/common.yaml#/components/responses/BadGateway
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+    post:
+      summary: Raise a macOS permission prompt, open its Settings pane, or relaunch Linger on an owned Local Computer
+      operationId: actOnLocalComputerPermission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/computer-permissions.yaml#/components/schemas/ComputerPermissionAction
+      responses:
+        "200":
+          description: Permission state after the step.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/computer-permissions.yaml#/components/schemas/ComputerPermissionStatus
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "502":
+          $ref: ../components/common.yaml#/components/responses/BadGateway
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /v1/agents/{agentId}/registration-changes:
+    parameters:
+      - $ref: "#/components/parameters/ManagedAgentId"
+    post:
+      summary: Tell Agent Service that TeamHub committed a change to one Agent registration
+      operationId: notifyAgentRegistrationChanged
+      description: >-
+        TeamHub already committed the change; this call is a best-effort wake-up. Agent Service
+        reads the registration again. An active Agent drops loaded Contexts on a superseded
+        configuration and is placed on its current Computer at its next Run. A removed Agent stops
+        its Contexts and records Runner removal, which reaches an offline Computer when it
+        reconnects. Repeating the call is harmless.
+      responses:
+        "204":
+          description: The current registration was applied.
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /v1/agent-runs/{runId}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/RunId"
+    post:
+      summary: Idempotently cancel one Agent Run
+      operationId: cancelAgentRun
+      description: A stable request replay succeeds without resuming the Run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/agent-runs.yaml#/components/schemas/CancelAgentRunRequest
+      responses:
+        "200":
+          description: Cancellation accepted or the Run was already terminal.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/agent-runs.yaml#/components/schemas/CancelAgentRunResult
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "409":
+          $ref: ../components/common.yaml#/components/responses/Conflict
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+      security:
+        - agentManagementBearer: []
+  /internal/v1/query:
+    post:
+      operationId: queryPersonalKnowledge
+      summary:
+        Raw Chunk search over one authorized Agent's original sources, with PG
+        Raw BM25 fallback.
+      x-deadline-ms: 120000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalKnowledgeQueryRequest"
+      responses:
+        "200":
+          description: Bounded evidence for the Agent to synthesize into an answer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalKnowledgeQueryResponse"
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/personal-knowledge/evidence:
+    post:
+      operationId: readPersonalKnowledgeEvidence
+      summary: Read selected chunks from one authorized Raw source candidate.
+      description:
+        The evidence identifier must resolve to a current authorized Raw
+        source version. Callers cannot supply a file path or select another
+        Agent, Tenant, or Human owner through this route.
+      x-deadline-ms: 120000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalKnowledgeEvidenceReadRequest"
+      responses:
+        "200":
+          description: Requested sections and the candidate's current directory.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalKnowledgeEvidenceReadResponse"
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "404":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/memory/entries:
+    get:
+      operationId: listMemoryEntries
+      summary: List displayable Memory entries for one authorized Human owner.
+      x-deadline-ms: 10000
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/AgentId"
+        - name: owner_actor_id
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/AgentId"
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9_-]{0,31}$
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^[0-9]{1,9}$
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Displayable Memory entries, ordered newest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryEntryPage"
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "404":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/memory/entries/{entry_id}:
+    get:
+      operationId: getMemoryEntry
+      summary: Read one displayable Memory entry for an authorized Human owner.
+      x-deadline-ms: 10000
+      parameters:
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^(memory|meeting)_[a-f0-9]{24}$
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/AgentId"
+        - name: owner_actor_id
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/AgentId"
+      responses:
+        "200":
+          description: One displayable Memory entry.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryEntry"
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "404":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/personal-knowledge-graph-visualization:
+    post:
+      operationId: getPersonalKnowledgeGraphVisualization
+      summary: Render the current derived graph for one authorized Human owner.
+      x-deadline-ms: 10000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalKnowledgeGraphVisualizationRequest"
+      responses:
+        "200":
+          description: Sandboxed interactive HTML rendered from the current subject graph.
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "404":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/published-wiki-graph-updates:
+    post:
+      operationId: updateGraphForPublishedWiki
+      summary: Index a Wiki revision TeamHub has published, and Raw Chunks when asked.
+      x-deadline-ms: 900000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishedWikiGraphUpdateRequest"
+      responses:
+        "204":
+          description: The Wiki index holds the published Wiki revision.
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/pocket-note-tracking-refreshes:
+    post:
+      operationId: refreshPocketNoteTrackingItems
+      summary: Update Tracking Items from a Human's Pocket Note of one day as it is now.
+      x-deadline-ms: 300000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PocketNoteTrackingRefreshRequest"
+      responses:
+        "204":
+          description: Tracking Items follow the Pocket Note, or the Human has no AnotherMe.
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/profile-memory-syncs:
+    post:
+      operationId: syncProfileMemory
+      summary: Take a Human's newly published Profile Revision into their memory.md.
+      x-deadline-ms: 300000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileMemorySyncRequest"
+      responses:
+        "204":
+          description: memory.md follows the current Profile Revision, or the Human has no AnotherMe.
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/health/failures:
+    get:
+      operationId: getMemoryFailureSummary
+      summary: Read bounded exhausted calendar tasks and failed index sources.
+      x-deadline-ms: 10000
+      responses:
+        "200":
+          description:
+            Each store section degrades independently to configured=false or
+            error=unavailable. Lists hold at most 200 items; no document
+            content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryFailureSummaryResponse"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/health/failures:retry:
+    post:
+      operationId: retryMemoryFailures
+      summary: Revive exhausted calendar tasks for the next worker pass.
+      x-deadline-ms: 10000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryFailureRetryRequest"
+      responses:
+        "200":
+          description: Counts of revived work; only requested sections are present.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryFailureRetryResponse"
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "503":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /internal/v1/rebuild:
+    get:
+      operationId: getMemoryRebuild
+      summary: Read one Another Me subject's operator rebuild progress.
+      x-deadline-ms: 10000
+      parameters:
+        - name: memory_subject_key
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/AgentId"
+        - name: owner_actor_id
+          in: query
+          required: false
+          description: Human actor; must resolve to exactly one Another Me subject.
+          schema:
+            $ref: "#/components/schemas/AgentId"
+      responses:
+        "200":
+          description: Phase, Session progress and counts of this subject's rebuild steps.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryRebuildStatus"
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "404":
+          $ref: "#/components/responses/MemoryError"
+        "409":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+    post:
+      operationId: startMemoryRebuild
+      summary:
+        "Queue one subject's history rebuild on the running scheduler: Wiki
+        init, initial index, each Session date's Wiki and Daily steps with
+        closed-week Weekly steps, then a final index."
+      description:
+        A subject with existing rebuild steps is returned unchanged unless
+        restart is set. The first rebuild (or restart) archives the subject's
+        local derived Memory state and clears its indexed Wiki and reports first, so
+        admission waits for the scheduler step already in flight.
+      x-deadline-ms: 3600000
+      x-max-request-body-bytes: 16384
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryRebuildRequest"
+      responses:
+        "202":
+          description: Rebuild steps accepted by the durable calendar.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryRebuildResponse"
+        "400":
+          $ref: "#/components/responses/MemoryError"
+        "401":
+          $ref: "#/components/responses/MemoryError"
+        "404":
+          $ref: "#/components/responses/MemoryError"
+        "409":
+          $ref: "#/components/responses/MemoryError"
+      security:
+        - memoryBearer: []
+  /healthz:
+    get:
+      operationId: getLlmWikiHealth
+      summary: Check LLM Wiki process health
+      tags:
+        - LLM Wiki
+      responses:
+        "200":
+          description: Process is accepting HTTP requests.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - status
+                properties:
+                  status:
+                    const: ok
+  /readyz:
+    get:
+      operationId: getLlmWikiReadiness
+      summary: Check LLM Wiki readiness
+      tags:
+        - LLM Wiki
+      responses:
+        "200":
+          description: LLM Wiki is ready to accept requests.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - status
+                properties:
+                  status:
+                    const: ok
+        "503":
+          description:
+            Not ready, for example while no model call is available in the
+            process (reason model_call_unavailable).
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - status
+                  - reason
+                properties:
+                  status:
+                    const: not_ready
+                  reason:
+                    type: string
+                    minLength: 1
+  /v0/document-normalizations:
+    post:
+      operationId: normalizeDocument
+      summary: Normalize one immutable document as Markdown
+      description: |
+        Converts one request-scoped source without creating a generation,
+        workspace, or persistent normalizer state. Text formats convert at
+        once; the rest wait for the process's one isolated converter, at most
+        32 requests and at most five minutes in line. A caller that
+        disconnects leaves the line and stops its conversion. Supported
+        sources include UTF-8 Markdown, plain text, HTML, CSV/TSV, JSON, XML,
+        YAML and other text, plus PDF, DOC, DOCX, XLSX, PPTX, ZIP/gzip
+        archives of those types, SVG, and raster images. ZIP and gzip unwrap
+        at most one archive layer; nested ZIP or gzip is unsupported. ZIP
+        members of supported non-archive types are extracted within
+        archive-safety limits. PDF pages keep their text layer, and pages
+        with raster images are also recognized with English and Simplified
+        Chinese OCR; raster images are recognized the same way. Audio, video,
+        RAR/7z/tar, and legacy Excel/PowerPoint binaries remain unsupported.
+        The media type picks the extractor first; when it is generic, the
+        filename and then the representation format do. Both the
+        request and response are bounded raw byte streams; source bytes are
+        never base64 encoded.
+      tags:
+        - Document Normalization
+      security:
+        - llmWikiBearer: []
+      parameters:
+        - name: X-Source-Media-Type
+          in: header
+          required: true
+          description: Canonical media type recorded for the immutable source Version.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
+          examples:
+            pdf:
+              value: application/pdf
+            doc:
+              value: application/msword
+            docx:
+              value: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+            html:
+              value: text/html
+            csv:
+              value: text/csv
+            xlsx:
+              value: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+            pptx:
+              value: application/vnd.openxmlformats-officedocument.presentationml.presentation
+            zip:
+              value: application/zip
+            png:
+              value: image/png
+            svg:
+              value: image/svg+xml
+        - name: X-Source-Filename
+          in: header
+          required: true
+          description:
+            Original filename of the source Version as percent-encoded UTF-8,
+            at most 255 characters once decoded. When the media type is generic,
+            such as application/octet-stream, the extension picks the extractor.
+            A missing filename, malformed encoding, or control characters return
+            400.
+          schema:
+            type: string
+            maxLength: 1024
+          examples:
+            typescript:
+              value: report%20v2.ts
+        - name: X-Source-Representation-Format
+          in: header
+          required: false
+          description:
+            Representation format recorded for the source Version. It picks the
+            extractor when neither the media type nor the filename does.
+          schema:
+            type: string
+            maxLength: 120
+          examples:
+            code:
+              value: code
+      requestBody:
+        required: true
+        description: Source bytes, limited to 50 MiB.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              maxLength: 52428800
+      responses:
+        "200":
+          description: Deterministic normalized Markdown, limited to 32 MiB.
+          headers:
+            X-Normalizer-Name:
+              required: true
+              description: Stable normalizer implementation identity.
+              schema:
+                type: string
+                const: llm-wiki-document-markdown
+            X-Normalizer-Version:
+              required: true
+              description:
+                Behavior version; it changes whenever normalized output semantics
+                change.
+              schema:
+                type: string
+                const: "2"
+          content:
+            text/markdown:
+              schema:
+                type: string
+                format: binary
+                maxLength: 33554432
+        "400":
+          description: Required transport metadata or the request body is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentNormalizationTerminalErrorResponse"
+        "401":
+          description: The LLM Wiki service token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceTokenErrorResponse"
+        "413":
+          description: Source bytes exceed the 50 MiB input limit.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentNormalizationTerminalErrorResponse"
+        "415":
+          description: The recorded source media type is not supported.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentNormalizationTerminalErrorResponse"
+        "422":
+          description:
+            The source is corrupt, encrypted, has no extractable text, or
+            produces excessive Markdown, or its conversion ran past five minutes
+            (DOCUMENT_NORMALIZATION_TIMEOUT). The same bytes fail the same way,
+            so callers do not retry that Version.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentNormalizationTerminalErrorResponse"
+        "503":
+          description:
+            DOCUMENT_NORMALIZATION_UNAVAILABLE when the converter is busy (its
+            line is full or the request waited five minutes) or temporarily
+            unavailable; retry later.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentNormalizationRetryableErrorResponse"
+  /internal/v1/wiki-refreshes/{wikiRefreshId}/candidates:
+    parameters:
+      - name: wikiRefreshId
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/TeamHubId"
+    post:
+      operationId: generateWikiRefreshCandidates
+      summary: Generate a complete Markdown candidate set from frozen Document Versions
+      description: |
+        TeamHub supplies exact immutable Version bytes from one admitted Wiki refresh.
+        LLM Wiki performs stateless normalization and generation, then returns candidates;
+        it cannot select Documents, Draft heads, ownership, Bindings, or settlement targets.
+        The request and response bodies are each at most 256 MiB. A source that can never
+        be normalized is left out of the generation; with no source left, an update returns
+        its base pages unchanged and an initialization fails with 400. TeamHub waits at
+        most four hours for the whole generation, which may run OpenWiki several times.
+      tags:
+        - LLM Wiki
+      security:
+        - llmWikiBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WikiRefreshCandidateGenerationRequest"
+      responses:
+        "200":
+          description: A complete deterministic candidate page set for TeamHub settlement.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WikiRefreshCandidateGenerationResult"
+            application/x-ndjson:
+              schema:
+                type: string
+              description: Newline-delimited JSON frames. A preview frame contains kind=preview and pages mapping page keys to completed Markdown. The last frame has kind=final, status, and the JSON result or error as body.
+        "400":
+          $ref: "#/components/responses/WikiRefreshBadRequest"
+        "401":
+          description: The LLM Wiki service token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceTokenErrorResponse"
+        "413":
+          $ref: "#/components/responses/WikiRefreshBadRequest"
+        "500":
+          description: The generated candidate is invalid; do not retry the same refresh.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WikiRefreshCandidateErrorResponse"
+        "503":
+          $ref: "#/components/responses/WikiOperationRetryable"
+  /internal/v1/documents/import:
+    post:
+      operationId: importDocument
+      summary: Deterministically compute the initial state of a new native Document
+      description: >-
+        TeamHub creates the Document and its body with the returned state in
+        one transaction. The Runtime keeps nothing.
+      x-deadline-ms: 30000
+      x-max-request-body-bytes: 50331648
+      x-max-response-decoded-bytes: 33554432
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/document-runtime.yaml#/components/schemas/ImportDocumentRequest
+      responses:
+        "200":
+          description: Deterministic initial state and warnings.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/document-runtime.yaml#/components/schemas/ComputedDocumentState
+        default:
+          $ref: ../components/document-errors.yaml#/components/responses/DocumentInternalError
+      security:
+        - teamHubToRuntimeBearer: []
+  /internal/v1/documents/export:
+    post:
+      operationId: exportDocument
+      summary: Deterministically export one Document state
+      x-deadline-ms: 30000
+      x-max-request-body-bytes: 50331648
+      x-max-response-decoded-bytes: 33554432
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/document-runtime.yaml#/components/schemas/ExportDocumentRequest
+      responses:
+        "200":
+          description: Export bytes, hash, references, and degradation warnings.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/document-runtime.yaml#/components/schemas/ExportDocumentResult
+        default:
+          $ref: ../components/document-errors.yaml#/components/responses/DocumentInternalError
+      security:
+        - teamHubToRuntimeBearer: []
+  /internal/v1/documents/{documentId}/apply:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    post:
+      operationId: applyDocumentChange
+      summary: Apply one authorized server change to a Document's online body
+      description: >-
+        TeamHub authorizes the change and calls this synchronously. The
+        Runtime applies it to the resident Document, or loads the body when
+        the Document is not open, saves the body, broadcasts the update to
+        open connections and returns. Nothing is queued: a failed call changed
+        nothing that was not saved, and the caller retries.
+      x-deadline-ms: 30000
+      x-max-request-body-bytes: 50331648
+      x-max-response-decoded-bytes: 1048576
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/document-runtime.yaml#/components/schemas/ApplyDocumentChangeRequest
+      responses:
+        "200":
+          description: The saved body sequence, or a stable conflict that changed nothing.
+          content:
+            application/json:
+              schema:
+                $ref: ../components/document-runtime.yaml#/components/schemas/ApplyDocumentChangeResult
+        default:
+          $ref: ../components/document-errors.yaml#/components/responses/DocumentInternalError
+      security:
+        - teamHubToRuntimeBearer: []
+  /v1/local-computer-tools:call:
+    post:
+      operationId: callLocalComputerTool
+      summary:
+        Execute one authorized local browser action or Task file read without a
+        model turn
+      security:
+        - agentManagementBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocalComputerToolCall"
+      responses:
+        "200":
+          description: The tool result, including an explicit failure or uncertain outcome.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocalComputerToolResult"
+        "400":
+          $ref: ../components/common.yaml#/components/responses/BadRequest
+        "401":
+          $ref: ../components/common.yaml#/components/responses/Unauthenticated
+        "404":
+          $ref: ../components/common.yaml#/components/responses/NotFound
+        "503":
+          $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+  /internal/v1/documents/{documentId}/disconnect:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+    post:
+      operationId: disconnectDocumentConnections
+      summary: Close open collaboration connections after a committed permission change
+      description: >-
+        TeamHub calls this after it commits a trash or a permission change. The
+        Runtime closes the Document's connections, or only the named Actor's,
+        so each reconnects with a token signed under the current permission
+        count. A failed call only delays the close until the token expires.
+      x-deadline-ms: 5000
+      x-max-request-body-bytes: 1024
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../components/document-runtime.yaml#/components/schemas/DisconnectDocumentConnectionsRequest
+      responses:
+        "204":
+          description: Every matching connection is closing; no connection matched is also success.
+        default:
+          $ref: ../components/document-errors.yaml#/components/responses/DocumentInternalError
+      security:
+        - teamHubToRuntimeBearer: []
+components:
+  securitySchemes:
+    agentManagementBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+    mcpServerBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: Workload credential accepted only from the Platform MCP Server.
+      x-service-audience: agent-mcp-context
+    memoryBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      x-service-audience: memory-internal
+    llmWikiBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque service token
+    teamHubToRuntimeBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      x-service-audience: document-runtime
+  parameters:
+    ManagedAgentId:
+      name: agentId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    RunId:
+      name: runId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    TenantId:
+      name: tenantId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    OwnerActorId:
+      name: ownerActorId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    ComputerId:
+      name: computerId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/common.yaml#/components/schemas/Id
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/document-internal.yaml#/components/schemas/DocumentInternalId
+  schemas:
+    AgentDebugHistoryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - tenant_id
+        - context_key
+        - ref
+      properties:
+        tenant_id:
+          $ref: ../components/common.yaml#/components/schemas/Id
+        context_key:
+          $ref: ../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeContextKey
+        ref:
+          $ref: ../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeContextRef
+        cursor:
+          type: string
+          minLength: 1
+          maxLength: 4096
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 500
+    AgentDebugRuntimeHistory:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - provider_kind
+        - instructions
+        - records
+      properties:
+        status:
+          $ref: ../components/agent-debug.yaml#/components/schemas/AgentDebugInspectionStatus
+        provider_kind:
+          type: string
+          minLength: 1
+          maxLength: 64
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+        source:
+          type: string
+          enum:
+            - codex_rollout
+            - claude_transcript
+        snapshot:
+          $ref: ../components/agent-debug.yaml#/components/schemas/AgentDebugHistorySnapshot
+        instructions:
+          $ref: ../components/agent-debug.yaml#/components/schemas/AgentDebugHistoryInstructions
+        records:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: ../components/agent-debug.yaml#/components/schemas/AgentDebugHistoryRecord
+        previous_cursor:
+          type: string
+          minLength: 1
+          maxLength: 4096
+    ProactiveEventJudgeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - specific
+        - openItems
+      properties:
+        specific:
+          description: The Human's learned specific rules.
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 200
+        openItems:
+          description: The Human's open Tracking Items.
+          type: array
+          maxItems: 1000
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - content
+            properties:
+              content:
+                type: string
+                minLength: 1
+                maxLength: 200
+              dueAt:
+                type: string
+                format: date-time
+    ProactiveEventJudgement:
+      type: object
+      additionalProperties: false
+      required:
+        - instructions
+      description: The rules Another Me applies when it is woken with the event.
+      properties:
+        instructions:
+          type: string
+          minLength: 1
+    ModelCallEffort:
+      type: string
+      enum: [low, medium, high]
+      description: Reasoning effort for the Runtime's default model; omitted, low.
+    ModelCallKind:
+      type: string
+      enum:
+        - approval
+        - voice_ask
+        - memory
+        - agent_memory
+        - wiki
+        - profile
+        - insight
+      x-enum-varnames:
+        - ModelCallKindApproval
+        - ModelCallKindVoiceAsk
+        - ModelCallKindMemory
+        - ModelCallKindAgentMemory
+        - ModelCallKindWiki
+        - ModelCallKindProfile
+        - ModelCallKindInsight
+      description: >-
+        What the call is for. It sets the call's place in the queue of the
+        Runtime it runs on, where an approval goes first and Runs come next;
+        voice_ask never queues. approval and voice_ask have a person waiting,
+        so they stop once the request is gone and never answer pending.
+    ModelCallErrorCode:
+      type: string
+      description: Stable error codes of POST /v1/model-calls.
+      enum:
+        - INVALID_MODEL_CALL
+        - MODEL_OWNER_UNRESOLVED
+        - LOCAL_COMPUTER_OFFLINE
+        - MODEL_CALL_PENDING
+        - LOCAL_RUNTIME_UNAVAILABLE
+        - MODEL_CALL_TIMED_OUT
+        - MODEL_OUTPUT_INVALID
+        - MODEL_CALL_FAILED
+    ModelCallRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+        - key
+        - input
+      properties:
+        kind:
+          $ref: "#/components/schemas/ModelCallKind"
+        key:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: >-
+            Names the work, for example profile:<generation_id>. A request with
+            the same key and the same content joins the running execution or
+            receives its cached result; the same key with other content is a
+            new request.
+        owner:
+          type: object
+          additionalProperties: false
+          required:
+            - tenantId
+            - ownerActorId
+          description:
+            The Human whose Another Me's Computer runs the call; omitted, the
+            deployment's only Another Me.
+          properties:
+            tenantId:
+              $ref: ../components/common.yaml#/components/schemas/Id
+            ownerActorId:
+              $ref: ../components/common.yaml#/components/schemas/Id
+        effort:
+          $ref: "#/components/schemas/ModelCallEffort"
+        instructions:
+          type: string
+          maxLength: 1000000
+          description: Shares the 1,000,000-character prompt budget with input.
+        input:
+          type: string
+          minLength: 1
+          maxLength: 1000000
+          description:
+            Together with instructions at most 1,000,000 characters, which
+            keeps the prompt under the Runtime's 3 MiB limit.
+        output:
+          type: object
+          additionalProperties: false
+          required:
+            - name
+            - schema
+          description: Asks for one JSON object; omitted, the answer is text.
+          properties:
+            name:
+              type: string
+              pattern: ^[A-Za-z0-9_-]{1,64}$
+            schema:
+              type: object
+              additionalProperties: true
+              description: A strict JSON Schema for the returned object.
+        timeoutMs:
+          type: integer
+          minimum: 1000
+          maximum: 600000
+          description:
+            The budget of one Runtime attempt, each correction getting its
+            own; omitted, the kind's default.
+        sessionKey:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description:
+            Names the session a structured call belongs to. Codex answers one
+            session's calls in one resident thread that keeps the instructions
+            and earlier calls, so only the new input is uncached; a schema
+            correction and a Claude call run on their own.
+        runOperationId:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description:
+            Only for approval. The Run Operation whose action is reviewed;
+            while that Run holds its place on the same Runtime, the review
+            runs in it instead of queuing behind the Run that waits for it.
+    ModelCallResult:
+      type: object
+      additionalProperties: false
+      properties:
+        model:
+          type: string
+          description: The model the Runtime reported, when it reported one.
+        output:
+          type: object
+          additionalProperties: true
+          description: The validated object, when the request asked for one.
+        text:
+          type: string
+          description: The answer, when the request asked for text.
+    AgentId:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: ^[A-Za-z0-9][A-Za-z0-9_-]*$
+    MemoryEntryKind:
+      type: string
+      enum:
+        - daily
+        - weekly
+        - meeting
+    MeetingFiles:
+      $ref: ../components/memory-browser.yaml#/components/schemas/MeetingFiles
+    MemoryEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - kind
+        - path
+        - title
+        - summary
+        - updated_at
+        - content
+      properties:
+        id:
+          type: string
+          pattern: ^(memory|meeting)_[a-f0-9]{24}$
+        kind:
+          $ref: "#/components/schemas/MemoryEntryKind"
+        meeting:
+          $ref: "#/components/schemas/MeetingFiles"
+        path:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description:
+            Relative Memory path, or virtual display path for a meeting.
+            Meeting paths are not filesystem paths.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 240
+        summary:
+          type: string
+          maxLength: 240
+        updated_at:
+          type: string
+          format: date-time
+        date:
+          type: string
+          format: date
+        content:
+          type: string
+          maxLength: 200000
+    MemoryEntryPage:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/MemoryEntry"
+        next_cursor:
+          type: string
+          pattern: ^[0-9]{1,9}$
+    PocketNoteTrackingRefreshRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - tenant_id
+        - owner_actor_id
+        - date
+      properties:
+        tenant_id:
+          $ref: "#/components/schemas/AgentId"
+        owner_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        date:
+          type: string
+          format: date
+          description: The Pocket Note day in TeamHub's local time zone.
+    ProfileMemorySyncRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - tenant_id
+        - owner_actor_id
+      properties:
+        tenant_id:
+          $ref: "#/components/schemas/AgentId"
+        owner_actor_id:
+          $ref: "#/components/schemas/AgentId"
+    PublishedWikiGraphUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - tenant_id
+        - owner_actor_id
+        - wiki_revision_id
+      properties:
+        tenant_id:
+          $ref: "#/components/schemas/AgentId"
+        owner_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        wiki_revision_id:
+          $ref: "#/components/schemas/AgentId"
+    PersonalKnowledgeGraphVisualizationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - owner_actor_id
+        - tenant_id
+      properties:
+        owner_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        tenant_id:
+          $ref: "#/components/schemas/AgentId"
+    PersonalKnowledgeQueryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - agent_id
+        - agent_actor_id
+        - user_artifact_owner_actor_id
+        - tenant_id
+        - query
+      properties:
+        agent_id:
+          $ref: "#/components/schemas/AgentId"
+        agent_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        user_artifact_owner_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        tenant_id:
+          $ref: "#/components/schemas/AgentId"
+        query:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        alternates:
+          type: array
+          maxItems: 6
+          description:
+            Synonyms and translations searched beside the query; each ranks
+            keywords separately.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 200
+        date_from:
+          type: string
+          format: date
+          description: Optional inclusive lower bound for evidence dates.
+        date_to:
+          type: string
+          format: date
+          description: Optional inclusive upper bound for evidence dates.
+        event_from:
+          type: string
+          format: date
+          description:
+            Optional inclusive start of the time the asked event happened. It
+            ranks Session facts in that period higher and never filters by
+            source date, so later mentions of earlier events remain eligible.
+        event_to:
+          type: string
+          format: date
+          description: Optional inclusive end of the asked event time; see event_from.
+    PersonalKnowledgeQueryResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - status
+        - items
+        - gaps
+        - indexedAt
+      properties:
+        schemaVersion:
+          type: integer
+          const: 1
+        status:
+          type: string
+          enum:
+            - grounded
+            - partial
+            - empty
+          description:
+            Candidate retrieval status. partial with evidence_sections_not_read
+            requires reading relevant candidate sections before judging whether
+            information is insufficient; it is not a failed search.
+        items:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/PersonalKnowledgeEvidenceItem"
+        gaps:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/PersonalKnowledgeEvidenceGap"
+        indexedAt:
+          type: string
+          format: date-time
+          nullable: true
+        facts:
+          type: array
+          maxItems: 30
+          description:
+            Session facts extracted from Room conversations that matched the
+            query, ranked separately from items so they never displace Raw
+            candidates. Each names the Raw chunk that states it; that chunk
+            remains the original evidence.
+          items:
+            $ref: "#/components/schemas/PersonalKnowledgeSessionFact"
+        requestId:
+          type: string
+          minLength: 1
+          maxLength: 128
+    PersonalKnowledgeSessionFact:
+      type: object
+      additionalProperties: false
+      required:
+        - text
+        - factType
+        - mentionedAt
+        - evidenceId
+        - sectionId
+      description: "A Session fact in Hindsight's stored shape: what | When |
+        Involving | why as one text, world or assistant, plain entities and the
+        event time."
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        factType:
+          type: string
+          enum:
+            - world
+            - assistant
+        entities:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            minLength: 1
+            maxLength: 80
+        occurredStart:
+          type: string
+          format: date
+        occurredEnd:
+          type: string
+          format: date
+        mentionedAt:
+          type: string
+          format: date-time
+        evidenceId:
+          $ref: "#/components/schemas/PersonalKnowledgeEvidenceId"
+        sectionId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: ^[a-z0-9][a-z0-9_-]*$
+          description: Raw section to read for the fact's original wording.
+    PersonalKnowledgeEvidenceItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - citeAs
+        - title
+        - excerpt
+        - source
+        - representation
+      properties:
+        id:
+          $ref: "#/components/schemas/PersonalKnowledgeEvidenceId"
+        citeAs:
+          type: string
+          pattern: ^S[1-9][0-9]*$
+        title:
+          type: string
+          minLength: 1
+          maxLength: 512
+        content:
+          type: string
+          maxLength: 6000
+          description:
+            Full matched chunk text for top-ranked candidates, bounded by the
+            response budget. Lower-ranked candidates carry only the excerpt.
+        excerpt:
+          type: string
+          minLength: 1
+          maxLength: 600
+        source:
+          $ref: "#/components/schemas/PersonalKnowledgeEvidenceSource"
+        representation:
+          type: string
+          enum:
+            - source_excerpt
+            - derived_summary
+            - structured_fact
+        facet:
+          type: string
+          minLength: 1
+          maxLength: 128
+        timeHint:
+          type: string
+          minLength: 1
+          maxLength: 128
+        metadata:
+          type: object
+          maxProperties: 20
+          additionalProperties:
+            nullable: true
+            oneOf:
+              - type: string
+                maxLength: 512
+              - type: number
+              - type: boolean
+        directory:
+          type: array
+          maxItems: 64
+          items:
+            $ref: "#/components/schemas/PersonalKnowledgeSectionDirectoryEntry"
+          description:
+            Actual Markdown headings available for a follow-up evidence read.
+            This is omitted when the candidate has no readable directory.
+    PersonalKnowledgeEvidenceId:
+      type: string
+      pattern: ^raw_[a-f0-9]{16}_[a-f0-9]{16}$
+      description:
+        Opaque Raw source identifier returned by candidate query and passed
+        unchanged to evidence read. It names a source ID and immutable content
+        hash and grants no access outside the authenticated Tenant and
+        represented Human scope.
+    PersonalKnowledgeSectionDirectoryEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - title
+        - level
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: ^[a-z0-9][a-z0-9_-]*$
+          description: Stable section identifier within this evidence item.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 512
+        level:
+          type: integer
+          minimum: 1
+          maximum: 6
+        purpose:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Optional directory guidance, never evidence content.
+    PersonalKnowledgeEvidenceReadRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - agent_id
+        - agent_actor_id
+        - user_artifact_owner_actor_id
+        - tenant_id
+        - evidence_id
+        - section_requests
+      properties:
+        agent_id:
+          $ref: "#/components/schemas/AgentId"
+        agent_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        user_artifact_owner_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        tenant_id:
+          $ref: "#/components/schemas/AgentId"
+        evidence_id:
+          $ref: "#/components/schemas/PersonalKnowledgeEvidenceId"
+        section_requests:
+          type: array
+          minItems: 1
+          maxItems: 8
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/PersonalKnowledgeSectionReadRequest"
+    PersonalKnowledgeSectionReadRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - section_id
+      properties:
+        section_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: ^[a-z0-9][a-z0-9_-]*$
+        offset:
+          type: integer
+          minimum: 0
+          maximum: 200000
+          description: Character offset used to continue a truncated section.
+    PersonalKnowledgeEvidenceReadResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - evidenceId
+        - title
+        - source
+        - directory
+        - sections
+        - missingSections
+        - complete
+      properties:
+        schemaVersion:
+          type: integer
+          const: 1
+        evidenceId:
+          $ref: "#/components/schemas/PersonalKnowledgeEvidenceId"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 512
+        source:
+          $ref: "#/components/schemas/PersonalKnowledgeEvidenceSource"
+        timeHint:
+          type: string
+          minLength: 1
+          maxLength: 128
+        directory:
+          type: array
+          maxItems: 64
+          items:
+            $ref: "#/components/schemas/PersonalKnowledgeSectionDirectoryEntry"
+        sections:
+          type: array
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/PersonalKnowledgeEvidenceSection"
+        missingSections:
+          type: array
+          maxItems: 8
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+            pattern: ^[a-z0-9][a-z0-9_-]*$
+        complete:
+          type: boolean
+          description:
+            True only when every requested section exists and its requested
+            page was returned without truncation.
+    PersonalKnowledgeEvidenceSection:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - title
+        - level
+        - content
+        - offset
+        - truncated
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: ^[a-z0-9][a-z0-9_-]*$
+        title:
+          type: string
+          minLength: 1
+          maxLength: 512
+        level:
+          type: integer
+          minimum: 1
+          maximum: 6
+        content:
+          type: string
+          maxLength: 12000
+          description: Verbatim Markdown body for this section page.
+        offset:
+          type: integer
+          minimum: 0
+          maximum: 200000
+        truncated:
+          type: boolean
+        nextOffset:
+          type: integer
+          minimum: 1
+          maximum: 200000
+          description: Offset for the next page; present only when truncated.
+    PersonalKnowledgeEvidenceSource:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+        - ref
+      properties:
+        kind:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Extensible source kind. The current value is raw.
+        ref:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: Opaque source reference. It is not a user-facing label.
+        label:
+          type: string
+          minLength: 1
+          maxLength: 512
+    PersonalKnowledgeEvidenceGap:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description:
+            Extensible stable code. Unknown codes must be handled as a generic
+            evidence gap.
+        detail:
+          type: string
+          minLength: 1
+          maxLength: 512
+    MemoryCalendarTaskKey:
+      type: string
+      pattern: ^(?:(?:wiki|sessionly|daily|weekly):[0-9T-]{10,13}|(?:wiki|daily|weekly):rebuild:[A-Za-z0-9][A-Za-z0-9_-]{0,63}:[0-9]{4}-[0-9]{2}-[0-9]{2}|(?:init|index-initial|index-final):rebuild:[A-Za-z0-9][A-Za-z0-9_-]{0,63})$
+    MemoryRebuildRequest:
+      type: object
+      additionalProperties: false
+      description:
+        Exactly one of memory_subject_key or owner_actor_id. Session dates
+        are discovered from TeamHub up to today in the scheduler zone.
+      properties:
+        memory_subject_key:
+          $ref: "#/components/schemas/AgentId"
+        owner_actor_id:
+          $ref: "#/components/schemas/AgentId"
+        from:
+          type: string
+          format: date
+          description: Optional pilot start; earlier Session dates are skipped.
+        restart:
+          type: boolean
+          description: Forget this subject's finished rebuild and archive its state again.
+    MemoryRebuildResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - memory_subject_key
+        - count
+        - queued_count
+        - task_keys
+        - queued
+      properties:
+        memory_subject_key:
+          type: string
+        count:
+          type: integer
+          minimum: 1
+        queued_count:
+          type: integer
+          minimum: 0
+        task_keys:
+          type: array
+          description: The whole ordered chain for the requested range.
+          items:
+            $ref: "#/components/schemas/MemoryCalendarTaskKey"
+        queued:
+          type: array
+          description: Steps newly queued by this request.
+          items:
+            $ref: "#/components/schemas/MemoryCalendarTaskKey"
+    MemoryRebuildStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - memory_subject_key
+        - from
+        - to
+        - total
+        - completed
+        - pending
+        - failed
+        - running
+        - current_task
+        - current_date
+        - failures
+        - phase
+        - index_hold
+        - sessions
+      properties:
+        memory_subject_key:
+          type: string
+        phase:
+          type: string
+          enum:
+            - init
+            - index-initial
+            - sessions
+            - index-final
+            - completed
+            - failed
+          nullable: true
+        index_hold:
+          type: boolean
+          description: Automatic indexing skips this subject while steps
+            are pending.
+        sessions:
+          type: object
+          additionalProperties: false
+          required:
+            - total
+            - completed
+          properties:
+            total:
+              type: integer
+              minimum: 0
+            completed:
+              type: integer
+              minimum: 0
+        from:
+          type: string
+          format: date
+          nullable: true
+        to:
+          type: string
+          format: date
+          nullable: true
+        total:
+          type: integer
+          minimum: 0
+        completed:
+          type: integer
+          minimum: 0
+        pending:
+          type: integer
+          minimum: 0
+        failed:
+          type: integer
+          minimum: 0
+        running:
+          type: boolean
+        current_task:
+          type: string
+          nullable: true
+        current_date:
+          type: string
+          format: date
+          nullable: true
+          description:
+            Business date of the current Session-phase step; null for init and
+            index steps.
+        current_attempts:
+          type: integer
+          minimum: 1
+        next_attempt_at:
+          type: string
+          format: date-time
+        failures:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - key
+              - attempts
+              - terminal_reason
+            properties:
+              key:
+                $ref: "#/components/schemas/MemoryCalendarTaskKey"
+              attempts:
+                type: integer
+                minimum: 0
+              terminal_reason:
+                type: string
+                maxLength: 300
+    MemoryFailureSectionNotConfigured:
+      type: object
+      additionalProperties: false
+      required:
+        - configured
+      properties:
+        configured:
+          type: boolean
+          const: false
+    MemoryFailureSectionUnavailable:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          const: unavailable
+    MemoryCalendarFailure:
+      type: object
+      additionalProperties: false
+      required:
+        - key
+        - task
+        - period
+        - subjects
+        - attempts
+      properties:
+        key:
+          $ref: "#/components/schemas/MemoryCalendarTaskKey"
+        task:
+          type: string
+          enum:
+            - wiki
+            - daily
+            - weekly
+            - init
+            - index-initial
+            - index-final
+        period:
+          type: string
+          format: date
+          description:
+            Business date, the week start for Weekly, or the start date of a
+            rebuild init/index step.
+        subjects:
+          type: array
+          description: Memory subjects still requiring retry; empty means all.
+          items:
+            type: string
+        attempts:
+          type: integer
+          minimum: 0
+        terminal_reason:
+          type: string
+          maxLength: 300
+        next_attempt_at:
+          type: string
+          format: date-time
+    MemoryFailureSummaryResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - scheduler
+        - raw_chunk_sources
+      properties:
+        scheduler:
+          type: object
+          additionalProperties: false
+          required:
+            - exhausted_total
+            - exhausted
+            - pending_retries_total
+            - pending_retries
+          properties:
+            exhausted_total:
+              type: integer
+              minimum: 0
+            exhausted:
+              type: array
+              maxItems: 200
+              items:
+                $ref: "#/components/schemas/MemoryCalendarFailure"
+            pending_retries_total:
+              type: integer
+              minimum: 0
+            pending_retries:
+              type: array
+              maxItems: 200
+              items:
+                $ref: "#/components/schemas/MemoryCalendarFailure"
+        raw_chunk_sources:
+          oneOf:
+            - $ref: "#/components/schemas/MemoryFailureSectionNotConfigured"
+            - $ref: "#/components/schemas/MemoryFailureSectionUnavailable"
+            - $ref: "#/components/schemas/RawChunkSourceFailures"
+    RawChunkSourceFailures:
+      type: object
+      additionalProperties: false
+      required:
+        - configured
+        - total
+        - by_owner
+        - items
+      properties:
+        configured:
+          type: boolean
+          const: true
+        total:
+          type: integer
+          minimum: 0
+        by_owner:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - tenant_id
+              - owner_id
+              - count
+            properties:
+              tenant_id:
+                type: string
+              owner_id:
+                type: string
+              count:
+                type: integer
+                minimum: 1
+        items:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - tenant_id
+              - owner_id
+              - agent_id
+              - source_kind
+              - origin_kind
+              - title
+              - last_index_error
+              - updated_at
+            properties:
+              tenant_id:
+                type: string
+              owner_id:
+                type: string
+              agent_id:
+                type: string
+              source_kind:
+                type: string
+              origin_kind:
+                type: string
+              title:
+                type: string
+                maxLength: 120
+              last_index_error:
+                type: string
+                nullable: true
+                maxLength: 300
+              updated_at:
+                type: string
+                format: date-time
+    MemoryFailureRetryRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        scheduler:
+          type: object
+          additionalProperties: false
+          description:
+            Revives the listed exhausted tasks (all when task_keys is omitted)
+            and the dependents they blocked; the next scheduler tick runs them.
+          properties:
+            task_keys:
+              type: array
+              minItems: 1
+              maxItems: 200
+              items:
+                $ref: "#/components/schemas/MemoryCalendarTaskKey"
+    MemoryFailureRetryResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        scheduler:
+          type: object
+          additionalProperties: false
+          required:
+            - revived
+            - task_keys
+          properties:
+            revived:
+              type: integer
+              minimum: 0
+            task_keys:
+              type: array
+              items:
+                $ref: "#/components/schemas/MemoryCalendarTaskKey"
+    MemoryErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              minLength: 1
+              maxLength: 64
+            message:
+              type: string
+              minLength: 1
+              maxLength: 512
+    WikiRefreshCandidateErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - disposition
+            - message
+          properties:
+            code:
+              type: string
+              minLength: 1
+            disposition:
+              type: string
+              enum:
+                - retryable
+                - terminal
+            message:
+              type: string
+              minLength: 1
+    ServiceTokenErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              const: SERVICE_TOKEN_INVALID
+            message:
+              type: string
+              minLength: 1
+    DocumentNormalizationTerminalErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - disposition
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - DOCUMENT_NORMALIZATION_INVALID
+                - DOCUMENT_SOURCE_TOO_LARGE
+                - DOCUMENT_SOURCE_UNSUPPORTED
+                - DOCUMENT_SOURCE_INVALID
+                - DOCUMENT_SOURCE_EMPTY
+                - DOCUMENT_MARKDOWN_TOO_LARGE
+                - DOCUMENT_NORMALIZATION_TIMEOUT
+            disposition:
+              type: string
+              const: terminal
+            message:
+              type: string
+              minLength: 1
+    DocumentNormalizationRetryableErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - disposition
+            - message
+          properties:
+            code:
+              type: string
+              const: DOCUMENT_NORMALIZATION_UNAVAILABLE
+            disposition:
+              type: string
+              const: retryable
+            message:
+              type: string
+              minLength: 1
+    TeamHubId:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: ^[A-Za-z0-9][A-Za-z0-9_-]*$
+      description: Opaque, case-sensitive TeamHub identifier.
+    WikiRefreshCandidateGenerationRequest:
+      type: object
+      description:
+        "`initialize` carries no base pages and at least one added source;
+        `update` carries the current Wiki pages as base pages. `changes` lists 1
+        to 1,000 sources in total across added, modified, and removed."
+      additionalProperties: false
+      required:
+        - wiki_refresh_id
+        - tenant_id
+        - generator_agent_actor_id
+        - mode
+        - base_pages
+        - changes
+      properties:
+        wiki_refresh_id:
+          $ref: "#/components/schemas/TeamHubId"
+        tenant_id:
+          $ref: "#/components/schemas/TeamHubId"
+        generator_agent_actor_id:
+          $ref: "#/components/schemas/TeamHubId"
+        mode:
+          type: string
+          enum:
+            - initialize
+            - update
+        base_pages:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/WikiRefreshBasePage"
+        changes:
+          $ref: "#/components/schemas/WikiRefreshSourceChanges"
+    WikiRefreshSourceChanges:
+      type: object
+      additionalProperties: false
+      required:
+        - added
+        - modified
+        - removed
+      properties:
+        added:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/WikiRefreshFrozenSource"
+        modified:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/WikiRefreshFrozenSource"
+        removed:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/WikiRefreshSourceReference"
+    WikiRefreshBasePage:
+      type: object
+      additionalProperties: false
+      required:
+        - page_key
+        - markdown_content
+        - markdown_sha256
+      properties:
+        page_key:
+          type: string
+          minLength: 1
+          maxLength: 512
+          pattern: ^[a-z0-9][a-z0-9._/-]*\.md$
+        markdown_content:
+          type: string
+          format: byte
+          maxLength: 22369624
+        markdown_sha256:
+          type: string
+          minLength: 64
+          maxLength: 64
+          pattern: ^[a-f0-9]{64}$
+    WikiRefreshSourceReference:
+      type: object
+      additionalProperties: false
+      required:
+        - document_id
+        - document_version_id
+        - filename
+      properties:
+        document_id:
+          $ref: "#/components/schemas/TeamHubId"
+        document_version_id:
+          $ref: "#/components/schemas/TeamHubId"
+        filename:
+          type: string
+          description:
+            "Stored filename as TeamHub sends it: control characters become
+            spaces and a longer name is shortened to at most 255 UTF-8 bytes,
+            keeping its extension."
+          minLength: 1
+          maxLength: 255
+    WikiRefreshFrozenSource:
+      type: object
+      additionalProperties: false
+      required:
+        - document_id
+        - document_version_id
+        - filename
+        - size_bytes
+        - sha256
+        - content
+      properties:
+        document_id:
+          $ref: "#/components/schemas/TeamHubId"
+        document_version_id:
+          $ref: "#/components/schemas/TeamHubId"
+        filename:
+          type: string
+          description:
+            "Stored filename as TeamHub sends it: control characters become
+            spaces and a longer name is shortened to at most 255 UTF-8 bytes,
+            keeping its extension."
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 52428800
+        sha256:
+          type: string
+          minLength: 64
+          maxLength: 64
+          pattern: ^[a-f0-9]{64}$
+        content:
+          type: string
+          format: byte
+          description:
+            A Document source's Markdown as TeamHub normalized it once into its Document text, or a Session source's
+            indexed Raw text.
+          maxLength: 69905068
+        session:
+          $ref: "#/components/schemas/WikiRefreshSessionSource"
+    WikiRefreshSessionSource:
+      type: object
+      additionalProperties: false
+      description:
+        Present when the source is a Room or recording Session of the Memory index rather than a Document. Its
+        document_id is then the index source ID and its document_version_id the SHA-256 of the indexed text.
+      required:
+        - kind
+        - date
+        - session_id
+        - room_id
+        - represented_human_actor_id
+        - represented_human_display_name
+      properties:
+        kind:
+          type: string
+          enum: [room, recording]
+        date:
+          type: string
+          format: date
+          description: The Session's business date; it names the dated Session page.
+        session_id:
+          $ref: "#/components/schemas/TeamHubId"
+          description: The Room ID of a Room Session or the capture ID of a recording; it names the Session page.
+        room_id:
+          $ref: "#/components/schemas/TeamHubId"
+        transcript_document_id:
+          $ref: "#/components/schemas/TeamHubId"
+          description: A recording's transcript Document, which its citations open.
+        transcript_document_version_id:
+          $ref: "#/components/schemas/TeamHubId"
+        represented_human_actor_id:
+          $ref: "#/components/schemas/TeamHubId"
+        represented_human_display_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+    WikiRefreshCandidateGenerationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - wiki_refresh_id
+        - pages
+        - unsettled_sources
+        - deferred_sources
+      properties:
+        wiki_refresh_id:
+          $ref: "#/components/schemas/TeamHubId"
+        pages:
+          type: array
+          minItems: 1
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/WikiRefreshCandidatePage"
+        unsettled_sources:
+          type: array
+          maxItems: 1000
+          description:
+            "Added or modified sources whose pages this candidate does not
+            fully hold because a model task over them failed: it timed out,
+            stayed too large or ran out of steps, or validation dropped the
+            pages written from them. TeamHub publishes the candidate but keeps
+            these sources pending, so a later refresh writes them again, up
+            to a bounded number of tries."
+          items:
+            $ref: "#/components/schemas/WikiRefreshSourceReference"
+        deferred_sources:
+          type: array
+          maxItems: 1000
+          description:
+            "Added or modified sources left unwritten only because the
+            generation's time or run budget ran out before their tasks
+            started. TeamHub keeps them pending like unsettled sources, but
+            they spend none of their tries."
+          items:
+            $ref: "#/components/schemas/WikiRefreshSourceReference"
+    WikiRefreshCandidatePage:
+      type: object
+      additionalProperties: false
+      required:
+        - page_key
+        - markdown_content
+        - markdown_sha256
+      properties:
+        page_key:
+          type: string
+          minLength: 1
+          maxLength: 512
+          pattern: ^[a-z0-9][a-z0-9._/-]*\.md$
+        markdown_content:
+          type: string
+          format: byte
+          maxLength: 22369624
+        markdown_sha256:
+          type: string
+          minLength: 64
+          maxLength: 64
+          pattern: ^[a-f0-9]{64}$
+    DurableAckEnvelope:
+      $ref: ../components/document-internal.yaml#/components/schemas/DurableAckEnvelope
+    DurabilityFailureEnvelope:
+      $ref: ../components/document-internal.yaml#/components/schemas/DurabilityFailureEnvelope
+    LocalComputerToolCall:
+      type: object
+      additionalProperties: false
+      required:
+        - tenant_id
+        - owner_actor_id
+        - computer_id
+        - agent_id
+        - tool_session_id
+        - server
+        - tool_name
+        - arguments
+      properties:
+        tenant_id:
+          type: string
+        owner_actor_id:
+          type: string
+        computer_id:
+          type: string
+        agent_id:
+          type: string
+        tool_session_id:
+          type: string
+        server:
+          type: string
+          enum:
+            - browser
+            - task_files
+        tool_name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        arguments:
+          type: object
+          additionalProperties: true
+        task_scope:
+          type: object
+          additionalProperties: false
+          required:
+            - tenant_id
+            - agent_id
+            - origin_room_id
+            - task_id
+          properties:
+            tenant_id:
+              type: string
+            agent_id:
+              type: string
+            origin_room_id:
+              type: string
+            task_id:
+              type: string
+    LocalComputerToolResult:
+      type: object
+      additionalProperties: false
+      required:
+        - result
+      properties:
+        result:
+          type: object
+          additionalProperties: true
+  responses:
+    MemoryError:
+      description: Memory internal request failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MemoryErrorResponse"
+    WikiRefreshBadRequest:
+      description: The candidate-generation request is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/WikiRefreshCandidateErrorResponse"
+    WikiOperationRetryable:
+      description: >-
+        Candidate generation encountered a retryable infrastructure or provider
+        failure. The code WIKI_COMPUTER_OFFLINE means the Wiki owner's Computer
+        is offline; TeamHub waits for it without spending a refresh attempt.
+        The code WIKI_SERVICE_STOPPING means LLM Wiki stopped the generation
+        because its process is restarting; TeamHub runs it again shortly,
+        also without spending an attempt.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/WikiRefreshCandidateErrorResponse"

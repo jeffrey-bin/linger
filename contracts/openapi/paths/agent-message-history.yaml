@@ -1,0 +1,57 @@
+search:
+  post:
+    operationId: searchAgentHistoryMessages
+    security: [{ agentBearer: [] }]
+    summary: Read currently authorized Agent message history without advancing reception cursors.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/agent-message-history.yaml#/schemas/AgentMessageSearchRequest",
+            }
+    responses:
+      "200":
+        description: Authorized history.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/agent-message-history.yaml#/schemas/AgentMessageSearchResponse",
+              }
+      "400": { description: Invalid history query }
+      "401": { description: Invalid Agent identity credential }
+      "403": { description: Agent credential cannot access message history }
+      "404": { description: Message or Inbox is unavailable }
+      "503":
+        {
+          description: "SEARCH_TIMEOUT: the search ran past its five-second limit; narrow it with inbox_ids or a longer query instead of retrying",
+        }
+
+read:
+  post:
+    operationId: readAgentHistoryMessages
+    security: [{ agentBearer: [] }]
+    summary: Read currently authorized Agent message history without advancing reception cursors.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            {
+              $ref: "../components/agent-message-history.yaml#/schemas/AgentMessageReadRequest",
+            }
+    responses:
+      "200":
+        description: Authorized history.
+        content:
+          application/json:
+            schema:
+              {
+                $ref: "../components/agent-message-history.yaml#/schemas/AgentMessageReadResponse",
+              }
+      "400": { description: Invalid history query }
+      "401": { description: Invalid Agent identity credential }
+      "403": { description: Agent credential cannot access message history }
+      "404": { description: Message or Inbox is unavailable }

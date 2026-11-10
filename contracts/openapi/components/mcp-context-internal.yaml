@@ -1,0 +1,235 @@
+components:
+  schemas:
+    McpContextReference:
+      oneOf:
+        - $ref: "#/components/schemas/MetaMcpContextReference"
+        - $ref: "#/components/schemas/AlterEgoMcpContextReference"
+        - $ref: "#/components/schemas/DocumentMcpContextReference"
+      discriminator:
+        propertyName: kind
+        mapping:
+          meta: "#/components/schemas/MetaMcpContextReference"
+          alter_ego: "#/components/schemas/AlterEgoMcpContextReference"
+          document: "#/components/schemas/DocumentMcpContextReference"
+    MetaMcpContextReference:
+      type: object
+      description: One Room-bound meta execution Context of an Agent.
+      additionalProperties: false
+      required: [kind, room_id]
+      properties:
+        kind:
+          type: string
+          const: meta
+          description: Identifies a meta execution Context.
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AlterEgoMcpContextReference:
+      type: object
+      description: One Task-scoped alterEgo execution Context of an Agent.
+      additionalProperties: false
+      required: [kind, task_id]
+      properties:
+        kind:
+          type: string
+          const: alter_ego
+          description: Identifies a Task-scoped alterEgo execution Context.
+        task_id:
+          type: string
+          description: Stable managed Task identifier bound to this alterEgo Context.
+          minLength: 1
+          maxLength: 128
+          pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    DocumentMcpContextReference:
+      type: object
+      description: One Document-scoped execution Context of an Agent.
+      additionalProperties: false
+      required: [kind, document_id]
+      properties:
+        kind:
+          type: string
+          const: document
+          description: Identifies a Document-scoped execution Context.
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    McpContextResolveRequest:
+      type: object
+      description: Execution Context the Agent Service is about to activate.
+      additionalProperties: false
+      required: [context]
+      properties:
+        context:
+          $ref: "#/components/schemas/McpContextReference"
+    McpContextDocumentAuthorityId:
+      type: string
+      description: Opaque Document identifier.
+      minLength: 1
+      maxLength: 255
+      pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    McpDocumentContentSha256:
+      type: string
+      description: Lowercase SHA-256 of the exact content.
+      minLength: 64
+      maxLength: 64
+      pattern: "^[a-f0-9]{64}$"
+    McpDocumentLatestRuntimeProjection:
+      type: object
+      description: Host-only exact current read-only native Document projection.
+      additionalProperties: false
+      required: [document_id, filename, media_type, content, size_bytes, sha256]
+      properties:
+        document_id:
+          $ref: "#/components/schemas/McpContextDocumentAuthorityId"
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 240
+        media_type:
+          type: string
+          const: text/markdown
+        content:
+          type: string
+          format: byte
+          maxLength: 44739244
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 33554432
+        sha256:
+          $ref: "#/components/schemas/McpDocumentContentSha256"
+    McpDocumentCommentRuntimeProjection:
+      type: object
+      description: >-
+        Host-only current Document Comment thread projection. The Agent Host writes this
+        exact Markdown to the stable model-visible comments.md path; it is never Tool input.
+      additionalProperties: false
+      required: [comments_markdown, current_document]
+      properties:
+        comments_markdown:
+          type: string
+          minLength: 1
+          maxLength: 4194304
+        current_document:
+          $ref: "#/components/schemas/McpDocumentLatestRuntimeProjection"
+    McpContextResolveResponse:
+      type: object
+      description: Current Runtime view for one Agent Context.
+      additionalProperties: false
+      required:
+        - agent_id
+        - context
+      properties:
+        agent_id:
+          type: string
+          description: Agent management identifier resolved from the path.
+          minLength: 1
+          maxLength: 64
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        context:
+          $ref: "#/components/schemas/McpContextReference"
+        document_comment_runtime:
+          $ref: "#/components/schemas/McpDocumentCommentRuntimeProjection"
+    McpContextErrorCode:
+      type: string
+      description: Stable machine-readable failure classification.
+      enum:
+        - invalid_request
+        - unauthenticated
+        - context_identity_invalid
+        - dependency_unavailable
+        - internal_error
+    McpContextErrorIssue:
+      type: object
+      description: One model-safe validation issue.
+      additionalProperties: false
+      required:
+        - path
+        - code
+        - message
+      properties:
+        path:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        code:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{0,127}$
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1024
+    McpContextError:
+      type: object
+      description: Safe error detail returned by the TeamHub MCP Context internal API.
+      additionalProperties: false
+      required:
+        - code
+        - message
+        - request_id
+      properties:
+        code:
+          $ref: "#/components/schemas/McpContextErrorCode"
+        message:
+          type: string
+          description: Human-readable failure summary containing no credential material.
+          minLength: 1
+          maxLength: 1024
+        request_id:
+          type: string
+          description: Correlation identifier safe to include in logs and support reports.
+          minLength: 1
+          maxLength: 128
+          pattern: ^[A-Za-z0-9._:-]+$
+        issues:
+          type: array
+          description: Safe field-level validation issues, when the failure has actionable paths.
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/McpContextErrorIssue"
+    McpContextErrorEnvelope:
+      type: object
+      description: Standard failure envelope for every TeamHub MCP Context internal operation.
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/McpContextError"
+  responses:
+    McpContextBadRequest:
+      description: The request does not satisfy the operation contract.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/McpContextErrorEnvelope"
+    McpContextUnauthenticated:
+      description: The workload Bearer credential is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/McpContextErrorEnvelope"
+    McpContextForbidden:
+      description: The workload identity or current MCP Context is not authorized.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/McpContextErrorEnvelope"
+    McpContextNotFound:
+      description: The requested Agent or MCP Context does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/McpContextErrorEnvelope"
+    McpContextConflict:
+      description: The MCP Context conflicts with current Agent state.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/McpContextErrorEnvelope"
+    McpContextInternalError:
+      description: The TeamHub MCP Context internal operation could not be completed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/McpContextErrorEnvelope"

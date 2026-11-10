@@ -1,0 +1,78 @@
+components:
+  schemas:
+    RoomHistoryShare:
+      type: object
+      required:
+        [id, room_name, created_at, message_count, snapshot_room_seq, revoked]
+      properties:
+        id: { type: string }
+        room_name: { type: string }
+        created_at: { type: string, format: date-time }
+        message_count: { type: integer }
+        snapshot_room_seq: { type: integer, format: int64 }
+        revoked: { type: boolean }
+        token:
+          {
+            type: string,
+            description: Returned only when a link is created. Never logged or stored in plaintext.,
+          }
+    CreateRoomHistoryShare:
+      type: object
+      additionalProperties: false
+      properties:
+        web_version: { type: string, maxLength: 200 }
+    RoomHistorySharePage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/RoomHistoryShare" }
+    ReadRoomHistoryShare:
+      type: object
+      additionalProperties: false
+      required: [token]
+      properties:
+        token: { type: string, minLength: 54, maxLength: 54 }
+        after: { type: integer, format: int64, minimum: 0 }
+        asset_id: { type: string, maxLength: 100 }
+    RoomHistorySnapshot:
+      type: object
+      required: [share, items, next_after]
+      properties:
+        share: { $ref: "#/components/schemas/RoomHistoryShare" }
+        next_after: { type: integer, format: int64 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/RoomHistoryMessage" }
+    RoomHistoryMessage:
+      type: object
+      required: [id, position, author, body, segments, created_at, attachments]
+      properties:
+        id: { type: string }
+        position: { type: integer, format: int64 }
+        author: { $ref: "./common.yaml#/components/schemas/ActorRef" }
+        avatar_image: { type: string }
+        body: { type: string }
+        segments:
+          type: array
+          items: { $ref: "./common.yaml#/components/schemas/MessageSegment" }
+        created_at: { type: string, format: date-time }
+        card:
+          type: object
+          required: [title, description, status]
+          properties:
+            title: { type: string }
+            description: { type: string }
+            status: { type: string }
+        attachments:
+          type: array
+          items:
+            type: object
+            required: [id, filename, media_type, size_bytes]
+            properties:
+              id: { type: string }
+              filename: { type: string }
+              media_type: { type: string }
+              size_bytes: { type: integer, format: int64 }
+              image_asset_id: { type: string }

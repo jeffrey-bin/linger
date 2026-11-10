@@ -1,0 +1,232 @@
+components:
+  schemas:
+    AgentActorRef:
+      type: object
+      additionalProperties: false
+      required: [id, kind, display_name]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          $ref: "./common.yaml#/components/schemas/ActorKind"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+      description: Agent-visible collaboration identity. TeamHub retains and validates Tenant scope internally.
+    AgentSponsorRef:
+      type: object
+      additionalProperties: false
+      required: [id, display_name]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+      description: Trusted Human sponsor identity derived from the active Agent registration.
+    AgentRepresentedHumanRef:
+      type: object
+      additionalProperties: false
+      required: [id, display_name]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        memory:
+          $ref: "./user-memory.yaml#/components/schemas/UserMemoryRevision"
+      description: Human represented by this AnotherMe. Present only for an authorized active AnotherMe identity.
+    AgentIdentity:
+      type: object
+      additionalProperties: false
+      required: [agent_id, agent_type, actor, sponsor]
+      properties:
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        agent_type:
+          $ref: "./domain.yaml#/components/schemas/AgentType"
+        actor:
+          $ref: "#/components/schemas/AgentActorRef"
+        sponsor:
+          $ref: "#/components/schemas/AgentSponsorRef"
+        represented_human:
+          $ref: "#/components/schemas/AgentRepresentedHumanRef"
+    AgentWorkItemAssignment:
+      type: object
+      additionalProperties: false
+      required: [actor, assigned_by, assigned_at]
+      properties:
+        actor:
+          $ref: "#/components/schemas/AgentActorRef"
+        assigned_by:
+          $ref: "#/components/schemas/AgentActorRef"
+        assigned_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentWorkItemAccessGrant:
+      type: object
+      additionalProperties: false
+      required: [actor, granted_by, granted_at]
+      properties:
+        actor:
+          $ref: "#/components/schemas/AgentActorRef"
+        granted_by:
+          $ref: "#/components/schemas/AgentActorRef"
+        granted_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentWorkItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - number
+        - kind
+        - title
+        - description
+        - referenced_actors
+        - priority
+        - state
+        - version
+        - created_by
+        - updated_by
+        - assignees
+        - explicit_access_grants
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        number:
+          type: integer
+          format: int64
+          minimum: 1
+        kind:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemKind"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 240
+        description:
+          type: string
+          maxLength: 50000
+        referenced_actors:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentActorRef"
+        priority:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemPriority"
+        state:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemState"
+        resolution:
+          $ref: "./work-items.yaml#/components/schemas/WorkItemResolution"
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+        created_by:
+          $ref: "#/components/schemas/AgentActorRef"
+        updated_by:
+          $ref: "#/components/schemas/AgentActorRef"
+        assignees:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentWorkItemAssignment"
+        explicit_access_grants:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentWorkItemAccessGrant"
+        origin_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        origin_message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        work_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        archived_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentWorkItemPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentWorkItem"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    AgentParticipantTaskResolution:
+      type: object
+      additionalProperties: false
+      required: [task_id, work_room_id, execution_generation]
+      properties:
+        task_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        work_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        execution_generation:
+          type: integer
+          format: int64
+          minimum: 1
+      description: >-
+        Managed Task identity derived from the current frozen participant snapshot. It is not a
+        projection of mutable Work Item Assignment or access relations.
+    AgentWorkItemComment:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          work_item_id,
+          author,
+          body,
+          segments,
+          version,
+          created_at,
+          updated_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        work_item_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        author:
+          $ref: "#/components/schemas/AgentActorRef"
+        body:
+          type: string
+          maxLength: 50000
+        segments:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "./work-items.yaml#/components/schemas/WorkItemCommentSegment"
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+        deleted_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentWorkItemCommentPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentWorkItemComment"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"

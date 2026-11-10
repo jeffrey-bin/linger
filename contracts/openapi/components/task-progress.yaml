@@ -1,0 +1,48 @@
+components:
+  schemas:
+    TaskProgressStep:
+      type: object
+      additionalProperties: false
+      required: [title, at]
+      properties:
+        title: { type: string }
+        at:
+          type: string
+          format: date-time
+          description: When the Run first reported this step.
+    TaskProgressTask:
+      type: object
+      additionalProperties: false
+      required: [task_id, title, status, status_since, pending_approvals]
+      properties:
+        task_id: { type: string }
+        title: { type: string }
+        status:
+          type: string
+          enum: [running, waiting_for_approval]
+          x-enum-varnames: [TaskProgressRunning, TaskProgressWaitingForApproval]
+        status_since: { type: string, format: date-time }
+        pending_approvals: { type: integer, minimum: 0 }
+        last_report_at:
+          type: string
+          format: date-time
+          description: Absent before the Task's first report to its coordinator.
+        latest_step:
+          $ref: "#/components/schemas/TaskProgressStep"
+          description: The newest step title the Task's latest Run reported, when it reported one.
+    TaskProgressSnapshot:
+      type: object
+      additionalProperties: false
+      required: [live_foreground, tasks]
+      properties:
+        live_foreground:
+          type: boolean
+          description: A Live call coordinates this Meta's work now; tasks is then empty and nothing else is read.
+        agent_last_spoke_at:
+          type: string
+          format: date-time
+          description: The Agent's latest ordinary message in the Room; absent when it never spoke there.
+        tasks:
+          type: array
+          description: Tasks this Meta Context coordinates that are running or waiting for an approval, oldest first.
+          items: { $ref: "#/components/schemas/TaskProgressTask" }

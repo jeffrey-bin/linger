@@ -1,0 +1,4 @@
+interface:
+  display_name: "Personal Profile"
+  short_description: "Rich personal profiles with source summaries, in your language"
+  default_prompt: "Use $personal-profile to build a rich first profile from authorized information, including material written by others, in my conversational language. Open with a developed portrait of current work, life, and concerns, with selective history; write naturally and preserve concrete working practices, communication tone, and useful detail. For an existing profile, default to integrating new information into affected passages without rereading all history or rewriting unchanged sections."

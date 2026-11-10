@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in Linger does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security problems here. Do not paste API keys, tokens or private messages.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a Room with one Agent
+        2. Mention the Agent
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Rooms and messages
+        - Agents and runs
+        - Documents and library
+        - Memory and Wiki
+        - Voice
+        - Local Computer or desktop app
+        - Connected apps
+        - Setup and deployment
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Commit or release you run.
+      placeholder: e.g. 0123abc
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: How you run it (pnpm dev or Docker Compose), operating system, and the Agent runtime (Codex, Claude Code or Pi).
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant log lines, with secrets removed.
+      render: text

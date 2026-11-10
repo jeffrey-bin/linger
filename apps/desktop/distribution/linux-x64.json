@@ -1,0 +1,31 @@
+{
+  "platform": "linux",
+  "arch": "x64",
+  "localmodelsTool": {
+    "url": "https://d2ikbbcl3j6jz9.cloudfront.net/cli/localmodels/0.1.0.dev28/linux-x64.tgz",
+    "sha256": "2923a04c83c88237814e753cfc3637bdc80545aa77defa669d8ff42cd85d6eb8",
+    "bytes": 68559312,
+    "sourceCommit": "c77bed6e5b65c30314d96dfe8dc9b7ab964c5332",
+    "manifestSha256": "374f72b64796a57d66344462881415bf0b1ab02b5884a55b82d1f9d2b6607877"
+  },
+  "nativeSources": [
+    {
+      "target": "linux-x64",
+      "file": "native/postgres-17.10-pgvector-0.8.6-linux-x64-5e6062ecf6be0260ace0d10671db48a81405687d50a853c7459888f405bbfdd5.tar.gz",
+      "sha256": "5e6062ecf6be0260ace0d10671db48a81405687d50a853c7459888f405bbfdd5",
+      "bytes": 11627166,
+      "postgresVersion": "17.10",
+      "pgvectorVersion": "0.8.6"
+    }
+  ],
+  "voiceTools": [
+    {
+      "target": "linux-x64",
+      "file": "native/voice-tools-livekit-1.13.6-ffmpeg-8.1.2-linux-x64-464c0a18eb4aefc6a364dff9b695cf080d89a0b39c707e40556b3854fc900bd3.tar.gz",
+      "sha256": "464c0a18eb4aefc6a364dff9b695cf080d89a0b39c707e40556b3854fc900bd3",
+      "bytes": 42910355,
+      "livekitVersion": "1.13.6",
+      "ffmpegVersion": "8.1.2"
+    }
+  ]
+}

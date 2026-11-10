@@ -1,0 +1,177 @@
+components:
+  schemas:
+    AgentDebugInspectionStatus:
+      type: string
+      enum: [available, unsupported, unavailable]
+      x-enum-varnames:
+        - AgentDebugInspectionStatusAvailable
+        - AgentDebugInspectionStatusUnsupported
+        - AgentDebugInspectionStatusUnavailable
+    AgentDebugHistorySnapshot:
+      type: object
+      additionalProperties: false
+      required: [id, thread_id, captured_at, record_count, tail_state]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        thread_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        captured_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        record_count:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+        tail_state:
+          type: string
+          enum: [clean, incomplete, corrupt]
+          x-enum-varnames:
+            - AgentDebugHistoryTailStateClean
+            - AgentDebugHistoryTailStateIncomplete
+            - AgentDebugHistoryTailStateCorrupt
+    AgentDebugHistoryInstructions:
+      type: object
+      additionalProperties: false
+      required: [status, source, blocks]
+      properties:
+        status:
+          type: string
+          enum: [available, unavailable]
+          x-enum-varnames:
+            - AgentDebugHistoryInstructionsStatusAvailable
+            - AgentDebugHistoryInstructionsStatusUnavailable
+        source:
+          type: string
+          enum: [codex_rollout, claude_transcript, pi_session]
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+        blocks:
+          type: array
+          maxItems: 512
+          items:
+            $ref: "#/components/schemas/AgentDebugHistoryInstructionBlock"
+    AgentDebugHistoryInstructionBlock:
+      type: object
+      additionalProperties: false
+      required: [record_ordinal, record_type, field, text]
+      properties:
+        record_ordinal:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+        record_type:
+          type: string
+          minLength: 1
+          maxLength: 256
+        field:
+          type: string
+          minLength: 1
+          maxLength: 256
+        content_ordinal:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+        timestamp:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        text:
+          type: string
+          maxLength: 524288
+    AgentDebugHistoryRecord:
+      type: object
+      additionalProperties: false
+      required: [ordinal, category, native_type, native_record, redacted_fields]
+      properties:
+        ordinal:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+        timestamp:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        turn_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        category:
+          type: string
+          enum:
+            [
+              message,
+              tool_call,
+              tool_result,
+              lifecycle,
+              reasoning,
+              usage,
+              provider_event,
+              compaction,
+            ]
+          x-enum-varnames:
+            - AgentDebugHistoryRecordCategoryMessage
+            - AgentDebugHistoryRecordCategoryToolCall
+            - AgentDebugHistoryRecordCategoryToolResult
+            - AgentDebugHistoryRecordCategoryLifecycle
+            - AgentDebugHistoryRecordCategoryReasoning
+            - AgentDebugHistoryRecordCategoryUsage
+            - AgentDebugHistoryRecordCategoryProviderEvent
+            - AgentDebugHistoryRecordCategoryCompaction
+        native_type:
+          type: string
+          minLength: 1
+          maxLength: 256
+        tool_call_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        tool_name:
+          type: string
+          minLength: 1
+          maxLength: 256
+        role:
+          type: string
+          minLength: 1
+          maxLength: 64
+        phase:
+          type: string
+          minLength: 1
+          maxLength: 64
+        native_record:
+          type: object
+          additionalProperties: true
+        redacted_fields:
+          type: array
+          maxItems: 1024
+          items:
+            $ref: "#/components/schemas/AgentDebugHistoryRedactedField"
+    AgentDebugHistoryRedactedField:
+      type: object
+      additionalProperties: false
+      required: [path, reason]
+      properties:
+        path:
+          type: string
+          maxLength: 4096
+        reason:
+          type: string
+          enum:
+            [
+              secret,
+              encrypted_content,
+              reasoning_content,
+              physical_path,
+              omitted_too_large,
+            ]
+          x-enum-varnames:
+            - AgentDebugHistoryRedactionReasonSecret
+            - AgentDebugHistoryRedactionReasonEncryptedContent
+            - AgentDebugHistoryRedactionReasonReasoningContent
+            - AgentDebugHistoryRedactionReasonPhysicalPath
+            - AgentDebugHistoryRedactionReasonOmittedTooLarge
+        byte_count:
+          type: integer
+          format: int64
+          minimum: 0

@@ -1,0 +1,851 @@
+/*
+ * Wiki Timeline on the product Work Surface: one background color, thin
+ * dividers, solid dots, tabular numerals and Information Blue for time and
+ * selection. Follows the No Glow rule: no colored shadows, gradients or glass.
+ */
+.wiki-graph-surface,
+.wiki-graph-daily-panel {
+  --surface: hsl(var(--town-card));
+  /* Same fill as Message bubbles and row hover (muted at 70%). */
+  --soft: hsl(var(--town-muted) / 0.7);
+  --ink: hsl(var(--town-foreground));
+  --body: var(--app-body);
+  --muted: hsl(var(--town-muted-foreground));
+  --line: hsl(var(--town-border));
+  --line-strong: hsl(var(--town-border-hover));
+  --accent: hsl(var(--town-info));
+  --accent-line: hsl(var(--town-info) / 0.5);
+  --tick: hsl(var(--town-muted-foreground) / 0.45);
+  --tick-strong: hsl(var(--town-muted-foreground));
+  --mono: var(--app-font-mono);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wiki-graph-page {
+  container: wiki-graph / inline-size;
+  --wiki-graph-page-padding: 16px;
+}
+.wiki-graph-page-header {
+  margin-inline: var(--wiki-graph-page-padding);
+}
+@media (max-width: 47.999rem) {
+  .wiki-graph-page {
+    --wiki-graph-page-padding: 12px;
+  }
+}
+
+.wiki-graph-surface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+/* Zero specificity so each control's own size and weight still apply. */
+:where(.wiki-graph-surface, .wiki-graph-daily-panel) :where(button, input) {
+  font: inherit;
+  color: inherit;
+}
+
+.wiki-graph-surface :focus-visible,
+.wiki-graph-daily-panel :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Toolbar */
+.wiki-graph-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.wiki-graph-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  transition:
+    border-color 160ms var(--ease),
+    background-color 160ms var(--ease);
+}
+
+.wiki-graph-search:focus-within {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+.wiki-graph-search input:focus-visible {
+  outline: none;
+}
+
+.wiki-graph-search input {
+  width: 160px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.wiki-graph-segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--soft);
+}
+
+.wiki-graph-segmented button {
+  height: 26px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 470;
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--ease),
+    color 160ms var(--ease);
+}
+
+.wiki-graph-segmented button[aria-checked="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--town-shadow-sm);
+}
+
+.wiki-graph-segmented button:hover:not([aria-checked="true"]) {
+  color: var(--ink);
+}
+
+/* Reading row */
+.wiki-graph-reading-row {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.wiki-graph-daily-panel {
+  position: fixed;
+  top: max(12px, calc((100dvh - 540px) / 2));
+  left: max(12px, calc((100dvw - 740px) / 2));
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+  width: min(740px, calc(100dvw - 24px));
+  height: min(540px, calc(100dvh - 24px));
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--town-shadow-lg);
+  animation: wiki-graph-details-in 220ms var(--ease) backwards;
+}
+
+.wiki-graph-daily-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+}
+
+.wiki-graph-daily-header h2 {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 580;
+  font-variant-numeric: tabular-nums;
+}
+
+.wiki-graph-daily-eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 470;
+}
+
+.wiki-graph-daily-reading {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.wiki-graph-daily-toc {
+  flex: 0 0 25%;
+  min-width: 104px;
+  max-width: 190px;
+  overflow-y: auto;
+  padding: 18px 8px 24px;
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.wiki-graph-daily-toc p {
+  margin: 0 12px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 470;
+}
+
+.wiki-graph-daily-toc button {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.wiki-graph-daily-toc button:hover,
+.wiki-graph-daily-toc button[aria-current] {
+  color: var(--ink);
+  background: var(--app-hover);
+}
+
+.wiki-graph-daily-toc button:focus-visible,
+.wiki-graph-daily-resize:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
+.wiki-graph-daily-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-top: 24px;
+}
+
+.wiki-graph-daily-panel .read-only-blocknote-document {
+  max-width: none;
+  padding: 24px 28px 40px;
+}
+
+.wiki-graph-daily-panel .bn-editor {
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.wiki-graph-daily-resize {
+  position: absolute;
+  z-index: 4;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  touch-action: none;
+}
+
+.wiki-graph-daily-resize[data-direction="n"],
+.wiki-graph-daily-resize[data-direction="s"] {
+  left: 14px;
+  right: 14px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.wiki-graph-daily-resize[data-direction="n"] {
+  top: 0;
+}
+.wiki-graph-daily-resize[data-direction="s"] {
+  bottom: 0;
+}
+
+.wiki-graph-daily-resize[data-direction="e"],
+.wiki-graph-daily-resize[data-direction="w"] {
+  top: 14px;
+  bottom: 14px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.wiki-graph-daily-resize[data-direction="e"] {
+  right: 0;
+}
+.wiki-graph-daily-resize[data-direction="w"] {
+  left: 0;
+}
+
+.wiki-graph-daily-resize:is(
+  [data-direction="ne"],
+  [data-direction="nw"],
+  [data-direction="se"],
+  [data-direction="sw"]
+) {
+  width: 14px;
+  height: 14px;
+}
+.wiki-graph-daily-resize[data-direction="ne"] {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+.wiki-graph-daily-resize[data-direction="nw"] {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+.wiki-graph-daily-resize[data-direction="se"] {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+}
+.wiki-graph-daily-resize[data-direction="sw"] {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+@media (max-width: 40rem) {
+  .wiki-graph-daily-header {
+    padding: 10px 12px;
+  }
+  .wiki-graph-daily-panel .read-only-blocknote-document {
+    padding: 18px 16px 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiki-graph-daily-panel {
+    animation: none;
+  }
+}
+
+@keyframes wiki-graph-details-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}
+
+/* Timeline: a precision ruler scrolling under a fixed playhead */
+.wiki-graph-timeline {
+  container: wiki-timeline / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  padding: 10px 16px 6px;
+  user-select: none;
+}
+
+.wiki-graph-timeline-empty {
+  padding: 16px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.wiki-graph-timeline-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+/* Readout above the playhead, in the instrument's own type. */
+.wiki-graph-readout {
+  grid-area: 1 / 2;
+  min-width: 0;
+  max-width: 560px;
+  text-align: center;
+}
+
+@container wiki-timeline (max-width: 640px) {
+  .wiki-graph-readout {
+    grid-area: 2 / 1 / auto / 4;
+    justify-self: center;
+    max-width: 100%;
+  }
+
+  .wiki-graph-readout-date {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.wiki-graph-readout p {
+  margin: 0;
+}
+
+.wiki-graph-readout-date {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 580;
+  letter-spacing: 0.22em;
+  font-variant-numeric: tabular-nums;
+}
+
+.wiki-graph-readout-date span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 470;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* The year sits quietly beside the date. */
+.wiki-graph-readout-date .wiki-graph-readout-year {
+  margin-left: -4px;
+  color: var(--line-strong);
+  font-size: 12px;
+  font-weight: 470;
+  letter-spacing: 0.12em;
+}
+
+.wiki-graph-readout-titles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Four lines are always reserved so the timeline never changes height. */
+  height: calc(4 * 15px);
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.wiki-graph-readout-titles li,
+.wiki-graph-preview-titles li {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wiki-graph-readout-titles li[data-more],
+.wiki-graph-preview-titles li[data-more] {
+  color: var(--accent);
+}
+
+.wiki-graph-latest {
+  grid-area: 1 / 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: end;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--body);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    opacity 200ms var(--ease),
+    background-color 160ms var(--ease);
+}
+
+.wiki-graph-latest:hover {
+  background: var(--soft);
+}
+
+.wiki-graph-latest[data-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wiki-graph-ruler {
+  position: relative;
+  height: 64px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+  /* Depth: the scale fades into the distance on both sides. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
+}
+
+.wiki-graph-ruler[data-dragging] {
+  cursor: grabbing;
+}
+
+.wiki-graph-ruler:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.wiki-graph-ruler-track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.wiki-graph-ruler-line,
+.wiki-graph-ruler-traveled {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.wiki-graph-ruler-line {
+  right: 0;
+}
+
+.wiki-graph-ruler-traveled {
+  top: 29.5px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+}
+
+.wiki-graph-ruler-slot {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.wiki-graph-ruler-tick {
+  position: absolute;
+  bottom: 34px;
+  left: 50%;
+  width: 1px;
+  height: 7px;
+  background: var(--tick);
+  transform: translateX(-50%);
+}
+
+.wiki-graph-ruler-tick[data-major] {
+  height: 14px;
+  background: var(--tick-strong);
+}
+
+.wiki-graph-ruler-tick[data-past] {
+  background: var(--body);
+}
+
+.wiki-graph-ruler-tick[data-hovered] {
+  width: 2px;
+  height: 18px;
+  background: var(--accent);
+}
+
+.wiki-graph-preview {
+  position: absolute;
+  bottom: 74px;
+  left: 0;
+  z-index: 3;
+  min-width: 170px;
+  max-width: 260px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--town-shadow-md);
+  pointer-events: none;
+  transition: transform 90ms var(--ease);
+  animation: wiki-graph-preview-in 140ms var(--ease) both;
+}
+
+@keyframes wiki-graph-preview-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.wiki-graph-preview p {
+  margin: 0;
+}
+
+.wiki-graph-preview-date {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px !important;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 580;
+  letter-spacing: 0.16em;
+}
+
+.wiki-graph-preview-date span {
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+.wiki-graph-preview-titles {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--body);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.wiki-graph-ruler-event {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 999px;
+  background: var(--tick);
+  transform: translateX(-50%);
+  transition: background-color 200ms var(--ease);
+}
+
+.wiki-graph-ruler-event[data-past] {
+  background: var(--ink);
+}
+
+.wiki-graph-ruler-year {
+  margin-left: 6px;
+  color: var(--line-strong);
+  font-weight: 470;
+  letter-spacing: 0.16em;
+}
+
+.wiki-graph-ruler-month {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 580;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Fixed playhead: a hairline and a solid dot on the scale. */
+.wiki-graph-playhead {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 1px;
+  height: 34px;
+  background: var(--ink);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.wiki-graph-playhead::after {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  background: var(--ink);
+  transform: translateX(-50%);
+  content: "";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiki-graph-surface *,
+  .wiki-graph-surface *::before,
+  .wiki-graph-surface *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Daily / Weekly cards above the timeline ruler. */
+.wiki-report-timeline {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.wiki-report-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wiki-report-controls > button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.wiki-report-controls > button:hover {
+  background: var(--soft);
+}
+.wiki-report-controls > button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.wiki-report-track {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: 24px;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 24px;
+  scroll-padding-inline: 24px;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  cursor: grab;
+}
+.wiki-report-track[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+.wiki-report-track[data-dragging] * {
+  user-select: none;
+}
+.wiki-report-card {
+  flex: 0 0 calc((100% - 48px) / 3);
+  min-width: 0;
+  cursor: pointer;
+}
+
+.wiki-report-error {
+  padding: 16px 24px;
+  color: var(--app-danger);
+  font-size: 14px;
+}
+.wiki-report-error button {
+  margin-top: 8px;
+  text-decoration: underline;
+}
+@container wiki-graph (max-width: 42rem) {
+  .wiki-graph-toolbar {
+    padding-inline: 16px;
+  }
+
+  .wiki-report-track {
+    gap: 16px;
+    padding: 20px 16px;
+    scroll-padding-inline: 16px;
+  }
+  .wiki-report-controls > button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Daily report page from the Wiki redesign: a frameless surface, the Day/Week
+   control first, the card arrows at the toolbar's end and the landing's
+   Daily cards in the track. */
+.wiki-graph-page {
+  width: 100%;
+  max-width: var(--app-content-width);
+  margin-inline: auto;
+  padding-bottom: 42px;
+}
+.wiki-graph-surface {
+  border: 0;
+  border-radius: 0;
+}
+.wiki-graph-toolbar {
+  padding-right: 96px;
+  padding-left: 16px;
+  border-bottom: 0;
+}
+/* Positioned in the reading row, so lifted onto the 46px toolbar row above. */
+.wiki-report-controls {
+  position: absolute;
+  top: -39px;
+  right: 16px;
+  z-index: 1;
+}
+.wiki-report-track {
+  align-items: stretch;
+  gap: 16px;
+  padding: 16px;
+  scroll-padding-inline: 16px;
+  scrollbar-width: none;
+}
+.wiki-report-track::-webkit-scrollbar {
+  display: none;
+}
+.wiki-report-card {
+  display: flex;
+  flex: 0 0 340px;
+}
+.wiki-report-card .daily-card {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.wiki-report-card .daily-card-group li,
+.wiki-report-card .daily-card-group p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@container wiki-graph (max-width: 42rem) {
+  .wiki-report-card {
+    flex-basis: 100%;
+  }
+}
+.wiki-graph-daily-backdrop {
+  animation: wiki-graph-backdrop-in 180ms ease-out backwards;
+}
+@keyframes wiki-graph-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wiki-graph-daily-backdrop {
+    animation: none;
+  }
+}

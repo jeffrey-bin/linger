@@ -1,0 +1,109 @@
+Linger - Third-Party and Asset Notices
+
+This file lists third-party material and non-code assets shipped with this
+repository and the terms that apply to them. It does not change the license of
+the repository's source code. Full license texts referenced below are in
+third_party/licenses/.
+
+1. Third-party integration logos
+   Path: apps/web/public/onboarding/provider-icons/ (GitHub, Gmail, LinkedIn,
+   Notion, Slack, X)
+   These logos are trademarks of their respective owners, used only to identify
+   the integrations. They are not covered by this repository's license.
+
+2. Agent avatars, scene images, and brand files
+   Paths: apps/web/public/agent-avatars/ (150 SVG avatars),
+   apps/web/public/agent-avatar-motion/ (avatar animations),
+   and apps/web/src/features/settings/profile-background.png
+   Designed by SimplexAI and released under this repository's license.
+
+3. Hindsight (vectorize-io/hindsight)
+   Copyright (c) 2025 Vectorize AI, Inc. MIT License.
+   Source: https://github.com/vectorize-io/hindsight
+   Code and prompt text adapted from Hindsight are in:
+     apps/node-services/src/memory/chunk-index.ts
+     apps/node-services/src/memory/search/temporal-window.ts
+     apps/node-services/src/memory/session-fact-extraction.ts
+     apps/node-services/src/memory/session-fact-index.ts
+     apps/node-services/prompts/memory/facts/fact-extraction.md
+   License text: third_party/licenses/hindsight-MIT.txt
+
+4. OpenAI Codex (openai/codex)
+   Copyright 2025 OpenAI. Apache License 2.0.
+   Source: https://github.com/openai/codex
+   apps/teamhub/internal/permissionreview/policy.md is adapted from Codex.
+   License and upstream NOTICE: third_party/licenses/openai-codex-Apache-2.0.txt
+
+5. Runtime dependencies under weak-copyleft or font licenses
+   These are used unmodified as package dependencies; their source is available
+   from the upstream projects.
+   - BlockNote (MPL-2.0): https://github.com/TypeCellOS/BlockNote
+   - River (MPL-2.0): https://github.com/riverqueue/river
+     License text: third_party/licenses/MPL-2.0.txt
+   - Roboto Slab font (Apache License 2.0), via Fontsource; Copyright 2018
+     The Roboto Slab Project Authors: https://github.com/googlefonts/robotoslab
+     License text: third_party/licenses/Apache-2.0.txt
+   - Geist and Noto Sans SC fonts (SIL Open Font License 1.1), via Fontsource:
+     https://github.com/vercel/geist-font and
+     https://github.com/notofonts/noto-cjk
+     License text: third_party/licenses/OFL-1.1.txt
+   - libvips via sharp, dynamically linked and not modified (LGPL):
+     https://github.com/libvips/libvips and
+     https://github.com/lovell/sharp-libvips.
+   - FFmpeg executables bundled with @livekit/av (LGPL-2.1-or-later): see
+     the LiveKit notices below. The separately installed Debian and Alpine
+     FFmpeg packages retain their distribution-specific licensing, which may
+     include GPL components; they are not covered by LiveKit's Apache license:
+     https://ffmpeg.org,
+     https://sources.debian.org/src/ffmpeg/,
+     https://gitlab.alpinelinux.org/alpine/aports.
+
+6. Skill names
+   The built-in "superpowers" and "impeccable" Skill names are inspired by
+   obra/superpowers (MIT, https://github.com/obra/superpowers) and
+   pbakaus/impeccable (Apache-2.0, https://github.com/pbakaus/impeccable).
+   Their content in this repository is independently written.
+
+7. LiveKit software and models
+   These components retain their own licenses, independently of this
+   repository's license. The upstream packages are used without modification.
+   Shared Apache License 2.0 text: third_party/licenses/Apache-2.0.txt
+   - LiveKit Server v1.13.6: https://github.com/livekit/livekit/tree/v1.13.6
+     Upstream NOTICE: third_party/licenses/livekit-server-NOTICE.txt
+   - livekit-client 2.22.2:
+     https://github.com/livekit/client-sdk-js/tree/v2.22.2
+     Upstream NOTICE: third_party/licenses/livekit-client-NOTICE.txt
+     Web distributions include this NOTICE and third-party-licenses.md.
+   - Go SDK v2.18.1 and protocol v1.49.0:
+     https://github.com/livekit/server-sdk-go/tree/v2.18.1
+     https://github.com/livekit/protocol/tree/v1.49.0
+     Their upstream NOTICE is identical to livekit-server-NOTICE.txt above.
+   - @livekit/agents 1.7.1: https://github.com/livekit/agents-js
+     Upstream NOTICE: third_party/licenses/livekit-agents-NOTICE.txt
+   - @livekit/rtc-node 0.13.34 and livekit-server-sdk 2.19.0:
+     https://github.com/livekit/node-sdks
+     Upstream NOTICE: third_party/licenses/livekit-node-NOTICE.txt
+     The SDK also depends on Apache-licensed @livekit/rtc-ffi-bindings 0.12.73
+     (https://github.com/livekit/rust-sdks), @livekit/protocol, @livekit/mutex,
+     and @livekit/throws-transformer. The Rust SDK's upstream NOTICE is
+     identical to livekit-server-NOTICE.txt above.
+   - @livekit/typed-emitter 3.0.0 (MIT):
+     https://github.com/livekit/typed-emitter
+     License text: third_party/licenses/livekit-typed-emitter-MIT.txt
+   - @livekit/local-inference 0.2.7:
+     https://www.npmjs.com/package/@livekit/local-inference/v/0.2.7
+     Package license: Apache-2.0 AND LicenseRef-LiveKit-Model.
+     Model terms: third_party/licenses/livekit-MODEL_LICENSE.txt
+     The model terms are proprietary, not Apache-2.0. They permit use only
+     with LiveKit Agents and prohibit using the models or their outputs to
+     develop other models. Redistribution remains subject to those terms.
+     Voice Runtime uses the package within its LiveKit Agents worker.
+   - @livekit/av 10.0.0 and its platform FFmpeg executables:
+     https://www.npmjs.com/package/@livekit/av/v/10.0.0
+     The wrapper is Apache-2.0; its FFmpeg executables are LGPL-2.1-or-later
+     and include libopus under the BSD 3-clause license.
+     Upstream NOTICE: third_party/licenses/livekit-av-NOTICE.txt
+     License texts: third_party/licenses/LGPL-2.1.txt and
+     third_party/licenses/libopus-BSD-3-Clause.txt
+   TeamHub and Voice Runtime images include this file at /app/NOTICE and
+   the license texts at /app/third_party/licenses/.

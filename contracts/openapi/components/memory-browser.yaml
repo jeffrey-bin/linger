@@ -1,0 +1,86 @@
+components:
+  schemas:
+    MemoryEntryKind:
+      type: string
+      enum: [daily, weekly, meeting]
+    MeetingFiles:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          capture_id,
+          started_at,
+          recording_document_id,
+          recording_version_id,
+          recording_filename,
+          transcript_document_id,
+          transcript_version_id,
+          summary_ready,
+        ]
+      properties:
+        capture_id:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        recording_document_id:
+          type: string
+        recording_version_id:
+          type: string
+        recording_filename:
+          type: string
+        transcript_document_id:
+          type: string
+        transcript_version_id:
+          type: string
+        summary_ready:
+          type: boolean
+        summary_path:
+          type: string
+          description: Reader-facing Markdown path under timeline/meetings in the personal memory tree.
+    MemoryEntry:
+      type: object
+      additionalProperties: false
+      required: [id, kind, path, title, summary, updated_at, content]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          $ref: "#/components/schemas/MemoryEntryKind"
+        meeting:
+          $ref: "#/components/schemas/MeetingFiles"
+        path:
+          type: string
+          minLength: 1
+          maxLength: 512
+        title:
+          type: string
+          minLength: 1
+          maxLength: 240
+        summary:
+          type: string
+          maxLength: 240
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        date:
+          type: string
+          format: date
+        content:
+          type: string
+          maxLength: 200000
+    MemoryEntryListItem:
+      allOf:
+        - $ref: "#/components/schemas/MemoryEntry"
+      description: MemoryEntry returned in a list; content is an empty string.
+    MemoryEntryPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/MemoryEntryListItem"
+        next_cursor:
+          $ref: "./common.yaml#/components/schemas/Cursor"

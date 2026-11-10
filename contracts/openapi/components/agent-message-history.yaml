@@ -1,0 +1,155 @@
+schemas:
+  AgentHistoryInbox:
+    type: object
+    additionalProperties: false
+    required: [inbox_id, kind]
+    properties:
+      inbox_id: { type: string }
+      kind: { type: string, enum: [room, thread, task, meta, taskmeta] }
+  AgentHistoryMessage:
+    type: object
+    additionalProperties: false
+    required:
+      [
+        message_id,
+        inbox_id,
+        author_actor_id,
+        author,
+        author_kind,
+        body,
+        segments,
+        message_kind,
+        created_at,
+        context_message_ids,
+        resource_references,
+      ]
+    properties:
+      message_id: { type: string }
+      inbox_id: { type: string }
+      author_actor_id: { type: string }
+      author: { type: string }
+      author_kind: { type: string, enum: [human, agent] }
+      body: { type: string }
+      segments:
+        type: array
+        items: { $ref: "./common.yaml#/components/schemas/MessageSegment" }
+      message_kind:
+        {
+          type: string,
+          enum: [conversation, agent_runtime, task_terminal_notice],
+        }
+      created_at: { type: string, format: date-time }
+      context_message_ids: { type: array, items: { type: string } }
+      resource_references:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [document_id]
+          properties:
+            document_id: { type: string }
+  AgentMessageSearchRequest:
+    type: object
+    additionalProperties: false
+    required: [query]
+    properties:
+      query: { type: string, minLength: 1, maxLength: 1000 }
+      inbox_ids:
+        {
+          type: array,
+          maxItems: 100,
+          items: { type: string, minLength: 1, maxLength: 512 },
+        }
+      cursor: { type: string, maxLength: 1024 }
+      limit: { type: integer, minimum: 1, maximum: 100, default: 20 }
+  AgentMessageSearchResponse:
+    type: object
+    additionalProperties: false
+    required: [messages, has_more]
+    properties:
+      messages:
+        { type: array, items: { $ref: "#/schemas/AgentHistoryMessage" } }
+      has_more: { type: boolean }
+      next_cursor: { type: string }
+  AgentReadMessage:
+    type: object
+    additionalProperties: false
+    required:
+      [
+        message_id,
+        inbox_id,
+        author_actor_id,
+        author,
+        author_kind,
+        body,
+        segments,
+        message_kind,
+        created_at,
+        context_message_ids,
+        resource_references,
+        context_messages,
+      ]
+    properties:
+      message_id: { type: string }
+      inbox_id: { type: string }
+      author_actor_id: { type: string }
+      author: { type: string }
+      author_kind: { type: string, enum: [human, agent] }
+      body: { type: string }
+      segments:
+        {
+          type: array,
+          items: { $ref: "./common.yaml#/components/schemas/MessageSegment" },
+        }
+      message_kind:
+        {
+          type: string,
+          enum: [conversation, agent_runtime, task_terminal_notice],
+        }
+      created_at: { type: string, format: date-time }
+      context_message_ids: { type: array, items: { type: string } }
+      resource_references:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [document_id]
+          properties:
+            document_id: { type: string }
+      context_messages:
+        { type: array, items: { $ref: "#/schemas/AgentHistoryMessage" } }
+      thread_id: { type: string }
+  AgentMessageReadRequest:
+    type: object
+    additionalProperties: false
+    oneOf:
+      - required: [inbox_id]
+      - required: [thread_id]
+      - required: [message_ids]
+      - required: [list_inboxes]
+    properties:
+      inbox_id: { type: string, minLength: 1, maxLength: 512 }
+      thread_id: { type: string, minLength: 1, maxLength: 256 }
+      message_ids:
+        type: array
+        minItems: 1
+        maxItems: 50
+        uniqueItems: true
+        items: { type: string, minLength: 1, maxLength: 256 }
+      list_inboxes: { type: boolean, const: true }
+      cursor: { type: string, maxLength: 1024 }
+      limit: { type: integer, minimum: 1, maximum: 100 }
+  AgentMessageReadResponse:
+    type: object
+    additionalProperties: false
+    required: [mode, has_more]
+    properties:
+      mode: { type: string, enum: [inbox, messages, inboxes] }
+      has_more: { type: boolean }
+      inbox_id: { type: string }
+      messages: { type: array, items: { $ref: "#/schemas/AgentReadMessage" } }
+      root: { $ref: "#/schemas/AgentReadMessage" }
+      requested_message_ids: { type: array, items: { type: string } }
+      unavailable_message_ids: { type: array, items: { type: string } }
+      inboxes: { type: array, items: { $ref: "#/schemas/AgentHistoryInbox" } }
+      next_cursor: { type: string }

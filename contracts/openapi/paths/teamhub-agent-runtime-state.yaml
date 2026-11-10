@@ -1,0 +1,1074 @@
+configSnapshot:
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentRuntimeConfigSnapshot
+    summary: Read one TeamHub-composed Agent Runtime configuration snapshot.
+    parameters:
+      - name: agent_id
+        in: query
+        required: true
+        schema:
+          $ref: "../components/common.yaml#/components/schemas/Id"
+      - name: revision
+        in: query
+        schema:
+          $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimePositiveInt64"
+    responses:
+      "200":
+        description: Canonical current Runtime configuration.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeConfigSnapshot"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+anotherMePlacements:
+  get:
+    tags: [Agent Runtime State]
+    operationId: listAnotherMePlacements
+    summary: List the Computer and Runtime of each active Another Me.
+    description: >-
+      Lets the Agent Service run a Human's background model calls on the
+      Computer of that Human's Another Me. Without filters it lists every
+      active Another Me placed on a Computer.
+    parameters:
+      - name: tenant_id
+        in: query
+        schema:
+          $ref: "../components/common.yaml#/components/schemas/Id"
+      - name: owner_actor_id
+        in: query
+        schema:
+          $ref: "../components/common.yaml#/components/schemas/Id"
+    responses:
+      "200":
+        description: Active Another Me placements, at most 1000.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AnotherMePlacementList"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+deletionSnapshot:
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentRuntimeDeletionSnapshot
+    summary: Read cleanup identity only for an Agent whose registration is revoked.
+    description: >-
+      A read-only snapshot of existing identity and Contexts. This does not reconcile
+      Contexts, load Sessions or authorize execution. Cleanup must check
+      this current deletion authority before retiring each existing physical resource.
+    parameters:
+      - name: agent_id
+        in: query
+        required: true
+        schema:
+          $ref: "../components/common.yaml#/components/schemas/Id"
+    responses:
+      "200":
+        description: Current deletion identity and existing Contexts.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeDeletionSnapshot"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+listOrEnsureContexts:
+  get:
+    tags: [Agent Runtime State]
+    operationId: listAgentExecutionContexts
+    summary: List persisted Execution Contexts, optionally scoped to one Agent.
+    parameters:
+      - name: agent_id
+        in: query
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Persisted Execution Context projections.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentExecutionContextList"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+  post:
+    tags: [Agent Runtime State]
+    operationId: ensureAgentExecutionContext
+    summary: Ensure one authorized Execution Context and its target residency.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/EnsureAgentExecutionContextRequest"
+    responses:
+      "200":
+        description: Existing or newly created Context.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/EnsureAgentExecutionContextResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+reconcileContexts:
+  post:
+    tags: [Agent Runtime State]
+    operationId: reconcileAgentExecutionContexts
+    summary: Repair missing canonical meta Contexts for materializable Agents.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/ReconcileAgentExecutionContextsRequest"
+    responses:
+      "200":
+        description: Bounded reconciliation page result.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/ReconcileAgentExecutionContextsResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+getContext:
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentExecutionContext
+    parameters:
+      - $ref: "#/components/parameters/ContextKey"
+    responses:
+      "200":
+        description: Persisted Execution Context.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentExecutionContext"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+setContextResidency:
+  post:
+    tags: [Agent Runtime State]
+    operationId: setAgentExecutionContextResidency
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/SetAgentExecutionContextResidencyRequest"
+    responses:
+      "200":
+        description: Updated Context.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentExecutionContext"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+deleteContext:
+  post:
+    tags: [Agent Runtime State]
+    operationId: deleteAgentExecutionContext
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/DeleteAgentExecutionContextRequest"
+    responses:
+      "200":
+        description: Context deletion result.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeDeletedResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+startEpoch:
+  post:
+    tags: [Agent Runtime State]
+    operationId: startAgentServiceEpoch
+    summary: Open the epoch of a newly started Agent Service process.
+    description: >-
+      One Agent Service process runs against a database. Every Run still
+      running under an earlier epoch ends as interrupted (failed with
+      process_interrupted); queued Runs stay queued. A Message steer that
+      waited for an interrupted Run becomes a queued Run, and any other
+      unsettled steer is settled as uncertain. Every later Runtime write
+      names this epoch; a write naming an earlier one is rejected with
+      CONTEXT_FENCED.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/StartAgentServiceEpochRequest"
+    responses:
+      "200":
+        description: The interrupted Runs and the Contexts with queued work.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentServiceEpochStart"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+acceptTrustedNotification:
+  post:
+    tags: [Agent Runtime State]
+    operationId: acceptAgentRuntimeTrustedNotification
+    summary: Persist one trusted internal notification for the active Local Run
+    description: >-
+      Inserts the internal input in steering state under the fenced Context. An
+      exact already-persisted input is reported as already_accepted so callers do
+      not steer the provider twice.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/AcceptAgentTrustedNotificationRequest"
+    responses:
+      "200":
+        description: Notification admission result.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AcceptAgentTrustedNotificationResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+submitTrustedTurn:
+  post:
+    tags: [Agent Runtime State]
+    operationId: submitAgentRuntimeTrustedTurn
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/SubmitAgentTrustedTurnRequest"
+    responses:
+      "200":
+        description: Stable queued Local Run identity.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/SubmitAgentTrustedTurnResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "#/components/responses/InboxNotAuthorized"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+clearSession:
+  post:
+    tags: [Agent Runtime State]
+    operationId: clearAgentRuntimeSession
+    summary: Clear a suspended Context's stale provider session
+    description: >-
+      Deletes only the session checkpoint at the caller's loaded configuration
+      revision while preserving the Context, inputs, Local Runs, and native history.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/ClearAgentRuntimeSessionRequest"
+    responses:
+      "200":
+        description: Whether the matching stale session was cleared.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/ClearAgentRuntimeSessionResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+getRun:
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentLocalRun
+    parameters:
+      - $ref: "#/components/parameters/ContextKey"
+      - $ref: "#/components/parameters/LocalRunId"
+    responses:
+      "200":
+        description: Local Run projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentLocalRun"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+claimRun:
+  post:
+    tags: [Agent Runtime State]
+    operationId: claimAgentLocalRun
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/ClaimAgentLocalRunRequest"
+    responses:
+      "200":
+        description: Earliest queued Local Run, or no claim while another Run is active.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/ClaimAgentLocalRunResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+requeueRun:
+  post:
+    tags: [Agent Runtime State]
+    operationId: requeueAgentLocalRun
+    summary: Return a running Local Run to the durable queue.
+    description: >-
+      Used when its start definitely did not happen or when the Agent Service
+      stops for a restart. The Run's pending native questions expire.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/RequeueAgentLocalRunRequest"
+    responses:
+      "200":
+        description: Local Run returned to the queue without changing its accepted inputs.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeSuccessResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+finishRun:
+  post:
+    tags: [Agent Runtime State]
+    operationId: finishAgentLocalRun
+    summary: Atomically commit Run terminal, optional Session checkpoint, and status terminal intent.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/FinishAgentLocalRunRequest"
+    responses:
+      "200":
+        description: Committed terminal projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/FinishAgentLocalRunResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+cancelRun:
+  post:
+    tags: [Agent Runtime State]
+    operationId: cancelAgentLocalRun
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/CancelAgentLocalRunRequest"
+    responses:
+      "200":
+        description: Local Run cancellation result.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/CancelAgentLocalRunResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+enqueueSteer:
+  post:
+    tags: [Agent Runtime State]
+    operationId: enqueueAgentRuntimeSteer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/EnqueueAgentSteerRequest"
+    responses:
+      "200":
+        description: Fallback queued Local Run.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/EnqueueAgentSteerResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+assignSteer:
+  post:
+    tags: [Agent Runtime State]
+    operationId: assignAgentRuntimeSteerRun
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/AssignAgentSteerRunRequest"
+    responses:
+      "200":
+        description: Steer assignment committed.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeSuccessResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+completeSteer:
+  post:
+    tags: [Agent Runtime State]
+    operationId: completeAgentRuntimeSteer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/CompleteAgentSteerRequest"
+    responses:
+      "200":
+        description: Steer outcome committed.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeSuccessResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+session:
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentRuntimeSession
+    parameters:
+      - $ref: "#/components/parameters/ContextKey"
+    responses:
+      "200":
+        description: RuntimeSession checkpoint, if present.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/GetAgentRuntimeSessionResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+checkpointSession:
+  post:
+    tags: [Agent Runtime State]
+    operationId: checkpointAgentRuntimeSession
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/CheckpointAgentRuntimeSessionRequest"
+    responses:
+      "200":
+        description: Committed RuntimeSession checkpoint.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeSession"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+waitingRuns:
+  get:
+    tags: [Agent Runtime State]
+    operationId: listAgentRuntimeWaitingContexts
+    summary: List Contexts whose queued Run or Message steer has waited 30 seconds.
+    description: >-
+      The Agent Service's fallback scan for lost run.queued and run.steered
+      hints. A queued Run counts while nothing runs in its Context; at most
+      1000 Context keys.
+    responses:
+      "200":
+        description: Context keys with waiting work.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeWaitingContexts"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+workState:
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentRuntimeWorkState
+    parameters:
+      - $ref: "#/components/parameters/ContextKey"
+    responses:
+      "200":
+        description: Pending Runtime work projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeWorkState"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+openStatus:
+  post:
+    tags: [Agent Runtime State]
+    operationId: openAgentRuntimeStatus
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/OpenAgentRuntimeStatusRequest"
+    responses:
+      "200":
+        description: The Room that shows the Run's status, or a no-op for private or ambiguous sources.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/OpenAgentRuntimeStatusResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+offerStatus:
+  post:
+    tags: [Agent Runtime State]
+    operationId: offerAgentRuntimePresentationEvents
+    description: >-
+      Appends one ordered batch of a running Run's Runtime presentation events in one
+      transaction and announces the Run's new event sequence to its status Room.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/OfferAgentRuntimePresentationEventsRequest"
+    responses:
+      "200":
+        description: Accepted ordered Runtime presentation events.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/OfferAgentRuntimePresentationEventsResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+getLocalComputer:
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentRuntimeLocalComputer
+    summary: Read one Local Computer, to check a Runner credential before a connection is accepted.
+    parameters:
+      - name: computer_id
+        in: query
+        required: true
+        schema:
+          $ref: "../components/common.yaml#/components/schemas/Id"
+    responses:
+      "200":
+        description: The Local Computer.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeLocalComputer"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+connectLocalComputer:
+  post:
+    tags: [Agent Runtime State]
+    operationId: connectAgentRuntimeLocalComputer
+    summary: Record a Computer's hello and read the Agent Runners it should hold.
+    description: >-
+      Checks the Runner credential generation and owner, binds the Computer
+      Daemon Identity on first use, records the observation, and returns every
+      active Agent placed on this Computer. The Agent Service computes the
+      Computer's Agent Runners from these placements; a Runner the Computer
+      reports for an Agent not listed here is removed.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/ConnectAgentRuntimeLocalComputerRequest"
+    responses:
+      "200":
+        description: The Computer and the Agents placed on it.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/ConnectAgentRuntimeLocalComputerResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+recordRunOperation:
+  post:
+    tags: [Agent Runtime State]
+    operationId: recordAgentLocalRunOperation
+    summary: Record a Runner Operation of a Run, and its usage once it ends.
+    description: >-
+      The Run keeps one entry per Runner Operation. A start records the
+      Operation with no usage; a terminal records its usage once and adds it
+      to the usage totals. A write of an earlier Agent Service epoch is
+      rejected with CONTEXT_FENCED.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/RecordAgentLocalRunOperationRequest"
+    responses:
+      "200":
+        description: Recorded.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeSuccessResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+touchLocalComputer:
+  post:
+    tags: [Agent Runtime State]
+    operationId: touchAgentRuntimeLocalComputer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/TouchAgentRuntimeLocalComputerRequest"
+    responses:
+      "200":
+        description: Updated Local Computer projection.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeLocalComputer"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+removeLocalComputer:
+  post:
+    tags: [Agent Runtime State]
+    operationId: removeAgentRuntimeLocalComputer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/RemoveAgentRuntimeLocalComputerRequest"
+    responses:
+      "200":
+        description: Local Computer removal result.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeLocalComputerRemovalResult"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+components:
+  responses:
+    InboxNotAuthorized:
+      description: >-
+        INBOX_NOT_AUTHORIZED rejects only this Inbox's current reception grant;
+        the Context and its other Inboxes remain authoritative. CONTEXT_FENCED
+        is reserved for a lost Context identity or a superseded Agent Service
+        epoch and is returned as 409.
+      content:
+        application/json:
+          schema:
+            $ref: "../components/common.yaml#/components/schemas/ErrorResponse"
+  parameters:
+    ContextKey:
+      name: context_key
+      in: query
+      required: true
+      schema:
+        $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentRuntimeContextKey"
+    InboxId:
+      name: inbox_id
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 1000
+    LocalRunId:
+      name: local_run_id
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+    InputId:
+      name: input_id
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 1000
+
+listRecentlyUsedContexts:
+  post:
+    tags: [Agent Runtime State]
+    operationId: listRecentlyUsedAgentRuntimeContexts
+    summary: List active Local Computer Contexts with a recent Local Run, for restart restore.
+    description: Read only. Never activates Contexts; callers decide what to do with the observations. The window and row limit are server-side.
+    responses:
+      "200":
+        description: Contexts ordered by most recent Local Run first. Empty when none match.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/ListRecentlyUsedAgentRuntimeContextsResult"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "500":
+        $ref: "../components/common.yaml#/components/responses/InternalError"
+
+agentMemory:
+  parameters:
+    - name: agentId
+      in: path
+      required: true
+      schema:
+        $ref: "../components/common.yaml#/components/schemas/Id"
+  get:
+    tags: [Agent Runtime State]
+    operationId: getAgentMemory
+    summary: Read the Agent-scoped derived memory and maintenance cursor.
+    responses:
+      "200":
+        description: Current memory; an uninitialized Agent has revision zero.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentMemoryDocument"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+  post:
+    tags: [Agent Runtime State]
+    operationId: commitAgentMemory
+    summary: Compare-and-swap derived memory using the supplied current revision.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentMemoryDocument"
+    responses:
+      "200":
+        description: Committed memory with incremented revision.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-runtime-state.yaml#/components/schemas/AgentMemoryDocument"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+
+humanInteractions:
+  post:
+    tags: [Agent Runtime State]
+    operationId: createRuntimeHumanInteraction
+    summary: Create a Room question card for one active Runtime request.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/agent-runtime-state.yaml#/components/schemas/CreateRuntimeHumanInteractionRequest
+    responses:
+      "201":
+        description: The card and its Room Event are committed.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/agent-runtime-state.yaml#/components/schemas/RuntimeHumanInteractionCreated
+      "400":
+        $ref: ../components/common.yaml#/components/responses/BadRequest
+      "401":
+        $ref: ../components/common.yaml#/components/responses/Unauthenticated
+      "403":
+        $ref: ../components/common.yaml#/components/responses/Forbidden
+      "409":
+        $ref: ../components/common.yaml#/components/responses/Conflict
+      "503":
+        $ref: ../components/common.yaml#/components/responses/ServiceUnavailable
+
+permissionReviews:
+  post:
+    tags: [Agent Runtime State]
+    operationId: createRuntimePermissionReview
+    summary: Judge one pending Runtime tool call that the Runtime would otherwise ask a human about.
+    description: |
+      Consumes a matching one-time approval, returns a still-pending approval card,
+      or asks the permission judge. A needs_approval verdict creates an asynchronous
+      approval card whose decision wakes the waiting Agent; the Runtime is never
+      blocked on the human.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/agent-runtime-state.yaml#/components/schemas/CreateRuntimePermissionReviewRequest
+    responses:
+      "200":
+        description: The verdict for this exact action.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/agent-runtime-state.yaml#/components/schemas/RuntimePermissionReviewResult
+      "400":
+        $ref: ../components/common.yaml#/components/responses/BadRequest
+      "401":
+        $ref: ../components/common.yaml#/components/responses/Unauthenticated
+      "403":
+        $ref: ../components/common.yaml#/components/responses/Forbidden
+      "409":
+        $ref: ../components/common.yaml#/components/responses/Conflict
+      "503":
+        $ref: ../components/common.yaml#/components/responses/ServiceUnavailable

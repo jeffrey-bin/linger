@@ -1,0 +1,351 @@
+/* Shared Markdown presentation for Human and Agent messages. */
+.message-markdown {
+  color: var(--app-ink);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 22px;
+  word-break: break-word;
+}
+
+.message-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.message-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.message-markdown p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.message-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.message-markdown h1,
+.message-markdown h2,
+.message-markdown h3,
+.message-markdown h4,
+.message-markdown h5,
+.message-markdown h6 {
+  margin: 16px 0 10px;
+  color: var(--app-ink);
+  font-weight: 580;
+  letter-spacing: 0.0075em;
+}
+
+.message-markdown h1:first-child,
+.message-markdown h2:first-child,
+.message-markdown h3:first-child,
+.message-markdown h4:first-child,
+.message-markdown h5:first-child,
+.message-markdown h6:first-child {
+  margin-top: 0;
+}
+
+.message-markdown h1 {
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.message-markdown h2 {
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.message-markdown h3 {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.message-markdown h4,
+.message-markdown h5,
+.message-markdown h6 {
+  margin: 14px 0 6px;
+  font-size: 15px;
+  line-height: 22.5px;
+}
+
+.message-markdown ul,
+.message-markdown ol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style-position: outside;
+}
+
+.message-markdown ul {
+  margin-left: 16px;
+  list-style-type: disc;
+}
+
+.message-markdown ol {
+  margin-left: 40px;
+  list-style-type: decimal;
+}
+
+.message-markdown li {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.message-markdown li::marker {
+  color: var(--app-muted);
+}
+
+.message-markdown li > p {
+  margin: 0;
+}
+
+.message-markdown li > p + p {
+  margin-top: 8px;
+}
+
+.message-markdown ul.contains-task-list {
+  margin-left: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.message-markdown li.task-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.message-markdown li.task-list-item input[type="checkbox"] {
+  margin-top: 4px;
+}
+
+.message-markdown blockquote {
+  margin: 10px 0;
+  padding: 0 0 0 12px;
+  border: 0;
+  border-left: 2px solid var(--app-border);
+  color: var(--app-muted);
+  font-style: normal;
+}
+
+.message-markdown blockquote p {
+  margin: 0;
+}
+
+.message-markdown code {
+  border-radius: 4px;
+  background: var(--app-surface-soft);
+  color: var(--app-ink);
+  font-family: var(--app-font-mono);
+  font-size: 0.875em;
+  letter-spacing: 0;
+  padding: 2px 4px;
+}
+
+.message-markdown pre {
+  margin: 16px 0;
+  padding: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface-soft);
+  color: var(--app-ink);
+  font-family: var(--app-font-mono);
+  font-size: 14px;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
+/* Inside a filled bubble, code is a slightly darker tint of the bubble
+   rather than a white chip. */
+.room-message-bubble .message-markdown :is(:not(pre) > code, pre) {
+  background: hsl(var(--town-foreground) / 0.06);
+}
+
+/* Code inside a block is part of the block's single surface. */
+.message-markdown pre code {
+  background: none;
+}
+
+.message-code-block {
+  position: relative;
+}
+
+.message-code-block > pre {
+  padding-right: 40px;
+}
+
+.message-code-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--app-muted);
+  opacity: 0;
+  transition:
+    opacity var(--app-micro-duration) ease,
+    background-color var(--app-micro-duration) ease;
+}
+
+.message-code-block:hover .message-code-copy,
+.message-code-copy:focus-visible {
+  opacity: 1;
+}
+
+.message-code-copy:hover {
+  background: hsl(var(--town-foreground) / 0.08);
+  color: var(--app-ink);
+}
+
+@media (hover: none) {
+  .message-code-copy {
+    opacity: 1;
+  }
+}
+
+.message-markdown pre code {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-markdown a {
+  color: var(--app-link);
+  text-decoration: none;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.message-markdown a:hover {
+  text-decoration: underline;
+}
+
+.message-markdown strong,
+.message-markdown b {
+  font-weight: 580;
+}
+
+.message-markdown em,
+.message-markdown i {
+  font-style: italic;
+}
+
+.message-markdown del,
+.message-markdown s {
+  text-decoration: line-through;
+}
+
+.message-markdown hr {
+  height: 0;
+  margin: 24px 0;
+  border: none;
+  border-top: 1px solid var(--app-border);
+}
+
+.message-markdown .tiptap-table-scroll-wrapper {
+  box-sizing: border-box;
+  width: min(724px, 100%);
+  margin: 16px 0;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+}
+
+.message-markdown .tiptap-table-scroll-viewport {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.message-markdown .tiptap-table-scroll-viewport table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: inherit;
+}
+
+.message-markdown .tiptap-table-scroll-viewport thead {
+  border-bottom: 1px solid var(--app-border);
+}
+
+.message-markdown .tiptap-table-scroll-viewport tr {
+  border-bottom: 1px solid var(--app-border);
+}
+
+.message-markdown .tiptap-table-scroll-viewport tr:last-child {
+  border-bottom: none;
+}
+
+.message-markdown .tiptap-table-scroll-viewport th,
+.message-markdown .tiptap-table-scroll-viewport td {
+  min-width: 140px;
+  border: none;
+  border-right: 1px solid var(--app-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.message-markdown .tiptap-table-scroll-viewport th:last-child,
+.message-markdown .tiptap-table-scroll-viewport td:last-child {
+  border-right: none;
+}
+
+.message-markdown .tiptap-table-scroll-viewport th {
+  padding: 12px 20px;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 470;
+  color: var(--app-muted);
+  background: var(--app-surface-soft);
+}
+
+.message-markdown .tiptap-table-scroll-viewport td {
+  padding: 12px 20px;
+  color: var(--app-ink);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Agent mention: avatar and name in the Agent's own colour, no chip box. */
+.agent-mention {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border-radius: var(--app-control-radius);
+  background: transparent;
+  color: var(--agent-mention-ink);
+  font-weight: 600;
+  line-height: inherit;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+button.agent-mention:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+button.agent-mention:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 1px;
+}
+/* On the reader's own dark bubble the colour is lifted toward white. */
+.room-message-card[data-current-actor="true"]
+  .room-message-bubble
+  .agent-mention {
+  color: color-mix(in srgb, var(--agent-mention-color) 45%, white);
+}

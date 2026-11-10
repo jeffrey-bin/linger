@@ -1,0 +1,18 @@
+diff --git a/dist/src-BMn6YVTo.js b/dist/src-BMn6YVTo.js
+--- a/dist/src-BMn6YVTo.js
++++ b/dist/src-BMn6YVTo.js
+@@ -1305,1 +1305,4 @@
+-		const formatPath = (rel) => this.virtualMode ? `/${rel}` : rel;
++		// Virtual paths must be relative to rootDir, not the glob search directory.
++		const formatPath = (rel) => this.virtualMode
++			? `/${path.relative(this.cwd, path.resolve(resolvedSearchPath, rel)).split(path.sep).join("/")}`
++			: rel;
+diff --git a/dist/src-BMXphRFQ.cjs b/dist/src-BMXphRFQ.cjs
+--- a/dist/src-BMXphRFQ.cjs
++++ b/dist/src-BMXphRFQ.cjs
+@@ -1313,1 +1313,4 @@
+-		const formatPath = (rel) => this.virtualMode ? `/${rel}` : rel;
++		// Virtual paths must be relative to rootDir, not the glob search directory.
++		const formatPath = (rel) => this.virtualMode
++			? `/${node_path.default.relative(this.cwd, node_path.default.resolve(resolvedSearchPath, rel)).split(node_path.default.sep).join("/")}`
++			: rel;

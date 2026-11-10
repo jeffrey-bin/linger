@@ -1,0 +1,22 @@
+{
+  "runner_id": "runner-local",
+  "display_name": "Alice's Mac",
+  "gateway": {
+    "url": "wss://agent.example.com/v1/runner-gateway",
+    "token_env": "LINGER_RUNNER_GATEWAY_TOKEN"
+  },
+  "state_directory": "/absolute/path/to/.linger/computer",
+  "codex": {
+    "auth_file": "/absolute/path/to/codex/auth.json"
+  },
+  "workspace_grants": [
+    {
+      "grant_id": "repo-main",
+      "label": "Linger workspace",
+      "tenant_id": "tenant_acme",
+      "root_path": "/absolute/path/to/workspace",
+      "mode": "workspace-write",
+      "scope": "owner"
+    }
+  ]
+}

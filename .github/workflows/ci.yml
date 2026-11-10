@@ -1,0 +1,96 @@
+name: CI
+
+# The repository gate runs on every pull request; each app's fast check runs
+# only when its paths change. Pushes to main run every check. The heavier
+# suites (node-services, voice-runtime, computer, integration, containers and
+# E2E) stay local: run `make check BASE=<target-ref>` and the targets in the
+# Makefile before you open a pull request.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # BASE reaches commitlint, the changed-file lints, the built-in Skill
+  # immutability check and the doc-comment lint.
+  BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      packages: ${{ steps.filter.outputs.packages }}
+      teamhub-cli: ${{ steps.filter.outputs.teamhub-cli }}
+      installer: ${{ steps.filter.outputs.installer }}
+      desktop: ${{ steps.filter.outputs.desktop }}
+      contracts: ${{ steps.filter.outputs.contracts }}
+      teamhub: ${{ steps.filter.outputs.teamhub }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = pull_request ]; then
+            changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          else
+            changed=ALL
+          fi
+          # Files every Node check depends on.
+          node='^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.npmrc|\.node-version|patches/|eslint\.config\.mjs|tsconfig\.base\.json|vitest\.config\.ts|Makefile|\.github/)'
+          match() {
+            if [ "$changed" = ALL ] || grep -Eq "$1" <<<"$changed"; then
+              echo "$2=true" >>"$GITHUB_OUTPUT"
+            else
+              echo "$2=false" >>"$GITHUB_OUTPUT"
+            fi
+          }
+          match "$node|^(apps/web/|packages/|contracts/generated/typescript/)" web
+          match "$node|^(packages/|contracts/generated/typescript/|contracts/fixtures/)" packages
+          match "$node|^(apps/teamhub-cli/|packages/|contracts/)" teamhub-cli
+          match "$node|^(apps/linger-installer/|packages/|contracts/generated/typescript/)" installer
+          match "$node|^(apps/desktop/|apps/computer/local-daemon/|apps/computer/package\.json|packages/|contracts/generated/typescript/)" desktop
+          match "$node|^contracts/" contracts
+          match '^(apps/teamhub/|skills/|contracts/generated/go/|contracts/fixtures/|\.golangci\.yml|Makefile|\.github/)' teamhub
+
+  repository-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      # A branch's first push has no earlier commit to compare against.
+      - if: env.BASE != '0000000000000000000000000000000000000000'
+        run: make check-repository-gate BASE="$BASE"
+
+  check:
+    needs: changes
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          [web, packages, teamhub-cli, installer, desktop, contracts, teamhub]
+    steps:
+      - name: Skip unchanged app
+        if: needs.changes.outputs[matrix.app] != 'true'
+        run: echo "No ${{ matrix.app }} paths changed."
+      - uses: actions/checkout@v4
+        if: needs.changes.outputs[matrix.app] == 'true'
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+        if: needs.changes.outputs[matrix.app] == 'true'
+      - if: needs.changes.outputs[matrix.app] == 'true'
+        run: make check-${{ matrix.app }} BASE="$BASE"

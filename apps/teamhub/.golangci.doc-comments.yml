@@ -1,0 +1,21 @@
+version: "2"
+
+# Doc comments on new and changed declarations only. `make -C apps/teamhub
+# lint-go` and `lint-go-daemon` run this config with --new-from-rev=$(BASE), so
+# undocumented existing symbols do not fail until they are migrated.
+linters:
+  default: none
+  enable:
+    - revive
+  settings:
+    revive:
+      rules:
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+        - name: package-comments
+  exclusions:
+    rules:
+      - linters:
+          - revive
+        path: _test\.go

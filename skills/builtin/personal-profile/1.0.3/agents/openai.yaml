@@ -1,0 +1,4 @@
+interface:
+  display_name: "Personal Profile"
+  short_description: "Build and update the Human's TeamHub Personal Profile"
+  default_prompt: "Use $personal-profile to build or update my Personal Profile. Collect my blog, personal site, other public pages, Gmail, and what I say about myself; delegate reading and writing to a Task that publishes the complete English Profile with teamhub personal-profile write. For an existing Profile, integrate new information into affected passages without rereading all history or rewriting unchanged sections."

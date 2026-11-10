@@ -1,0 +1,90 @@
+components:
+  schemas:
+    BrowserProfile:
+      description: A Chrome profile directory name inside the user's Chrome data directory.
+      type: string
+      pattern: "^(Default|Profile [1-9][0-9]{0,3}|Guest Profile)$"
+    BrowserConnectionStatus:
+      description: >-
+        The browser that browser tools of this owner's Agents drive on one Local
+        Computer. It never contains the Playwright Extension token.
+      type: object
+      additionalProperties: false
+      required: [mode, state, platform]
+      properties:
+        mode:
+          type: string
+          enum: [isolated, user_chrome]
+          x-enum-varnames:
+            [BrowserConnectionModeIsolated, BrowserConnectionModeUserChrome]
+        state:
+          type: string
+          enum:
+            - isolated
+            - not_connected
+            - connected
+            - token_invalid
+            - browser_unavailable
+            - extension_unavailable
+            - unsupported
+          x-enum-varnames:
+            - BrowserConnectionStateIsolated
+            - BrowserConnectionStateNotConnected
+            - BrowserConnectionStateConnected
+            - BrowserConnectionStateTokenInvalid
+            - BrowserConnectionStateBrowserUnavailable
+            - BrowserConnectionStateExtensionUnavailable
+            - BrowserConnectionStateUnsupported
+        platform:
+          type: string
+          enum: [darwin, windows, linux]
+          x-enum-varnames:
+            [
+              BrowserConnectionPlatformDarwin,
+              BrowserConnectionPlatformWindows,
+              BrowserConnectionPlatformLinux,
+            ]
+        browser:
+          type: string
+          enum: [chrome]
+          x-enum-varnames: [BrowserConnectionBrowserChrome]
+        profile:
+          $ref: "#/components/schemas/BrowserProfile"
+        configured_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        verified_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        message:
+          type: string
+          minLength: 1
+          maxLength: 500
+    BrowserConnectionConfigureCommand:
+      description: >-
+        A normalized Playwright Extension token for the Local Computer. The
+        Computer stores it privately and never returns it.
+      type: object
+      additionalProperties: false
+      required: [extension_token]
+      properties:
+        extension_token:
+          type: string
+          writeOnly: true
+          pattern: "^[A-Za-z0-9_-]{20,256}$"
+        profile:
+          $ref: "#/components/schemas/BrowserProfile"
+    BrowserConnectionConfigureRequest:
+      description: >-
+        The text a Human pasted from the Playwright Extension. TeamHub trims it,
+        removes one optional PLAYWRIGHT_MCP_EXTENSION_TOKEN= prefix and optional
+        surrounding quotes, then validates the token. TeamHub never stores it.
+      type: object
+      additionalProperties: false
+      required: [extension_token]
+      properties:
+        extension_token:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 4096
+        profile:
+          $ref: "#/components/schemas/BrowserProfile"

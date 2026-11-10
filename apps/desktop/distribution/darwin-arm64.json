@@ -1,0 +1,31 @@
+{
+  "platform": "darwin",
+  "arch": "arm64",
+  "localmodelsTool": {
+    "url": "https://d2ikbbcl3j6jz9.cloudfront.net/cli/localmodels/0.1.0.dev28/darwin-arm64.tgz",
+    "sha256": "abd3baeabd3d43bd4a4e5fc3694ed2456d5b32b3b8d0b3805856d9b0a57272c8",
+    "bytes": 40530675,
+    "sourceCommit": "c77bed6e5b65c30314d96dfe8dc9b7ab964c5332",
+    "manifestSha256": "4aea49a70a826d9926762e12dac0fd6e358876e959f05c2bd825dfd4070ddf3a"
+  },
+  "nativeSources": [
+    {
+      "target": "darwin-arm64",
+      "file": "native/postgres-17.10-pgvector-0.8.6-darwin-arm64-b6f41d3d99572303e7c51f1c3de82f8a98a9f74d071362f1291625e3311b3b44.tar.gz",
+      "sha256": "b6f41d3d99572303e7c51f1c3de82f8a98a9f74d071362f1291625e3311b3b44",
+      "bytes": 9846138,
+      "postgresVersion": "17.10",
+      "pgvectorVersion": "0.8.6"
+    }
+  ],
+  "voiceTools": [
+    {
+      "target": "darwin-arm64",
+      "file": "native/voice-tools-livekit-1.13.6-ffmpeg-8.1.2-darwin-arm64-2ac0a1e4dc9114d747988876c41ae0e2a2d5dbee4c0e4e9bd8308f7c2ec2c825.tar.gz",
+      "sha256": "2ac0a1e4dc9114d747988876c41ae0e2a2d5dbee4c0e4e9bd8308f7c2ec2c825",
+      "bytes": 42124532,
+      "livekitVersion": "1.13.6",
+      "ffmpegVersion": "8.1.2"
+    }
+  ]
+}

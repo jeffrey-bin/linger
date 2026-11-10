@@ -1,0 +1,118 @@
+.bn-block-content[data-content-type="codeBlock"]:has(> .room-document-mermaid) {
+  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.room-document-mermaid {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.room-document-mermaid__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--app-border);
+  padding: 5px 7px 5px 10px;
+  background: var(--app-surface-soft);
+}
+
+.room-document-mermaid__copy {
+  min-width: 84px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+}
+
+.room-document-mermaid__language {
+  flex: 1;
+  min-width: 108px;
+  border: 0;
+  background: transparent;
+  color: var(--app-muted);
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.room-document-mermaid__modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+}
+
+.room-document-mermaid__mode {
+  min-width: 64px;
+  border: 0;
+  padding: 4px 9px;
+  background: transparent;
+  color: var(--app-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 470;
+  cursor: pointer;
+}
+
+.room-document-mermaid__mode + .room-document-mermaid__mode {
+  border-left: 1px solid var(--app-border);
+}
+
+.room-document-mermaid__mode[aria-pressed="true"] {
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-weight: 470;
+}
+
+.room-document-mermaid__source {
+  min-height: 240px;
+  margin: 0;
+  overflow: auto;
+  padding: 14px 16px;
+  background: var(--app-surface);
+  color: var(--app-body);
+  font-family: var(--app-font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.room-document-mermaid__source > code {
+  color: inherit;
+  caret-color: var(--app-ink);
+}
+
+.room-document-mermaid__source > code::selection {
+  background: color-mix(in srgb, var(--app-info) 24%, var(--app-surface));
+  color: var(--app-ink);
+}
+
+.room-document-mermaid__preview {
+  min-height: 240px;
+  background: white;
+}
+
+.room-document-mermaid__preview > p {
+  margin: 0;
+  padding: 72px 18px;
+  color: var(--app-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.room-document-mermaid__preview > .room-document-mermaid__error {
+  color: var(--app-danger);
+}
+
+/* Component layout must not override the browser's hidden attribute. */
+.room-document-mermaid [hidden] {
+  display: none;
+}

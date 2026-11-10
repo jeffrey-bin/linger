@@ -1,0 +1,140 @@
+workerClaims:
+  post:
+    tags: [Task Worker]
+    operationId: claimTaskExecution
+    summary: Claim one runnable Task using a fenced PostgreSQL lease.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/task-executions.yaml#/components/schemas/TaskWorkerClaimRequest"
+    responses:
+      "200":
+        description: Claimed Task execution bundle with a new lease token.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/task-executions.yaml#/components/schemas/TaskWorkerExecution"
+      "204":
+        description: No Task is currently claimable.
+        headers:
+          Task-Next-Claim-Delay-Ms:
+            description: >-
+              Milliseconds on the TeamHub database clock until the earliest
+              Task becomes claimable without another commit. Omitted when no
+              Task is pending.
+            schema:
+              type: integer
+              format: int64
+              minimum: 0
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+
+workerExecution:
+  get:
+    tags: [Task Worker]
+    operationId: getTaskExecution
+    summary: Reload one Task execution under its current fenced lease.
+    parameters:
+      - name: worker_id
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: Task-Lease-Token
+        in: header
+        required: true
+        description: Opaque lease secret; kept out of URLs and ordinary request bodies.
+        schema:
+          type: string
+      - name: lease_generation
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    responses:
+      "200":
+        description: Current Task execution bundle.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/task-executions.yaml#/components/schemas/TaskWorkerExecution"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+
+workerHeartbeat:
+  post:
+    tags: [Task Worker]
+    operationId: heartbeatTaskExecution
+    summary: Extend the same Task lease without changing execution state.
+    parameters:
+      - name: Task-Lease-Token
+        in: header
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/task-executions.yaml#/components/schemas/TaskWorkerHeartbeatRequest"
+    responses:
+      "200":
+        description: Extended Task lease.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/task-executions.yaml#/components/schemas/TaskWorkerLease"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+
+workerTransition:
+  post:
+    tags: [Task Worker]
+    operationId: transitionTaskExecution
+    summary: Commit one discriminated Task transition under a fenced lease.
+    parameters:
+      - name: Task-Lease-Token
+        in: header
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/task-executions.yaml#/components/schemas/TaskWorkerTransitionRequest"
+    responses:
+      "200":
+        description: Updated Task execution bundle.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/task-executions.yaml#/components/schemas/TaskWorkerExecution"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"

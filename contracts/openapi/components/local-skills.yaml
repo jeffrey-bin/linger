@@ -1,0 +1,128 @@
+components:
+  schemas:
+    LocalSkillScanRequest:
+      type: object
+      additionalProperties: false
+      required: [runtime_type]
+      properties:
+        runtime_type:
+          type: string
+          enum: [codex, claude]
+          x-enum-varnames:
+            [
+              LocalSkillScanRequestRuntimeCodex,
+              LocalSkillScanRequestRuntimeClaude,
+            ]
+    LocalSkillCandidate:
+      type: object
+      additionalProperties: false
+      required:
+        - candidate_ref
+        - name
+        - description
+        - package_sha256
+        - file_count
+        - size_bytes
+        - normalizations
+        - risk_flags
+        - importability
+      properties:
+        native_source:
+          type: string
+          minLength: 1
+          maxLength: 120
+        native_enabled:
+          type: boolean
+        candidate_ref:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        package_sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        file_count:
+          type: integer
+          minimum: 1
+          maximum: 256
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 33554432
+        normalizations:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            minLength: 1
+            maxLength: 120
+        risk_flags:
+          type: array
+          maxItems: 16
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+        importability:
+          type: string
+          enum: [ready, unsupported]
+          x-enum-varnames:
+            [LocalSkillCandidateReady, LocalSkillCandidateUnsupported]
+        error_code:
+          type: string
+          minLength: 1
+          maxLength: 64
+        error_detail:
+          type: string
+          minLength: 1
+          maxLength: 512
+        manifest_excerpt:
+          type: string
+          minLength: 1
+          maxLength: 4096
+    LocalSkillScan:
+      type: object
+      additionalProperties: false
+      required: [scan_id, computer_id, runtime_type, expires_at, items]
+      properties:
+        scan_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        runtime_type:
+          type: string
+          enum: [codex, claude]
+          x-enum-varnames:
+            [LocalSkillScanRuntimeCodex, LocalSkillScanRuntimeClaude]
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        items:
+          type: array
+          maxItems: 256
+          items:
+            $ref: "#/components/schemas/LocalSkillCandidate"
+    LocalSkillScanCommandRequest:
+      type: object
+      additionalProperties: false
+      required: [request_id, scan_id, runtime_type, expires_at]
+      properties:
+        request_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        scan_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        runtime_type:
+          type: string
+          enum: [codex, claude]
+          x-enum-varnames:
+            [
+              LocalSkillScanCommandRuntimeCodex,
+              LocalSkillScanCommandRuntimeClaude,
+            ]
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"

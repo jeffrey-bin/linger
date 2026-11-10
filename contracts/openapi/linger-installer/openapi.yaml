@@ -1,0 +1,1252 @@
+openapi: 3.1.0
+info:
+  title: Linger Local Installer API
+  version: 0.1.0
+  description:
+    Loopback-only independent offline installer. Exact Host and Origin
+    verification plus local session auth. No arbitrary shell execution.
+servers:
+  - url: http://127.0.0.1:0
+    description: Ephemeral host-local installer port
+security:
+  - installerSession: []
+paths:
+  /api/reopen:
+    post:
+      operationId: reopenInstaller
+      summary: reopenInstaller
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - token
+              properties:
+                token: &a1
+                  type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ok"
+        "400": &a2
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallerError"
+        "401": &a3
+          description: Local installer session required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallerError"
+        "409": &a4
+          description: Instance busy or operation unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallerError"
+      security: []
+      description:
+        Host-local launcher control capability from an owned private file;
+        rotate the one-use browser bootstrap without restarting tasks.
+  /api/session:
+    post:
+      operationId: createInstallerSession
+      summary: createInstallerSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - token
+              properties:
+                token: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ok"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+      security: []
+  /api/environment:
+    get:
+      operationId: getInstallerEnvironment
+      summary: getInstallerEnvironment
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnvironmentReport"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/setup:
+    get:
+      operationId: getInstallerSetup
+      summary: Inspect hardware and available runtimes without installing
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetupReport"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/config:
+    get:
+      operationId: getInstallerConfiguration
+      summary: getInstallerConfiguration
+      parameters:
+        - name: instance
+          in: query
+          required: false
+          schema: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallerConfig"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/instances:
+    get:
+      operationId: listInstallerInstances
+      summary: listInstallerInstances
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/InstanceSummary"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/instances/{instance}/status:
+    get:
+      operationId: getInstallerInstanceStatus
+      summary: getInstallerInstanceStatus
+      parameters:
+        - name: instance
+          in: path
+          required: true
+          schema: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceStatus"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/instances/{instance}/runtime:
+    get:
+      operationId: getInstallerInstanceRuntime
+      summary:
+        Read the instance's selected AI runtime with the executable and profile
+        paths an external Computer must use for it
+      parameters:
+        - name: instance
+          in: path
+          required: true
+          schema: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceRuntime"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/instances/{instance}/login:
+    get:
+      operationId: getInstallerLoginInformation
+      summary:
+        Read current instance login credentials for explicit owner display;
+        never log or persist in browser storage.
+      parameters:
+        - name: instance
+          in: path
+          required: true
+          schema: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginInformation"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+      description: "Returns Cache-Control: no-store. This is the only authorized
+        credential-display response; secrets never enter events, status or
+        diagnostic output."
+  /api/jobs:
+    get:
+      operationId: listInstallationJobs
+      summary: listInstallationJobs
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/InstallationJob"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+    post:
+      operationId: createInstallationJob
+      summary: createInstallationJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstallationInput"
+      responses:
+        "202":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallationJob"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/jobs/{id}:
+    get:
+      operationId: getInstallationJob
+      summary: getInstallationJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallationJob"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/jobs/{id}/events:
+    get:
+      operationId: streamInstallationEvents
+      summary:
+        Replay sequenced events and stream real progress; heartbeat comments do
+        not advance sequence.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: *a1
+        - name: Last-Event-ID
+          in: header
+          required: false
+          schema: *a1
+        - name: after
+          in: query
+          required: false
+          schema: *a1
+      responses:
+        "200":
+          description:
+            Default SSE message events, JSON InstallationEvent data; id is the
+            sequence. Snapshot event reconciles replay window gaps.
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/InstallationEvent"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/jobs/{id}/cancel:
+    post:
+      operationId: cancelInstallationJob
+      summary: cancelInstallationJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: *a1
+      responses:
+        "202":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallationJob"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/jobs/{id}/retry:
+    post:
+      operationId: retryInstallationJob
+      summary: retryInstallationJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: *a1
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocalModelsAuthority"
+      responses:
+        "202":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallationJob"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/model/check:
+    post:
+      operationId: checkInstallerModel
+      summary: checkInstallerModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModelConfiguration"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelCheckReport"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/runtime-model/check:
+    post:
+      operationId: checkInstallerRuntimeModel
+      summary: Validate native Codex Responses model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModelConfiguration"
+      responses:
+        "200":
+          description: Model checks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelCheckReport"
+        "400": *a2
+        "401": *a3
+  /api/runtime-login:
+    get:
+      operationId: inspectInstallerRuntimeLogin
+      summary: Inspect native runtime sign-in without exposing process logs
+      parameters:
+        - in: query
+          name: instance
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Owner-only ephemeral authentication state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RuntimeLogin"
+        "400": *a2
+        "401": *a3
+    post:
+      operationId: startInstallerRuntimeLogin
+      summary: Start native sign-in or submit its authorization code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [instance]
+              properties:
+                instance:
+                  type: string
+                apiKey:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+                  writeOnly: true
+                provider:
+                  type: string
+                  enum: [openai, anthropic, openai-compatible]
+                baseUrl:
+                  type: string
+                  format: uri
+                  maxLength: 2048
+                  description: Pi compatible API base URL; required together with model for openai-compatible. HTTP loopback or credential-free HTTPS only.
+                model:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+                  description: Existing Pi compatible model ID; not a model download request.
+                code:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+      responses:
+        "200":
+          description: Owner-only ephemeral authentication state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RuntimeLogin"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+    delete:
+      operationId: cancelInstallerRuntimeLogin
+      summary: Stop the native sign-in this installer started
+      parameters:
+        - in: query
+          name: instance
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Owner-only ephemeral authentication state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RuntimeLogin"
+        "400": *a2
+        "401": *a3
+  /api/actions/stop:
+    post:
+      operationId: stopInstallerInstance
+      summary: stopInstallerInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - instance
+              properties:
+                instance: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ok"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/actions/open-data:
+    post:
+      operationId: openInstallerDataDirectory
+      summary: openInstallerDataDirectory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - instance
+              properties:
+                instance: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ok"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/actions/open-product:
+    post:
+      operationId: openInstallerProduct
+      summary: openInstallerProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - instance
+              properties:
+                instance: *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ok"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+  /api/shutdown:
+    post:
+      operationId: shutdownInstaller
+      summary: shutdownInstaller
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ok"
+        "400": *a2
+        "401": *a3
+        "409": *a4
+components:
+  securitySchemes:
+    installerSession:
+      type: apiKey
+      in: cookie
+      name: linger_installer_session
+  schemas:
+    CheckResult:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - title
+        - state
+        - detail
+      properties:
+        id: *a1
+        title: *a1
+        state:
+          type: string
+          enum:
+            - ready
+            - action_required
+            - failed
+        detail: *a1
+    EnvironmentReport:
+      type: object
+      additionalProperties: false
+      required:
+        - platform
+        - arch
+        - releaseAvailable
+        - checks
+      properties:
+        platform: *a1
+        arch: *a1
+        releaseAvailable: &a6
+          type: boolean
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/CheckResult"
+        availableBytes: &a5
+          type: integer
+          minimum: 0
+        requiredBytes: *a5
+    ModelConfiguration:
+      type: object
+      additionalProperties: false
+      required:
+        - baseUrl
+        - model
+        - apiKey
+      properties:
+        baseUrl:
+          type: string
+          format: uri
+        model:
+          type: string
+          minLength: 1
+          maxLength: 256
+        apiKey:
+          type: string
+          minLength: 1
+          maxLength: 16384
+    ModelCheckReport:
+      type: object
+      additionalProperties: false
+      required:
+        - checks
+      properties:
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/CheckResult"
+    LocalModelsAuthority:
+      type: object
+      additionalProperties: false
+      description: Continue the private saved job input, replacing only model approval or explicit review. Omit both for an ordinary retry without spent authority.
+      not:
+        required: [localModelsApproval, localModelsReplan]
+      properties:
+        localModelsApproval:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        localModelsReplan:
+          type: boolean
+    LocalModelsPlan:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          planId,
+          gpuIndex,
+          gpuName,
+          llm,
+          contextWindow,
+          downloadBytes,
+          diskBytes,
+          memoryBytes,
+          components,
+          warnings,
+        ]
+      properties:
+        planId:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        gpuIndex:
+          type: integer
+          minimum: 0
+        gpuName: *a1
+        llm: *a1
+        contextWindow:
+          type: integer
+          minimum: 0
+        downloadBytes:
+          type: integer
+          minimum: 0
+        diskBytes:
+          type: integer
+          minimum: 0
+        memoryBytes:
+          type: integer
+          minimum: 0
+        components:
+          type: array
+          items: *a1
+        warnings:
+          type: array
+          items: *a1
+    InstallationInput:
+      type: object
+      additionalProperties: false
+      required:
+        - instance
+      properties:
+        shareGpu:
+          type: boolean
+          description: Explicit consent to share currently free GPU memory with existing tasks; defaults to false and never stops other processes.
+        setupChoice:
+          $ref: "#/components/schemas/SetupChoice"
+        localModelsApproval:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+          description: Approve only this saved plan. Must not be combined with localModelsReplan.
+        localModelsReplan:
+          type: boolean
+          description: Explicitly review an updated plan on the previously selected GPU; approval requires a separate request.
+        preparation:
+          type: string
+          enum: [codex, claude, pi]
+          description: Prepare a dependency without starting product services.
+        runtimeModel:
+          $ref: "#/components/schemas/ModelConfiguration"
+        instance:
+          type: string
+          pattern: ^[a-z][a-z0-9-]{0,39}$
+          default: default
+        port:
+          type: integer
+          minimum: 1024
+          maximum: 65535
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        password:
+          type: string
+          minLength: 8
+          maxLength: 256
+        computerName:
+          type: string
+          minLength: 1
+          maxLength: 120
+        model:
+          $ref: "#/components/schemas/ModelConfiguration"
+    InstallerConfig:
+      type: object
+      additionalProperties: false
+      required:
+        - instance
+        - email
+        - computerName
+        - releaseAvailable
+        - accountExists
+      properties:
+        shareGpu:
+          type: boolean
+          description: Explicit consent to share currently free GPU memory with existing tasks; defaults to false and never stops other processes.
+        setupChoice:
+          $ref: "#/components/schemas/SetupChoice"
+        runtimeModel:
+          type: object
+          additionalProperties: false
+          required: [baseUrl, model, keySaved]
+          properties:
+            baseUrl: *a1
+            model: *a1
+            keySaved: *a6
+        instance: *a1
+        email: *a1
+        computerName: *a1
+        port:
+          type: integer
+        releaseAvailable: *a6
+        dataDir: *a1
+        model:
+          type: object
+          additionalProperties: false
+          required:
+            - baseUrl
+            - model
+            - keySaved
+          properties:
+            baseUrl: *a1
+            model: *a1
+            keySaved: *a6
+        accountExists: *a6
+    ServiceStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - service
+        - ready
+      properties:
+        service: *a1
+        ready: *a6
+    RuntimeStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - status
+      properties:
+        type: *a1
+        status: *a1
+    ComputerStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - state
+        - detail
+        - runtimes
+      properties:
+        state:
+          type: string
+          enum:
+            - ready
+            - action_required
+            - offline
+        detail: *a1
+        runtimes:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuntimeStatus"
+        connected: *a6
+    StageId:
+      type: string
+      enum:
+        - preflight
+        - release
+        - images
+        - services
+        - account
+        - computer
+        - runtime
+    StageState:
+      type: string
+      enum:
+        - pending
+        - running
+        - succeeded
+        - failed
+        - skipped
+        - waiting_user
+        - canceled
+    JobState:
+      type: string
+      enum:
+        - queued
+        - running
+        - waiting_user
+        - succeeded
+        - failed
+        - canceled
+        - interrupted
+    InstallationStage:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - state
+        - message
+        - at
+      properties:
+        progress:
+          $ref: "#/components/schemas/ProgressCounter"
+        id:
+          $ref: "#/components/schemas/StageId"
+        state:
+          $ref: "#/components/schemas/StageState"
+        message: *a1
+        at:
+          type: string
+          format: date-time
+    ProgressCounter:
+      type: object
+      additionalProperties: false
+      required:
+        - completed
+        - unit
+      properties:
+        completed:
+          type: number
+          minimum: 0
+        total:
+          type: number
+          minimum: 0
+        unit: *a1
+    RuntimeLogin:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state:
+          type: string
+          enum: [idle, starting, waiting_user, ready, failed]
+        url:
+          type: string
+        deviceCode:
+          type: string
+        acceptsCode:
+          type: boolean
+        message:
+          type: string
+    InstallationJob:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - instance
+        - state
+        - createdAt
+        - updatedAt
+        - lastSequence
+        - stages
+      properties:
+        shareGpu:
+          type: boolean
+          description: Explicit consent to share currently free GPU memory with existing tasks; defaults to false and never stops other processes.
+        runtimeAuth:
+          type: object
+          additionalProperties: false
+          required: [runtime, loginCommand]
+          properties:
+            runtime:
+              type: string
+              enum: [codex, claude, pi]
+            loginCommand: *a1
+            loginInstructions: *a1
+        setupChoice:
+          $ref: "#/components/schemas/SetupChoice"
+        preparation:
+          type: string
+          enum: [codex, claude, pi]
+        id: *a1
+        instance: *a1
+        state:
+          $ref: "#/components/schemas/JobState"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastSequence: *a5
+        stage:
+          $ref: "#/components/schemas/StageId"
+        message: *a1
+        origin: *a1
+        stages:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstallationStage"
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/ServiceStatus"
+        computer:
+          $ref: "#/components/schemas/ComputerStatus"
+        knowledge: *a1
+        localModelsPlan:
+          $ref: "#/components/schemas/LocalModelsPlan"
+        errorCode: *a1
+        cancelRequested: *a6
+    InstallationEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - jobId
+        - sequence
+        - at
+        - kind
+        - message
+      properties:
+        jobId: *a1
+        sequence: *a5
+        at:
+          type: string
+          format: date-time
+        kind:
+          type: string
+          enum:
+            - stage
+            - log
+            - state
+            - snapshot
+        stage:
+          $ref: "#/components/schemas/StageId"
+        state: *a1
+        message: *a1
+        progress:
+          $ref: "#/components/schemas/ProgressCounter"
+        job:
+          $ref: "#/components/schemas/InstallationJob"
+    InstanceSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - origin
+      properties:
+        name: *a1
+        origin: *a1
+        mode:
+          type: string
+          enum:
+            - source-native
+    InstanceStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - origin
+        - services
+        - computer
+        - knowledge
+      properties:
+        origin: *a1
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/ServiceStatus"
+        computer:
+          $ref: "#/components/schemas/ComputerStatus"
+        knowledge: *a1
+        businessVerification: *a1
+    LoginInformation:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+        - origin
+      properties:
+        email: *a1
+        password: *a1
+        origin: *a1
+    InstallerError:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code: *a1
+        message: *a1
+    Ok:
+      type: object
+      additionalProperties: false
+      required:
+        - ok
+      properties:
+        ok:
+          type: boolean
+          const: true
+
+    SetupChoice:
+      type: string
+      enum: [local-models, codex, claude, pi]
+    InstanceRuntime:
+      type: object
+      additionalProperties: false
+      required: [environment]
+      properties:
+        setupChoice:
+          $ref: "#/components/schemas/SetupChoice"
+        environment:
+          type: object
+          description:
+            Absolute paths only, never credentials. LINGER_CODEX_PATH,
+            LINGER_CLAUDE_PATH and LINGER_PI_PATH name the executable;
+            CODEX_HOME, CLAUDE_CONFIG_DIR and PI_CODING_AGENT_DIR its profile
+            when it is not the user's default.
+          additionalProperties:
+            type: string
+    SetupReport:
+      type: object
+      additionalProperties: false
+      required:
+        - hardware
+        - choices
+        - localModels
+        - runtimes
+        - recommendation
+      properties:
+        hardware:
+          type: object
+          additionalProperties: false
+          required:
+            - platform
+            - arch
+            - totalMemoryBytes
+            - diskFreeBytes
+            - gpus
+          properties:
+            platform:
+              type: string
+            arch:
+              type: string
+            totalMemoryBytes:
+              type: number
+            diskFreeBytes:
+              type:
+                - number
+                - "null"
+            gpus:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                  - index
+                  - name
+                  - totalMemoryBytes
+                  - freeMemoryBytes
+                  - busy
+                properties:
+                  index:
+                    type: number
+                  name:
+                    type: string
+                  totalMemoryBytes:
+                    type: number
+                  freeMemoryBytes:
+                    type: number
+                  busy:
+                    type: boolean
+        choices:
+          type: array
+          items:
+            $ref: "#/components/schemas/SetupChoice"
+        localModels:
+          type: object
+          additionalProperties: false
+          required:
+            - eligible
+            - reasons
+            - selectedGpuIndex
+            - estimate
+          properties:
+            eligible:
+              type: boolean
+            reasons:
+              type: array
+              items:
+                type: string
+            reasonMessages:
+              type: array
+              description: Human-readable upstream explanations in the same order as reasons; model eligibility remains upstream-owned.
+              items:
+                type: string
+            selectedGpuIndex:
+              type:
+                - number
+                - "null"
+            estimate:
+              type: object
+              additionalProperties: false
+              required:
+                - downloadBytes
+                - diskBytes
+                - memoryBytes
+                - durationSeconds
+                - assumption
+                - model
+              properties:
+                downloadBytes:
+                  type:
+                    - number
+                    - "null"
+                diskBytes:
+                  type:
+                    - number
+                    - "null"
+                memoryBytes:
+                  type:
+                    - number
+                    - "null"
+                durationSeconds:
+                  type:
+                    - object
+                    - "null"
+                  additionalProperties: false
+                  required:
+                    - min
+                    - max
+                  properties:
+                    min:
+                      type: number
+                    max:
+                      type: number
+                assumption:
+                  type: string
+                model:
+                  type: string
+        runtimes:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - choice
+              - installed
+              - auth
+              - estimate
+            properties:
+              choice:
+                type: string
+                enum:
+                  - codex
+                  - claude
+                  - pi
+              installed:
+                type: boolean
+              auth:
+                type: string
+                enum:
+                  - unknown
+                  - authenticated
+                  - unauthenticated
+              estimate:
+                type: object
+                additionalProperties: false
+                required:
+                  - downloadBytes
+                  - diskBytes
+                  - memoryBytes
+                  - durationSeconds
+                  - assumption
+                properties:
+                  downloadBytes:
+                    type:
+                      - number
+                      - "null"
+                  diskBytes:
+                    type:
+                      - number
+                      - "null"
+                  memoryBytes:
+                    type:
+                      - number
+                      - "null"
+                  durationSeconds:
+                    type:
+                      - object
+                      - "null"
+                    additionalProperties: false
+                    required:
+                      - min
+                      - max
+                    properties:
+                      min:
+                        type: number
+                      max:
+                        type: number
+                  assumption:
+                    type: string
+        recommendation:
+          $ref: "#/components/schemas/SetupChoice"

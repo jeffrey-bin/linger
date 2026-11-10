@@ -1,0 +1,24 @@
+components:
+  schemas:
+    TaskRuntimePresentationRunPage:
+      type: object
+      additionalProperties: false
+      required: [active_items, history_items]
+      properties:
+        work_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        active_items:
+          type: array
+          items:
+            $ref: "./room-agent.yaml#/components/schemas/RoomRunStatus"
+        history_items:
+          type: array
+          maxItems: 200
+          items:
+            $ref: "./room-agent.yaml#/components/schemas/RoomRunStatus"
+        next_cursor:
+          type: string
+      description: >-
+        Room-authorized public Task activities. Unfinished Runs are independent of history
+        pagination; both lists may contain the same Run. History is newest first by Run creation.
+        A Task without a work Room omits work_room_id.

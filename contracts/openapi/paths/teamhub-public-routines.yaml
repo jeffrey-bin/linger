@@ -1,0 +1,138 @@
+roomRoutines:
+  get:
+    tags: [Routines]
+    operationId: listRoomRoutines
+    summary: List Routines in the current Room.
+    description: >-
+      A current participating Human Room member may list Routines for that Room.
+    parameters:
+      - $ref: "../components/common.yaml#/components/parameters/Cursor"
+      - $ref: "../components/common.yaml#/components/parameters/Limit"
+    responses:
+      "200":
+        description: Room-scoped Routines.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/routines.yaml#/components/schemas/RoutinePage"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+  post:
+    tags: [Routines]
+    operationId: createRoomRoutine
+    summary: Create a Routine in the current Room.
+    description: >-
+      A current participating Human Room member may create a Routine. TeamHub stores the
+      name, instruction, cadence, optional Agent mention, and next run time, and writes a Room Event.
+      A repeated submission creates another Routine.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/routines.yaml#/components/schemas/RoutineCreateRequest"
+    responses:
+      "201":
+        description: Routine created.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/routines.yaml#/components/schemas/Routine"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+
+routine:
+  patch:
+    tags: [Routines]
+    operationId: updateRoutine
+    summary: Update a Routine name, instruction, cadence, mention, or enabled state.
+    description: >-
+      A current participating Human Room member may update a Routine in that Room. A repeated
+      submission carries a stale expected_revision and fails with 409 CONFLICT.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/routines.yaml#/components/schemas/RoutineUpdateRequest"
+    responses:
+      "200":
+        description: Routine updated.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/routines.yaml#/components/schemas/Routine"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+  delete:
+    tags: [Routines]
+    operationId: deleteRoutine
+    summary: Delete a Routine.
+    description: >-
+      A current participating Human Room member may delete a Routine in that Room. A repeated
+      submission finds no Routine and returns 404.
+    parameters:
+      - name: expected_revision
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    responses:
+      "204":
+        description: Routine deleted.
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+
+routineRun:
+  post:
+    tags: [Routines]
+    operationId: runRoutine
+    summary: Run a Routine immediately.
+    description: >-
+      Posts the Routine instruction into the Room now. The stored next run time is unchanged.
+      A repeated submission posts the instruction again.
+    responses:
+      "200":
+        description: Routine ran.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/routines.yaml#/components/schemas/Routine"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"

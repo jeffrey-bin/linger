@@ -1,0 +1,4 @@
+interface:
+  display_name: "Taste"
+  short_description: "Keep Linger calm and reject AI-default UI"
+  default_prompt: "Use $taste to remove generic decoration and keep the Room tool quiet."

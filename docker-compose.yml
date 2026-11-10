@@ -1,0 +1,204 @@
+# Memory caps sit well above the idle use measured on 2026-10-28 (Postgres
+# about 270 MiB, TeamHub 110 MiB, node-services 380 MiB, Web 30 MiB) so the
+# stack runs in a small Docker VM and one runaway service cannot starve it.
+services:
+  postgres:
+    mem_limit: 512m
+    image: "pgvector/pgvector:0.8.6-pg17-bookworm@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: simplexai
+      POSTGRES_PASSWORD: simplexai
+      POSTGRES_DB: simplexai_dev
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - simplexai-postgres-data:/var/lib/postgresql/data
+      - ./.linger-runtime/postgres-logs/stack:/var/log/postgresql
+    entrypoint:
+      - bash
+      - -c
+      - mkdir -p /var/log/postgresql && chown postgres:postgres /var/log/postgresql && exec docker-entrypoint.sh "$$@"
+      - --
+    command:
+      - postgres
+      # OLTP queries gain nothing from JIT, and a backend that JIT-compiles once
+      # keeps LLVM loaded until it exits.
+      - -c
+      - jit=off
+      - -c
+      - log_lock_waits=on
+      - -c
+      - logging_collector=on
+      - -c
+      - log_directory=/var/log/postgresql
+      - -c
+      - log_filename=postgresql-%Y-%m-%d_%H%M%S.log
+      - -c
+      - log_truncate_on_rotation=off
+      - -c
+      - log_error_verbosity=verbose
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U simplexai -d simplexai_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Media server for voice. Browsers dial it on the published ports; TeamHub
+  # and the voice workers in node-services dial it on the Compose network.
+  # Voice stays off until SONIOX_API_KEY is set.
+  livekit:
+    mem_limit: 256m
+    image: "livekit/livekit-server:v1.13.6"
+    restart: unless-stopped
+    command:
+      - --config-body
+      - |
+        port: 7880
+        rtc:
+          tcp_port: 7881
+          udp_port: 7882
+          use_external_ip: false
+        logging:
+          level: info
+    environment:
+      # The server's only key pair; TeamHub and the voice workers sign with
+      # the same LIVEKIT_API_KEY / LIVEKIT_API_SECRET and the same defaults.
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-devkey}: ${LIVEKIT_API_SECRET:-devsecret-livekit-voice-local-only-32-bytes}"
+      # The address LiveKit gives browsers for media. A host that serves other
+      # computers sets the address they reach it on, and publishes the media
+      # ports with LIVEKIT_RTC_BIND_ADDRESS.
+      NODE_IP: "${LIVEKIT_NODE_IP:-127.0.0.1}"
+    ports:
+      - "127.0.0.1:17880:7880"
+      - "${LIVEKIT_RTC_BIND_ADDRESS:-127.0.0.1}:7881:7881"
+      - "${LIVEKIT_RTC_BIND_ADDRESS:-127.0.0.1}:7882:7882/udp"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:7880/"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+
+  teamhub-migrate:
+    mem_limit: 256m
+    build:
+      context: .
+      dockerfile: apps/teamhub/Dockerfile
+    entrypoint: ["teamhub-migrate"]
+    env_file:
+      - scripts/local-defaults.env
+      - ${LOCAL_ENV_FILE:-.env}
+    environment:
+      TEAMHUB_DATABASE_URL: postgres://simplexai:simplexai@postgres:5432/simplexai_dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  node-services:
+    # Unified service; Voice ASR, recorder and Live retain independent processes.
+    # The recorder needs up to 72 seconds to persist its accepted final audio.
+    mem_limit: 3g
+    stop_grace_period: 100s
+    build:
+      context: .
+      dockerfile: apps/node-services/Dockerfile
+    env_file:
+      - scripts/local-defaults.env
+      - ${LOCAL_ENV_FILE:-.env}
+    environment:
+      # The env files carry host-run values; keep container ones explicit.
+      # Keep a NODE_SERVICES_ROLES from the env file from narrowing the roles.
+      NODE_SERVICES_ROLES: ""
+      # Listeners in the env file must not move the container's.
+      NODE_SERVICES_HTTP_ADDRESS: "0.0.0.0:4319"
+      DOCUMENT_RUNTIME_HTTP_ADDRESS: "0.0.0.0:4321"
+      # Computers cannot resolve http://teamhub:8080; Web forwards the CLI API.
+      TEAMHUB_CLI_BASE_URL: "${TEAMHUB_CLI_BASE_URL:-${WEB_PUBLIC_ORIGIN:-http://localhost:3000}}"
+      AGENT_HOME: /data/agent/mirror
+      COMPUTER_RELEASE_DIR: /app/computer-release
+      LINGER_SECRET_SEED: ${LINGER_SECRET_SEED:-local-development-secret-seed-not-for-production}
+      TEAMHUB_BASE_URL: http://teamhub:8080
+      TEAMHUB_DATABASE_URL: postgres://simplexai:simplexai@postgres:5432/simplexai_dev
+      # 127.0.0.1 inside a container is the container itself, so the voice
+      # workers dial LiveKit on the Compose network.
+      LIVEKIT_URL: ws://livekit:7880
+      # The origin the Computer installer binds; Web forwards /install/ here.
+      WEB_PUBLIC_ORIGIN: "${WEB_PUBLIC_ORIGIN:-http://localhost:3000}"
+    ports:
+      - "127.0.0.1:${NODE_SERVICES_HTTP_PORT:-4319}:4319"
+      - "127.0.0.1:${DOCUMENT_RUNTIME_HTTP_PORT:-4321}:4321"
+    volumes:
+      - simplexai-agent-data:/data/agent
+    depends_on:
+      postgres:
+        condition: service_healthy
+      livekit:
+        condition: service_healthy
+      # The Agent Service loads its Runtime State from TeamHub while starting.
+      teamhub:
+        condition: service_healthy
+
+  teamhub:
+    mem_limit: 512m
+    build:
+      context: .
+      dockerfile: apps/teamhub/Dockerfile
+    env_file:
+      - scripts/local-defaults.env
+      - ${LOCAL_ENV_FILE:-.env}
+    environment:
+      # The env files carry host-run values; keep container ones explicit.
+      TEAMHUB_HTTP_ADDRESS: ":8080"
+      TEAMHUB_DATABASE_URL: postgres://simplexai:simplexai@postgres:5432/simplexai_dev
+      TEAMHUB_NODE_SERVICES_URL: http://node-services:4319
+      LINGER_SECRET_SEED: ${LINGER_SECRET_SEED:-local-development-secret-seed-not-for-production}
+      TEAMHUB_ARTIFACT_STORAGE_ROOT: /data/artifacts
+      TEAMHUB_DOCUMENT_RUNTIME_URL: http://node-services:4321
+      TEAMHUB_DOCUMENT_PREVIEW_PUBLIC_ORIGIN: "${TEAMHUB_DOCUMENT_PREVIEW_PUBLIC_ORIGIN:-${WEB_PUBLIC_ORIGIN:-http://localhost:3000}}"
+      # Browsers keep dialing LIVEKIT_URL on the published port; TeamHub calls
+      # the LiveKit API on the Compose network.
+      LIVEKIT_API_URL: http://livekit:7880
+    ports:
+      - "127.0.0.1:${TEAMHUB_HTTP_PORT:-8080}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:8080/healthz",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - simplexai-teamhub-data:/data
+    depends_on:
+      teamhub-migrate:
+        condition: service_completed_successfully
+
+  web:
+    mem_limit: 128m
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      # The browser reaches TeamHub and the Document Runtime through this
+      # origin; Computers reach the Agent Service's /install/ and Gateway paths.
+      TEAMHUB_BASE_URL: http://teamhub:8080
+      TEAMHUB_DOCUMENT_RUNTIME_URL: http://node-services:4321
+      TEAMHUB_NODE_SERVICES_URL: http://node-services:4319
+    ports:
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_HTTP_PORT:-3000}:3000"
+    depends_on:
+      teamhub:
+        condition: service_started
+      node-services:
+        condition: service_started
+
+volumes:
+  simplexai-postgres-data:
+  simplexai-agent-data:
+  simplexai-teamhub-data:

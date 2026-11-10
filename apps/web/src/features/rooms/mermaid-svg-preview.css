@@ -1,0 +1,88 @@
+.mermaid-svg-preview {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 640px;
+  min-height: 280px;
+  overflow: hidden;
+  background: white;
+}
+
+.mermaid-svg-preview__toolbar {
+  display: flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-body);
+  background: var(--app-surface);
+}
+
+.mermaid-svg-preview__toolbar button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--app-muted);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.mermaid-svg-preview__toolbar button:hover:not(:disabled) {
+  background: var(--app-hover);
+  color: var(--app-ink);
+}
+
+.mermaid-svg-preview__toolbar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mermaid-svg-preview__toolbar output {
+  width: 48px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.mermaid-svg-preview__viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: none;
+  cursor: grab;
+}
+
+.mermaid-svg-preview__viewport:active {
+  cursor: grabbing;
+}
+
+.mermaid-svg-preview__viewport:focus-visible,
+.mermaid-svg-preview__toolbar button:focus-visible {
+  outline: 2px solid var(--app-ring);
+  outline-offset: -2px;
+}
+
+.mermaid-svg-preview__plane {
+  display: grid;
+  place-items: center;
+}
+
+.mermaid-svg-preview iframe {
+  display: block;
+  min-width: 160px;
+  min-height: 120px;
+  max-width: none;
+  border: 0;
+  pointer-events: none;
+}

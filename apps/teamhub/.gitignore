@@ -1,0 +1,7 @@
+build/
+node_modules/
+.tools/
+.env
+.local/
+data/
+.DS_Store

@@ -1,0 +1,59 @@
+components:
+  schemas:
+    InvalidationResource:
+      type: string
+      description: >-
+        What changed. room: the Room summary, unread or read state, or a card shown in the Room
+        (id is the Room ID). document: a Document's metadata, access, comments, or access requests
+        (id is the Document ID). document-access: the same, and the Document's access may have been
+        revoked, so cached Document bytes must be dropped (id is the Document ID). directory, agents (availability, status, and activity),
+        another-me, computers, connections, and work-items name a Tenant collection (id is the
+        Tenant ID). Producers add a value here when they start publishing a new resource type.
+      enum:
+        [
+          room,
+          directory,
+          agents,
+          another-me,
+          computers,
+          connections,
+          work-items,
+          document,
+          document-access,
+        ]
+    ResourceInvalidatedSseEvent:
+      type: object
+      additionalProperties: false
+      required: [tenant_id, resource, id]
+      properties:
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        resource:
+          $ref: "#/components/schemas/InvalidationResource"
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_seq:
+          $ref: "./common.yaml#/components/schemas/RoomSeq"
+          description: >-
+            Latest room_seq the hint observed; present only for room. A Room without a cursor in
+            this stream uses it to tell whether its cached page is behind.
+      description: >-
+        Identity-only refetch hint, never persisted and never replayed. It carries no title or
+        content; every refetch is authorized by its own endpoint. Every Human of the Tenant can
+        observe the identifiers. Hints for the same resource may repeat or coalesce.
+    StreamResyncSseEvent:
+      type: object
+      additionalProperties: false
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          enum: [connected, hints_lost]
+          description: >-
+            connected follows the initial Room replay of every new connection; hints_lost means
+            the server may have dropped hints (its database listener reconnected or this client
+            fell behind).
+      description: >-
+        Invalidation hints sent before this point may be missing. Clients refetch each displayed
+        hint-scoped resource once; Room cursors stay valid because the stream already replayed
+        them from PostgreSQL.

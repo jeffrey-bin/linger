@@ -1,0 +1,26 @@
+root = "."
+tmp_dir = ".local/air"
+
+[build]
+cmd = "go build -o ./.local/air/teamhub ./cmd/teamhub"
+entrypoint = ["./.local/air/teamhub"]
+delay = 300
+exclude_dir = [".git", ".local", ".tools", "vendor"]
+exclude_regex = ["_test\\.go$"]
+include_dir = ["cmd", "internal", "../../contracts/generated/go"]
+include_ext = ["go"]
+kill_delay = "12s"
+send_interrupt = true
+stop_on_error = true
+
+# Windows runs only files with an executable extension; native installs on
+# Windows build and run TeamHub through air too.
+[build.windows]
+cmd = "go build -o ./.local/air/teamhub.exe ./cmd/teamhub"
+entrypoint = ["./.local/air/teamhub.exe"]
+
+[log]
+time = true
+
+[misc]
+clean_on_exit = true

@@ -1,0 +1,50 @@
+.agent-model-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.agent-model-switch-trigger {
+  display: inline-flex;
+  max-width: 220px;
+  align-items: center;
+  height: 28px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 470;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.agent-model-switch-trigger:hover {
+  background: hsl(var(--town-accent));
+  color: var(--app-ink);
+}
+
+.agent-model-switch-trigger:active {
+  transform: scale(0.96);
+}
+
+.agent-model-switch-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-model-switch-trigger:focus-visible {
+  outline: 2px solid var(--app-ink);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-model-switch-trigger {
+    transition: none;
+  }
+}

@@ -1,0 +1,1508 @@
+components:
+  schemas:
+    AgentInvocationId:
+      type: string
+      description: >-
+        Stable SHA-256 operation identity derived by the CLI from the Agent identity, command,
+        and caller operation ID. Credential rotation and Runtime restarts do not change it.
+      minLength: 88
+      maxLength: 88
+      pattern: "^agent-invocation-sha256:[a-f0-9]{64}$"
+    AgentDocumentAuthorityId:
+      type: string
+      description: Opaque document identifier.
+      minLength: 1
+      maxLength: 128
+      pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+    AgentDocumentCreateRequest:
+      type: object
+      description: >-
+        One native Document creation command. TeamHub derives the Agent owner from the credential
+        and rechecks the current document permissions for the requested business target.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - title
+        - markdown
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        markdown:
+          type: string
+          maxLength: 1048576
+    AgentDocumentCreateResponse:
+      type: object
+      description: Canonical Agent-owned native Document result.
+      additionalProperties: false
+      required:
+        - document_id
+        - revision_id
+        - status
+        - replayed
+      properties:
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          const: created
+        replayed:
+          type: boolean
+    AgentDocumentSemanticMutationRequest:
+      type: object
+      description: >-
+        One fixed semantic edit command. TeamHub validates the current Agent permissions
+        and applies the edit against the current Document revision.
+        Supply document_id; TeamHub validates current authority before mutation.
+      additionalProperties: false
+      required:
+        - document_id
+        - invocation_id
+        - schema_version
+        - semantic_change
+      properties:
+        document_id:
+          $ref: "#/components/schemas/AgentDocumentAuthorityId"
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        schema_version:
+          type: string
+          const: blocknote-semantic-v1
+        semantic_change:
+          $ref: "#/components/schemas/AgentDocumentSemanticOperations"
+    AgentDocumentSemanticBlocks:
+      type: array
+      description: Every block and nested child must have a unique valid id. Missing or duplicate IDs are invalid input. Preserve IDs for updates and choose new IDs for inserts.
+      minItems: 1
+      maxItems: 2048
+      items:
+        type: object
+        additionalProperties: true
+    AgentSetDocumentTitleSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, title]
+      properties:
+        kind:
+          type: string
+          const: set_title
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+    AgentAppendDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, blocks]
+      properties:
+        kind:
+          type: string
+          const: append_blocks
+        blocks:
+          $ref: "#/components/schemas/AgentDocumentSemanticBlocks"
+    AgentInsertDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, position, stable_block_id, blocks]
+      properties:
+        kind:
+          type: string
+          const: insert_blocks
+        position:
+          type: string
+          enum: [before, after]
+        stable_block_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        blocks:
+          $ref: "#/components/schemas/AgentDocumentSemanticBlocks"
+    AgentReplaceDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, stable_block_ids, blocks]
+      properties:
+        kind:
+          type: string
+          const: replace_blocks
+        stable_block_ids:
+          type: array
+          minItems: 1
+          maxItems: 2048
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+        blocks:
+          type: array
+          maxItems: 2048
+          items:
+            type: object
+            additionalProperties: true
+    AgentUpdateDocumentBlockSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, stable_block_id, block]
+      properties:
+        kind:
+          type: string
+          const: update_block
+        stable_block_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        block:
+          type: object
+          additionalProperties: true
+    AgentDeleteDocumentBlocksSemanticOperation:
+      type: object
+      additionalProperties: false
+      required: [kind, stable_block_ids]
+      properties:
+        kind:
+          type: string
+          const: delete_blocks
+        stable_block_ids:
+          type: array
+          minItems: 1
+          maxItems: 2048
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+    AgentDocumentSemanticOperations:
+      type: array
+      minItems: 1
+      maxItems: 64
+      x-max-encoded-bytes: 262144
+      items:
+        oneOf:
+          - $ref: "./document-runtime.yaml#/components/schemas/EditNativeDocumentSemanticOperation"
+          - $ref: "#/components/schemas/AgentSetDocumentTitleSemanticOperation"
+          - $ref: "#/components/schemas/AgentInsertDocumentBlocksSemanticOperation"
+          - $ref: "#/components/schemas/AgentAppendDocumentBlocksSemanticOperation"
+          - $ref: "#/components/schemas/AgentReplaceDocumentBlocksSemanticOperation"
+          - $ref: "#/components/schemas/AgentUpdateDocumentBlockSemanticOperation"
+          - $ref: "#/components/schemas/AgentDeleteDocumentBlocksSemanticOperation"
+        discriminator:
+          propertyName: kind
+          mapping:
+            edit_document: "./document-runtime.yaml#/components/schemas/EditNativeDocumentSemanticOperation"
+            set_title: "#/components/schemas/AgentSetDocumentTitleSemanticOperation"
+            insert_blocks: "#/components/schemas/AgentInsertDocumentBlocksSemanticOperation"
+            append_blocks: "#/components/schemas/AgentAppendDocumentBlocksSemanticOperation"
+            replace_blocks: "#/components/schemas/AgentReplaceDocumentBlocksSemanticOperation"
+            update_block: "#/components/schemas/AgentUpdateDocumentBlockSemanticOperation"
+            delete_blocks: "#/components/schemas/AgentDeleteDocumentBlocksSemanticOperation"
+    AgentDocumentSemanticMutationResponse:
+      type: object
+      description: Canonical durable semantic mutation result.
+      additionalProperties: false
+      required:
+        - semantic_mutation_id
+        - status
+        - replayed
+      properties:
+        semantic_mutation_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          enum: [applied, conflicted]
+        replayed:
+          type: boolean
+        revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        history_entry_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        conflict_reason:
+          type: string
+          minLength: 1
+          maxLength: 255
+    AgentDocumentCommentThreadRequest:
+      type: object
+      description: >-
+        Read the active attached, unresolved Document Comment Thread selected by the current
+        Document Local Run. TeamHub derives the Document and Agent from trusted Context authority.
+      additionalProperties: false
+      required: [thread_id]
+      properties:
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentDocumentCommentThreadSelection:
+      type: object
+      description: Current attached text selection for one visible Document Comment Thread.
+      additionalProperties: false
+      required: [quoted_text, context_before, context_after]
+      properties:
+        quoted_text:
+          type: string
+          maxLength: 50000
+        context_before:
+          type: string
+          maxLength: 50000
+        context_after:
+          type: string
+          maxLength: 50000
+    AgentDocumentCommentAuthor:
+      type: object
+      description: Narrow visible author projection for one Document Comment.
+      additionalProperties: false
+      required: [display_name, kind]
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        kind:
+          type: string
+          enum: [human, agent]
+    AgentDocumentComment:
+      type: object
+      description: Latest visible, non-deleted version of one Document Comment.
+      additionalProperties: false
+      required: [comment_id, author, segments, created_at]
+      properties:
+        comment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        parent_comment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        author:
+          $ref: "#/components/schemas/AgentDocumentCommentAuthor"
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./room-document-comments.yaml#/components/schemas/DocumentCommentSegment"
+        created_at:
+          type: string
+          format: date-time
+    AgentDocumentCommentThreadResponse:
+      type: object
+      description: >-
+        Attached selection and latest visible comments for the active unresolved Thread.
+        Deleted comments, edit timestamps, resolution state, and internal trigger flags are omitted.
+      additionalProperties: false
+      required:
+        - thread_id
+        - selection
+        - comments
+      properties:
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        selection:
+          $ref: "#/components/schemas/AgentDocumentCommentThreadSelection"
+        comments:
+          type: array
+          minItems: 0
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/AgentDocumentComment"
+    AgentDocumentCommentReplyRequest:
+      type: object
+      description: >-
+        Reply to the active Document Comment Thread as the current Agent. Document, Agent,
+        origin Room, and idempotency scope remain infrastructure-owned.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - thread_id
+        - segments
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        parent_comment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./room-document-comments.yaml#/components/schemas/DocumentCommentSegment"
+    AgentDocumentCommentReplyResponse:
+      type: object
+      description: Durable Agent Comment reply.
+      additionalProperties: false
+      required:
+        - thread_id
+        - comment_id
+        - replayed
+      properties:
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        comment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        replayed:
+          type: boolean
+    AgentDocumentCommentTextReplacementRequest:
+      type: object
+      description: >-
+        Replace the current attached text selection for the active Document Comment Thread.
+        TeamHub captures the current canonical Revision as the mutation-scoped base and commits
+        Revision and History atomically.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - thread_id
+        - replace_str
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        replace_str:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    AgentDocumentCommentTextReplacementResponse:
+      type: object
+      description: Canonical replacement result.
+      additionalProperties: false
+      required:
+        - thread_id
+        - status
+        - replayed
+        - observation
+      properties:
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          enum: [applied, conflicted]
+        replayed:
+          type: boolean
+        revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        history_entry_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        current_document_projection:
+          $ref: "#/components/schemas/AgentCurrentDocumentProjection"
+        conflict_reason:
+          type: string
+          minLength: 1
+          maxLength: 255
+        observation:
+          type: string
+          minLength: 1
+          maxLength: 512
+    AgentCurrentDocumentProjection:
+      type: object
+      description: >-
+        Host-only canonical Markdown for the committed Revision. The Agent CLI must write these exact bytes
+        to the active read-only latest Document projection and omit them from the model-visible
+        Tool result.
+      additionalProperties: false
+      required: [content_base64, size_bytes, sha256]
+      properties:
+        content_base64:
+          type: string
+          format: byte
+          minLength: 0
+          maxLength: 44739244
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 33554432
+        sha256:
+          type: string
+          minLength: 64
+          maxLength: 64
+          pattern: "^[a-f0-9]{64}$"
+    AgentPlaygroundFilePath:
+      type: string
+      description: >-
+        Canonical model-visible file path below the current owning Playground. The required
+        ./playground/ prefix identifies the writable Agent workspace and is removed before
+        TeamHub persists the TaskRunSpec.
+      minLength: 14
+      maxLength: 1037
+      pattern: '^\./playground/(?=.{1,1024}$)(?!\.[aA][gG][eE][nN][tT][sS](?:/|$))(?!\.[tT][eE][aA][mM][hH][uU][bB](?:/|$))(?!\.{1,2}(?:/|$))[^\s/\\\x00](?:[^/\\\x00]{0,253}[^\s/\\\x00])?(?:/(?!\.{1,2}(?:/|$))[^\s/\\\x00](?:[^/\\\x00]{0,253}[^\s/\\\x00])?)*$'
+    AgentSendDirectMessageRequest:
+      type: object
+      description: >-
+        Infrastructure-owned invocation identity and Runtime Manifest attestation plus
+        the ordered private messages to send to the current Agent's Human sponsor.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - messages
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        messages:
+          type: array
+          description: Ordered private messages persisted atomically in the Direct Room.
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            description: One non-empty user-visible private message body.
+            minLength: 1
+            maxLength: 50000
+    AgentSendDirectMessageResponse:
+      type: object
+      description: >-
+        Accepted Direct Room messages plus the exact active Manifest attested in the
+        same authorization and persistence transaction.
+      additionalProperties: false
+      required:
+        - duplicate_request
+        - accepted
+        - inbox_id
+        - message_ids
+        - room_created
+      properties:
+        duplicate_request:
+          type: boolean
+          description: True only when the server recovered a prior committed operation.
+        reason:
+          type: string
+          minLength: 1
+          description: Optional public receipt explanation.
+        accepted:
+          type: boolean
+          const: true
+          description: Whether TeamHub accepted and persisted every message.
+        inbox_id:
+          type: string
+          description: Canonical public Inbox of the Human sponsor Direct Room.
+          minLength: 6
+          maxLength: 69
+          pattern: "^room:[A-Za-z0-9][A-Za-z0-9_-]*$"
+        message_ids:
+          type: array
+          description: Stable identifiers of the created messages, in input order.
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+        room_created:
+          type: boolean
+          description: Whether this invocation created the sponsor Direct Room.
+    AgentGetAgentRequest:
+      type: object
+      description: One General Agent of the calling Agent's Sponsor to read.
+      additionalProperties: false
+      required:
+        - actor_id
+      properties:
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentAgentProfile:
+      type: object
+      description: The current profile of one General Agent of the calling Agent's Sponsor.
+      additionalProperties: false
+      required:
+        - actor_id
+        - name
+        - description
+        - prompt
+      properties:
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    AgentCreateAgentRequest:
+      type: object
+      description: >-
+        A new General Agent for the calling Agent's Sponsor. Sponsor, Runtime,
+        and Room are derived by TeamHub, never accepted from the caller.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - name
+        - prompt
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    AgentUpdateAgentRequest:
+      type: object
+      description: >-
+        Changes to one General Agent of the calling Agent's Sponsor. Omitted
+        fields are kept; actor_id defaults to the caller.
+      additionalProperties: false
+      required:
+        - invocation_id
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    AgentAgentChangeResponse:
+      type: object
+      description: >-
+        applied means TeamHub made the change now. confirmation_pending means it
+        waits for the Sponsor's card; TeamHub runs it after approval and tells
+        the caller the result.
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [applied, confirmation_pending]
+          x-enum-varnames: [AgentChangeApplied, AgentChangeConfirmationPending]
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The changed or created Agent, when applied.
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: >-
+            When applied, the Room a created Agent joined; when pending, the
+            Room holding the card.
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The confirmation card message, when pending.
+        interaction_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The confirmation card's decision, when pending.
+    AgentAddRoomMemberRequest:
+      type: object
+      description: >-
+        One existing Agent to add to the calling Agent's Context Room. The Room
+        and the Sponsor who admits the Agent are derived by TeamHub, never
+        accepted from the caller. Adding a member is idempotent by itself, so
+        TeamHub keeps no receipt for invocation_id.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - actor_id
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentAddRoomMemberResponse:
+      type: object
+      description: >-
+        The Agent is a member of the Room. added is false when it already was,
+        so a retried call adds nothing and announces nothing.
+      additionalProperties: false
+      required:
+        - room_id
+        - actor_id
+        - added
+      properties:
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        added:
+          type: boolean
+    AgentMessageSegmentContent:
+      type: string
+      description: User-visible text carried by this segment.
+      minLength: 1
+      maxLength: 50000
+    AgentTextMessageSegment:
+      type: object
+      description: >-
+        Plain text segment. Include type: text and content.
+      additionalProperties: false
+      required:
+        - type
+        - content
+      properties:
+        type:
+          type: string
+          const: text
+          description: Discriminator identifying the message segment kind.
+        content:
+          $ref: "#/components/schemas/AgentMessageSegmentContent"
+    AgentReferenceMessageSegment:
+      type: object
+      description: >-
+        Actor-reference segment. Include type: reference, content, target, and target_type.
+      additionalProperties: false
+      required:
+        - type
+        - content
+        - target
+        - target_type
+      properties:
+        type:
+          type: string
+          const: reference
+          description: Discriminator identifying the message segment kind.
+        content:
+          $ref: "#/components/schemas/AgentMessageSegmentContent"
+        target:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Stable TeamHub Actor identifier referenced by this segment.
+        target_type:
+          type: string
+          enum:
+            - agent
+            - user
+          description: Declared Actor kind; TeamHub verifies it against the target.
+    AgentCreationMessageSegment:
+      description: >-
+        One structured initial message segment accepted by a Creation request. Every segment
+        must include its type discriminator. Document and file segments remain excluded because
+        the destination Room does not exist yet; create_room delivers existing Documents through
+        its separate artifacts field.
+      oneOf:
+        - $ref: "#/components/schemas/AgentTextMessageSegment"
+        - $ref: "#/components/schemas/AgentReferenceMessageSegment"
+      discriminator:
+        propertyName: type
+        mapping:
+          text: "#/components/schemas/AgentTextMessageSegment"
+          reference: "#/components/schemas/AgentReferenceMessageSegment"
+    AgentCreationMessageSegments:
+      type: array
+      description: >-
+        Ordered text or Actor-reference segments for the first message created after
+        approval. Copy one of these JSON shapes: {"type":"text","content":"..."} or
+        {"type":"reference","content":"...","target":"actor_...","target_type":"agent"}.
+        Every item needs its type discriminator; combined content must be non-blank and no longer
+        than 50,000 Unicode characters.
+      minItems: 1
+      maxItems: 1000
+      items:
+        $ref: "#/components/schemas/AgentCreationMessageSegment"
+    AgentCreationActorIds:
+      type: array
+      description: Duplicate-free TeamHub Actor identifiers in caller-supplied order.
+      minItems: 1
+      maxItems: 100
+      uniqueItems: true
+      items:
+        $ref: "./common.yaml#/components/schemas/Id"
+    AgentRoomCreationArtifacts:
+      type: array
+      description: >-
+        Ordered, duplicate-free stable IDs of existing unified Documents from the authorized
+        source Room. TeamHub freezes each current Content Head (Version or native Revision)
+        for delivery after approval.
+      minItems: 1
+      maxItems: 5
+      uniqueItems: true
+      items:
+        $ref: "./common.yaml#/components/schemas/Id"
+    AgentRoomCreationCallerInput:
+      type: object
+      description: Exact model-visible input submitted to create_room before normalization.
+      additionalProperties: false
+      required:
+        - name
+        - member_ids
+        - initial_message_segments
+      properties:
+        name:
+          type: string
+          description: Name of the proposed collaboration Room.
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          description: Optional description of the proposed collaboration Room.
+          maxLength: 2000
+        member_ids:
+          $ref: "#/components/schemas/AgentCreationActorIds"
+          description: TeamHub Actors explicitly proposed as Room members.
+        artifacts:
+          $ref: "#/components/schemas/AgentRoomCreationArtifacts"
+          description: Existing Documents to share with the new Room after approval.
+        initial_message_segments:
+          $ref: "#/components/schemas/AgentCreationMessageSegments"
+          description: Model-supplied initial message created only after approval.
+    AgentRoomCreationEffectivePayload:
+      type: object
+      description: >-
+        Canonical Room creation business payload frozen by the Agent CLI. TeamHub derives the authoritative origin Room from the requested business target in the final transaction.
+      additionalProperties: false
+      required:
+        - name
+        - member_ids
+        - initial_message_segments
+      properties:
+        name:
+          type: string
+          description: Normalized name of the proposed collaboration Room.
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          description: Optional normalized description of the proposed Room.
+          maxLength: 2000
+        member_ids:
+          $ref: "#/components/schemas/AgentCreationActorIds"
+          description: Validated explicit Room members in canonical sorted order.
+        artifacts:
+          $ref: "#/components/schemas/AgentRoomCreationArtifacts"
+          description: Validated Document IDs preserved in caller-supplied order.
+        initial_message_segments:
+          $ref: "#/components/schemas/AgentCreationMessageSegments"
+          description: Validated initial Room message frozen for fulfillment.
+    AgentRoomCreationApprovalRequest:
+      type: object
+      description: >-
+        Room caller input, separately frozen effective payload, Manifest attestation, and
+        infrastructure-owned active Run provenance.
+      additionalProperties: false
+      required:
+        - request_kind
+        - invocation_id
+        - caller_input
+        - effective_payload
+      properties:
+        request_kind:
+          type: string
+          const: room_creation
+          description: Discriminator selecting Room creation approval.
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        caller_input:
+          $ref: "#/components/schemas/AgentRoomCreationCallerInput"
+          description: Exact caller input hashed independently for idempotency comparison.
+        effective_payload:
+          $ref: "#/components/schemas/AgentRoomCreationEffectivePayload"
+          description: Canonical Room payload frozen independently from caller input.
+    AgentCreationApprovalResponse:
+      type: object
+      description: Durable pending Room creation approval request.
+      additionalProperties: false
+      required:
+        - accepted
+        - status
+        - creation_approval_request_id
+        - message_id
+      properties:
+        accepted:
+          type: boolean
+          const: true
+          description: Whether TeamHub accepted and durably persisted the Creation request.
+        status:
+          type: string
+          const: pending_approval
+          description: Initial lifecycle state while awaiting a Human decision.
+        creation_approval_request_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Stable identifier of the Creation approval request fact.
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Stable identifier of the Human approval card message.
+    AgentCreateTaskRequest:
+      type: object
+      description: >-
+        One delegated Task created and started immediately for the calling Agent's own
+        AlterEgo. The origin Room is the caller's Room Context; no Human approval is requested.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - name
+        - requirement
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        name:
+          type: string
+          description: Short Task title shown in Task lists.
+          minLength: 1
+          maxLength: 120
+        requirement:
+          type: string
+          description: >-
+            Self-contained plain-text brief: the work, the origin Room context it needs, Document
+            IDs or file paths, the completion standard, and what to report.
+          minLength: 1
+          maxLength: 20000
+    AgentCreateTaskResponse:
+      type: object
+      description: The created and started delegated Task.
+      additionalProperties: false
+      required:
+        - accepted
+        - task_id
+        - status
+        - duplicate_request
+      properties:
+        accepted:
+          type: boolean
+          const: true
+          description: Whether TeamHub durably created the Task.
+        task_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Stable Task identifier used by task check, send and stop.
+        status:
+          type: string
+          const: running
+          description: A delegated Task starts running immediately.
+        duplicate_request:
+          type: boolean
+          description: True only when TeamHub recovered a prior committed invocation.
+    AgentTaskId:
+      type: string
+      minLength: 1
+      maxLength: 255
+      description: A delegated Task created by this Room's Meta.
+    AgentTaskStatus:
+      type: string
+      description: >-
+        A delegated Task's state. None is terminal: task send wakes every state but running.
+      enum: [running, waiting_for_approval, idle, failed, canceled]
+      x-enum-varnames:
+        [
+          AgentTaskRunning,
+          AgentTaskWaitingForApproval,
+          AgentTaskIdle,
+          AgentTaskFailed,
+          AgentTaskCanceled,
+        ]
+    AgentCheckTaskRequest:
+      type: object
+      description: One Task to show, or none to list the Tasks this Room delegated.
+      additionalProperties: false
+      properties:
+        task_id:
+          $ref: "#/components/schemas/AgentTaskId"
+    AgentTaskSummary:
+      type: object
+      additionalProperties: false
+      required: [task_id, name, status, created_at, updated_at]
+      properties:
+        task_id:
+          $ref: "#/components/schemas/AgentTaskId"
+        name:
+          type: string
+        status:
+          $ref: "#/components/schemas/AgentTaskStatus"
+        reason:
+          type: string
+          description: Why the Task is failed (an error code) or canceled (stopped).
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AgentTaskActivity:
+      type: object
+      additionalProperties: false
+      required: [at, kind, summary]
+      properties:
+        at:
+          type: string
+          format: date-time
+        kind:
+          type: string
+          description: started, message, approval_result, or the state the Task entered.
+        summary:
+          type: string
+    AgentTaskPendingApproval:
+      type: object
+      additionalProperties: false
+      required: [kind, id, title, created_at]
+      properties:
+        kind:
+          type: string
+          enum: [permission, connector]
+          x-enum-varnames:
+            [AgentTaskApprovalPermission, AgentTaskApprovalConnector]
+        id:
+          type: string
+          description: The approval card's interaction ID.
+        title:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+    AgentTaskReport:
+      type: object
+      description: The Task's latest report to this Meta, truncated to 4000 characters.
+      additionalProperties: false
+      required: [at, body]
+      properties:
+        at:
+          type: string
+          format: date-time
+        body:
+          type: string
+    AgentTaskDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - task_id
+        - name
+        - status
+        - origin_room_id
+        - work_room_id
+        - created_at
+        - status_since
+        - recent_activity
+        - pending_approvals
+        - queued_message_count
+      properties:
+        task_id:
+          $ref: "#/components/schemas/AgentTaskId"
+        name:
+          type: string
+        status:
+          $ref: "#/components/schemas/AgentTaskStatus"
+        reason:
+          type: string
+          description: Why the Task is failed (an error code) or canceled (stopped).
+        origin_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        work_room_id:
+          type: string
+          description: The Task's execution Room; read-only for Humans.
+        created_at:
+          type: string
+          format: date-time
+        status_since:
+          type: string
+          format: date-time
+          description: When the Task entered its current state.
+        recent_activity:
+          type: array
+          maxItems: 5
+          description: The latest state changes and inputs, newest first.
+          items:
+            $ref: "#/components/schemas/AgentTaskActivity"
+        pending_approvals:
+          type: array
+          description: Approval cards the AlterEgo is waiting on.
+          items:
+            $ref: "#/components/schemas/AgentTaskPendingApproval"
+        last_report:
+          $ref: "#/components/schemas/AgentTaskReport"
+        queued_message_count:
+          type: integer
+          minimum: 0
+          description: Messages waiting behind the running turn.
+    AgentCheckTaskResponse:
+      type: object
+      description: Exactly one of task (with task_id) or tasks (without).
+      additionalProperties: false
+      properties:
+        task:
+          $ref: "#/components/schemas/AgentTaskDetail"
+        tasks:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/AgentTaskSummary"
+    AgentSendTaskRequest:
+      type: object
+      description: One plain-text message for the Task's AlterEgo.
+      additionalProperties: false
+      required: [invocation_id, task_id, message]
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        task_id:
+          $ref: "#/components/schemas/AgentTaskId"
+        message:
+          type: string
+          minLength: 1
+          maxLength: 20000
+        steer:
+          type: boolean
+          default: false
+          description: Ask to join the running turn instead of queuing as the next turn.
+    AgentSendTaskResponse:
+      type: object
+      additionalProperties: false
+      required: [accepted, task_id, status, delivery, duplicate_request]
+      properties:
+        accepted:
+          type: boolean
+          const: true
+        task_id:
+          $ref: "#/components/schemas/AgentTaskId"
+        status:
+          type: string
+          const: running
+        delivery:
+          type: string
+          enum: [started, queued, steered]
+          x-enum-varnames:
+            [
+              AgentTaskDeliveryStarted,
+              AgentTaskDeliveryQueued,
+              AgentTaskDeliverySteered,
+            ]
+          description: >-
+            started wakes a Task that was not running; queued runs after the current turn;
+            steered was requested into the current turn and runs as the next turn when the
+            turn cannot take it.
+        duplicate_request:
+          type: boolean
+          description: True only when TeamHub recovered a prior committed invocation.
+    AgentStopTaskRequest:
+      type: object
+      additionalProperties: false
+      required: [invocation_id, task_id]
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        task_id:
+          $ref: "#/components/schemas/AgentTaskId"
+    AgentStopTaskResponse:
+      type: object
+      additionalProperties: false
+      required: [accepted, task_id, status, duplicate_request]
+      properties:
+        accepted:
+          type: boolean
+          const: true
+        task_id:
+          $ref: "#/components/schemas/AgentTaskId"
+        status:
+          type: string
+          const: canceled
+        duplicate_request:
+          type: boolean
+          description: True only when TeamHub recovered a prior committed invocation.
+    AgentPresentationSequencePause:
+      type: string
+      enum: [none, brief, natural]
+      description: Delay tier before this bubble is published. The first item must be none.
+    AgentPresentationSequenceItem:
+      type: object
+      additionalProperties: false
+      required: [content, pause_before]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: One non-blank user-visible message bubble.
+        pause_before:
+          $ref: "#/components/schemas/AgentPresentationSequencePause"
+    AgentPresentationSequenceItems:
+      type: array
+      minItems: 2
+      maxItems: 8
+      items:
+        $ref: "#/components/schemas/AgentPresentationSequenceItem"
+    AgentSendPresentationSequenceRequest:
+      type: object
+      description: >-
+        A Room-bound ordered sequence of conversational bubbles with optional reply provenance. This operation is restricted to AnotherMe Agents.
+        Every bubble records the Local Run named by the X-TeamHub-Run-Id header when TeamHub accepts that Run as the sequence is queued.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - inbox_id
+        - messages
+      properties:
+        source_message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Optional message in the same Room visible to the Agent that this response answers; never inferred from a Run.
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        inbox_id:
+          type: string
+          minLength: 6
+          maxLength: 69
+          pattern: "^room:[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+          description: The current public Room Inbox.
+        messages:
+          $ref: "#/components/schemas/AgentPresentationSequenceItems"
+    AgentSendPresentationSequenceResponse:
+      type: object
+      additionalProperties: false
+      required: [accepted, inbox_id, sequence_id]
+      properties:
+        duplicate_request:
+          type: boolean
+          description: True only when the server recovered a prior committed operation.
+        reason:
+          type: string
+          minLength: 1
+          description: Optional public receipt explanation.
+        accepted:
+          type: boolean
+          const: true
+        inbox_id:
+          type: string
+          minLength: 6
+          maxLength: 69
+          pattern: "^room:[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+        sequence_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentSendEmojiReactionRequest:
+      type: object
+      description: One emoji Reaction the current Agent adds to a Message it can see.
+      additionalProperties: false
+      required: [invocation_id, message_id, emoji]
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        emoji:
+          $ref: "./messages.yaml#/components/schemas/MessageReactionId"
+    AgentSendEmojiReactionResponse:
+      type: object
+      additionalProperties: false
+      required: [accepted, message_id, emoji]
+      properties:
+        accepted:
+          type: boolean
+          const: true
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        emoji:
+          $ref: "./messages.yaml#/components/schemas/MessageReactionId"
+    AgentAskUserRequest:
+      type: object
+      description: >-
+        One question card the current Agent posts in its Context Room, or in one of that Room's
+        Threads, for its sponsor to answer. The answer arrives where the card was posted.
+      additionalProperties: false
+      required: [invocation_id, title, questions]
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        thread_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        questions:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/AgentAskUserQuestion"
+    AgentAskUserQuestion:
+      type: object
+      description: >-
+        One question on the card. The sponsor picks one option, or several when multiple is
+        true; an open question is asked in an ordinary message instead. TeamHub names the
+        question and its options itself and reports the answer by their text.
+      additionalProperties: false
+      required: [question, options]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        options:
+          type: array
+          minItems: 1
+          maxItems: 20
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 200
+        multiple:
+          type: boolean
+    AgentAskUserResponse:
+      type: object
+      additionalProperties: false
+      required: [interaction_id, message_id, status]
+      properties:
+        interaction_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          enum: [pending]
+          x-enum-varnames: [AgentAskUserResponseStatusPending]
+    AgentCreateTeamMdRequest:
+      type: object
+      description: >-
+        Infrastructure-owned active Run provenance plus one complete teamMD collaboration
+        protocol document. TeamHub parses and validates the content, stores it as the owning
+        Room's team.md, which Agents read through teamhub room protocol, and notifies every declared
+        participant except the publishing Agent, including a separately appointed Orchestrator.
+        TeamHub rejects the whole submission when any rule fails.
+      additionalProperties: false
+      required:
+        - invocation_id
+        - content
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        content:
+          type: string
+          minLength: 1
+          maxLength: 65536
+          description: >-
+            Complete team.md Markdown, including the collaborate_pattern frontmatter and the
+            Task Goal, Orchestrator, and Team Member sections. TeamHub stores it verbatim.
+    AgentCreateTeamMdResponse:
+      type: object
+      description: The persisted team.md and the notified participants.
+      additionalProperties: false
+      required:
+        - created
+        - room_id
+        - revision
+        - notified_actor_ids
+        - message_id
+      properties:
+        created:
+          type: boolean
+          const: true
+          description: Whether TeamHub accepted and persisted the team.md.
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Room that now owns this team.md.
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Monotonic revision of this Room's team.md after the write.
+        notified_actor_ids:
+          type: array
+          minItems: 1
+          maxItems: 51
+          description: Declared participant Actor IDs that TeamHub notified, including a separately appointed Orchestrator. The publishing Agent is excluded.
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Agent-only Room Message that announces the protocol and carries the Mentions.
+    AgentListAvailableAgentsRequest:
+      type: object
+      description: >-
+        Manifest-attested pagination input for Sponsor-authorized Agent discovery. Sponsor,
+        Human, Tenant, and candidate Agent identifiers are derived by TeamHub rather than
+        accepted as authority from the caller.
+      additionalProperties: false
+      required: []
+      properties:
+        cursor:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Opaque continuation cursor returned by the preceding page.
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 50
+          description: Maximum number of Agents returned in this page.
+    AgentAvailableAgent:
+      type: object
+      description: >-
+        One active General Agent that the calling Agent's Human Sponsor is authorized
+        to use.
+      additionalProperties: false
+      required:
+        - actor_id
+        - name
+        - description
+      properties:
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Exact TeamHub Actor identifier accepted by create_room and create_task.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Current Agent display name.
+        description:
+          type: string
+          maxLength: 1000
+          description: Current Human-facing description of the Agent's role and capability.
+    AgentListAvailableAgentsResponse:
+      type: object
+      description: >-
+        One stable page of active General Agents authorized for the calling Agent's exact
+        Human Sponsor, plus the Manifest attested in the same authorization transaction.
+      additionalProperties: false
+      required:
+        - agents
+      properties:
+        agents:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentAvailableAgent"
+        next_cursor:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Opaque continuation cursor when more Agents remain.
+    AgentRoutineWeekday:
+      type: string
+      enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+    AgentRoutineSchedule:
+      type: object
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [daily, weekly, every_n_hours, once]
+        time:
+          type: string
+          description: Local 24-hour clock as HH:MM. Required for daily and weekly.
+          pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+        timezone:
+          type: string
+          description: IANA timezone. Required for daily and weekly.
+          minLength: 1
+          maxLength: 255
+        weekdays:
+          type: array
+          minItems: 1
+          maxItems: 7
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/AgentRoutineWeekday"
+          description: Selected local weekdays. Required for weekly. Responses use Monday through Sunday order.
+        interval_hours:
+          type: integer
+          minimum: 1
+          maximum: 168
+          description: Repeat interval for every_n_hours. Do not send a clock or timezone with it.
+        run_at:
+          type: string
+          format: date-time
+          description: The one moment a once Routine fires (RFC 3339 with offset). It must be in the future; the Routine is done (disabled) after it fires. Timezone is optional and only used for display.
+    AgentRoutineListener:
+      type: object
+      additionalProperties: false
+      required: [app]
+      properties:
+        app:
+          type: string
+          enum: [gmail, outlook, google_calendar, slack]
+          description: Connected app whose new events the Routine hands to proactive judgement.
+    AgentRoutine:
+      type: object
+      additionalProperties: false
+      description: A Routine has exactly one of schedule and listener. A listener Routine is an app listener; it can only be paused and enabled, and goes away when the Human revokes AnotherMe's access to the app.
+      required: [id, name, instruction, enabled]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        mention_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Agent actor woken when the Routine fires. Absent when the message is plain text.
+        schedule:
+          $ref: "#/components/schemas/AgentRoutineSchedule"
+        listener:
+          $ref: "#/components/schemas/AgentRoutineListener"
+        enabled:
+          type: boolean
+        next_run_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        tracking_item_id:
+          type: string
+          description: Tracking Item this Routine serves, when it serves one.
+    AgentRoutineCommandRequest:
+      type: object
+      additionalProperties: false
+      properties: {}
+    AgentCreateRoutineRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - invocation_id
+        - name
+        - instruction
+        - schedule
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        instruction:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        mention_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Omit for plain text. self wakes the calling Agent. Any other value must be an Agent actor still in this room.
+        schedule:
+          $ref: "#/components/schemas/AgentRoutineSchedule"
+        tracking_item_id:
+          type: string
+          pattern: "^ti_[a-f0-9]{32}$"
+          description: Tracking Item of the represented Human this Routine serves. Deleting the item deletes the Routine.
+        tracking_purpose:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: What this Routine checks or reminds for its Tracking Item. Required with tracking_item_id.
+    AgentRoutineIdRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - invocation_id
+        - routine_id
+      properties:
+        invocation_id:
+          $ref: "#/components/schemas/AgentInvocationId"
+        routine_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentRoutineResponse:
+      type: object
+      additionalProperties: false
+      required: [routine]
+      properties:
+        routine:
+          $ref: "#/components/schemas/AgentRoutine"
+    AgentListRoutinesResponse:
+      type: object
+      additionalProperties: false
+      required: [routines]
+      properties:
+        routines:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/AgentRoutine"
+    AgentDeleteRoutineResponse:
+      type: object
+      additionalProperties: false
+      required: [deleted, routine_id]
+      properties:
+        deleted:
+          type: boolean
+          const: true
+        routine_id:
+          $ref: "./common.yaml#/components/schemas/Id"

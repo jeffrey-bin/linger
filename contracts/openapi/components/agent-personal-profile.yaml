@@ -1,0 +1,122 @@
+components:
+  schemas:
+    AgentPersonalProfileQueryRequest:
+      type: object
+      additionalProperties: false
+      description: Reads the Personal Profile of the Human who owns this Agent.
+    AgentPersonalProfileResponse:
+      type: object
+      additionalProperties: false
+      required: [current]
+      properties:
+        current:
+          description: The current revision, or null when the owner has no Personal Profile yet.
+          type: object
+          nullable: true
+          x-go-type-name: AgentPersonalProfileRevision
+          additionalProperties: false
+          required: [revision_id, profile, markdown, created_at]
+          properties:
+            revision_id:
+              $ref: "./common.yaml#/components/schemas/Id"
+            profile:
+              $ref: "./personal-profile.yaml#/components/schemas/PersonalProfileDocument"
+            markdown:
+              type: string
+              maxLength: 100000
+              description: The Markdown TeamHub rendered from profile; edit profile, not this.
+            source_apps:
+              type: array
+              maxItems: 20
+              uniqueItems: true
+              items:
+                type: string
+                pattern: "^[a-z0-9][a-z0-9_-]{0,119}$"
+            created_at:
+              $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentPersonalProfileBuildRequest:
+      type: object
+      additionalProperties: false
+      required: [invocation_id]
+      description: >-
+        Records that this Agent has started writing its owner's Personal Profile. The
+        next revision ends the build; otherwise it ends after 30 minutes. Repeating it
+        keeps the original start, so the invocation ID is not stored.
+      properties:
+        invocation_id:
+          $ref: "./agent-collaboration.yaml#/components/schemas/AgentInvocationId"
+    AgentPersonalProfileBuildResponse:
+      type: object
+      additionalProperties: false
+      required: [building_since]
+      properties:
+        building_since:
+          type: string
+          format: date-time
+          description: When the build in progress started.
+    AgentPersonalProfileWriteRequest:
+      type: object
+      additionalProperties: false
+      required: [invocation_id, profile]
+      properties:
+        invocation_id:
+          $ref: "./agent-collaboration.yaml#/components/schemas/AgentInvocationId"
+        base_revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: >-
+            The current revision this write replaces. Omit only when the owner has no
+            Personal Profile yet; a different current revision is a conflict.
+        profile:
+          $ref: "./personal-profile.yaml#/components/schemas/PersonalProfileDocument"
+          description: The complete new Personal Profile document; it replaces the whole Profile.
+        source_apps:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          description: App keys actually used as evidence for this complete Profile; omit when unknown.
+          items:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9_-]{0,119}$"
+    AgentPersonalProfileWriteResponse:
+      type: object
+      additionalProperties: false
+      required: [revision_id, created_at]
+      properties:
+        revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AgentAccountProfileQueryRequest:
+      type: object
+      additionalProperties: false
+      description: Reads the Account fields of the Human who owns this Agent.
+    AgentAccountProfileUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [invocation_id]
+      minProperties: 2
+      description: Sets at least one Account field of the Human who owns this Agent.
+      properties:
+        invocation_id:
+          $ref: "./agent-collaboration.yaml#/components/schemas/AgentInvocationId"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        bio:
+          type: string
+          maxLength: 2000
+        organization:
+          type: string
+          maxLength: 200
+    AgentAccountProfileResponse:
+      type: object
+      additionalProperties: false
+      required: [name, bio, organization]
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+        organization:
+          type: string

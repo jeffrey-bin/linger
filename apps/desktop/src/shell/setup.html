@@ -1,0 +1,2520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src 'self'; font-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+    />
+    <title>Set Up Linger</title>
+    <style>
+      @font-face {
+        font-family: "Geist Variable";
+        font-style: normal;
+        font-display: block;
+        font-weight: 100 900;
+        src: url("/geist.woff2") format("woff2");
+      }
+      /* The installer's look: a scene on top, the step centered below. */
+      :root {
+        --ink: #262626;
+        --body: #1a1a16;
+        --muted: #737266;
+        --faint: #a3a39b;
+        --line: #ecece9;
+        --field: #f4f4f0;
+        --ok: #2f9e44;
+        --error: #b5320a;
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        color: var(--body);
+        background: #fff;
+        font:
+          14px/1.5 "Geist Variable",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          "PingFang SC",
+          "Noto Sans SC",
+          system-ui,
+          sans-serif;
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      /* Scene and top bar. Both are the window drag region. */
+      .scene {
+        flex: none;
+        height: 190px;
+        background: #f4f4f0 url("/welcome-scene.png") center / cover no-repeat;
+        -webkit-app-region: drag;
+      }
+      .topbar {
+        position: absolute;
+        top: 18px;
+        left: 28px;
+        right: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        color: #52524b;
+        font-size: 12px;
+        -webkit-app-region: drag;
+      }
+      /* Clear the traffic lights. */
+      body[data-platform="darwin"] .topbar {
+        left: 84px;
+      }
+
+      .topbar .brand {
+        height: 24px;
+        width: auto;
+      }
+
+      /* The current step. */
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        width: min(100%, 568px);
+        margin: 0 auto;
+        padding: 28px 24px 22px;
+        text-align: center;
+      }
+      section {
+        display: none;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        animation: enter 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      section.active {
+        display: flex;
+      }
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+      }
+      h1 {
+        margin: 0 0 6px;
+        color: var(--ink);
+        font-size: 20px;
+        font-weight: 580;
+        line-height: 32px;
+        letter-spacing: 0.0025em;
+        text-wrap: balance;
+      }
+      .lead {
+        max-width: 440px;
+        margin: 0 auto 22px;
+        color: var(--muted);
+        font-size: 13px;
+        text-wrap: pretty;
+      }
+      .lead.compact {
+        margin-bottom: 14px;
+      }
+      .icon {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--field);
+        color: var(--ink);
+      }
+      svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      form {
+        width: min(100%, 400px);
+        margin: 0 auto;
+        text-align: left;
+      }
+      label.field {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 550;
+      }
+      input[type="text"] {
+        width: 100%;
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        outline: none;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        font-size: 14px;
+        user-select: text;
+        -webkit-user-select: text;
+        transition: border-color 0.15s;
+      }
+      input[type="text"]:focus {
+        border-color: var(--ink);
+      }
+      .hint {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .hint:empty {
+        display: none;
+      }
+      .error:empty {
+        display: none;
+      }
+      .error {
+        margin: 10px 0 0;
+        color: var(--error);
+        font-size: 12px;
+      }
+      .card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: min(100%, 420px);
+        margin: 0 auto;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        text-align: left;
+      }
+      .card .text {
+        flex: 1;
+        min-width: 0;
+      }
+      .card .text strong {
+        display: block;
+        overflow: hidden;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 550;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .card .text span {
+        display: block;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .badge[data-ok="true"] {
+        color: var(--ok);
+        font-weight: 500;
+      }
+      .badge svg {
+        width: 14px;
+        height: 14px;
+      }
+      .spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 6px;
+        vertical-align: -1px;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      .badge .spinner {
+        margin-right: 0;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .rows {
+        display: grid;
+        align-content: start;
+        min-height: 0;
+        overflow-y: auto;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+      }
+      .row + .row {
+        border-top: 1px solid var(--line);
+      }
+      .row .text {
+        flex: 1;
+        min-width: 0;
+      }
+      .row strong {
+        display: block;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 550;
+      }
+      .row span.sub {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .folders {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .folders span {
+        max-width: 200px;
+        padding: 2px 6px;
+        overflow: hidden;
+        border-radius: 4px;
+        background: var(--field);
+        color: #52524b;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      body:not([data-platform="darwin"]) .mac-only {
+        display: none;
+      }
+      .row .badge {
+        flex: none;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .row span.sub[data-warn="true"] {
+        color: var(--error);
+      }
+      .row select {
+        flex: none;
+        height: 30px;
+        padding: 0 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        font-size: 12px;
+      }
+      .switch {
+        position: relative;
+        flex: none;
+        width: 34px;
+        height: 20px;
+        padding: 0;
+        border: 0;
+        border-radius: 999px;
+        background: #dbdcd5;
+        transition: background 0.2s;
+      }
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .switch[aria-checked="true"] {
+        background: var(--ink);
+      }
+      .switch[aria-checked="true"]::after {
+        transform: translateX(14px);
+      }
+      .switch:hover:not(:disabled) {
+        background: #c4c4bc;
+      }
+      .switch[aria-checked="true"]:hover:not(:disabled) {
+        background: #41413b;
+      }
+      .switch:disabled {
+        opacity: 0.5;
+      }
+
+      footer.actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 18px;
+      }
+      button,
+      select {
+        font: inherit;
+        cursor: pointer;
+      }
+      button:disabled,
+      select:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      button:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+      }
+      .primary,
+      .ghost,
+      .secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid #dbdcd5;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 470;
+        white-space: nowrap;
+        transition:
+          background-color 140ms ease,
+          transform 100ms ease;
+      }
+      .primary,
+      .ghost {
+        min-height: 36px;
+        padding: 6px 15px;
+      }
+      .primary {
+        min-width: 112px;
+        border-color: var(--ink);
+        background: var(--ink);
+        color: #fff;
+      }
+      .primary:hover:not(:disabled) {
+        background: #41413b;
+      }
+      .ghost:hover:not(:disabled),
+      .secondary:hover:not(:disabled) {
+        background: #f4f4f5;
+      }
+      .primary:active:not(:disabled),
+      .ghost:active:not(:disabled),
+      .secondary:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+      .primary svg {
+        width: 14px;
+        height: 14px;
+      }
+      .secondary {
+        min-height: 28px;
+        padding: 3px 10px;
+        font-size: 12px;
+      }
+      .link {
+        padding: 6px;
+        border: 0;
+        border-radius: 4px;
+        background: none;
+        color: #414038;
+        font-size: 12px;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .link:hover:not(:disabled) {
+        background: #f4f4f5;
+      }
+
+      /* Quick Install: one button, the options folded away behind it. */
+      main {
+        position: relative;
+      }
+      section[data-step="welcome"],
+      section[data-step="installing"],
+      section[data-step="ready"] {
+        /* A long error scrolls instead of pushing the title into the scene. */
+        justify-content: safe center;
+        overflow-y: auto;
+        padding-bottom: 40px;
+      }
+      h1 {
+        margin-bottom: 8px;
+        font-size: 26px;
+        font-weight: 600;
+        line-height: 34px;
+        letter-spacing: -0.022em;
+      }
+      .lead {
+        font-size: 13.5px;
+        letter-spacing: -0.003em;
+      }
+      .lead.tight {
+        margin-bottom: 0;
+      }
+      /* Customizing makes room for the options. */
+      section[data-customizing="true"] {
+        padding-bottom: 0;
+      }
+      section[data-customizing="true"] .eyebrow,
+      section[data-customizing="true"] .plan-line .sep,
+      section[data-customizing="true"] #plan-summary {
+        display: none;
+      }
+      section[data-customizing="true"] .start {
+        padding-top: 16px;
+      }
+      section[data-customizing="true"] .plan-line {
+        margin-top: 8px;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-self: center;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 14px;
+        padding: 3px 10px 3px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.8);
+        color: #5f5e55;
+        font-size: 11.5px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+      }
+      .eyebrow svg {
+        width: 12px;
+        height: 12px;
+        stroke-width: 2;
+      }
+      .start {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 24px;
+      }
+      .primary.large {
+        position: relative;
+        min-width: 232px;
+        min-height: 44px;
+        padding: 0 22px;
+        overflow: hidden;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #2f2f2c 0%, #1b1b19 100%);
+        box-shadow:
+          0 0 0 1px rgba(20, 20, 16, 0.9),
+          0 1px 2px rgba(20, 20, 16, 0.2),
+          0 10px 24px -12px rgba(20, 20, 16, 0.55),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        font-size: 14px;
+        font-weight: 550;
+        letter-spacing: -0.006em;
+        transition:
+          box-shadow 200ms ease,
+          transform 200ms var(--ease);
+      }
+      .primary.large:hover:not(:disabled) {
+        background: linear-gradient(180deg, #353532 0%, #1f1f1d 100%);
+        box-shadow:
+          0 0 0 1px rgba(20, 20, 16, 0.9),
+          0 2px 4px rgba(20, 20, 16, 0.2),
+          0 16px 30px -14px rgba(20, 20, 16, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        transform: translateY(-1px);
+      }
+      .primary.large:active:not(:disabled) {
+        transform: translateY(0);
+      }
+      .primary.large svg {
+        width: 15px;
+        height: 15px;
+        stroke-width: 2;
+        transition: transform 240ms var(--ease);
+      }
+      .primary.large:hover:not(:disabled) svg {
+        transform: translateX(2px);
+      }
+      /* What Quick Install does, and the way to change it. */
+      .plan-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 14px;
+        color: var(--faint);
+        font-size: 12px;
+      }
+      .plan-line .sep {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #d4d4cd;
+      }
+      .link.quiet {
+        padding: 2px 4px;
+        color: #52524b;
+        font-weight: 500;
+        text-decoration-color: #d4d4cd;
+        transition:
+          color 140ms ease,
+          text-decoration-color 140ms ease;
+      }
+      .link.quiet:hover:not(:disabled) {
+        background: none;
+        color: var(--ink);
+        text-decoration-color: var(--ink);
+      }
+      .fold {
+        display: grid;
+        grid-template-rows: 0fr;
+        width: min(100%, 440px);
+        margin: 0 auto;
+        opacity: 0;
+        transition:
+          grid-template-rows 420ms var(--ease),
+          opacity 280ms ease,
+          margin 420ms var(--ease);
+      }
+      .fold[data-open="true"] {
+        grid-template-rows: 1fr;
+        margin: 16px auto 0;
+        opacity: 1;
+      }
+      .fold > div {
+        min-height: 0;
+        overflow: hidden;
+        padding: 0 4px 10px;
+      }
+      .choices,
+      .panel {
+        border: 1px solid rgba(20, 20, 16, 0.07);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow:
+          0 1px 2px rgba(20, 20, 16, 0.04),
+          0 12px 32px -18px rgba(20, 20, 16, 0.22);
+        text-align: left;
+      }
+      .choices {
+        padding: 4px 18px;
+      }
+      .choice {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 8px 0;
+      }
+      .choice + .choice {
+        border-top: 1px solid #f1f1ee;
+      }
+      .choice .text {
+        flex: 1;
+        min-width: 0;
+      }
+      .choice strong {
+        display: block;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 550;
+        letter-spacing: -0.005em;
+      }
+      .choice .sub {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .seg {
+        position: relative;
+        display: flex;
+        flex: none;
+        padding: 2px;
+        border-radius: 9px;
+        background: #f1f1ee;
+        box-shadow: inset 0 0 0 1px rgba(20, 20, 16, 0.04);
+      }
+      .seg button {
+        position: relative;
+        z-index: 1;
+        min-width: 56px;
+        height: 26px;
+        padding: 0 10px;
+        border: 0;
+        border-radius: 7px;
+        background: none;
+        color: #6b6a60;
+        font-size: 12px;
+        font-weight: 500;
+        transition: color 160ms ease;
+      }
+      .seg button:hover:not(:disabled) {
+        color: var(--ink);
+      }
+      .seg button[aria-checked="true"] {
+        color: var(--ink);
+        cursor: default;
+      }
+      .seg .knob {
+        position: absolute;
+        z-index: 0;
+        top: 2px;
+        left: 0;
+        height: 26px;
+        border-radius: 7px;
+        background: #fff;
+        box-shadow:
+          0 1px 2px rgba(20, 20, 16, 0.12),
+          0 0 0 0.5px rgba(20, 20, 16, 0.08);
+        transition:
+          transform 320ms var(--ease),
+          width 320ms var(--ease);
+      }
+      /* The local model: one card naming it and what it needs. */
+      .choice.local {
+        flex-wrap: wrap;
+        row-gap: 8px;
+      }
+      .pick {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1px;
+        min-width: 0;
+        padding: 7px 10px;
+        border: 1px solid #e6e6e1;
+        border-radius: 9px;
+        background: #fff;
+        text-align: left;
+        transition:
+          border-color 140ms ease,
+          background-color 140ms ease;
+      }
+      .pick:hover:not(:disabled) {
+        border-color: #c4c4bc;
+      }
+      .pick[aria-checked="true"] {
+        border-color: var(--ink);
+        background: #fafaf8;
+        box-shadow: inset 0 0 0 0.5px var(--ink);
+      }
+      .pick span {
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 550;
+      }
+      .pick small {
+        color: var(--muted);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+      /* Opens the system folder picker. */
+      .change {
+        flex: none;
+        height: 28px;
+        padding: 0 12px;
+        border: 1px solid #e6e6e1;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 500;
+        transition:
+          border-color 140ms ease,
+          background-color 140ms ease;
+      }
+      .change:hover:not(:disabled) {
+        border-color: #c4c4bc;
+        background: #fafaf8;
+      }
+      .change:active:not(:disabled) {
+        background: #f1f1ee;
+      }
+      .choice .sub[data-warn="true"] {
+        color: var(--error);
+      }
+      /* Provider keys: one line per provider under the row. */
+      .choice.provider-keys {
+        flex-wrap: wrap;
+        row-gap: 6px;
+      }
+      .keys {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 64px 1fr auto auto;
+        align-items: center;
+        gap: 6px 8px;
+      }
+      .keys label {
+        color: #5f5e55;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .keys input {
+        min-width: 0;
+        height: 28px;
+        padding: 0 10px;
+        border: 1px solid #e6e6e1;
+        border-radius: 8px;
+        outline: none;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        font-size: 12px;
+        user-select: text;
+        -webkit-user-select: text;
+        transition: border-color 140ms ease;
+      }
+      .keys input:focus {
+        border-color: var(--ink);
+      }
+      .keys-note {
+        width: 100%;
+        margin: 0;
+        color: var(--muted);
+        font-size: 11.5px;
+      }
+      .team {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 20px;
+        margin: 0;
+        color: var(--faint);
+        font-size: 12px;
+      }
+      .team .link {
+        padding: 2px 4px;
+        color: var(--muted);
+        text-decoration-color: #d4d4cd;
+      }
+
+      /* Installing: one panel with the bar and a short stepper. */
+      .panel {
+        width: 380px;
+        margin: 26px auto 0;
+        padding: 20px 22px 18px;
+      }
+      .now {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.005em;
+      }
+      .now .pct {
+        color: var(--ink);
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+      }
+      .track {
+        position: relative;
+        height: 4px;
+        margin-top: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #f0f0ec;
+      }
+      .fill {
+        position: relative;
+        width: 0;
+        height: 100%;
+        overflow: hidden;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #4a4a45, #1b1b19);
+        transition: width 900ms var(--ease);
+      }
+      /* A soft sheen shows the work goes on between updates. */
+      .fill::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.45),
+          transparent
+        );
+        transform: translateX(-100%);
+        animation: sheen 1.8s ease-in-out infinite;
+      }
+      section[data-failed="true"] .fill {
+        background: #c9c8c0;
+      }
+      section[data-failed="true"] .fill::after {
+        display: none;
+      }
+      @keyframes sheen {
+        to {
+          transform: translateX(100%);
+        }
+      }
+      .checks {
+        position: relative;
+        display: grid;
+        gap: 12px;
+        margin: 18px 0 0;
+        padding: 16px 0 0;
+        border-top: 1px solid #f1f1ee;
+        list-style: none;
+        color: var(--faint);
+        font-size: 12.5px;
+      }
+      .checks li {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: color 240ms ease;
+      }
+      /* The line that joins the steps. */
+      .checks li + li::before {
+        content: "";
+        position: absolute;
+        left: 7.25px;
+        bottom: calc(100% + 1px);
+        width: 1.5px;
+        height: 10px;
+        border-radius: 1px;
+        background: #ecece8;
+        transition: background-color 240ms ease;
+      }
+      .checks li[data-state="done"] + li::before {
+        background: var(--ink);
+      }
+      .checks li[data-state="now"] {
+        color: var(--ink);
+        font-weight: 500;
+      }
+      .checks li[data-state="done"] {
+        color: #52524b;
+      }
+      .checks .time {
+        margin-left: auto;
+        color: var(--faint);
+        font-size: 11.5px;
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+      }
+      .dot {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 16px;
+        height: 16px;
+        border: 1.5px solid #deded8;
+        border-radius: 50%;
+        background: #fff;
+        transition:
+          background-color 240ms ease,
+          border-color 240ms ease;
+      }
+      .dot svg {
+        width: 9px;
+        height: 9px;
+        stroke: #fff;
+        stroke-width: 3;
+        opacity: 0;
+        transform: scale(0.6);
+        transition:
+          opacity 200ms ease,
+          transform 260ms var(--ease);
+      }
+      [data-state="done"] .dot {
+        border-color: var(--ink);
+        background: var(--ink);
+      }
+      [data-state="done"] .dot svg {
+        opacity: 1;
+        transform: none;
+      }
+      [data-state="now"] .dot {
+        border-color: var(--ink);
+        border-right-color: transparent;
+        animation: spin 0.9s linear infinite;
+      }
+      [data-state="failed"] .dot {
+        border-color: var(--error);
+      }
+      .checks li[data-state="failed"] {
+        color: var(--error);
+      }
+      /* After a failure the steps not reached make room for the error and
+         what to do next. */
+      section[data-failed="true"] .checks li[data-state=""] {
+        display: none;
+      }
+      .problem {
+        width: 380px;
+        margin: 14px auto 0;
+        padding: 10px 14px;
+        border: 1px solid #f3dfd6;
+        border-radius: 12px;
+        background: #fdf6f3;
+        color: var(--error);
+        font-size: 12px;
+        text-align: left;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+      .problem:empty {
+        display: none;
+      }
+      /* The whole message, line breaks kept; long ones fold behind
+         "Show Details". */
+      #installing-error {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      #installing-error.folded {
+        max-height: 7.5em;
+        overflow: hidden;
+        mask-image: linear-gradient(#000 70%, transparent);
+      }
+      /* The AI runtime's own sign-in: a small dialog over the progress while
+         the "signin" step waits. */
+      .signin-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        background: rgb(38 38 38 / 28%);
+        animation: enter 0.18s ease-out;
+      }
+      .signin-modal[hidden],
+      .signin-modal [hidden] {
+        display: none;
+      }
+      .signin-modal .sheet {
+        width: 340px;
+        padding: 22px 22px 18px;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 18px 48px rgb(0 0 0 / 18%);
+        font-size: 12px;
+        text-align: left;
+      }
+      .signin-modal h2 {
+        margin: 0 0 6px;
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .signin-modal p {
+        margin: 0 0 14px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .signin-modal .waiting {
+        display: flex;
+        align-items: center;
+        color: var(--ink);
+      }
+      .signin-modal .device-code strong {
+        color: var(--ink);
+        font:
+          600 14px ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        letter-spacing: 0.08em;
+        user-select: all;
+        -webkit-user-select: all;
+      }
+      .signin-modal .problem {
+        width: auto;
+        margin: 0 0 14px;
+      }
+      .signin-modal .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .signin-modal .actions .primary {
+        width: 100%;
+      }
+      .signin-modal .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .signin-modal .runtimes {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .signin-modal .runtimes button {
+        flex: 1;
+      }
+      .signin-modal details {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+      }
+      .signin-modal summary {
+        width: max-content;
+        cursor: pointer;
+        list-style: none;
+      }
+      .signin-modal summary::-webkit-details-marker {
+        display: none;
+      }
+      .signin-modal details p {
+        margin: 8px 0;
+      }
+      .signin-modal form {
+        display: flex;
+        gap: 8px;
+      }
+      .signin-modal input {
+        flex: 1;
+        min-width: 0;
+        padding: 5px 10px;
+        border: 1px solid #dbdcd5;
+        border-radius: 8px;
+        font: inherit;
+      }
+      .diagnostics {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 4px 10px;
+        width: 380px;
+        margin: 6px auto 0;
+        font-size: 12px;
+      }
+      .diagnostics[hidden] {
+        display: none;
+      }
+      .diagnostics output {
+        flex-basis: 100%;
+        color: #52524b;
+        text-align: center;
+        overflow-wrap: anywhere;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+
+      /* Ready: the check draws itself, then a short receipt. */
+      .mark {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #2f2f2c, #1b1b19);
+        box-shadow:
+          0 0 0 6px #f4f4f0,
+          0 14px 28px -14px rgba(20, 20, 16, 0.6);
+      }
+      section.active .mark {
+        animation: pop 560ms var(--ease) both;
+      }
+      .mark svg {
+        width: 22px;
+        height: 22px;
+        stroke: #fff;
+        stroke-width: 2.4;
+        stroke-dasharray: 24;
+        stroke-dashoffset: 24;
+      }
+      section.active .mark svg {
+        animation: draw 420ms 260ms var(--ease) forwards;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: scale(0.7);
+        }
+      }
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .connected {
+        display: flex;
+        width: max-content;
+        align-items: center;
+        gap: 8px;
+        margin: 18px auto 0;
+        padding: 6px 12px;
+        border: 1px solid #ecece7;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .connected .live {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--ok);
+        box-shadow: 0 0 0 3px rgba(47, 158, 68, 0.15);
+      }
+      section.active .connected {
+        animation: enter 420ms 120ms var(--ease) both;
+      }
+      /* Confetti for a finished install, drawn over the whole window. */
+      #confetti {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      section[data-step="ready"] .start {
+        padding-top: 22px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-platform="darwin">
+    <div class="scene" aria-hidden="true"></div>
+    <header class="topbar">
+      <img class="brand" src="logo.png" alt="Linger" />
+      <span id="step-label"></span>
+    </header>
+
+    <main>
+      <section data-step="welcome" aria-labelledby="welcome-title">
+        <span class="eyebrow" id="welcome-eyebrow"
+          ><svg viewBox="0 0 24 24">
+            <rect x="5" y="11" width="14" height="9" rx="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg
+          >Private to this computer</span
+        >
+        <h1 id="welcome-title">Set up Linger</h1>
+        <p class="lead tight" id="welcome-lead"></p>
+        <div class="fold" id="local-options" data-open="false">
+          <div>
+            <div class="choices">
+              <div class="choice">
+                <div class="text">
+                  <strong>AI runtime</strong
+                  ><span class="sub" id="runtime-sub">Runs your tasks.</span>
+                </div>
+                <div
+                  class="seg"
+                  role="radiogroup"
+                  aria-label="AI runtime"
+                  data-plan="runtime"
+                >
+                  <span class="knob"></span>
+                  <button type="button" role="radio" data-value="recommended">
+                    Auto
+                  </button>
+                  <button type="button" role="radio" data-value="codex">
+                    Codex
+                  </button>
+                  <button type="button" role="radio" data-value="claude">
+                    Claude Code
+                  </button>
+                  <button type="button" role="radio" data-value="pi">Pi</button>
+                </div>
+              </div>
+              <div class="choice local" id="local-row" hidden>
+                <div class="text">
+                  <strong>Local model</strong
+                  ><span class="sub" id="local-sub"></span>
+                </div>
+                <button
+                  type="button"
+                  class="pick"
+                  id="local-model"
+                  role="checkbox"
+                  aria-label="Run tasks on a local model"
+                  hidden
+                >
+                  <span id="local-model-name"></span
+                  ><small id="local-model-needs"></small>
+                </button>
+              </div>
+              <div class="choice provider-keys">
+                <div class="text">
+                  <strong>API keys</strong
+                  ><span class="sub"
+                    >Optional. Composio connects apps; Soniox and xAI enable
+                    voice input. Keys stay on this computer.</span
+                  >
+                </div>
+                <div class="keys">
+                  <label for="key-composio">Composio</label>
+                  <input
+                    id="key-composio"
+                    type="password"
+                    data-key="composio"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="Composio API key"
+                  />
+                  <button type="button" class="change" data-reveal="composio">
+                    Show
+                  </button>
+                  <button type="button" class="change" data-remove="composio">
+                    Remove
+                  </button>
+                  <label for="key-soniox">Soniox</label>
+                  <input
+                    id="key-soniox"
+                    type="password"
+                    data-key="soniox"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="Soniox API key"
+                  />
+                  <button type="button" class="change" data-reveal="soniox">
+                    Show
+                  </button>
+                  <button type="button" class="change" data-remove="soniox">
+                    Remove
+                  </button>
+                  <label for="key-xai">xAI</label>
+                  <input
+                    id="key-xai"
+                    type="password"
+                    data-key="xai"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="xAI API key"
+                  />
+                  <button type="button" class="change" data-reveal="xai">
+                    Show
+                  </button>
+                  <button type="button" class="change" data-remove="xai">
+                    Remove
+                  </button>
+                </div>
+                <p class="keys-note" id="keys-note"></p>
+              </div>
+              <div class="choice">
+                <div class="text">
+                  <strong>Install location</strong
+                  ><span class="sub" id="location-sub"></span>
+                </div>
+                <button type="button" class="change" id="location-change">
+                  Change…
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="start">
+          <button class="primary large" id="local-install" type="button">
+            <span id="local-install-label">Quick Install</span
+            ><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+          </button>
+          <button
+            class="primary large"
+            id="get-started"
+            data-go="server"
+            type="button"
+          >
+            Get Started
+          </button>
+          <p class="plan-line" id="plan-line">
+            <span id="plan-summary"></span><span class="sep"></span
+            ><button
+              class="link quiet"
+              id="local-customize"
+              type="button"
+              aria-expanded="false"
+              aria-controls="local-options"
+            >
+              Customize
+            </button>
+          </p>
+        </div>
+        <p class="error" id="local-error" role="alert"></p>
+        <p class="team" id="team">
+          Have a team server?
+          <button class="link" data-go="server" type="button">
+            Connect to it instead
+          </button>
+        </p>
+      </section>
+
+      <section data-step="installing" aria-labelledby="installing-title">
+        <h1 id="installing-title">Installing Linger</h1>
+        <p class="lead tight" id="installing-plan"></p>
+        <div
+          class="panel"
+          role="progressbar"
+          id="installing-bar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="now">
+            <span id="installing-step"></span
+            ><span class="pct" id="installing-count"></span>
+          </div>
+          <div class="track"><div class="fill" id="installing-fill"></div></div>
+          <ol class="checks" id="installing-checks"></ol>
+        </div>
+        <div
+          class="signin-modal"
+          id="runtime-signin"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="runtime-signin-title"
+          hidden
+        >
+          <div class="sheet">
+            <h2 id="runtime-signin-title"></h2>
+            <p id="runtime-signin-lead"></p>
+            <p class="waiting" id="runtime-signin-waiting" role="status">
+              <span class="spinner"></span>Waiting for authorization in your
+              browser…
+            </p>
+            <p class="device-code" id="runtime-signin-device" hidden>
+              Enter this code in your browser:
+              <strong id="runtime-signin-device-code"></strong>
+            </p>
+            <p class="problem" id="runtime-signin-error" role="alert"></p>
+            <div class="actions" id="runtime-signin-idle">
+              <button class="primary" id="runtime-signin-start" type="button">
+                Authorize
+              </button>
+              <div class="row">
+                <button
+                  class="link quiet"
+                  id="runtime-signin-other"
+                  type="button"
+                >
+                  Use a different runtime
+                </button>
+                <button
+                  class="link quiet"
+                  id="runtime-signin-logs"
+                  type="button"
+                >
+                  Show Logs
+                </button>
+              </div>
+              <div class="runtimes" id="runtime-signin-runtimes" hidden>
+                <button class="secondary" data-switch="codex" type="button">
+                  Codex
+                </button>
+                <button class="secondary" data-switch="claude" type="button">
+                  Claude Code
+                </button>
+                <button class="secondary" data-switch="pi" type="button">
+                  Pi
+                </button>
+              </div>
+            </div>
+            <div class="row" id="runtime-signin-busy">
+              <button class="link quiet" id="runtime-signin-open" type="button">
+                Open browser again
+              </button>
+              <button class="ghost" id="runtime-signin-cancel" type="button">
+                Cancel
+              </button>
+            </div>
+            <details id="runtime-signin-trouble">
+              <summary class="link quiet">Having trouble?</summary>
+              <p id="runtime-signin-help"></p>
+              <form id="runtime-signin-paste">
+                <input
+                  id="runtime-signin-input"
+                  type="password"
+                  autocomplete="off"
+                  spellcheck="false"
+                  aria-label="Code from the sign-in page"
+                  placeholder="Paste the code"
+                />
+                <button class="secondary" type="submit">Continue</button>
+              </form>
+            </details>
+          </div>
+        </div>
+        <p class="problem" id="installing-error" role="alert"></p>
+        <div class="diagnostics" id="installing-diagnostics" hidden>
+          <button class="link quiet" id="installing-more" type="button" hidden>
+            Show Details
+          </button>
+          <button class="link quiet" id="show-logs" type="button">
+            Show Logs
+          </button>
+          <button class="link quiet" id="save-diagnostics" type="button">
+            Save Diagnostics
+          </button>
+          <output id="diagnostics-note"></output>
+        </div>
+        <footer class="actions" id="installing-actions">
+          <button class="ghost" data-go="welcome" type="button">Back</button>
+          <button class="primary" id="local-retry" type="button">
+            Try Again
+          </button>
+        </footer>
+      </section>
+
+      <section data-step="ready" aria-labelledby="ready-title">
+        <span class="mark"
+          ><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10" /></svg
+        ></span>
+        <h1 id="ready-title">Linger is ready</h1>
+        <p class="lead tight" id="ready-lead"></p>
+        <p class="connected">
+          <span class="live"></span>This computer is connected
+        </p>
+        <div class="start">
+          <button class="primary large" id="open" type="button">
+            <span>Open Linger</span
+            ><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+          </button>
+        </div>
+      </section>
+
+      <section data-step="server" aria-labelledby="server-title">
+        <h1 id="server-title">Where is your team's Linger?</h1>
+        <p class="lead">Enter the address your team uses for Linger.</p>
+        <form id="server-form" novalidate>
+          <label class="field" for="server">Server address</label>
+          <input
+            id="server"
+            type="text"
+            inputmode="url"
+            autocomplete="url"
+            spellcheck="false"
+            placeholder="https://linger.example.com"
+          />
+          <p class="hint">Ask your admin if you're not sure.</p>
+          <p class="error" id="server-error" role="alert"></p>
+        </form>
+        <footer class="actions">
+          <button class="ghost" data-go="welcome" type="button">Back</button>
+          <span class="spacer"></span>
+          <button class="primary" form="server-form" type="submit">
+            Continue
+          </button>
+        </footer>
+      </section>
+
+      <section data-step="signin" aria-labelledby="signin-title">
+        <h1 id="signin-title">Sign in to your account</h1>
+        <p class="lead">
+          Linger opens in its own window. Sign in there, and this window moves
+          on by itself.
+        </p>
+        <div class="card">
+          <span class="icon"
+            ><svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0" /></svg
+          ></span>
+          <div class="text">
+            <strong>Account</strong><span id="signin-host"></span>
+          </div>
+          <span class="badge" id="signin-badge"></span>
+        </div>
+        <footer class="actions">
+          <button class="ghost" data-go="server" type="button">Back</button>
+          <span class="spacer"></span>
+          <button class="primary" id="signin" type="button">
+            Open Sign-in
+          </button>
+        </footer>
+      </section>
+
+      <section data-step="connect" aria-labelledby="connect-title">
+        <h1 id="connect-title">Connect this computer</h1>
+        <p class="lead">
+          Your workspace will see this computer and can send it tasks. You can
+          disconnect it at any time.
+        </p>
+        <div class="card">
+          <span class="icon"
+            ><svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="12" rx="2" />
+              <path d="M8 20h8M12 16v4" /></svg
+          ></span>
+          <div class="text">
+            <strong id="computer-name"></strong><span id="computer-host"></span>
+          </div>
+          <span class="badge" id="connect-badge"></span>
+        </div>
+        <p class="error" id="connect-error" role="alert"></p>
+        <footer class="actions">
+          <button class="ghost" data-go="signin" type="button">Back</button>
+          <span class="spacer"></span>
+          <button class="primary" id="connect" type="button">Connect</button>
+        </footer>
+      </section>
+
+      <section data-step="permissions" aria-labelledby="permissions-title">
+        <h1 id="permissions-title">A few permissions</h1>
+        <p class="lead compact">
+          Change these later from the menu bar or in your system settings.
+        </p>
+        <div class="rows">
+          <div class="row">
+            <span class="icon"
+              ><svg viewBox="0 0 24 24">
+                <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg
+            ></span>
+            <div class="text">
+              <strong>Notifications</strong
+              ><span class="sub">Know when a task finishes or needs you.</span>
+            </div>
+            <button class="secondary" id="notify" type="button">
+              Allow Notifications
+            </button>
+          </div>
+          <div class="row">
+            <span class="icon"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                /></svg
+            ></span>
+            <div class="text">
+              <strong>Folders</strong
+              ><span class="sub">Folders tasks may read and change.</span>
+              <div class="folders" id="folders"></div>
+            </div>
+            <button class="secondary" id="folder" type="button">
+              Add Folder…
+            </button>
+          </div>
+          <div class="row mac-only">
+            <span class="icon"
+              ><svg viewBox="0 0 24 24">
+                <rect x="4" y="3" width="16" height="18" rx="2" />
+                <path d="M8 8h8M8 12h8M8 16h5" /></svg
+            ></span>
+            <div class="text">
+              <strong>Full Disk Access</strong
+              ><span class="sub" id="perm-full-disk-sub"></span>
+            </div>
+            <span class="badge" id="perm-full-disk-badge"></span>
+            <button class="secondary" id="perm-full-disk" type="button">
+              Open Settings
+            </button>
+          </div>
+          <div class="row mac-only">
+            <span class="icon"
+              ><svg viewBox="0 0 24 24">
+                <path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg
+            ></span>
+            <div class="text">
+              <strong>Downloads, Documents, Desktop</strong
+              ><span class="sub" id="perm-folders-sub"></span>
+            </div>
+            <span class="badge" id="perm-folders-badge"></span>
+            <button class="secondary" id="perm-folders" type="button">
+              Allow…
+            </button>
+          </div>
+          <div class="row mac-only">
+            <span class="icon"
+              ><svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M3 9h18M8 14l2 2 4-4" /></svg
+            ></span>
+            <div class="text">
+              <strong>Control other apps</strong
+              ><span class="sub" id="perm-automation-sub"></span>
+            </div>
+            <span class="badge" id="perm-automation-badge"></span>
+            <button class="secondary" id="perm-automation" type="button">
+              Allow…
+            </button>
+          </div>
+          <div class="row">
+            <span class="icon"
+              ><svg viewBox="0 0 24 24">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9" /></svg
+            ></span>
+            <div class="text">
+              <strong>Prevent sleep</strong
+              ><span class="sub"
+                >Keep this computer awake for incoming tasks.</span
+              >
+            </div>
+            <button
+              class="switch"
+              id="sleep"
+              role="switch"
+              aria-checked="false"
+              aria-label="Prevent sleep"
+              type="button"
+            ></button>
+          </div>
+          <div class="row">
+            <span class="icon"
+              ><svg viewBox="0 0 24 24">
+                <path d="M12 2v10" />
+                <path d="M18.4 6.6a9 9 0 1 1-12.77.04" /></svg
+            ></span>
+            <div class="text">
+              <strong>Open at login</strong
+              ><span class="sub">Start in the menu bar when you log in.</span>
+            </div>
+            <button
+              class="switch"
+              id="login"
+              role="switch"
+              aria-checked="false"
+              aria-label="Open at login"
+              type="button"
+            ></button>
+          </div>
+        </div>
+        <p class="error" id="permissions-error" role="alert"></p>
+        <footer class="actions">
+          <span class="spacer"></span>
+          <button class="primary" id="finish" type="button">
+            Start Using Linger
+          </button>
+        </footer>
+      </section>
+    </main>
+
+    <script>
+      const setup = window.lingerSetup;
+      const $ = (id) => document.getElementById(id);
+      // The steps of connecting to a team server.
+      const ORDER = ["server", "signin", "connect", "permissions"];
+      const check = '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>';
+      let state;
+      let step;
+      // The one action in flight; every control waits for it.
+      let pending = null;
+      // Whether the full failure message is unfolded.
+      let detailsOpen = false;
+      let shownDiagnostics;
+
+      // What each macOS permission is for, and what goes wrong without it.
+      const PERMISSIONS = {
+        "full-disk": {
+          about: "Recommended. Covers every folder, no prompts.",
+          missing: "Off. Protected folders prompt the first time.",
+        },
+        folders: {
+          about: "Lets tasks read these folders.",
+          missing: "Not allowed. Tasks can't read these folders.",
+        },
+        automation: {
+          about: "Lets tasks drive apps like your browser.",
+          missing: "Not allowed. Tasks can't control other apps.",
+        },
+      };
+
+      // What Install sets up; Quick Install keeps the defaults.
+      const RUNTIMES = {
+        recommended: "",
+        codex: "Codex",
+        claude: "Claude Code",
+        pi: "Pi",
+      };
+      // The installing steps, as the main process reports them; it says
+      // which of them this installation shows.
+      const ALL_STEPS = [
+        ["prepare", () => "Checking this computer"],
+        ["download", () => "Downloading Linger " + state.version],
+        ["services", () => "Starting services"],
+        ["workspace", () => "Setting up your account"],
+        [
+          "signin",
+          () =>
+            "Sign in to " +
+            (RUNTIMES[state.localServer.signIn?.runtime] || "your AI runtime"),
+        ],
+        ["connect", () => "Connecting this computer"],
+        ["agents", () => "Preparing your agents"],
+      ];
+      const gigabytes = (bytes) => Math.round(bytes / 1024 ** 3) + " GB";
+      // Long folders keep their start and their end.
+      const shortPath = (value) =>
+        value.length <= 46
+          ? value
+          : value.slice(0, 18) + "…" + value.slice(-27);
+      // The local model runs tasks through Pi, so choosing it chooses Pi.
+      const defaults = () => ({
+        runtime: "recommended",
+        localModel: false,
+      });
+      let plan;
+      let customizing = false;
+      // Provider keys typed or removed here ("" removes the saved one); kept
+      // only in the inputs and sent once with Install.
+      let keys = {};
+      const isDefaultPlan = (local) =>
+        JSON.stringify(plan) === JSON.stringify(defaults()) &&
+        !local.location.custom &&
+        !Object.keys(keys).length;
+
+      const host = (url) => {
+        try {
+          return new URL(url).host;
+        } catch {
+          return url;
+        }
+      };
+
+      // Two bursts of confetti from the lower corners, then gone.
+      const celebrate = () => {
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const canvas = document.createElement("canvas");
+        canvas.id = "confetti";
+        document.body.append(canvas);
+        const ratio = devicePixelRatio || 1;
+        const width = innerWidth;
+        const height = innerHeight;
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+        const ctx = canvas.getContext("2d");
+        ctx.scale(ratio, ratio);
+        const colors = [
+          "#1b1b19",
+          "#f2c94c",
+          "#eb5757",
+          "#2f9e44",
+          "#2d9cdb",
+          "#bb6bd9",
+          "#f2994a",
+        ];
+        const pieces = [];
+        for (const side of [-1, 1])
+          for (let i = 0; i < 90; i++) {
+            const angle =
+              ((side < 0 ? 60 : 120) + (Math.random() - 0.5) * 40) *
+              (Math.PI / 180);
+            const speed = 9 + Math.random() * 9;
+            pieces.push({
+              x: side < 0 ? -10 : width + 10,
+              y: height * 0.75,
+              vx: Math.cos(angle) * speed,
+              vy: -Math.sin(angle) * speed,
+              size: 5 + Math.random() * 5,
+              spin: Math.random() * Math.PI,
+              turn: (Math.random() - 0.5) * 0.3,
+              wobble: Math.random() * 10,
+              color: colors[i % colors.length],
+              round: Math.random() < 0.3,
+            });
+          }
+        const begun = performance.now();
+        const frame = (now) => {
+          const age = (now - begun) / 1000;
+          ctx.clearRect(0, 0, width, height);
+          ctx.globalAlpha = Math.min(1, Math.max(0, 3.2 - age));
+          for (const p of pieces) {
+            p.vx *= 0.985;
+            p.vy = p.vy * 0.985 + 0.32;
+            p.x += p.vx + Math.sin(age * 4 + p.wobble) * 0.6;
+            p.y += p.vy;
+            p.spin += p.turn;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.spin);
+            ctx.fillStyle = p.color;
+            if (p.round) {
+              ctx.beginPath();
+              ctx.arc(0, 0, p.size / 2.4, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              ctx.scale(1, Math.cos(age * 6 + p.wobble));
+              ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+            }
+            ctx.restore();
+          }
+          if (age < 3.2) requestAnimationFrame(frame);
+          else canvas.remove();
+        };
+        requestAnimationFrame(frame);
+      };
+
+      const show = (next) => {
+        // Leaving the sign-in step stops waiting for it.
+        if (pending === "signin.open") pending = null;
+        if (next === "ready" && step !== "ready") setTimeout(celebrate, 320);
+        step = next;
+        for (const el of document.querySelectorAll("section"))
+          el.classList.toggle("active", el.dataset.step === step);
+        if (step === "server") {
+          $("server").value ||= state.serverUrl;
+          setTimeout(() => $("server").focus(), 30);
+        }
+        render();
+      };
+
+      // Slides each segmented control's knob under its choice.
+      const placeKnobs = () => {
+        for (const seg of document.querySelectorAll(".seg")) {
+          const on = seg.querySelector('[aria-checked="true"]');
+          const knob = seg.querySelector(".knob");
+          // No option is on while the local model runs tasks.
+          knob.style.opacity = on ? "" : "0";
+          if (!on || !on.offsetWidth) continue;
+          knob.style.width = on.offsetWidth + "px";
+          knob.style.transform = "translateX(" + on.offsetLeft + "px)";
+        }
+      };
+
+      // The bar eases toward the end of the current step between updates,
+      // so long steps never look stuck; it never passes the step's end.
+      let shown = 0;
+      let eased = 0;
+      const shownProgress = (local, at) => {
+        const now = Date.now();
+        const seconds = eased ? (now - eased) / 1000 : 0;
+        eased = now;
+        // A failure keeps the bar where it was, within the step that failed.
+        if (local.phase === "failed")
+          return (shown = Math.min(
+            Math.max(local.progress, shown),
+            (at + 1) / local.steps.length,
+          ));
+        if (local.phase !== "installing") return (shown = local.progress);
+        const cap = (at + 1) / local.steps.length - 0.02;
+        shown = Math.max(local.progress, shown);
+        if (shown < cap) shown += (cap - shown) * (1 - Math.exp(-seconds / 90));
+        return shown;
+      };
+      // When each step began, for the timings beside the steps.
+      let started = [];
+      // Each Install or Try Again times its steps and fills the bar afresh.
+      let attempt;
+      // The attempt whose failure was last scrolled into view.
+      let revealed;
+      const startAttempt = (local) => {
+        if (local.attempt === attempt) return;
+        attempt = local.attempt;
+        started = [];
+        shown = 0;
+        eased = 0;
+      };
+      const timeStep = (local, at) => {
+        if (local.phase === "idle") started = [];
+        for (let index = 0; index <= at; index++) started[index] ??= Date.now();
+        if (local.phase === "ready") started[local.steps.length] ??= Date.now();
+      };
+      const clock = (ms) => {
+        const seconds = Math.max(0, Math.round(ms / 1000));
+        return (
+          Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0")
+        );
+      };
+      const stepTime = (index, stepState) =>
+        stepState === "now"
+          ? clock(Date.now() - started[index])
+          : stepState === "done" && started[index] && started[index + 1]
+            ? clock(started[index + 1] - started[index])
+            : "";
+      // Timers and the easing bar move once a second while installing.
+      setInterval(() => {
+        if (step === "installing" && state?.localServer.phase === "installing")
+          render();
+      }, 1000);
+
+      // Whose account each runtime signs in with.
+      const ACCOUNTS = {
+        codex: "your ChatGPT account",
+        claude: "your Claude account",
+      };
+      let otherRuntimes = false;
+      // The runtime installed but not signed in: a dialog starts its own
+      // login, which opens the browser, and closes once it is signed in.
+      // The link and code it prints are only a fallback, folded away. No
+      // secret shows here; a pasted code goes straight to the runtime.
+      const renderSignIn = (local, busy) => {
+        const sign = local.signIn;
+        const open =
+          local.phase === "installing" &&
+          local.step === "signin" &&
+          sign &&
+          sign.state !== "signed_in";
+        $("runtime-signin").hidden = !open;
+        if (!open) {
+          otherRuntimes = false;
+          $("runtime-signin-trouble").open = false;
+          return;
+        }
+        const name = RUNTIMES[sign.runtime];
+        const failed = sign.state === "failed";
+        const running =
+          sign.state === "starting" || sign.state === "waiting_user";
+        const pi = sign.runtime === "pi";
+        $("runtime-signin-title").textContent = "Sign in to " + name;
+        $("runtime-signin-lead").textContent = pi
+          ? "Pi needs a model provider. Run pi in a terminal to sign in; setup continues by itself."
+          : "Your agents run on " +
+            name +
+            ". Authorize it with " +
+            ACCOUNTS[sign.runtime] +
+            " to continue.";
+        $("runtime-signin-lead").hidden = running;
+        $("runtime-signin-waiting").hidden = !running;
+        $("runtime-signin-device").hidden = !sign.deviceCode;
+        $("runtime-signin-device-code").textContent = sign.deviceCode || "";
+        $("runtime-signin-error").textContent = failed
+          ? sign.message || "Sign-in did not finish."
+          : "";
+        $("runtime-signin-idle").hidden = running;
+        $("runtime-signin-start").hidden = pi;
+        $("runtime-signin-start").textContent = failed ? "Retry" : "Authorize";
+        $("runtime-signin-logs").hidden = !failed;
+        $("runtime-signin-runtimes").hidden = !otherRuntimes && !pi;
+        $("runtime-signin-other").hidden = pi;
+        for (const option of document.querySelectorAll("[data-switch]")) {
+          option.hidden = option.dataset.switch === sign.runtime;
+          option.disabled = busy;
+        }
+        $("runtime-signin-busy").hidden = !running;
+        $("runtime-signin-open").hidden = !sign.url;
+        // The fallback: the printed link, and for Claude Code the code its
+        // page shows.
+        $("runtime-signin-trouble").hidden = !sign.url || !!sign.deviceCode;
+        $("runtime-signin-help").textContent = sign.acceptsCode
+          ? "If your browser didn't open, choose Open browser again, then paste the code the page shows."
+          : "If your browser didn't open, choose Open browser again.";
+        $("runtime-signin-paste").hidden = !sign.acceptsCode;
+      };
+
+      const renderLocal = (busy) => {
+        const local = state.localServer;
+        plan ??= defaults();
+        // The local model is offered only once this computer is known to
+        // serve it; until then its row does not show.
+        const models = local.localModels;
+        const model =
+          models.state === "checked" && models.eligible && models.model;
+        if (!model) plan.localModel = false;
+        const custom = !isDefaultPlan(local);
+        $("welcome-lead").textContent = local.available
+          ? "Runs on this computer, just for you. Takes a few minutes."
+          : "Connect this computer to your team's Linger.";
+        $("local-install").hidden = !local.available;
+        $("team").hidden = !local.available || customizing;
+        $("get-started").hidden = local.available;
+        $("local-options").dataset.open = String(
+          customizing && local.available,
+        );
+        $("local-customize").setAttribute("aria-expanded", String(customizing));
+        $("local-customize").textContent = customizing
+          ? "Use the defaults"
+          : "Customize";
+        $("local-install-label").textContent = custom
+          ? "Install"
+          : "Quick Install";
+        document.querySelector('[data-step="welcome"]').dataset.customizing =
+          String(customizing && local.available);
+        $("plan-summary").textContent = [
+          RUNTIMES[plan.runtime] || "Best AI runtime",
+          plan.localModel && "Local model",
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        $("plan-line").hidden = !local.available;
+        $("welcome-eyebrow").hidden = !local.available;
+        const location = local.location;
+        $("location-sub").textContent =
+          location.error || shortPath(location.path);
+        $("location-sub").title = location.error ? "" : location.path;
+        $("location-sub").dataset.warn = String(!!location.error);
+        for (const input of document.querySelectorAll("[data-key]")) {
+          const provider = input.dataset.key;
+          const saved = local.keys[provider];
+          const removing = keys[provider] === "";
+          input.placeholder = removing
+            ? "Removed when you install"
+            : saved
+              ? "Saved · type to replace"
+              : "API key";
+          const remove = document.querySelector(`[data-remove="${provider}"]`);
+          // Kept in place so the inputs line up.
+          remove.style.visibility =
+            saved || keys[provider] ? "visible" : "hidden";
+          remove.textContent = removing ? "Keep" : "Remove";
+        }
+        $("keys-note").textContent = "Applies when the installation runs.";
+        $("local-row").hidden = !model;
+        $("local-model").hidden = !model;
+        if (model) {
+          $("local-sub").textContent = [
+            "Runs your tasks on this computer",
+            models.gpu,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          $("local-model-name").textContent = model.name;
+          $("local-model-needs").textContent = [
+            model.downloadBytes != null &&
+              gigabytes(model.downloadBytes) + " download",
+            model.diskBytes != null && gigabytes(model.diskBytes) + " disk",
+            model.memoryBytes != null &&
+              gigabytes(model.memoryBytes) + " memory",
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          $("local-model").setAttribute(
+            "aria-checked",
+            String(plan.localModel),
+          );
+          $("local-model").disabled = busy;
+        }
+        $("runtime-sub").textContent = plan.localModel
+          ? "Pi + local model."
+          : "Runs your tasks.";
+        for (const seg of document.querySelectorAll("[data-plan]"))
+          for (const option of seg.querySelectorAll("button")) {
+            option.setAttribute(
+              "aria-checked",
+              String(plan[seg.dataset.plan] === option.dataset.value),
+            );
+            option.disabled = busy;
+          }
+        requestAnimationFrame(placeKnobs);
+
+        // Installing. A restart after a reboot shows here as starting.
+        const failed = local.phase === "failed";
+        const starting = local.phase === "preparing";
+        $("installing-title").textContent = failed
+          ? "Installation stopped"
+          : starting
+            ? "Starting Linger"
+            : "Installing Linger";
+        $("installing-plan").textContent = failed
+          ? "Your data is kept. Fix the problem and try again."
+          : "This takes a few minutes. You can keep working.";
+        const section = document.querySelector('[data-step="installing"]');
+        const steps = ALL_STEPS.filter(([id]) => local.steps.includes(id));
+        section.dataset.failed = String(failed);
+        const at = Math.max(
+          0,
+          steps.findIndex(([id]) => id === local.step),
+        );
+        startAttempt(local);
+        const percent = Math.round(shownProgress(local, at) * 100);
+        $("installing-fill").style.width = Math.max(2, percent) + "%";
+        $("installing-bar").setAttribute("aria-valuenow", String(percent));
+        timeStep(local, at);
+        $("installing-step").textContent = failed
+          ? steps[at][1]()
+          : starting
+            ? local.message
+            : steps[at][1]() + "…";
+        $("installing-count").textContent = starting ? "" : percent + "%";
+        $("installing-checks").hidden = starting;
+        const checks = $("installing-checks");
+        if (checks.children.length !== steps.length)
+          checks.replaceChildren(
+            ...steps.map(() => {
+              const item = document.createElement("li");
+              item.innerHTML =
+                '<span class="dot">' +
+                check +
+                '</span><span></span><span class="time"></span>';
+              return item;
+            }),
+          );
+        steps.forEach(([, label], index) => {
+          const item = checks.children[index];
+          item.dataset.state =
+            local.phase === "ready" || index < at
+              ? "done"
+              : index === at
+                ? failed
+                  ? "failed"
+                  : "now"
+                : "";
+          item.children[1].textContent = label();
+          item.lastChild.textContent = stepTime(index, item.dataset.state);
+        });
+        const problem = $("installing-error");
+        const message = failed ? local.message : "";
+        if (problem.textContent !== message) {
+          problem.textContent = message;
+          detailsOpen = false;
+        }
+        // Folded first to see whether the message overflows the fold.
+        problem.classList.add("folded");
+        const long = failed && problem.scrollHeight > problem.clientHeight + 1;
+        problem.classList.toggle("folded", long && !detailsOpen);
+        $("installing-more").hidden = !long;
+        $("installing-more").textContent = detailsOpen
+          ? "Hide Details"
+          : "Show Details";
+        $("installing-diagnostics").hidden = !failed;
+        // A new save result replaces the note; a failed "Show Logs" writes
+        // its own error there and stays until the next result.
+        const saved = state.diagnostics;
+        const savedKey = saved && JSON.stringify(saved);
+        if (saved && savedKey !== shownDiagnostics)
+          $("diagnostics-note").textContent = saved.error
+            ? saved.error
+            : "Saved " + saved.file + ". Send this file to Linger support.";
+        shownDiagnostics = savedKey;
+        $("installing-actions").hidden = !failed;
+        renderSignIn(local, busy);
+        // Each failure brings its message and actions into view once.
+        if (failed && revealed !== local.attempt) {
+          revealed = local.attempt;
+          requestAnimationFrame(() =>
+            $("installing-actions").scrollIntoView({ block: "nearest" }),
+          );
+        }
+        $("ready-lead").textContent = "Running on this computer, just for you.";
+      };
+
+      const render = () => {
+        if (!state) return;
+        document.body.dataset.platform = state.platform;
+        const at = ORDER.indexOf(step);
+        $("step-label").textContent =
+          at >= 0 ? "Step " + (at + 1) + " of " + ORDER.length : "";
+        const busy = pending !== null;
+        for (const el of document.querySelectorAll("main button"))
+          el.disabled = busy && el.dataset.go === undefined;
+        // Waiting for sign-in still lets the user reopen the sign-in window.
+        if (pending === "signin.open") $("signin").disabled = false;
+
+        renderLocal(busy);
+
+        $("signin-host").textContent = host(state.serverUrl);
+        $("signin-badge").dataset.ok = String(state.signedIn);
+        $("signin-badge").innerHTML = state.signedIn
+          ? check + "Signed in"
+          : pending === "signin.open"
+            ? '<span class="spinner"></span>Waiting…'
+            : "Not signed in";
+        $("signin").textContent = state.signedIn ? "Continue" : "Open Sign-in";
+
+        $("computer-name").textContent = state.displayName;
+        $("computer-host").textContent = host(state.serverUrl);
+        $("connect-badge").dataset.ok = String(state.enrolled);
+        $("connect-badge").innerHTML = state.enrolled
+          ? check + "Connected"
+          : pending === "computer.connect"
+            ? '<span class="spinner"></span>Connecting…'
+            : "";
+        $("connect").textContent = state.enrolled ? "Continue" : "Connect";
+
+        $("sleep").setAttribute("aria-checked", String(state.preventSleep));
+        $("login").setAttribute("aria-checked", String(state.openAtLogin));
+        for (const [id, text] of Object.entries(PERMISSIONS)) {
+          const status = state.permissions?.[id] ?? "unknown";
+          const granted = status === "granted";
+          const sub = $("perm-" + id + "-sub");
+          sub.textContent = status === "denied" ? text.missing : text.about;
+          // Most Macs run without Full Disk Access; only refusals are warnings.
+          sub.dataset.warn = String(status === "denied" && id !== "full-disk");
+          const badge = $("perm-" + id + "-badge");
+          badge.dataset.ok = String(granted);
+          badge.innerHTML = granted ? check + "Allowed" : "";
+          const button = $("perm-" + id);
+          button.hidden = granted;
+          button.textContent =
+            id === "full-disk" || status === "denied"
+              ? "Open Settings"
+              : "Allow…";
+        }
+        const folders = $("folders");
+        folders.replaceChildren(
+          ...state.folders.map((f) => {
+            const chip = document.createElement("span");
+            chip.textContent = f.label;
+            chip.title = f.path;
+            return chip;
+          }),
+        );
+      };
+
+      // Runs one command at a time; errors land next to the step.
+      const run = async (command, errorId) => {
+        if (pending !== null) return;
+        pending = command.op;
+        if (errorId) $(errorId).textContent = "";
+        render();
+        try {
+          state = await setup.run(command);
+          return true;
+        } catch (error) {
+          const message = String(error?.message ?? error).replace(
+            /^Error invoking remote method '[^']+': (Error: )?/,
+            "",
+          );
+          if (errorId) $(errorId).textContent = message;
+          return false;
+        } finally {
+          pending = null;
+          render();
+        }
+      };
+
+      for (const el of document.querySelectorAll("[data-go]"))
+        el.addEventListener("click", () => show(el.dataset.go));
+
+      $("server-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const ok = await run(
+          { op: "server.set", serverUrl: $("server").value },
+          "server-error",
+        );
+        if (ok) show(state.enrolled ? "permissions" : "signin");
+      });
+      // The install runs on its own; this window follows its progress.
+      const install = async () => {
+        const ok = await run(
+          {
+            op: "local.start",
+            // The installer sets up Pi with the local model for "local".
+            runtime: plan.localModel ? "local" : plan.runtime,
+            ...(customizing && Object.keys(keys).length ? { keys } : {}),
+          },
+          "local-error",
+        );
+        // Saved or not, the keys leave the page once sent.
+        if (ok) clearKeys();
+        if (ok && state.localServer.phase !== "idle") show("installing");
+      };
+      $("local-install").addEventListener("click", install);
+      $("runtime-signin-start").addEventListener("click", () =>
+        run({ op: "local.signin.start" }, "runtime-signin-error"),
+      );
+      $("runtime-signin-paste").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = $("runtime-signin-input");
+        const code = input.value.trim();
+        if (!code) return;
+        input.value = "";
+        await run({ op: "local.signin.start", code }, "runtime-signin-error");
+      });
+      $("runtime-signin-open").addEventListener("click", () => {
+        // That page shows a code to paste back here.
+        if (state.localServer.signIn?.acceptsCode)
+          $("runtime-signin-trouble").open = true;
+        run({ op: "local.signin.open" }, "runtime-signin-error");
+      });
+      $("runtime-signin-cancel").addEventListener("click", () =>
+        run({ op: "local.signin.cancel" }, "runtime-signin-error"),
+      );
+      $("runtime-signin-other").addEventListener("click", () => {
+        otherRuntimes = !otherRuntimes;
+        render();
+      });
+      $("runtime-signin-logs").addEventListener("click", () =>
+        run({ op: "logs.open" }, "runtime-signin-error"),
+      );
+      for (const option of document.querySelectorAll("[data-switch]"))
+        option.addEventListener("click", () =>
+          run(
+            { op: "local.signin.switch", runtime: option.dataset.switch },
+            "runtime-signin-error",
+          ),
+        );
+      $("local-retry").addEventListener("click", install);
+      $("installing-more").addEventListener("click", () => {
+        detailsOpen = !detailsOpen;
+        render();
+      });
+      $("show-logs").addEventListener("click", () =>
+        run({ op: "logs.open" }, "diagnostics-note"),
+      );
+      $("save-diagnostics").addEventListener("click", () =>
+        run({ op: "diagnostics.save" }, "diagnostics-note"),
+      );
+      const clearKeys = () => {
+        keys = {};
+        for (const input of document.querySelectorAll("[data-key]")) {
+          input.value = "";
+          input.type = "password";
+        }
+        for (const reveal of document.querySelectorAll("[data-reveal]"))
+          reveal.textContent = "Show";
+      };
+      for (const input of document.querySelectorAll("[data-key]"))
+        input.addEventListener("input", () => {
+          const key = input.value.trim();
+          if (key) keys = { ...keys, [input.dataset.key]: key };
+          else {
+            const { [input.dataset.key]: _, ...rest } = keys;
+            keys = rest;
+          }
+          render();
+        });
+      for (const reveal of document.querySelectorAll("[data-reveal]"))
+        reveal.addEventListener("click", () => {
+          const input = $(`key-${reveal.dataset.reveal}`);
+          input.type = input.type === "password" ? "text" : "password";
+          reveal.textContent = input.type === "password" ? "Show" : "Hide";
+        });
+      for (const remove of document.querySelectorAll("[data-remove]"))
+        remove.addEventListener("click", () => {
+          const provider = remove.dataset.remove;
+          const { [provider]: current, ...rest } = keys;
+          $(`key-${provider}`).value = "";
+          // Remove clears a typed key, then the saved one; Keep undoes that.
+          keys =
+            current === undefined && state.localServer.keys[provider]
+              ? { ...rest, [provider]: "" }
+              : rest;
+          render();
+        });
+      $("local-customize").addEventListener("click", () => {
+        customizing = !customizing;
+        if (!customizing) {
+          plan = defaults();
+          clearKeys();
+          const location = state.localServer.location;
+          if (location.custom || location.error)
+            run({ op: "local.location.reset" });
+        }
+        render();
+      });
+      for (const seg of document.querySelectorAll("[data-plan]"))
+        for (const option of seg.querySelectorAll("button"))
+          option.addEventListener("click", () => {
+            plan = { ...plan, [seg.dataset.plan]: option.dataset.value };
+            // Another runtime than Pi does not run the local model.
+            if (plan.runtime !== "pi") plan.localModel = false;
+            render();
+          });
+      $("location-change").addEventListener("click", () =>
+        run({ op: "local.location.pick" }),
+      );
+      $("local-model").addEventListener("click", () => {
+        plan = plan.localModel
+          ? { ...plan, localModel: false }
+          : { ...plan, runtime: "pi", localModel: true };
+        render();
+      });
+      $("open").addEventListener("click", () => run({ op: "finish" }));
+      $("signin").addEventListener("click", () => {
+        if (state.signedIn) return show("connect");
+        if (pending !== null && pending !== "signin.open") return;
+        // Stays pending until the main window reports a session.
+        pending = "signin.open";
+        render();
+        setup.run({ op: "signin.open" }).catch(() => {
+          pending = null;
+          render();
+        });
+      });
+      $("connect").addEventListener("click", async () => {
+        if (state.enrolled) return show("permissions");
+        if (await run({ op: "computer.connect" }, "connect-error"))
+          show("permissions");
+      });
+      $("notify").addEventListener("click", async () => {
+        if (await run({ op: "notifications.test" }, "permissions-error"))
+          $("notify").textContent = "Test Sent";
+      });
+      $("folder").addEventListener("click", () =>
+        run({ op: "folder.add" }, "permissions-error"),
+      );
+      for (const id of Object.keys(PERMISSIONS))
+        $("perm-" + id).addEventListener("click", () => {
+          const status = state.permissions?.[id] ?? "unknown";
+          run(
+            id === "full-disk" || status === "denied"
+              ? { op: "permission.settings", id }
+              : { op: "permission.request", id },
+            "permissions-error",
+          );
+        });
+      $("sleep").addEventListener("click", () =>
+        run(
+          { op: "prevent-sleep.set", on: !state.preventSleep },
+          "permissions-error",
+        ),
+      );
+      $("login").addEventListener("click", () =>
+        run(
+          { op: "open-at-login.set", on: !state.openAtLogin },
+          "permissions-error",
+        ),
+      );
+      $("finish").addEventListener("click", () => run({ op: "finish" }));
+
+      setup.onState((next) => {
+        const signedInNow = next.signedIn && !state?.signedIn;
+        const localReady =
+          next.localServer.phase === "ready" &&
+          state?.localServer.phase !== "ready";
+        state = next;
+        if (pending === "signin.open" && next.signedIn) pending = null;
+        if (localReady && step === "installing") show("ready");
+        else if (signedInNow && step === "signin") show("connect");
+        else render();
+      });
+      setup.getState().then((initial) => {
+        state = initial;
+        const phase = initial.localServer.phase;
+        show(
+          ["preparing", "installing", "failed"].includes(phase)
+            ? "installing"
+            : initial.enrolled
+              ? "permissions"
+              : initial.signedIn
+                ? "connect"
+                : "welcome",
+        );
+      });
+      addEventListener("resize", placeKnobs);
+    </script>
+  </body>
+</html>

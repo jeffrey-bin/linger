@@ -1,0 +1,32 @@
+packages:
+  - "apps/*"
+  - "contracts/generated/typescript"
+  - "packages/*"
+verifyDepsBeforeRun: error
+enableGlobalVirtualStore: false
+autoInstallPeers: false
+allowBuilds:
+  "@google/genai": false
+  "@livekit/local-inference": true
+  "@scarf/scarf": false
+  better-sqlite3: true
+  esbuild: true
+  protobufjs: false
+  sharp: true
+  tesseract.js: false
+minimumReleaseAgeExclude:
+  - "@types/node@26.0.1"
+  - "@ai-sdk/openai-compatible@2.0.56"
+  - "@ai-sdk/provider-utils@4.0.35"
+  - "@tanstack/query-core@5.101.3"
+  - "@tanstack/react-query@5.101.3"
+  - livekit-client@2.22.2
+  - officeparser@8.2.0
+overrides:
+  xlsx: "npm:@e965/xlsx@0.20.3"
+patchedDependencies:
+  "@hocuspocus/server@4.3.0": patches/@hocuspocus__server@4.3.0.patch
+  # Voice uses no LiveKit turn detection; the local EOT runner would start a
+  # full inference process per worker.
+  "@livekit/agents@1.7.1": patches/@livekit__agents@1.7.1.patch
+  "deepagents@1.12.0": patches/deepagents@1.12.0.patch

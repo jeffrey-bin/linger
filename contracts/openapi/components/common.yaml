@@ -1,0 +1,476 @@
+components:
+  schemas:
+    Id:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+      description: Opaque, case-sensitive identifier. Clients must not infer type or time from it.
+      examples: [01JZTEAMHUB000000000000001]
+    SkillIdentifier:
+      type: string
+      minLength: 1
+      maxLength: 512
+      pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+      description: Stable, case-sensitive logical Skill identifier.
+    SkillManifestIdentifier:
+      type: string
+      minLength: 1
+      maxLength: 512
+      pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+      description: Immutable, case-sensitive Skill Manifest identifier.
+    ManifestVersion:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)([.](0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?([+]([0-9A-Za-z-]+)([.][0-9A-Za-z-]+)*)?$"
+      description: Immutable strict Semantic Version for a Skill Manifest.
+      examples: ["1.0.0"]
+    Timestamp:
+      type: string
+      format: date-time
+      description: UTC timestamp in RFC 3339 format with an explicit offset.
+      examples: ["2026-07-21T10:15:30Z"]
+    RoomSeq:
+      type: integer
+      format: int64
+      minimum: 1
+      description: Monotonically increasing sequence allocated within one Room.
+      examples: [42]
+    Cursor:
+      type: string
+      minLength: 1
+      maxLength: 1024
+      description: Opaque pagination cursor. Clients must not parse or modify it.
+    IdempotencyKey:
+      type: string
+      minLength: 8
+      maxLength: 128
+      pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+      description: Client-generated key scoped to the authenticated principal and operation.
+      examples: [web-01JZTEAMHUB000000000000001]
+    ActorKind:
+      type: string
+      enum: [human, agent]
+    MessageKind:
+      type: string
+      enum: [conversation, agent_runtime, room_notice]
+      description: >-
+        Product-level Message rendering and behavior category. conversation is Human-visible
+        and Agent-inbox material. agent_runtime is Agent Inbox material and must not appear in
+        the Human timeline, unread, latest_message, or room summary. room_notice is a
+        Human-only timeline line about an Agent creation, a new member, or an Agent identity
+        change; it never reaches an Agent and is not counted as unread or shown as
+        latest_message.
+    ActorRef:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, kind, display_name]
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        tenant_id:
+          $ref: "#/components/schemas/Id"
+        kind:
+          $ref: "#/components/schemas/ActorKind"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+    ReferenceSegment:
+      type: object
+      additionalProperties: false
+      required: [type, content, target, target_type]
+      properties:
+        type:
+          type: string
+          const: reference
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        target:
+          $ref: "#/components/schemas/Id"
+          description: >-
+            TeamHub Actor ID of the referenced current Room member. The Actor kind must match
+            target_type.
+        target_type:
+          type: string
+          enum: [user, agent]
+          description: >-
+            user references a Human Actor; agent references an Agent Actor.
+    TextSegment:
+      type: object
+      additionalProperties: false
+      required: [type, content]
+      properties:
+        type:
+          type: string
+          const: text
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+    FileSegment:
+      type: object
+      deprecated: true
+      description: Legacy immutable attachment reference retained for historical Messages.
+      additionalProperties: false
+      required: [type, content, document_id, document_version_id]
+      properties:
+        type:
+          type: string
+          const: file
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        document_id:
+          $ref: "#/components/schemas/Id"
+          description: Stable unified Document ID. The attachment never grants access.
+        document_version_id:
+          $ref: "#/components/schemas/Id"
+          description: Exact immutable Version of document_id selected for this attachment.
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: Canonical filename of the immutable Version, supplied by TeamHub.
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Canonical media type of the immutable Version, supplied by TeamHub.
+    HtmlFragmentSegment:
+      type: object
+      additionalProperties: false
+      required: [type, content, html]
+      properties:
+        type:
+          type: string
+          const: html_fragment
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: >-
+            Raw-message text for the inline widget. show_fragment uses the exact flat,
+            content-addressed Documents path of its projected HTML file; this is not widget markup.
+        html:
+          type: string
+          minLength: 1
+          maxLength: 2097152
+          description: >-
+            Widget HTML or SVG markup inlined by show_fragment. This is message content,
+            not a published Document. Ordinary delivered Documents use presentation=card.
+    DocumentSegment:
+      type: object
+      additionalProperties: false
+      required: [type, content, document_id]
+      properties:
+        type:
+          type: string
+          const: document
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: User-visible Document label included in raw_message.
+        document_id:
+          $ref: "#/components/schemas/Id"
+          description: >-
+            Stable unified Document ID. The referenced Document must have an active Context Binding
+            or Room/message share source for this Room; the reference never grants access by itself.
+        presentation:
+          type: string
+          enum: [inline, card, canvas]
+          description: >-
+            Optional presentation intent. inline preserves an in-text @Document reference; card
+            presents a delivered Document with the shared Human/Agent Document card; canvas presents
+            the card and asks clients viewing the Room live to open the Document in the side panel.
+            Omitted values remain inline for historical compatibility.
+    SkillSegment:
+      type: object
+      additionalProperties: false
+      required: [type, content, target, skill_id, manifest_version]
+      properties:
+        type:
+          type: string
+          const: skill
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: Exact slash token shown in raw_message, for example /summarize.
+        target:
+          $ref: "#/components/schemas/Id"
+          description: Agent Actor ID whose enabled Skill binding is selected.
+        skill_id:
+          $ref: "#/components/schemas/SkillIdentifier"
+        manifest_version:
+          $ref: "#/components/schemas/ManifestVersion"
+    ArtifactTreeSegment:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - content
+        - publication_group_id
+        - root_path
+        - file_count
+        - directory_count
+        - total_bytes
+      properties:
+        type:
+          type: string
+          const: artifact_tree
+        content:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        publication_group_id:
+          $ref: "#/components/schemas/Id"
+        root_path:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        file_count:
+          type: integer
+          minimum: 1
+          maximum: 64
+        directory_count:
+          type: integer
+          minimum: 1
+          maximum: 10001
+        total_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 536870912
+        entry_document_id:
+          $ref: "#/components/schemas/Id"
+        entry_document_version_id:
+          $ref: "#/components/schemas/Id"
+      oneOf:
+        - required: [entry_document_id, entry_document_version_id]
+        - not:
+            anyOf:
+              - required: [entry_document_id]
+              - required: [entry_document_version_id]
+    MessageSegment:
+      oneOf:
+        - $ref: "#/components/schemas/ReferenceSegment"
+        - $ref: "#/components/schemas/TextSegment"
+        - $ref: "#/components/schemas/FileSegment"
+        - $ref: "#/components/schemas/HtmlFragmentSegment"
+        - $ref: "#/components/schemas/DocumentSegment"
+        - $ref: "#/components/schemas/SkillSegment"
+        - $ref: "#/components/schemas/ArtifactTreeSegment"
+      discriminator:
+        propertyName: type
+        mapping:
+          reference: "#/components/schemas/ReferenceSegment"
+          text: "#/components/schemas/TextSegment"
+          file: "#/components/schemas/FileSegment"
+          html_fragment: "#/components/schemas/HtmlFragmentSegment"
+          document: "#/components/schemas/DocumentSegment"
+          skill: "#/components/schemas/SkillSegment"
+          artifact_tree: "#/components/schemas/ArtifactTreeSegment"
+    ArtifactVersionRef:
+      type: object
+      additionalProperties: false
+      required: [artifact_id, artifact_version_id, version_number]
+      properties:
+        artifact_id:
+          $ref: "#/components/schemas/Id"
+        artifact_version_id:
+          $ref: "#/components/schemas/Id"
+        version_number:
+          type: integer
+          minimum: 1
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    SkillRef:
+      type: object
+      additionalProperties: false
+      required: [skill_id, manifest_version]
+      properties:
+        skill_id:
+          $ref: "#/components/schemas/SkillIdentifier"
+        manifest_version:
+          $ref: "#/components/schemas/ManifestVersion"
+    PageMeta:
+      type: object
+      additionalProperties: false
+      required: [has_more]
+      properties:
+        next_cursor:
+          $ref: "#/components/schemas/Cursor"
+          description: Omitted when there is no next page.
+        has_more:
+          type: boolean
+    ErrorDetail:
+      type: object
+      additionalProperties: false
+      required: [field, reason]
+      properties:
+        field:
+          type: string
+          minLength: 1
+        code:
+          type: string
+          pattern: "^[a-z][a-z0-9_]{0,127}$"
+          description: Optional stable classification for this individual validation issue.
+        reason:
+          type: string
+          minLength: 1
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message, request_id]
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]*$"
+          examples: [ROOM_NOT_FOUND]
+        message:
+          type: string
+          minLength: 1
+          description: Human-readable summary safe to display; clients branch on code, not message.
+        request_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        details:
+          type: array
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+        retryable:
+          type: boolean
+          default: false
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >-
+        Reusing the same key with the same canonical request returns the original result.
+        Reusing it with different input returns 409 IDEMPOTENCY_KEY_REUSED.
+      schema:
+        $ref: "#/components/schemas/IdempotencyKey"
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Cursor"
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    AfterRoomSeq:
+      name: after
+      in: query
+      required: false
+      description: Return only Room Events whose room_seq is strictly greater than this value.
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        default: 0
+  headers:
+    IdempotentReplay:
+      description: true when this response replays the result of an earlier idempotent request.
+      schema:
+        type: boolean
+  responses:
+    BadRequest:
+      description: The request is malformed or fails validation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthenticated:
+      description: >-
+        Authentication is missing, invalid, expired, or revoked. Logout and password reset
+        invalidate the affected Sessions; subsequent requests return UNAUTHENTICATED.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: The authenticated principal cannot perform this action in the Tenant or Run.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: The resource does not exist or is intentionally hidden across a Tenant boundary.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Gone:
+      description: The resource existed but was explicitly removed and cannot be reused.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: The request conflicts with current state or a prior idempotent request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    PayloadTooLarge:
+      description: Uploaded content exceeds the configured V0 limit.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    TooManyRequests:
+      description: The caller must retry after the indicated delay.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalError:
+      description: An unexpected server error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ServiceUnavailable:
+      description: A required product capability, configured upstream, or service credential is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    BadGateway:
+      description: A configured upstream rejected the request or returned an invalid response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

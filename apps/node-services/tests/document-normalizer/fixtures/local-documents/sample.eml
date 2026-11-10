@@ -1,0 +1,8 @@
+From: alice@example.invalid
+To: bob@example.invalid
+Subject: MAIL-ORCHID approval
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+
+Budget approved: 1250 USD. Owner: Alice Chen.

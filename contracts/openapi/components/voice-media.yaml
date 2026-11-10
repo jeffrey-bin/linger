@@ -1,0 +1,518 @@
+components:
+  schemas:
+    VoiceMediaPolicy:
+      type: object
+      additionalProperties: false
+      required: [voice_media_supported]
+      properties:
+        voice_media_supported:
+          type: boolean
+          description: Soniox ASR is configured, so Recording, Pocket notes dictation and Voice Mode dictation are available.
+        active_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        live_supported:
+          type: boolean
+          description: Whether the xAI live voice provider is configured; Live does not need Soniox.
+        live_enabled:
+          type: boolean
+          description: Whether this tenant may enter live voice mode.
+    VoiceSessionStatus:
+      type: string
+      enum: [provisioning, connected, reconnecting, closing, closed]
+    VoiceSessionPurpose:
+      type: string
+      enum:
+        - hardware_control
+        - chat_dictation
+        - chat_live
+    VoiceSessionCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [purpose]
+      properties:
+        purpose:
+          $ref: "#/components/schemas/VoiceSessionPurpose"
+    VoiceSession:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - tenant_id
+        - room_id
+        - created_by_actor_id
+        - status
+        - purpose
+        - credential_generation
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        created_by_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          $ref: "#/components/schemas/VoiceSessionStatus"
+        purpose:
+          $ref: "#/components/schemas/VoiceSessionPurpose"
+        credential_generation:
+          type: integer
+          format: int64
+          minimum: 0
+        input_ready_generation:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Publisher generation whose Runtime has opened its ASR consumer. Zero means not ready.
+        input_started_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          description:
+            Latest persisted track_started offset on the session audio clock. Absent until Runtime reports an input
+            boundary.
+        input_ended_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          description:
+            Latest persisted track_ended offset, reported only after preceding transcript callbacks are accepted. A
+            value older than input_started_offset_ms does not confirm the current input has drained. Absent until an
+            input drains.
+        last_failure_code:
+          type: string
+          minLength: 1
+          maxLength: 128
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        closed_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        partial_transcript:
+          type: string
+          minLength: 1
+          description:
+            Latest uncommitted ASR hypothesis. It is cleared when a final event arrives and is never used for the
+            formal transcript.
+        partial_start_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        partial_end_offset_ms:
+          type: integer
+          format: int64
+          minimum: 1
+    VoiceDictationCommitRequest:
+      type: object
+      additionalProperties: false
+      required: [request_id]
+      properties:
+        request_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+      description:
+        Transient request to finalize the current dictation turn. Retry with the same request ID; ordinary chat
+        message idempotence uses the resulting dictation_turn event ID.
+    VoiceDictationCommitReceipt:
+      type: object
+      additionalProperties: false
+      required: [request_id, status]
+      properties:
+        request_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          type: string
+          enum: [accepted]
+    VoiceConnectionCredential:
+      type: object
+      additionalProperties: false
+      required: [endpoint, credential, expires_at, generation]
+      properties:
+        endpoint:
+          type: string
+          format: uri
+          pattern: "^wss?://"
+        credential:
+          type: string
+          minLength: 1
+          description: Short-lived opaque LiveKit participant grant.
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        generation:
+          type: integer
+          format: int64
+          minimum: 1
+    VoiceCaptureStartRequest:
+      type: object
+      additionalProperties: false
+      required: [room_id, start_offset_ms]
+      properties:
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        start_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+    VoiceCaptureStatus:
+      type: string
+      enum: [starting, recording, finalizing, recovering, finalized, failed]
+    VoiceCaptureQuestionRequest:
+      type: object
+      additionalProperties: false
+      required: [question]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    VoiceCaptureQuestionSource:
+      type: object
+      additionalProperties: false
+      required: [start_offset_ms, end_offset_ms, text]
+      properties:
+        start_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        end_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        text:
+          type: string
+    VoiceCaptureQuestion:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          kind,
+          question,
+          answer,
+          answered,
+          cutoff_offset_ms,
+          sources,
+          created_at,
+        ]
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [answer, task]
+          description:
+            answer when the recording's Agent answered the question; task when it recognized a request for the caller's
+            Another Me to act, which is handed to Another Me as a background Task request.
+        question:
+          type: string
+        answer:
+          type: string
+          description: The answer; empty for a task request.
+        task_title:
+          type: string
+          description: Short title the recording's Agent gave a task request.
+        sent_message_id:
+          type: string
+          description: The hidden Message that handed this task request to the caller's Another Me; absent until it is sent.
+        answered:
+          type: boolean
+          description: False when the recording so far does not settle the question.
+        cutoff_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          description: End of the last confirmed transcript the answer could read.
+        sources:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/VoiceCaptureQuestionSource"
+        created_at:
+          type: string
+          format: date-time
+    VoiceCaptureQuestionList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/VoiceCaptureQuestion"
+    VoiceCapture:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - voice_session_id
+        - room_id
+        - status
+        - requested_start_offset_ms
+        - gap_count
+        - gap_duration_ms
+        - created_at
+        - updated_at
+      properties:
+        source_audio_document_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        transcript_recovery_status:
+          type: string
+          enum: [pending, running, succeeded, failed]
+        transcript_recovery_progress_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        transcript_recovery_total_ms:
+          type: integer
+          format: int64
+          minimum: 1
+        audio_document_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        transcript_document_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        voice_session_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          $ref: "#/components/schemas/VoiceCaptureStatus"
+        requested_start_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          description:
+            Original Capture start request on the VoiceSession audio timeline. Stable across media startup alignment;
+            scopes transient ASR previews, not archived audio trimming.
+        archived_through_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        gap_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Number of authoritative unrecoverable media gaps observed during this Capture.
+        gap_duration_ms:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total duration of authoritative unrecoverable media gaps during this Capture.
+        last_failure_code:
+          type: string
+          minLength: 1
+          maxLength: 128
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    VoiceTranscriptEventKind:
+      type: string
+      enum: [speech, dictation_turn]
+    VoiceTranscriptEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - event_id
+        - voice_session_id
+        - media_epoch
+        - lane
+        - start_offset_ms
+        - end_offset_ms
+        - text
+        - kind
+        - accepted_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        event_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        voice_session_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        capture_session_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        media_epoch:
+          type: integer
+          format: int32
+          minimum: 0
+        lane:
+          type: string
+          enum: [live, recovery]
+        start_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        end_offset_ms:
+          type: integer
+          format: int64
+          minimum: 1
+        text:
+          type: string
+          minLength: 1
+        speaker_id:
+          type: string
+          minLength: 1
+          maxLength: 16
+          pattern: "^spk_[1-9][0-9]*$"
+          description: Session-scoped anonymous speaker cluster. Omitted when the provider did not label this window.
+        kind:
+          $ref: "#/components/schemas/VoiceTranscriptEventKind"
+        accepted_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    VoiceTranscriptEventPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/VoiceTranscriptEvent"
+        partial_transcript:
+          type: string
+          minLength: 1
+        partial_start_offset_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        partial_end_offset_ms:
+          type: integer
+          format: int64
+          minimum: 1
+        event_cursor:
+          type: string
+          minLength: 1
+          description:
+            Voice event cursor read in the same snapshot as this HTTP page; every transcript event committed later is
+            delivered after it by the event feed. Absent from SSE partial frames.
+
+    VoiceEventPage:
+      type: object
+      additionalProperties: false
+      required: [items, next_cursor, has_more]
+      description:
+        Transcript events committed after the cursor, in commit order, followed on the last page by the current
+        VoiceSession and its unfinished and newest Captures. Session and Capture items are current snapshots, not
+        changes, and may repeat; clients upsert every item by resource ID. Cursors are opaque and scoped to one
+        VoiceSession. Partial snapshots have no cursor.
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/VoiceEvent"
+        next_cursor:
+          type: string
+        has_more:
+          type: boolean
+    VoiceEvent:
+      type: object
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [transcript, capture, session]
+        transcript:
+          $ref: "#/components/schemas/VoiceTranscriptEvent"
+        capture:
+          $ref: "#/components/schemas/VoiceCapture"
+        session:
+          $ref: "#/components/schemas/VoiceSession"
+    VoiceLiveTurnMarker:
+      type: object
+      additionalProperties: false
+      required:
+        - voice_session_id
+        - turn_id
+      properties:
+        voice_session_id:
+          $ref: ./common.yaml#/components/schemas/Id
+        turn_id:
+          $ref: ./common.yaml#/components/schemas/Id
+      description:
+        Marks a Human Message as a turn the caller's own active chat_live VoiceSession answers. TeamHub records it
+        once for that turn. A turn the live model handed to a live task (start_task or reply_to_task) is routed to Room
+        Agents as usual; any other turn does not wake them. The marker never grants authority.
+    VoiceLiveRuntimeEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      description:
+        Reliable LiveKit data packet on topic linger.voice.live sent by Voice Runtime to the VoiceSession
+        publisher. user_partial and user_turn carry the Human's transcript; reply_delta and reply_done carry the live
+        reply text for subtitles; reply_done also means the turn's whole reply, including its tool rounds, has finished,
+        so the browser saves the turn after it; reply_interrupted stops playback of that turn; tool_request asks the
+        browser to read or operate the page it shows, or to end Voice Mode; speech_started opens the bubble of a
+        background update the runtime started saying, identified by speech_id, whose reply_delta/reply_done carry its
+        actual spoken words without touching the turn's own reply. playout_done says the turn's reply audio has finished
+        playing on the reply track. session_failure asks the browser to fall back to dictation.
+      properties:
+        type:
+          type: string
+          enum:
+            - user_partial
+            - user_turn
+            - reply_delta
+            - reply_done
+            - reply_interrupted
+            - tool_request
+            - speech_started
+            - playout_done
+            - session_failure
+        turn_id:
+          $ref: ./common.yaml#/components/schemas/Id
+        speech_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Identifies one background update the runtime said, for its own subtitle bubble.
+        call_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        tool:
+          type: string
+          enum:
+            - read_page
+            - page_action
+            - end_voice_mode
+        text:
+          type: string
+          maxLength: 20000
+        interrupted:
+          type: boolean
+        code:
+          type: string
+          maxLength: 128
+    VoiceLiveClientEvent:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      description:
+        Reliable LiveKit data packet on topic linger.voice.live sent by the VoiceSession publisher to Voice
+        Runtime. tool_result answers one tool_request; context silently tells the live model where the Human is, such as
+        the page they opened. These packets only steer the conversation and never authorize writes.
+      properties:
+        type:
+          type: string
+          enum:
+            - tool_result
+            - context
+        call_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        text:
+          type: string
+          maxLength: 20000

@@ -1,0 +1,384 @@
+components:
+  schemas:
+    TaskExecutionStatus:
+      type: string
+      description: >-
+        A delegated Task's state. None is terminal: a Meta message wakes every
+        state but running.
+      enum:
+        - running
+        - waiting_for_approval
+        - idle
+        - failed
+        - canceled
+    TaskAttemptPolicyV1:
+      type: object
+      additionalProperties: false
+      required:
+        - policy_version
+        - timeout_seconds
+        - max_retries
+        - retry_on_agent_failure
+        - retry_on_timeout
+      properties:
+        policy_version:
+          type: integer
+          const: 1
+        timeout_seconds:
+          type: integer
+          minimum: 1
+          maximum: 86400
+        max_retries:
+          type: integer
+          minimum: 0
+          maximum: 10
+        retry_on_agent_failure:
+          type: boolean
+        retry_on_timeout:
+          type: boolean
+    TaskRunSpecV1:
+      type: object
+      additionalProperties: false
+      required: [schema_version, result_agent_actor_id, attempt_policy]
+      properties:
+        schema_version:
+          type: integer
+          const: 1
+        result_agent_actor_id:
+          allOf:
+            - $ref: "./common.yaml#/components/schemas/Id"
+          description: The Actor of the Agent whose AlterEgo runs the Task.
+        attempt_policy:
+          $ref: "#/components/schemas/TaskAttemptPolicyV1"
+    TaskExecutionParticipant:
+      type: object
+      additionalProperties: false
+      required:
+        - actor_id
+        - agent_id
+        - execution_context_ref
+      properties:
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        execution_context_ref:
+          type: object
+          additionalProperties: true
+    TaskAttemptSummary:
+      type: object
+      additionalProperties: false
+      required: [id, attempt_number, status, current_input_revision, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        attempt_number:
+          type: integer
+          format: int64
+          minimum: 1
+        status:
+          type: string
+          enum: [running, passed, stopped]
+        current_input_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        deadline_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        stop_reason_code:
+          type: string
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        finished_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    TaskExecutionProjection:
+      type: object
+      additionalProperties: false
+      required:
+        - task_id
+        - generation
+        - status
+        - execution_revision
+        - desired_control
+        - control_revision
+        - control_settled_revision
+        - run_spec
+        - execution_updated_at
+      properties:
+        task_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        generation:
+          type: integer
+          format: int64
+          minimum: 1
+        status:
+          $ref: "#/components/schemas/TaskExecutionStatus"
+        execution_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        reason_code:
+          type: string
+        desired_control:
+          type: string
+          enum: [run]
+        control_revision:
+          type: integer
+          format: int64
+          minimum: 0
+        control_settled_revision:
+          type: integer
+          format: int64
+          minimum: 0
+        run_spec:
+          $ref: "#/components/schemas/TaskRunSpecV1"
+        current_attempt:
+          $ref: "#/components/schemas/TaskAttemptSummary"
+        execution_updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+      description: >-
+        Human-safe current Task execution projection. It excludes Worker leases, effect payloads,
+        and participant Local Run references.
+    TaskEffect:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - root_operation_id
+        - operation
+        - status
+        - dispatch_sequence
+        - payload
+        - payload_hash
+        - created_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        root_operation_id:
+          type: string
+        operation:
+          type: string
+          enum:
+            - submit_agent_turn
+            - cleanup_runtime
+        status:
+          type: string
+          enum: [pending, dispatching, succeeded, failed, uncertain, canceled]
+        dispatch_sequence:
+          type: integer
+          format: int64
+          minimum: 1
+        payload:
+          type: object
+          additionalProperties: true
+        payload_hash:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        observation:
+          type: object
+          additionalProperties: true
+        error:
+          type: string
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        completed_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    TaskExecutionFact:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - execution_revision
+        - fact_kind
+        - execution_status
+        - control_settled_revision
+        - payload
+        - created_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        execution_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        fact_kind:
+          type: string
+          enum:
+            - TASK_EXECUTION_CHANGED
+        execution_status:
+          $ref: "#/components/schemas/TaskExecutionStatus"
+        control_settled_revision:
+          type: integer
+          format: int64
+          minimum: 0
+        reason_code:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    TaskExecution:
+      type: object
+      additionalProperties: false
+      required:
+        - task_id
+        - generation
+        - status
+        - execution_revision
+        - desired_control
+        - control_revision
+        - control_settled_revision
+        - run_spec
+        - participants
+        - pending_effects
+        - execution_facts
+        - execution_updated_at
+      properties:
+        task_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        generation:
+          type: integer
+          format: int64
+          minimum: 1
+        status:
+          $ref: "#/components/schemas/TaskExecutionStatus"
+        execution_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        reason_code:
+          type: string
+        desired_control:
+          type: string
+          enum: [run]
+        control_revision:
+          type: integer
+          format: int64
+          minimum: 0
+        control_settled_revision:
+          type: integer
+          format: int64
+          minimum: 0
+        run_spec:
+          $ref: "#/components/schemas/TaskRunSpecV1"
+        participants:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/TaskExecutionParticipant"
+        current_attempt:
+          $ref: "#/components/schemas/TaskAttemptSummary"
+        pending_effects:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskEffect"
+        execution_facts:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskExecutionFact"
+        execution_updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    TaskWorkerClaimRequest:
+      type: object
+      additionalProperties: false
+      required: [worker_id, lease_seconds]
+      properties:
+        worker_id:
+          type: string
+          minLength: 1
+          maxLength: 200
+        lease_seconds:
+          type: integer
+          minimum: 5
+          maximum: 300
+    TaskWorkerLease:
+      type: object
+      additionalProperties: false
+      required:
+        [task_id, worker_id, lease_token, lease_generation, lease_expires_at]
+      properties:
+        task_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        worker_id:
+          type: string
+        lease_token:
+          type: string
+          minLength: 32
+          maxLength: 256
+        lease_generation:
+          type: integer
+          format: int64
+          minimum: 1
+        lease_expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    TaskWorkerExecution:
+      type: object
+      additionalProperties: false
+      required: [execution]
+      properties:
+        lease:
+          $ref: "#/components/schemas/TaskWorkerLease"
+        execution:
+          $ref: "#/components/schemas/TaskExecution"
+    TaskWorkerHeartbeatRequest:
+      type: object
+      additionalProperties: false
+      required: [worker_id, lease_generation, lease_seconds]
+      properties:
+        worker_id:
+          type: string
+        lease_generation:
+          type: integer
+          format: int64
+          minimum: 1
+        lease_seconds:
+          type: integer
+          minimum: 5
+          maximum: 300
+    TaskWorkerTransitionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - worker_id
+        - lease_generation
+        - execution_generation
+        - expected_execution_revision
+        - transition
+      properties:
+        worker_id:
+          type: string
+        lease_generation:
+          type: integer
+          format: int64
+          minimum: 1
+        execution_generation:
+          type: integer
+          format: int64
+          minimum: 1
+        expected_execution_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        expected_control_revision:
+          type: integer
+          format: int64
+          minimum: 0
+        transition:
+          type: string
+          enum:
+            - advance
+            - record_agent_turn
+            - record_agent_turn_failure
+            - record_agent_terminal
+            - begin_effect_dispatch
+            - complete_runtime_cleanup
+            - schedule_reconcile
+        operation_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        payload:
+          type: object
+          additionalProperties: true

@@ -1,0 +1,46 @@
+components:
+  schemas:
+    PocketNoteDate:
+      type: string
+      pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      description: Calendar day in the TeamHub process time zone (TZ) that owns one Pocket Note page.
+      examples: ["2026-10-01"]
+    PocketNoteText:
+      type: string
+      maxLength: 20000
+    PocketNote:
+      type: object
+      additionalProperties: false
+      required: [date, text, updated_at]
+      properties:
+        date:
+          $ref: "#/components/schemas/PocketNoteDate"
+        text:
+          $ref: "#/components/schemas/PocketNoteText"
+        updated_at:
+          type: string
+          format: date-time
+    PocketNotePage:
+      type: object
+      additionalProperties: false
+      required: [today, items, page]
+      properties:
+        today:
+          $ref: "#/components/schemas/PocketNoteDate"
+          description: Current calendar day in the TeamHub process time zone (TZ); only this day's page is writable.
+        items:
+          type: array
+          maxItems: 200
+          description: Non-empty pages, newest day first.
+          items:
+            $ref: "#/components/schemas/PocketNote"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    PocketNoteUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [text]
+      properties:
+        text:
+          $ref: "#/components/schemas/PocketNoteText"
+          description: Replaces today's page; an empty string clears it.

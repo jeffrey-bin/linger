@@ -1,0 +1,44 @@
+roomMembers:
+  post:
+    operationId: getAgentRoomMembers
+    security: [{ agentBearer: [] }]
+    summary: Read current Agent-authorized collaboration state without a Run.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-context-reads.yaml#/schemas/AgentRoomMembersRequest"
+    responses:
+      "200":
+        description: Current collaboration state in one authorized database snapshot.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-context-reads.yaml#/schemas/AgentRoomMembersResponse"
+      "400": { description: Invalid resource query }
+      "401": { description: Invalid Agent identity credential }
+      "403": { description: Agent credential cannot read collaboration state }
+      "404": { description: Resource is unavailable }
+teamMd:
+  post:
+    operationId: getAgentTeamMd
+    security: [{ agentBearer: [] }]
+    summary: Read current Agent-authorized collaboration state without a Run.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-context-reads.yaml#/schemas/AgentRoomMembersRequest"
+    responses:
+      "200":
+        description: Current collaboration state in one authorized database snapshot.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-context-reads.yaml#/schemas/AgentTeamMdResponse"
+      "400": { description: Invalid resource query }
+      "401": { description: Invalid Agent identity credential }
+      "403": { description: Agent credential cannot read collaboration state }
+      "404": { description: Resource is unavailable }

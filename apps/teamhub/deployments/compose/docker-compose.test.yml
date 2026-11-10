@@ -1,0 +1,53 @@
+services:
+  postgres:
+    container_name: "${TEAMHUB_TEST_CONTAINER_NAME:?managed test container name is required}"
+    image: "pgvector/pgvector:0.8.6-pg17-bookworm@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f"
+    labels:
+      com.linger.teamhub.test-managed: "true"
+      com.linger.teamhub.test-run-token: "${TEAMHUB_TEST_RUN_TOKEN:?managed test run token is required}"
+    environment:
+      POSTGRES_DB: teamhub_test_control
+      POSTGRES_USER: teamhub
+      POSTGRES_PASSWORD: teamhub
+    # The Timescale setting is a no-op on pgvector and keeps rollback-image workers off.
+    # Integration databases are disposable; skip crash-durability disk waits.
+    command:
+      - postgres
+      - -c
+      - timescaledb.max_background_workers=0
+      - -c
+      - fsync=off
+      - -c
+      - full_page_writes=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - max_connections=1000
+    ports:
+      - name: postgres
+        target: 5432
+        published: "${TEAMHUB_TEST_POSTGRES_PORT:-0}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    # Integration databases are disposable; keep the default PGDATA in RAM so
+    # per-test clone and drop (each forcing a checkpoint) do not wait on disk.
+    # Same path as the CI runner's services_tmpfs; no anonymous volume is created.
+    tmpfs:
+      - /var/lib/postgresql/data:size=4g
+    healthcheck:
+      # The image briefly starts a non-PID-1 postmaster during first-time init.
+      test:
+        [
+          "CMD-SHELL",
+          'test "$$(head -n 1 "$$PGDATA/postmaster.pid")" = 1 && psql -U teamhub -d teamhub_test_control -Atqc ''select 1''',
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+networks:
+  default:
+    name: "${TEAMHUB_TEST_NETWORK_NAME:?managed test network name is required}"
+    labels:
+      com.linger.teamhub.test-managed: "true"
+      com.linger.teamhub.test-run-token: "${TEAMHUB_TEST_RUN_TOKEN:?managed test run token is required}"

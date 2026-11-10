@@ -1,0 +1,58 @@
+.meeting-document .read-only-blocknote-document {
+  max-width: none;
+  padding: 0;
+}
+
+/* Meeting recording track: a thin line filled in ink up to the playhead,
+   with a small thumb that only shows on hover or keyboard focus. */
+.meeting-audio-track {
+  height: 4px;
+  appearance: none;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    var(--app-ink) var(--meeting-audio-progress, 0%),
+    var(--app-border) var(--meeting-audio-progress, 0%)
+  );
+  cursor: pointer;
+}
+
+.meeting-audio-track:disabled {
+  cursor: default;
+}
+
+.meeting-audio-track::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  appearance: none;
+  border: 2px solid var(--app-surface);
+  border-radius: 9999px;
+  background: var(--app-ink);
+  opacity: 0;
+  transition: opacity var(--app-micro-duration) ease;
+}
+
+.meeting-audio-track::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--app-surface);
+  border-radius: 9999px;
+  background: var(--app-ink);
+  opacity: 0;
+  transition: opacity var(--app-micro-duration) ease;
+}
+
+.meeting-audio-track:not(:disabled):hover::-webkit-slider-thumb,
+.meeting-audio-track:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.meeting-audio-track:not(:disabled):hover::-moz-range-thumb,
+.meeting-audio-track:focus-visible::-moz-range-thumb {
+  opacity: 1;
+}
+
+.meeting-audio-track:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 3px;
+}

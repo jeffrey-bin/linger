@@ -1,0 +1,378 @@
+components:
+  schemas:
+    ExternalAppKey:
+      type: string
+      minLength: 1
+      maxLength: 120
+      pattern: "^[a-z0-9][a-z0-9_-]{0,119}$"
+      description: Stable catalog key. TeamHub validates app availability and capabilities.
+    ExternalAppAvailability:
+      type: string
+      enum: [available, unavailable]
+    ExternalAppCapability:
+      type: string
+      enum: [connect, personal_wiki_import, agent_tools, proactive_reminders]
+    ExternalApp:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          key,
+          display_name,
+          description,
+          availability,
+          capabilities,
+          allows_multiple_connections,
+        ]
+      properties:
+        key:
+          $ref: "#/components/schemas/ExternalAppKey"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        description:
+          type: string
+          minLength: 1
+          maxLength: 240
+        availability:
+          $ref: "#/components/schemas/ExternalAppAvailability"
+        capabilities:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/ExternalAppCapability"
+        allows_multiple_connections:
+          type: boolean
+        logo_url:
+          type: string
+          format: uri
+        supports_reauthorization:
+          type: boolean
+          description: Whether account identity can be verified when replacing credentials. Otherwise create a new connection and explicitly grant Agent access again.
+    ExternalAppList:
+      type: object
+      additionalProperties: false
+      required: [apps, provider_configured, provider_key]
+      properties:
+        apps:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExternalApp"
+        provider_configured:
+          type: boolean
+          description: Whether this deployment has an external connection provider. When false, every app is unavailable until an operator configures the provider credential.
+        provider_key:
+          $ref: "#/components/schemas/ExternalProviderKeyStatus"
+    ExternalProviderKeyStatus:
+      type: object
+      additionalProperties: false
+      required: [source, can_save]
+      description: Where the Composio API key comes from. The key itself is never returned.
+      properties:
+        source:
+          type: string
+          enum: [none, environment, stored]
+          description: environment is COMPOSIO_API_KEY and always wins; stored was saved in the product.
+        can_save:
+          type: boolean
+          description: Whether a key can be saved in the product. False when COMPOSIO_API_KEY is set or TEAMHUB_SECRET_ENCRYPTION_KEY is missing.
+    SaveExternalProviderKeyRequest:
+      type: object
+      additionalProperties: false
+      required: [api_key]
+      properties:
+        api_key:
+          type: string
+          minLength: 1
+          maxLength: 512
+    CreateExternalConnectionRequest:
+      type: object
+      additionalProperties: false
+      required: [app_key]
+      properties:
+        app_key:
+          $ref: "#/components/schemas/ExternalAppKey"
+    ExternalConnectionStatus:
+      type: string
+      enum:
+        [
+          pending,
+          active,
+          expired,
+          failed,
+          disconnecting,
+          revoke_pending,
+          revoked,
+        ]
+    ExternalConnection:
+      type: object
+      additionalProperties: false
+      required:
+        [id, provider, status, revision, auto_reminders, created_at, updated_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        provider:
+          $ref: "#/components/schemas/ExternalAppKey"
+        identity_label:
+          type: string
+          description: Provider identity text safe to display. Credentials and upstream IDs are never returned.
+        status:
+          $ref: "#/components/schemas/ExternalConnectionStatus"
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+        auto_reminders:
+          type: boolean
+          description: Whether AnotherMe watches this connection for things that need the Human's attention. Only apps with the proactive_reminders capability are watched.
+        status_checked_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        status_error_code:
+          type: string
+        status_check_requested_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+          description: Set while a status check the Human asked for waits for its result.
+        reauthorizing:
+          type: boolean
+          description: Whether a reauthorization is in progress; absent means none.
+        reauthorization_connect_url:
+          type: string
+          format: uri
+          description: Short-lived Composio Connect Link of the reauthorization in progress.
+        reauthorization_connect_expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        reauthorization_error_code:
+          type: string
+          description: How the last reauthorization failed, cleared when another starts or one succeeds.
+          enum:
+            [
+              candidate_not_active,
+              connect_link_expired,
+              identity_mismatch,
+              duplicate_remote_principal,
+              stale_revision,
+              internal_error,
+            ]
+        connect_url:
+          type: string
+          format: uri
+          description: Short-lived Composio Connect Link, returned while the connection is pending.
+        connect_expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    ExternalConnectionAgentAccess:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          agent_actor_id,
+          agent_management_id,
+          agent_display_name,
+          tenant_id,
+          granted,
+          revision,
+        ]
+      properties:
+        agent_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        agent_management_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        agent_display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        granted:
+          type: boolean
+        revision:
+          type: integer
+          format: int64
+          minimum: 0
+    ExternalConnectionAgentAccessList:
+      type: object
+      additionalProperties: false
+      required: [agents]
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExternalConnectionAgentAccess"
+    SetExternalConnectionAutoRemindersRequest:
+      type: object
+      additionalProperties: false
+      required: [enabled]
+      properties:
+        enabled:
+          type: boolean
+    SetExternalConnectionAgentAccessRequest:
+      type: object
+      additionalProperties: false
+      required: [granted]
+      properties:
+        granted:
+          type: boolean
+    SlackConversation:
+      type: object
+      additionalProperties: false
+      required: [id, name, kind, is_private]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        kind: { type: string, enum: [public_channel, private_channel] }
+        is_private: { type: boolean }
+    SlackConversationPage:
+      type: object
+      additionalProperties: false
+      required: [conversations]
+      properties:
+        conversations:
+          type: array
+          items: { $ref: "#/components/schemas/SlackConversation" }
+        next_cursor: { type: string }
+    DiscordChannel:
+      type: object
+      additionalProperties: false
+      required: [id, name, kind]
+      properties:
+        id: { type: string, minLength: 1 }
+        name: { type: string, minLength: 1 }
+        kind:
+          type: string
+          enum: [text, announcement, forum, media]
+          x-enum-varnames:
+            [
+              DiscordChannelKindText,
+              DiscordChannelKindAnnouncement,
+              DiscordChannelKindForum,
+              DiscordChannelKindMedia,
+            ]
+    DiscordChannelList:
+      type: object
+      additionalProperties: false
+      required: [channels]
+      properties:
+        channels:
+          type: array
+          items: { $ref: "#/components/schemas/DiscordChannel" }
+    GoogleCalendar:
+      type: object
+      additionalProperties: false
+      required: [id, summary, access_role, primary, selected]
+      properties:
+        id: { type: string, minLength: 1 }
+        summary: { type: string, minLength: 1 }
+        time_zone: { type: string }
+        access_role:
+          type: string
+          enum: [reader, writer, owner]
+          x-enum-varnames:
+            [
+              GoogleCalendarAccessRoleReader,
+              GoogleCalendarAccessRoleWriter,
+              GoogleCalendarAccessRoleOwner,
+            ]
+        primary: { type: boolean }
+        selected: { type: boolean }
+    GoogleCalendarPage:
+      type: object
+      additionalProperties: false
+      required: [calendars]
+      properties:
+        calendars:
+          type: array
+          items: { $ref: "#/components/schemas/GoogleCalendar" }
+        next_page_token: { type: string }
+    GitHubRepository:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          full_name,
+          name,
+          html_url,
+          description,
+          language,
+          default_branch,
+          updated_at,
+        ]
+      properties:
+        id: { type: string, minLength: 1 }
+        full_name: { type: string, minLength: 1, maxLength: 255 }
+        name: { type: string, minLength: 1, maxLength: 255 }
+        html_url: { type: string, format: uri }
+        description: { type: string }
+        language: { type: string }
+        default_branch: { type: string }
+        updated_at: { $ref: "./common.yaml#/components/schemas/Timestamp" }
+    GitHubRepositoryPage:
+      type: object
+      additionalProperties: false
+      required: [repositories]
+      properties:
+        repositories:
+          type: array
+          items: { $ref: "#/components/schemas/GitHubRepository" }
+        next_cursor: { type: string }
+    NotionResource:
+      type: object
+      additionalProperties: false
+      required: [id, title, kind]
+      properties:
+        id: { type: string, minLength: 1 }
+        title: { type: string, minLength: 1, maxLength: 255 }
+        kind: { type: string, enum: [notion_page, notion_database] }
+        url: { type: string, format: uri }
+    NotionResourcePage:
+      type: object
+      additionalProperties: false
+      required: [resources]
+      properties:
+        resources:
+          type: array
+          items: { $ref: "#/components/schemas/NotionResource" }
+        next_cursor: { type: string }
+    ExternalConnectionList:
+      type: object
+      additionalProperties: false
+      required: [connections]
+      properties:
+        connections:
+          type: array
+          items: { $ref: "#/components/schemas/ExternalConnection" }
+    DisconnectExternalConnectionRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_revision]
+      properties:
+        expected_revision: { type: integer, format: int64, minimum: 1 }
+    ExternalConnectionStatusCheckRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_revision]
+      properties:
+        expected_revision: { type: integer, format: int64, minimum: 1 }
+    CompleteExternalConnectionAuthorizationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        connected_account_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: The connected account the Composio callback named, when it named one.
+    CreateExternalConnectionReauthorizationRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_revision]
+      properties:
+        expected_revision: { type: integer, format: int64, minimum: 1 }

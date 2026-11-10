@@ -1,0 +1,51 @@
+{
+  "boundary": 35920,
+  "word_gap_ms": -1552,
+  "left": {
+    "StartMS": 32032,
+    "EndMS": 35920,
+    "Final": true,
+    "Text": "ぁあぃいぅうぇえぉおかがきぎくぐく けげ こ。",
+    "Words": [
+      { "TextStart": 0, "TextEnd": 3, "StartMS": 32152, "EndMS": 32312 },
+      { "TextStart": 3, "TextEnd": 6, "StartMS": 32312, "EndMS": 32392 },
+      { "TextStart": 6, "TextEnd": 9, "StartMS": 32392, "EndMS": 32512 },
+      { "TextStart": 9, "TextEnd": 12, "StartMS": 32512, "EndMS": 32592 },
+      { "TextStart": 12, "TextEnd": 15, "StartMS": 32592, "EndMS": 32712 },
+      { "TextStart": 15, "TextEnd": 18, "StartMS": 32712, "EndMS": 32832 },
+      { "TextStart": 18, "TextEnd": 21, "StartMS": 32832, "EndMS": 33032 },
+      { "TextStart": 21, "TextEnd": 24, "StartMS": 33752, "EndMS": 33912 },
+      { "TextStart": 24, "TextEnd": 27, "StartMS": 33912, "EndMS": 33992 },
+      { "TextStart": 27, "TextEnd": 30, "StartMS": 33992, "EndMS": 34072 },
+      { "TextStart": 30, "TextEnd": 33, "StartMS": 34072, "EndMS": 34152 },
+      { "TextStart": 33, "TextEnd": 36, "StartMS": 34152, "EndMS": 34272 },
+      { "TextStart": 36, "TextEnd": 39, "StartMS": 34272, "EndMS": 34392 },
+      { "TextStart": 39, "TextEnd": 42, "StartMS": 34392, "EndMS": 34552 },
+      { "TextStart": 42, "TextEnd": 45, "StartMS": 34552, "EndMS": 34632 },
+      { "TextStart": 45, "TextEnd": 48, "StartMS": 34632, "EndMS": 34792 },
+      { "TextStart": 48, "TextEnd": 51, "StartMS": 34792, "EndMS": 34992 },
+      { "TextStart": 52, "TextEnd": 58, "StartMS": 35032, "EndMS": 35392 },
+      { "TextStart": 59, "TextEnd": 62, "StartMS": 35392, "EndMS": 35472 }
+    ]
+  },
+  "right": {
+    "StartMS": 33920,
+    "EndMS": 36212,
+    "Final": true,
+    "Text": "えぉおかがきぎくぐく けげ ご。",
+    "Words": [
+      { "TextStart": 0, "TextEnd": 3, "StartMS": 33920, "EndMS": 34000 },
+      { "TextStart": 3, "TextEnd": 6, "StartMS": 34000, "EndMS": 34040 },
+      { "TextStart": 6, "TextEnd": 9, "StartMS": 34040, "EndMS": 34160 },
+      { "TextStart": 9, "TextEnd": 12, "StartMS": 34160, "EndMS": 34200 },
+      { "TextStart": 12, "TextEnd": 15, "StartMS": 34200, "EndMS": 34320 },
+      { "TextStart": 15, "TextEnd": 18, "StartMS": 34320, "EndMS": 34400 },
+      { "TextStart": 18, "TextEnd": 21, "StartMS": 34400, "EndMS": 34560 },
+      { "TextStart": 21, "TextEnd": 24, "StartMS": 34560, "EndMS": 34640 },
+      { "TextStart": 24, "TextEnd": 27, "StartMS": 34640, "EndMS": 34800 },
+      { "TextStart": 27, "TextEnd": 30, "StartMS": 34800, "EndMS": 34960 },
+      { "TextStart": 31, "TextEnd": 37, "StartMS": 35080, "EndMS": 35240 },
+      { "TextStart": 38, "TextEnd": 41, "StartMS": 35360, "EndMS": 35440 }
+    ]
+  }
+}

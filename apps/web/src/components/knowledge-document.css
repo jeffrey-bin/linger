@@ -1,0 +1,154 @@
+/* Shared reading typography for Memory and native Wiki; never applied in Edit. */
+[data-knowledge-presentation] .bn-container .bn-editor {
+  color: var(--app-body);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+}
+
+[data-knowledge-presentation] .bn-editor [data-content-type="heading"] {
+  padding-top: 0;
+}
+
+/* Town docs heading scale. */
+[data-knowledge-presentation] .bn-editor :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: var(--app-ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 580;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+[data-knowledge-presentation] .bn-editor h1 {
+  margin-top: 32px;
+  font-size: 26px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+[data-knowledge-presentation] .bn-editor h2 {
+  margin-top: 28px;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+[data-knowledge-presentation] .bn-editor h3 {
+  margin-top: 20px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+[data-knowledge-presentation]
+  .bn-editor
+  > .bn-block-group
+  > .bn-block-outer:first-child
+  :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 0;
+}
+
+/* Wiki cross-links read as navigation; external links stay in the prose. */
+[data-knowledge-presentation] .bn-editor a[href] {
+  color: inherit;
+  text-decoration-line: underline;
+  text-underline-offset: 3px;
+}
+
+[data-knowledge-presentation] .bn-editor a[href]:not([href*=":"]) {
+  color: var(--app-link);
+  text-decoration-line: none;
+}
+
+[data-knowledge-presentation] .bn-editor a[href]:not([href*=":"]):hover {
+  text-decoration-line: underline;
+}
+
+[data-knowledge-presentation]
+  .bn-editor
+  .bn-block-outer:has(
+    > .bn-block
+      > .bn-block-content:is(
+        [data-content-type="bulletListItem"],
+        [data-content-type="numberedListItem"],
+        [data-content-type="checkListItem"]
+      )
+  )
+  + .bn-block-outer:not(.knowledge-change-log-entry):has(
+    > .bn-block
+      > .bn-block-content:is(
+        [data-content-type="bulletListItem"],
+        [data-content-type="numberedListItem"],
+        [data-content-type="checkListItem"]
+      )
+  ) {
+  margin-top: 4px;
+}
+
+[data-knowledge-presentation]
+  .bn-block-group
+  .bn-block-group
+  > .bn-block-outer:has(
+    > .bn-block
+      > :is(
+        [data-content-type="bulletListItem"],
+        [data-content-type="numberedListItem"],
+        [data-content-type="checkListItem"]
+      )
+  )::before {
+  border-left-width: 0;
+}
+
+/* Change Log as a "Recent updates" card; see knowledge-reading-extension. */
+[data-knowledge-presentation] .bn-editor .knowledge-change-log-entry {
+  padding: 4px 16px 0;
+  background: hsl(var(--town-muted) / 0.7);
+  font-size: 14px;
+}
+
+[data-knowledge-presentation]
+  .bn-editor
+  .knowledge-change-log-entry
+  + .knowledge-change-log-entry {
+  margin-top: 0;
+}
+
+[data-knowledge-presentation] .bn-editor .knowledge-change-log-entry--first {
+  padding-top: 12px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+[data-knowledge-presentation] .bn-editor .knowledge-change-log-entry--last {
+  padding-bottom: 12px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+[data-knowledge-presentation] .bn-editor .knowledge-change-log-date {
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+/* View more under a long Interaction History. */
+[data-knowledge-presentation] .bn-editor .knowledge-section-toggle {
+  padding: 4px 0 0;
+}
+
+.knowledge-section-toggle button {
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--app-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.knowledge-section-toggle button:hover {
+  color: var(--app-ink);
+}

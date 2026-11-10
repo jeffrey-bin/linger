@@ -1,0 +1,125 @@
+.illustration {
+  position: relative;
+  width: min(100%, 320px);
+  height: 150px;
+  margin: 0 auto 12px;
+}
+
+.halo {
+  position: absolute;
+  inset: 0 35px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    hsl(var(--town-muted)) 0%,
+    hsl(var(--town-muted) / 0.5) 45%,
+    transparent 70%
+  );
+}
+
+.connection {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.connection path {
+  stroke: hsl(var(--town-border-hover));
+  stroke-width: 1.5;
+  stroke-dasharray: 3 7;
+  animation: travel 2s linear infinite;
+}
+
+.node,
+.agent {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--town-card));
+  border: 1px solid hsl(var(--town-border));
+}
+
+.node {
+  top: 58px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: hsl(var(--town-muted-foreground));
+  box-shadow: var(--town-shadow-sm);
+}
+
+.source {
+  left: 10%;
+  transform: rotate(-8deg);
+}
+.chat {
+  right: 10%;
+  transform: rotate(8deg);
+}
+
+.agent {
+  top: 30px;
+  left: calc(50% - 39px);
+  width: 78px;
+  height: 78px;
+  border-radius: 16px;
+  color: hsl(var(--town-foreground));
+  box-shadow:
+    var(--town-shadow-md),
+    inset 0 0 0 5px hsl(var(--town-card));
+  background: hsl(var(--town-card));
+  animation: float 3.2s ease-in-out infinite;
+}
+
+.online {
+  position: absolute;
+  right: -3px;
+  bottom: 1px;
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 3px solid hsl(var(--town-card));
+  border-radius: 50%;
+  background: var(--app-status-success-surface);
+  color: var(--app-status-success-text);
+}
+
+.sparkle {
+  position: absolute;
+  top: 18px;
+  right: 28%;
+  color: hsl(var(--town-muted-foreground));
+  animation: glimmer 3.2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(2px) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+@keyframes travel {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+@keyframes glimmer {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent,
+  .sparkle,
+  .connection path {
+    animation: none;
+  }
+}

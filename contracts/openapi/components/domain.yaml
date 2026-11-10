@@ -1,0 +1,990 @@
+components:
+  schemas:
+    Tenant:
+      type: object
+      additionalProperties: false
+      description: The deployment's Space. It has no row of its own; its name follows the Human's display name.
+      required: [id, name, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          description: The Human's display name (at most 120 characters) followed by "'s Workspace".
+          type: string
+          minLength: 1
+          maxLength: 132
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    TenantList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tenant"
+    Account:
+      type: object
+      additionalProperties: false
+      required: [id, email, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        email:
+          type: string
+          format: email
+          description: Normalized email address; the login identifier.
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    Actor:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, kind, display_name, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          $ref: "./common.yaml#/components/schemas/ActorKind"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        account_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Present only for Human Actors; omitted for Agent Actors.
+        handle:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^@[A-Za-z0-9][A-Za-z0-9_-]*$"
+        email:
+          type: string
+          format: email
+          maxLength: 320
+          description: >-
+            Account email of a Human Actor. Returned only by the Tenant Actor
+            listing, where the caller is an active member of the same Tenant, so
+            member pickers can match an invited address to an existing person.
+    ActorPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Actor"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    AgentModel:
+      type: object
+      additionalProperties: false
+      required: [id, label]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 120
+        label:
+          type: string
+          minLength: 1
+          maxLength: 120
+        allowed_reasoning_effort:
+          type: array
+          maxItems: 7
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/AgentReasoningEffort"
+        default_reasoning_effort:
+          $ref: "#/components/schemas/AgentReasoningEffort"
+        is_default:
+          type: boolean
+          description: The model the Runtime runs when none is selected.
+    AgentReasoningEffort:
+      type: string
+      enum: [none, low, medium, high, xhigh, max, ultra]
+    AgentType:
+      type: string
+      description: Persisted Agent runtime type.
+      enum: [general, anotherme]
+    CreatableAgentType:
+      type: string
+      description: >-
+        Agent type selectable through Human-facing Agent creation APIs. AnotherMe Agents are
+        provisioned by TeamHub for their Human, never created through these APIs.
+      enum: [general]
+      default: general
+    LocalRuntimeType:
+      type: string
+      enum: [codex, claude, pi]
+      x-enum-varnames:
+        [LocalRuntimeTypeCodex, LocalRuntimeTypeClaude, LocalRuntimeTypePi]
+    AgentRuntimePlacement:
+      type: object
+      additionalProperties: false
+      required: [type]
+      description: >-
+        Agents run on one of the Sponsor's Local Computers. Placement requires computer_id,
+        runtime_type, and workspace_grant_id; TeamHub validates that invariant before persistence.
+      properties:
+        type:
+          type: string
+          enum: [local]
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        runtime_type:
+          $ref: "#/components/schemas/LocalRuntimeType"
+        workspace_grant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    AgentRuntimeConfig:
+      type: object
+      additionalProperties: false
+      required: [model]
+      description: The local Runtime an Agent runs is placement.runtime_type.
+      properties:
+        model:
+          type: string
+          minLength: 1
+          maxLength: 120
+        reasoning_effort:
+          $ref: "#/components/schemas/AgentReasoningEffort"
+        placement:
+          $ref: "#/components/schemas/AgentRuntimePlacement"
+    LocalComputerRuntime:
+      type: object
+      additionalProperties: false
+      required: [type, status, models]
+      properties:
+        type:
+          $ref: "#/components/schemas/LocalRuntimeType"
+        status:
+          $ref: "#/components/schemas/LocalRuntimeDiagnosticStatus"
+        version:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Observed diagnostic value; never a compatibility gate.
+        error_code:
+          $ref: "#/components/schemas/LocalRuntimeDiagnosticErrorCode"
+        message:
+          type: string
+          minLength: 1
+          maxLength: 512
+        models:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AgentModel"
+    LocalRuntimeDiagnosticStatus:
+      type: string
+      enum:
+        [
+          not_installed,
+          authentication_required,
+          ready,
+          incompatible,
+          error,
+          unknown,
+        ]
+    LocalRuntimeDiagnosticErrorCode:
+      type: string
+      enum:
+        [
+          RUNTIME_NOT_INSTALLED,
+          RUNTIME_AUTHENTICATION_REQUIRED,
+          RUNTIME_INCOMPATIBLE,
+          RUNTIME_DIAGNOSTIC_FAILED,
+          LOCAL_COMPUTER_OFFLINE,
+        ]
+    LocalAgentRuntimeStatus:
+      type: object
+      additionalProperties: false
+      required:
+        [computer_id, display_name, computer_status, runtime_type, status]
+      properties:
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        computer_status:
+          type: string
+          enum: [online, offline, unknown]
+        runtime_type:
+          $ref: "#/components/schemas/LocalRuntimeType"
+        status:
+          $ref: "#/components/schemas/LocalRuntimeDiagnosticStatus"
+        observed_at:
+          type: string
+          format: date-time
+          description: Time of the last persisted Computer connection observation, including heartbeats and disconnects; not a live execution check.
+        connection_status:
+          type: string
+          enum: [connected, reconnecting, offline, unknown]
+          description: Freshness of the persisted connection observation, independent of the last Runtime diagnostic.
+        version:
+          type: string
+          minLength: 1
+          maxLength: 256
+        error_code:
+          $ref: "#/components/schemas/LocalRuntimeDiagnosticErrorCode"
+        message:
+          type: string
+          minLength: 1
+          maxLength: 512
+    LocalComputerWorkspaceGrant:
+      type: object
+      additionalProperties: false
+      required: [grant_id, label, mode]
+      properties:
+        grant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        label:
+          type: string
+          minLength: 1
+          maxLength: 120
+        mode:
+          type: string
+          enum: [read-only, workspace-write]
+    LocalComputer:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          computer_id,
+          display_name,
+          status,
+          upgrade_required,
+          active_operations,
+          runtimes,
+          workspace_grants,
+        ]
+      properties:
+        platform:
+          type: string
+          enum: [darwin, linux, win32]
+          description: Last native host platform reported by this Computer. Omission preserves an existing observation; unknown legacy Computers omit this field.
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        status:
+          type: string
+          enum: [online, offline]
+        upgrade_required:
+          type: boolean
+          description: The enrolled Computer is incompatible with the current Runner Gateway and must be upgraded in place.
+        daemon_version:
+          type: string
+          maxLength: 80
+          description: Release version the Computer reported when it last connected.
+        recommended_version:
+          type: string
+          maxLength: 80
+          description: Recommended Computer release. This is advisory and does not prevent legacy execution.
+        last_seen_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        capacity:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Optional maximum simultaneous active Operations on this Computer. Omission means unlimited; it does not limit bound Agents.
+        available_capacity:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Currently available active Operation slots. Present only when capacity is configured.
+        active_operations:
+          type: integer
+          minimum: 0
+          description: Active Operations the Computer reported at its last heartbeat; 0 while it is offline.
+        runtimes:
+          type: array
+          maxItems: 4
+          description: Runtimes and models as the Computer last reported them, kept while it is offline so an Agent can be placed there.
+          items:
+            $ref: "#/components/schemas/LocalComputerRuntime"
+        workspace_grants:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/LocalComputerWorkspaceGrant"
+    LocalComputerPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/LocalComputer"
+    LocalComputerEnrollmentCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [display_name, redirect_uri, code_challenge]
+      properties:
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        redirect_uri:
+          type: string
+          format: uri
+          maxLength: 2048
+        code_challenge:
+          type: string
+          pattern: "^[A-Za-z0-9_-]{43}$"
+    LocalComputerEnrollmentAuthorization:
+      type: object
+      additionalProperties: false
+      required: [enrollment_id, computer_id, authorization_code, expires_at]
+      properties:
+        enrollment_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        authorization_code:
+          type: string
+          pattern: "^[A-Za-z0-9_-]{43,128}$"
+          writeOnly: true
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    LocalComputerEnrollmentExchangeRequest:
+      type: object
+      additionalProperties: false
+      required: [authorization_code, code_verifier, redirect_uri]
+      properties:
+        authorization_code:
+          type: string
+          pattern: "^[A-Za-z0-9_-]{43,128}$"
+          writeOnly: true
+        code_verifier:
+          type: string
+          pattern: "^[A-Za-z0-9_-]{43}$"
+          writeOnly: true
+        redirect_uri:
+          type: string
+          format: uri
+          maxLength: 2048
+    LocalComputerCredentialBundle:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          computer_id,
+          tenant_id,
+          gateway_url,
+          gateway_token,
+          credential_expires_at,
+        ]
+      properties:
+        computer_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        gateway_url:
+          type: string
+          format: uri
+          maxLength: 2048
+        gateway_token:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          writeOnly: true
+        credential_expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    TenantAgentCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name, instructions, runtime]
+      properties:
+        template_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: TeamHub freezes this template's Routines when reserving the Agent. Activation creates the Sponsor direct Room and copies all Routines atomically. Registration retries reuse the frozen snapshot even if the template is later removed.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        avatar_key:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: >-
+            Product avatar selection stored with the Agent so every Human sees the same avatar.
+            Clients that do not recognise the key fall back to their own derived default.
+        instructions:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        runtime:
+          $ref: "#/components/schemas/AgentRuntimeConfig"
+        agent_type:
+          $ref: "#/components/schemas/CreatableAgentType"
+          description: Defaults to general for compatibility with existing clients.
+        visibility_scope:
+          $ref: "#/components/schemas/AgentVisibilityScope"
+        skill_bindings:
+          type: array
+          maxItems: 100
+          description: >-
+            Initial enabled Agent Skill bindings; skill_id values must be unique. Configuration
+            defaults to an empty object and must satisfy each selected Manifest.
+          items:
+            $ref: "./skills.yaml#/components/schemas/AgentSkillRegistration"
+    TenantAgentAvatarUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [avatar_key]
+      properties:
+        avatar_key:
+          type: string
+          minLength: 1
+          maxLength: 64
+        avatar_image:
+          type: string
+          maxLength: 131072
+          description: >-
+            JPEG, PNG, or WebP data URL. An empty string removes the uploaded image; omitting it
+            keeps the current image.
+    TenantAgentUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_configuration_revision]
+      properties:
+        expected_configuration_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        instructions:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: Updated Agent instructions. Omit to preserve the current instructions; changes require the Sponsor and an idle Agent.
+        runtime:
+          $ref: "#/components/schemas/AgentRuntimeConfig"
+    AgentVisibilityScope:
+      type: string
+      enum: [sponsor, workspace]
+      x-enum-varnames:
+        - AgentVisibilityScopeSponsor
+        - AgentVisibilityScopeWorkspace
+      default: sponsor
+      description: >-
+        Tenant directory visibility only. Sponsor visibility does not hide the Agent from members
+        of a Room where the Sponsor explicitly admitted it, and workspace visibility does not grant
+        Agent management or ordinary Room admission rights.
+    TenantAgentAvailabilityStatus:
+      type: string
+      enum: [online, error, offline, unknown]
+      description: Runtime availability. Managed Task execution is represented by active_task_count.
+    TenantAgentCurrentActivity:
+      type: object
+      additionalProperties: false
+      required: [summary]
+      properties:
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 240
+        run_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        work_item_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    TenantAgentAvailability:
+      type: object
+      additionalProperties: false
+      required: [status, label, active_task_count]
+      properties:
+        status:
+          $ref: "#/components/schemas/TenantAgentAvailabilityStatus"
+        label:
+          type: string
+          minLength: 1
+          maxLength: 120
+        active_task_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Number of non-terminal managed Tasks assigned to this Agent.
+        current_activity:
+          $ref: "#/components/schemas/TenantAgentCurrentActivity"
+          deprecated: true
+          description: Deprecated compatibility detail for Runtime errors and offline diagnostics.
+    TenantAgentAvailabilitySnapshot:
+      type: object
+      additionalProperties: false
+      required: [actor_id, availability]
+      properties:
+        actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        availability:
+          $ref: "#/components/schemas/TenantAgentAvailability"
+        local_runtime_status:
+          $ref: "#/components/schemas/LocalAgentRuntimeStatus"
+    TenantAgent:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          actor,
+          agent_management_id,
+          agent_type,
+          description,
+          configuration_revision,
+          instructions,
+          runtime,
+          skill_bindings,
+          created_by,
+          created_at,
+          updated_at,
+          visibility_scope,
+        ]
+      properties:
+        actor:
+          $ref: "#/components/schemas/Actor"
+        agent_management_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+          description: Opaque AgentManagement identifier.
+        agent_type:
+          $ref: "#/components/schemas/AgentType"
+        description:
+          type: string
+          maxLength: 1000
+        avatar_key:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: >-
+            Product avatar selection: `figure:<name>:RRGGBB` (the named animal character on a background) or
+            `image:RRGGBB` (the uploaded image on a background). Set at creation and replaced
+            through the Agent avatar endpoint.
+        avatar_image_url:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: >-
+            Same-origin URL of the uploaded image shown on the avatar background when avatar_key
+            selects an image. The URL carries the image version, so it changes whenever the
+            image does and each version may be cached indefinitely. Omitted when the Agent has
+            no uploaded image.
+        configuration_revision:
+          type: integer
+          format: int64
+          minimum: 1
+        instructions:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        runtime:
+          $ref: "#/components/schemas/AgentRuntimeConfig"
+        skill_bindings:
+          type: array
+          items:
+            $ref: "./skills.yaml#/components/schemas/AgentSkillRegistration"
+        created_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        visibility_scope:
+          $ref: "#/components/schemas/AgentVisibilityScope"
+    AnotherMe:
+      type: object
+      additionalProperties: false
+      description: >-
+        The Human's Another Me and its live direct Chat. Empty until the Another Me exists; room_id is
+        also absent while the Chat is being deleted.
+      properties:
+        agent_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    TenantAgentPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TenantAgent"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    TenantAgentAvailabilityPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TenantAgentAvailabilitySnapshot"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    AgentIdentity:
+      type: object
+      additionalProperties: false
+      required: [agent_id, actor]
+      properties:
+        agent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: AgentManagement execution identity used by the Agent callback path.
+        actor:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+          description: TeamHub collaboration identity mapped from the active Agent registration.
+    CurrentIdentity:
+      type: object
+      additionalProperties: false
+      required: [account, actors]
+      properties:
+        account:
+          $ref: "#/components/schemas/Account"
+        actors:
+          type: array
+          description: Active Human Actor identities available to this Account, one per Tenant in V0.
+          items:
+            $ref: "#/components/schemas/Actor"
+    Session:
+      type: object
+      additionalProperties: false
+      required: [id, account_id, created_at, expires_at, identity]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        account_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        identity:
+          $ref: "#/components/schemas/CurrentIdentity"
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [identifier, password]
+      properties:
+        identifier:
+          type: string
+          minLength: 1
+          maxLength: 320
+          description: The Account's email address, matched case-insensitively.
+        password:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          writeOnly: true
+    RoomKind:
+      type: string
+      enum: [room, direct, thread]
+    RoomParticipationStatus:
+      type: string
+      enum: [joined, left]
+      description: Personal Room participation; leaving preserves membership and its role.
+    RoomParticipationRequest:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/RoomParticipationStatus"
+    Room:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, kind, name, created_by, created_at, updated_at]
+      properties:
+        snapshot_room_seq:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Room event watermark captured before reading this projection. Events at or below
+            this watermark are reflected in the response; newer events may also be reflected.
+            Present on authorized Room detail/member reads. Older servers may omit it.
+        participation:
+          $ref: "#/components/schemas/RoomParticipationStatus"
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          $ref: "#/components/schemas/RoomKind"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+        created_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        direct_peer:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        direct_peer_active:
+          type: boolean
+        parent_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Parent Collaboration Room when kind is thread. Omitted otherwise.
+        root_message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Parent-timeline Message this Thread is rooted at. Present only when kind is thread.
+      description: >-
+        A member-scoped collaboration space. Current Room members can read the complete Room
+        history, including data committed before they joined. Non-members and callers from another
+        Tenant receive the same not-found response even if they know the Room ID.
+    LatestMessageSummary:
+      type: object
+      additionalProperties: false
+      required: [id, room_seq, author, raw_message, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_seq:
+          $ref: "./common.yaml#/components/schemas/RoomSeq"
+        author:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        raw_message:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoomListItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - tenant_id
+        - kind
+        - name
+        - created_by
+        - created_at
+        - updated_at
+        - latest_room_seq
+        - read_through_room_seq
+        - unread_message_count
+        - unread_mention_count
+      properties:
+        participation:
+          $ref: "#/components/schemas/RoomParticipationStatus"
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        kind:
+          $ref: "#/components/schemas/RoomKind"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+        created_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        latest_room_seq:
+          type: integer
+          format: int64
+          minimum: 1
+        read_through_room_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        unread_message_count:
+          type: integer
+          format: int64
+          minimum: 0
+        unread_mention_count:
+          type: integer
+          format: int64
+          minimum: 0
+        latest_message:
+          $ref: "#/components/schemas/LatestMessageSummary"
+        direct_peer:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        direct_peer_active:
+          type: boolean
+        parent_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Parent Collaboration Room when kind is thread.
+        root_message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Parent-timeline Message this Thread is rooted at. Present only when kind is thread.
+        pinned_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+          description: When the current Human pinned this Room. Omitted while the Room is unpinned.
+        member_preview:
+          type: array
+          maxItems: 9
+          items:
+            $ref: "./common.yaml#/components/schemas/ActorRef"
+          description: >-
+            The first nine current members, Humans and Agents alike, in the order they joined, for
+            the Room's avatar mosaic. A Thread previews its parent Room's members.
+      description: >-
+        Room metadata plus the current Human's durable attention projection. The latest message is
+        omitted until the Room has a Message. Counts exclude Messages authored by the caller and
+        clear only through an explicit monotonic read-state update. Thread rooms are included for
+        current parent Room members who opened the Thread, posted a non-seed reply, or were mentioned.
+    RoomPinUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [pinned]
+      properties:
+        pinned:
+          type: boolean
+    RoomPinState:
+      type: object
+      additionalProperties: false
+      required: [room_id]
+      properties:
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        pinned_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+          description: Omitted while the Room is unpinned.
+    RoomReadStateUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [through_room_seq]
+      properties:
+        through_room_seq:
+          type: integer
+          format: int64
+          minimum: 0
+    RoomReadState:
+      type: object
+      additionalProperties: false
+      required: [room_id, read_through_room_seq, updated_at]
+      properties:
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        read_through_room_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoomMemberRole:
+      type: string
+      enum: [owner, member]
+      description: Owners manage Room metadata and membership; members participate in Room work.
+    RoomMember:
+      type: object
+      additionalProperties: false
+      required: [room_id, actor, role, added_by, joined_at, updated_at]
+      properties:
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        actor:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        role:
+          $ref: "#/components/schemas/RoomMemberRole"
+        added_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        joined_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoomMemberPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        snapshot_room_seq:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Room event watermark captured before reading this projection. Events at or below
+            this watermark are reflected in the response; newer events may also be reflected.
+            Present on authorized Room detail/member reads. Older servers may omit it.
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomMember"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    RoomMemberPutRequest:
+      type: object
+      additionalProperties: false
+      required: [role]
+      properties:
+        role:
+          $ref: "#/components/schemas/RoomMemberRole"
+    HumanRoomCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      description: The creator is the Room's owner and only member; others are added afterwards.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+    DirectRoomOpenRequest:
+      type: object
+      additionalProperties: false
+      required: [peer_actor_id]
+      properties:
+        peer_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    RoomUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+    RoomPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoomListItem"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"

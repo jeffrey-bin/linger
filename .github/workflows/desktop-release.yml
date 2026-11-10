@@ -1,0 +1,197 @@
+name: Desktop release
+
+# Pushing a desktop-v<version> tag builds the macOS (Apple silicon), Linux x64
+# and Windows x64 packages and publishes them, with SHA256SUMS.txt, as the
+# GitHub Release of that tag in RELEASE_REPO (simplexai-labs/linger unless the
+# variable says otherwise); a version with a hyphen is a prerelease. A manual
+# run builds a version from the chosen branch and keeps the files as workflow
+# artifacts unless "publish" is set. scripts/ci/desktop-release.sh does the
+# work; docs/desktop-release.md lists the variables and secrets. This is the
+# only workflow that publishes desktop releases.
+on:
+  push:
+    tags: ["desktop-v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to build, such as 0.16.33 or 0.16.33-rc.1
+        required: true
+      publish:
+        description: Also create the desktop-v<version> release at this commit
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-${{ github.ref }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+env:
+  # owner/name of the repository that receives the release.
+  RELEASE_REPO: ${{ vars.RELEASE_REPO || 'simplexai-labs/linger' }}
+  # https folder serving the PostgreSQL and voice tools archives that
+  # apps/desktop/distribution/*.json pin. As a secret it stays out of the
+  # public log; a variable also works.
+  LINGER_NATIVE_DEPS_URL: ${{ secrets.LINGER_NATIVE_DEPS_URL || vars.LINGER_NATIVE_DEPS_URL }}
+  # rcodesign reads RCODESIGN_* variables as its configuration, so these
+  # carry another prefix.
+  APPLE_CODESIGN_VERSION: 0.29.0
+  APPLE_CODESIGN_SHA256: dbe85cedd8ee4217b64e9a0e4c2aef92ab8bcaaa41f20bde99781ff02e600002
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        shell: bash
+        env:
+          INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+          PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
+          HAS_RELEASE_TOKEN: ${{ secrets.LINGER_RELEASE_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          scripts/ci/desktop-release.sh version "$INPUT" | tee -a "$GITHUB_OUTPUT"
+          echo "publish=$PUBLISH" >>"$GITHUB_OUTPUT"
+          if [ -z "$LINGER_NATIVE_DEPS_URL" ]; then
+            echo "::error::Set the LINGER_NATIVE_DEPS_URL secret or variable (see docs/desktop-release.md)."
+            exit 1
+          fi
+          # Stop before an hour of building when the release could not be published.
+          if [ "$PUBLISH" = true ] && [ "$RELEASE_REPO" != "$GITHUB_REPOSITORY" ] && [ "$HAS_RELEASE_TOKEN" != true ]; then
+            echo "::error::Publishing to $RELEASE_REPO from $GITHUB_REPOSITORY needs the LINGER_RELEASE_TOKEN secret, a token with contents write access to $RELEASE_REPO (see docs/desktop-release.md)."
+            exit 1
+          fi
+          echo "Release repository: $RELEASE_REPO"
+
+  build:
+    needs: prepare
+    # The packaging scripts build the DMG and the Windows installer on Linux
+    # with Docker, which the macOS and Windows runners do not offer.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [darwin-arm64, linux-x64, win32-x64]
+    env:
+      DESKTOP_VERSION: ${{ needs.prepare.outputs.version }}
+      RELEASE_OUT: ${{ github.workspace }}/.linger-runtime/desktop-release
+      LINGER_NATIVE_POSTGRES_DIR: ${{ github.workspace }}/.linger-runtime/native-deps
+    steps:
+      # A target's build holds the bundled runtime, its archive and the
+      # package at once; the runner image's SDKs leave too little room.
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/teamhub/go.mod
+          cache-dependency-path: |
+            apps/teamhub/go.sum
+            apps/computer/local-daemon/go.sum
+            contracts/generated/go/go.sum
+      - run: pnpm install --frozen-lockfile
+      # Electron zips that package.py downloads, keyed by the pinned version.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/linger-desktop
+          key: electron-${{ matrix.target }}-${{ hashFiles('apps/desktop/package.json') }}
+          restore-keys: electron-${{ matrix.target }}-
+      - name: Install rcodesign
+        if: matrix.target == 'darwin-arm64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          name="apple-codesign-$APPLE_CODESIGN_VERSION-x86_64-unknown-linux-musl"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/rcodesign.tar.gz" \
+            "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F$APPLE_CODESIGN_VERSION/$name.tar.gz"
+          echo "$APPLE_CODESIGN_SHA256  $RUNNER_TEMP/rcodesign.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/rcodesign.tar.gz" -C "$RUNNER_TEMP"
+          echo "RCODESIGN=$RUNNER_TEMP/$name/rcodesign" >>"$GITHUB_ENV"
+      - name: Install osslsigncode
+        if: matrix.target == 'win32-x64'
+        run: sudo apt-get update -q && sudo apt-get install -y -q osslsigncode
+      # Optional signing material goes to files only rcodesign, openssl and
+      # osslsigncode read; each is skipped when its secret is empty.
+      - name: Write signing files
+        shell: bash
+        env:
+          MACOS_DEVELOPER_ID_P12_BASE64: ${{ secrets.MACOS_DEVELOPER_ID_P12_BASE64 }}
+          MACOS_DEVELOPER_ID_PASSWORD: ${{ secrets.MACOS_DEVELOPER_ID_PASSWORD }}
+          MACOS_NOTARY_KEY_JSON: ${{ secrets.MACOS_NOTARY_KEY_JSON }}
+          DESKTOP_UPDATE_KEY_PEM: ${{ secrets.DESKTOP_UPDATE_KEY_PEM }}
+          WINDOWS_SIGNING_P12_BASE64: ${{ secrets.WINDOWS_SIGNING_P12_BASE64 }}
+          WINDOWS_SIGNING_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PASSWORD }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          umask 077
+          keys="$RUNNER_TEMP/signing"
+          mkdir -p "$keys"
+          if [ "$TARGET" = darwin-arm64 ] && [ -n "$MACOS_DEVELOPER_ID_P12_BASE64" ]; then
+            base64 -d <<<"$MACOS_DEVELOPER_ID_P12_BASE64" >"$keys/developer-id.p12"
+            printf '%s' "$MACOS_DEVELOPER_ID_PASSWORD" >"$keys/developer-id.password"
+            echo "MACOS_DEVELOPER_ID_P12=$keys/developer-id.p12" >>"$GITHUB_ENV"
+            echo "MACOS_DEVELOPER_ID_PASSWORD_FILE=$keys/developer-id.password" >>"$GITHUB_ENV"
+            if [ -n "$MACOS_NOTARY_KEY_JSON" ]; then
+              printf '%s' "$MACOS_NOTARY_KEY_JSON" >"$keys/notary.json"
+              echo "MACOS_NOTARY_KEY=$keys/notary.json" >>"$GITHUB_ENV"
+            fi
+          fi
+          if [ "$TARGET" = darwin-arm64 ] && [ -n "$DESKTOP_UPDATE_KEY_PEM" ]; then
+            printf '%s\n' "$DESKTOP_UPDATE_KEY_PEM" >"$keys/update.pem"
+            echo "DESKTOP_UPDATE_KEY=$keys/update.pem" >>"$GITHUB_ENV"
+          fi
+          if [ "$TARGET" = win32-x64 ] && [ -n "$WINDOWS_SIGNING_P12_BASE64" ]; then
+            base64 -d <<<"$WINDOWS_SIGNING_P12_BASE64" >"$keys/authenticode.p12"
+            printf '%s' "$WINDOWS_SIGNING_PASSWORD" >"$keys/authenticode.password"
+            echo "WINDOWS_SIGNING_P12=$keys/authenticode.p12" >>"$GITHUB_ENV"
+            echo "WINDOWS_SIGNING_PASSWORD_FILE=$keys/authenticode.password" >>"$GITHUB_ENV"
+          fi
+      - run: scripts/ci/desktop-release.sh build ${{ matrix.target }}
+      - name: Remove signing files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/signing"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.target }}
+          path: ${{ env.RELEASE_OUT }}/assets/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  release:
+    needs: [prepare, build]
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          path: release
+          merge-multiple: true
+      - run: scripts/ci/desktop-release.sh checksums release "${{ needs.prepare.outputs.version }}"
+      # GITHUB_TOKEN can write only this repository; a release in another one
+      # takes LINGER_RELEASE_TOKEN, which prepare checked.
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ env.RELEASE_REPO == github.repository && github.token || secrets.LINGER_RELEASE_TOKEN }}
+        run: >-
+          scripts/ci/desktop-release.sh github-release release
+          "${{ needs.prepare.outputs.tag }}" "${{ needs.prepare.outputs.version }}"

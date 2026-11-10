@@ -1,0 +1,138 @@
+{
+  "indirect": {
+    "OWNER_EMAIL": "Local account CLI input for scripts/prepare-local-owner.mjs and scripts/source-native.mjs; scripts are outside the service runtime scan",
+    "COMPUTER_RELEASE_TARGETS": "Computer release targets the local release build makes; the installer sets the host platform for a Native installation",
+    "COMPOSE_PROJECT_NAME": "Read by docker compose",
+    "POSTGRES_PORT": "docker compose host-port interpolation in the root docker-compose.yml (pnpm stack:up)",
+    "TEAMHUB_HTTP_PORT": "docker compose host-port interpolation in the root docker-compose.yml (pnpm stack:up)",
+    "WEB_HTTP_PORT": "docker compose host-port interpolation in the root docker-compose.yml (pnpm stack:up)",
+    "WEB_BIND_ADDRESS": "docker compose host-address interpolation of the Web port in the root docker-compose.yml (pnpm stack:up)",
+    "NODE_SERVICES_HTTP_PORT": "docker compose host-port interpolation in the root docker-compose.yml (pnpm stack:up)",
+    "DOCUMENT_RUNTIME_HTTP_PORT": "docker compose host-port interpolation in the root docker-compose.yml (pnpm stack:up)",
+    "LIVEKIT_NODE_IP": "docker compose interpolation of the LiveKit advertised media address (NODE_IP) in the root docker-compose.yml",
+    "LIVEKIT_RTC_BIND_ADDRESS": "docker compose host-address interpolation of the LiveKit media ports in the root docker-compose.yml"
+  },
+  "unlisted": {
+    "agent": {
+      "owner": "docs",
+      "description": "Logging configuration read by the agent role. Code defaults apply, so it is not listed in .env.example.",
+      "names": ["AGENT_LOG_DIRECTORY", "AGENT_LOG_LEVEL"]
+    },
+    "listeners": {
+      "owner": "code-default",
+      "description": "host:port each process listens on. Code defaults bind loopback at the port of the service URL in .env.example; images and Compose listen on every interface. Named in .env.example prose only, so a template copy never moves a listener away from its URL.",
+      "names": [
+        "DOCUMENT_RUNTIME_HTTP_ADDRESS",
+        "NODE_SERVICES_HTTP_ADDRESS",
+        "TEAMHUB_HTTP_ADDRESS"
+      ]
+    },
+    "memory": {
+      "owner": "docs",
+      "description": "Role selection for node-services; see apps/node-services/AGENTS.md. The default value runs as-is, and it is not listed in .env.example.",
+      "names": ["NODE_SERVICES_ROLES"]
+    },
+    "web": {
+      "owner": "code-default",
+      "description": "Port and allowed hosts read by the Vite dev server, and the address and port of the static host that serves the production build to Native. Code defaults apply, so it is not listed in .env.example.",
+      "names": ["HOST", "PORT", "WEB_ALLOWED_DEV_HOSTS"]
+    },
+    "teamhub-tools": {
+      "owner": "out-of-env",
+      "description": "Input parameters of the TeamHub operations and test CLIs (apps/teamhub/cmd/*), passed by the caller on the command line or in scripts; not part of .env.",
+      "names": [
+        "TEAMHUB_AGENT_SMOKE_ADDRESS",
+        "TEAMHUB_AGENT_SMOKE_AGENT_ID",
+        "TEAMHUB_AGENT_SMOKE_LOG",
+        "TEAMHUB_AGENT_SMOKE_TOKEN",
+        "TEAMHUB_API_URL",
+        "TEAMHUB_DEMO_EMAIL",
+        "TEAMHUB_DEMO_IDENTITIES_ONLY",
+        "TEAMHUB_E2E_DISPLAY_NAME",
+        "TEAMHUB_E2E_EMAIL",
+        "TEAMHUB_E2E_IDENTITY_ENABLED",
+        "TEAMHUB_E2E_PASSWORD",
+        "TEAMHUB_E2E_RUN_ID",
+        "TEAMHUB_SEED_DEVELOPMENT_DATA"
+      ]
+    },
+    "platform": {
+      "owner": "out-of-env",
+      "description": "Variables injected by the runtime environment: image build info, the teamhub-cli runtime, Computer on user machines, deployment platforms, and the Room Document E2E harness. On Linux the Computer reads the desktop session's DISPLAY and WAYLAND_DISPLAY before it opens a browser window. Not part of .env.",
+      "names": [
+        "APP_VERSION",
+        "CLAUDE_CONFIG_DIR",
+        "CODEX_HOME",
+        "DISPLAY",
+        "PI_CODING_AGENT_DIR",
+        "LINGER_CLI_RELEASE_ID",
+        "LINGER_CLAUDE_PATH",
+        "LINGER_CLAUDE_SESSION_ROOT",
+        "LINGER_CODEX_PATH",
+        "LINGER_COMPUTER_COMMAND",
+        "LINGER_COMPUTER_CONFIG",
+        "LINGER_COMPUTER_CUA_PATH",
+        "LINGER_COMPUTER_DATA_DIR",
+        "LINGER_COMPUTER_LAUNCHER",
+        "LINGER_COMPUTER_SERVICE_COMMAND",
+        "LINGER_DAEMON_LAUNCH_NONCE",
+        "LINGER_GO_LOCAL_DAEMON_PATH",
+        "LINGER_PI_PATH",
+        "LINGER_PI_SESSION_ROOT",
+        "LINGER_WEB_URL",
+        "TEAMHUB_AGENT_ID",
+        "TEAMHUB_CONFIG",
+        "TEAMHUB_PROFILE",
+        "TEAMHUB_SKIP_STARTUP_SKILL_RECONCILIATION",
+        "TEAMHUB_STATE_ROOT",
+        "TEAMHUB_TENANT_ID",
+        "TEAMHUB_TIMING_FILE",
+        "TEAMHUB_TOKEN",
+        "TEAMHUB_TOKEN_FILE",
+        "TEAMHUB_URL",
+        "WAYLAND_DISPLAY"
+      ]
+    },
+    "desktop": {
+      "owner": "out-of-env",
+      "description": "Read by the desktop client on user machines: the bridge state directory it migrates from, the daemon and update overrides, the source checkout for \"Run on This Computer\", and whether a parent agent session that opened the app manages its model provider. Not part of .env.",
+      "names": [
+        "CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST",
+        "LINGER_BRIDGE_STATE_DIR",
+        "LINGER_COMPUTER_DAEMON",
+        "LINGER_DESKTOP_USER_DATA",
+        "LINGER_CHECKOUT",
+        "LINGER_SERVER_URL",
+        "XDG_STATE_HOME"
+      ]
+    },
+    "installer": {
+      "owner": "out-of-env",
+      "description": "Read by the local installer and @linger/local-installation on user machines: the installer home, the local models tool, the app model gateway passed to natively started services, a package registry and Go module proxy the person configured for native source, and Python variables cleared before running it. Not part of .env.",
+      "names": [
+        "GOPROXY",
+        "LOCAL_ENV_FILE",
+        "NPM_CONFIG_REGISTRY",
+        "PNPM_CONFIG_REGISTRY",
+        "PYTHONHOME",
+        "PYTHONINSPECT",
+        "PYTHONSTARTUP",
+        "LINGER_COMPUTER_BIN",
+        "LINGER_HOME",
+        "LINGER_LOCALMODELS_TOOL_JSON",
+        "LINGER_NATIVE_DEPENDENCIES_JSON",
+        "LINGER_NATIVE_VOICE_TOOLS_JSON"
+      ]
+    },
+    "voice-workers": {
+      "owner": "runtime",
+      "description": "Private port assigned by the node-services voice supervisor to its ASR, recorder and Live child processes, and the NODE_PATH it prepends with the downloaded model packages; never a user configuration setting.",
+      "names": ["NODE_PATH", "VOICE_WORKER_PORT"]
+    },
+    "voice-compose": {
+      "owner": "code-default",
+      "description": "Where TeamHub calls the LiveKit API when it reaches LiveKit at another address than browsers do. Only the root docker-compose.yml sets it; otherwise TeamHub derives it from LIVEKIT_URL.",
+      "names": ["LIVEKIT_API_URL"]
+    }
+  }
+}

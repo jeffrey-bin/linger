@@ -1,0 +1,96 @@
+{
+  "salt": "simplexai/service-credential/v1",
+  "length": 32,
+  "vectors": [
+    {
+      "seed": "test-seed-0123456789abcdef0123456789",
+      "label": "node-services-internal",
+      "credential": "xpV0qfdSedLGH1GEdz9RH4YJb4IJf8KYI5iMkqcjibQ"
+    },
+    {
+      "seed": "test-seed-0123456789abcdef0123456789",
+      "label": "teamhub-internal",
+      "credential": "sjPv7PXSbUhVxRxd2-VMKrTXG9tdvH6VLm8Zmiu5a2E"
+    },
+    {
+      "seed": "test-seed-0123456789abcdef0123456789",
+      "label": "agent-run-token",
+      "credential": "jb2imx0DoSYdb5QXC6qks11j5C2qwiZ7W9pBxcYw6ZM"
+    },
+    {
+      "seed": "test-seed-0123456789abcdef0123456789",
+      "label": "voice-runtime",
+      "credential": "IUjHOa9fzWMJpjYf9iTlIAJTYnHjBUrnuQRQW8sDkwg"
+    },
+    {
+      "seed": "test-seed-0123456789abcdef0123456789",
+      "label": "runner-signing",
+      "credential": "FNyDhJustyTBz43Tvd9GOpNqHa9oGRWIgN2G1PJvP9Y"
+    },
+    {
+      "seed": "test-seed-0123456789abcdef0123456789",
+      "label": "local-context-file-signing",
+      "credential": "KGRH13ibgYPZneh9eLRGYrQXvQ5EJcLMmRXsL6hIXLo"
+    },
+    {
+      "seed": "abcdefghijklmnopqrstuvwxyz012345",
+      "label": "node-services-internal",
+      "credential": "5rbc5tmAdJTTlyZX0gdwJFRywwlUkhQwfG_Rg-urEv0"
+    },
+    {
+      "seed": "abcdefghijklmnopqrstuvwxyz012345",
+      "label": "teamhub-internal",
+      "credential": "eWdXqyh0esEiFXsHlKnqYJgfJkt8NI1XWZfps0SX8KA"
+    },
+    {
+      "seed": "abcdefghijklmnopqrstuvwxyz012345",
+      "label": "agent-run-token",
+      "credential": "GMGXudIbA2N3W3hWeThAO-f8C20VzOSYH69-vz31A_w"
+    },
+    {
+      "seed": "abcdefghijklmnopqrstuvwxyz012345",
+      "label": "voice-runtime",
+      "credential": "NvuRFjCgmP5F0hhp0x3JzskVSBZ_37bWL4ELfTb_aS4"
+    },
+    {
+      "seed": "abcdefghijklmnopqrstuvwxyz012345",
+      "label": "runner-signing",
+      "credential": "8seZxv4gqJW6WiQWuw0Zo_U5oiT8H44TG_5l7Q35AU8"
+    },
+    {
+      "seed": "abcdefghijklmnopqrstuvwxyz012345",
+      "label": "local-context-file-signing",
+      "credential": "4-wjGCTi97EMGbcF1hEsSO-NCblhBpH65vvIwdE5Dio"
+    },
+    {
+      "seed": "Größe-seed-abcdefghijklmnopqrstuvwxyz",
+      "label": "node-services-internal",
+      "credential": "ppX0i4OTleN-kbyxF9_CUBGRU7mCgfZOT38XEq3ufEs"
+    },
+    {
+      "seed": "Größe-seed-abcdefghijklmnopqrstuvwxyz",
+      "label": "teamhub-internal",
+      "credential": "j1qHfKpbo1J1DLG_PZVlLgeuNKcBBKgrACB57v71AKQ"
+    },
+    {
+      "seed": "Größe-seed-abcdefghijklmnopqrstuvwxyz",
+      "label": "agent-run-token",
+      "credential": "bkFIiUVPl2lIgZvxyavxq8Xn61GbNT1CI9DoB9S--C8"
+    },
+    {
+      "seed": "Größe-seed-abcdefghijklmnopqrstuvwxyz",
+      "label": "voice-runtime",
+      "credential": "06rRav01Y4fqd0ZZ7zLRw_mZYZdtu6djhSIJTTr--1k"
+    },
+    {
+      "seed": "Größe-seed-abcdefghijklmnopqrstuvwxyz",
+      "label": "runner-signing",
+      "credential": "_ZqLe9mH-5Qse5BV9qeWkzOkMxWHuYvYlCCTDY5DN_8"
+    },
+    {
+      "seed": "Größe-seed-abcdefghijklmnopqrstuvwxyz",
+      "label": "local-context-file-signing",
+      "credential": "B-RIxHPtE3PESJhqxfnmR8qOAKIP-gyoTbNcS_tu_A8"
+    }
+  ]
+}

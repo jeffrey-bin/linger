@@ -1,0 +1,24 @@
+diff --git a/dist/worker.cjs b/dist/worker.cjs
+index 825526b2dfc3e91efc74b166a5f1c043d7a0ead6..b574cfac595f2fe070e7fe69c5bc4c1333301afc 100644
+--- a/dist/worker.cjs
++++ b/dist/worker.cjs
+@@ -281,7 +281,6 @@ class AgentServer {
+         opts.loadThreshold = loadThreshold;
+       }
+     }
+-    maybeRegisterLocalEotRunner();
+     this.#inferenceExecutor = import_inference_proc_executor.InferenceProcExecutor.createIfNeeded();
+     this.#procPool = new import_proc_pool.ProcPool(
+       opts.agent,
+diff --git a/dist/worker.js b/dist/worker.js
+index 78aeef83ed16858331c64e45644ca4393231e56a..52b5876daafa6c6c9663fcbb7c5fe94e60685bef 100644
+--- a/dist/worker.js
++++ b/dist/worker.js
+@@ -255,7 +255,6 @@ class AgentServer {
+         opts.loadThreshold = loadThreshold;
+       }
+     }
+-    maybeRegisterLocalEotRunner();
+     this.#inferenceExecutor = InferenceProcExecutor.createIfNeeded();
+     this.#procPool = new ProcPool(
+       opts.agent,

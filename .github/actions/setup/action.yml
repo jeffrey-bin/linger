@@ -1,0 +1,22 @@
+name: Set up the toolchain
+description: Node, pnpm and Go at the repository's pinned versions, with workspace dependencies installed.
+
+runs:
+  using: composite
+  steps:
+    # Reads the version from packageManager in package.json.
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .node-version
+        cache: pnpm
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: apps/teamhub/go.mod
+        cache-dependency-path: |
+          apps/teamhub/go.sum
+          apps/computer/local-daemon/go.sum
+          contracts/generated/go/go.sum
+    # No install scripts: none of the checks that run here loads a native addon.
+    - shell: bash
+      run: pnpm install --frozen-lockfile --ignore-scripts

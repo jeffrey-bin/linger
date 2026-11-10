@@ -1,0 +1,1211 @@
+components:
+  schemas:
+    DocumentAgentMentionRelationshipV1:
+      type: string
+      enum: [sponsor, ordinary_direct]
+    DocumentAgentMentionCandidateV1:
+      type: object
+      additionalProperties: false
+      required: [actor, agent_management_id, relationship]
+      properties:
+        actor:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        agent_management_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        relationship:
+          $ref: "#/components/schemas/DocumentAgentMentionRelationshipV1"
+    DocumentAgentMentionCandidatePageV1:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentAgentMentionCandidateV1"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    UnifiedDocumentStatus:
+      type: string
+      enum: [active, trashed]
+    DocumentCreateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        parent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        representation_format:
+          type: string
+          enum: [markdown, html]
+          description: User-facing representation for the native BlockNote Draft. Defaults to markdown.
+    ContextDocumentCreateRequest:
+      type: object
+      additionalProperties: false
+    DocumentDuplicateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        target_folder_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    DocumentMetadataUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+    DocumentDraftTitleUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+    DocumentUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [filename, representation_format, content]
+      properties:
+        parent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        representation_format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        content:
+          type: string
+          format: binary
+    ContextDocumentUploadRequest:
+      type: object
+      description: >-
+        Ordinary file upload whose source Context is derived exclusively from its typed route.
+      additionalProperties: false
+      required: [filename, representation_format, content]
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        representation_format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        content:
+          type: string
+          format: binary
+    DocumentVersionUploadRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [expected_current_version_id, filename, representation_format, content]
+      properties:
+        link_token:
+          type: string
+          pattern: "^doc_link_[A-Za-z0-9_-]{43}$"
+          description: Optional editor capability; revalidated on every write and replay, without creating an Actor grant.
+        expected_current_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        representation_format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        content:
+          type: string
+          format: binary
+    UnifiedDocumentActor:
+      allOf:
+        - $ref: "./common.yaml#/components/schemas/ActorRef"
+    UnifiedDocumentNullableActor:
+      oneOf:
+        - $ref: "./common.yaml#/components/schemas/ActorRef"
+        - type: "null"
+      x-go-type: "*ActorRef"
+    UnifiedDocumentVersionRef:
+      type: object
+      additionalProperties: false
+      required: [id, version_number, sha256]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        version_number:
+          type: integer
+          minimum: 1
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    UnifiedDocumentNullableVersionRef:
+      oneOf:
+        - $ref: "#/components/schemas/UnifiedDocumentVersionRef"
+        - type: "null"
+      x-go-type: "*UnifiedDocumentVersionRef"
+    UnifiedDocumentCapabilities:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          read,
+          write,
+          manage,
+          delete,
+          duplicate,
+          export,
+          comment,
+          use_as_context,
+        ]
+      properties:
+        read: { type: boolean }
+        write: { type: boolean }
+        manage: { type: boolean }
+        delete: { type: boolean }
+        duplicate: { type: boolean }
+        export: { type: boolean }
+        comment: { type: boolean }
+        use_as_context: { type: boolean }
+    DocumentContentRoleV2:
+      type: string
+      enum: [viewer, editor, manager, owner]
+      x-enum-varnames:
+        [
+          DocumentContentRoleV2Viewer,
+          DocumentContentRoleV2Editor,
+          DocumentContentRoleV2Manager,
+          DocumentContentRoleV2Owner,
+        ]
+    DocumentAccessSourceKindV2:
+      type: string
+      enum: [owner, direct, context, link]
+      x-enum-varnames:
+        [
+          DocumentAccessSourceKindV2Owner,
+          DocumentAccessSourceKindV2Direct,
+          DocumentAccessSourceKindV2Context,
+          DocumentAccessSourceKindV2Link,
+        ]
+    DocumentAccessSourceStatusV2:
+      type: string
+      enum: [active, revoked, disabled]
+      x-enum-varnames:
+        [
+          DocumentAccessSourceStatusV2Active,
+          DocumentAccessSourceStatusV2Revoked,
+          DocumentAccessSourceStatusV2Disabled,
+        ]
+    DocumentLinkScopeV2:
+      type: string
+      enum: [restricted, tenant_members, anyone_with_link]
+      x-enum-varnames:
+        [
+          DocumentLinkScopeV2Restricted,
+          DocumentLinkScopeV2TenantMembers,
+          DocumentLinkScopeV2AnyoneWithLink,
+        ]
+    DocumentAuthorizationModeV2:
+      type: string
+      enum: [human_native, agent_native]
+      x-enum-varnames:
+        [
+          DocumentAuthorizationModeV2HumanNative,
+          DocumentAuthorizationModeV2AgentNative,
+        ]
+    DocumentAccessTargetV2:
+      type: object
+      additionalProperties: false
+      required: [kind, id]
+      properties:
+        kind:
+          type: string
+          enum: [human, agent, room]
+          x-enum-varnames:
+            [
+              DocumentAccessTargetV2Human,
+              DocumentAccessTargetV2Agent,
+              DocumentAccessTargetV2Room,
+            ]
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    DocumentAccessSourceProvenanceV2:
+      type: object
+      additionalProperties: false
+      required: [schema_version, kind]
+      properties:
+        schema_version:
+          type: integer
+          const: 2
+        kind:
+          type: string
+          enum: [owner, direct_grant, context_binding, link_policy]
+          x-enum-varnames:
+            [
+              DocumentAccessSourceProvenanceV2Owner,
+              DocumentAccessSourceProvenanceV2DirectGrant,
+              DocumentAccessSourceProvenanceV2ContextBinding,
+              DocumentAccessSourceProvenanceV2LinkPolicy,
+            ]
+        binding_kind:
+          type: string
+          enum: [room, task, wiki_source, wiki_page]
+          x-enum-varnames:
+            [
+              DocumentAccessSourceProvenanceV2Room,
+              DocumentAccessSourceProvenanceV2Task,
+              DocumentAccessSourceProvenanceV2WikiSource,
+              DocumentAccessSourceProvenanceV2WikiPage,
+            ]
+        context_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        membership_epoch_id:
+          allOf:
+            - $ref: "./common.yaml#/components/schemas/Id"
+          description: Current caller Room Membership epoch when this source contributes access.
+        membership_mode:
+          type: string
+          enum: [dynamic_active_members]
+          description: Room membership is resolved at read time; the share does not snapshot members.
+        parent_source_id:
+          type: string
+          minLength: 1
+          maxLength: 160
+        grantor_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    DocumentAccessSourceV2:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          schema_version,
+          source_id,
+          source_version,
+          source_kind,
+          status,
+          role,
+          provenance,
+          created_at,
+          updated_at,
+        ]
+      properties:
+        schema_version:
+          type: integer
+          const: 2
+        source_id:
+          type: string
+          minLength: 1
+          maxLength: 160
+        source_version:
+          type: integer
+          format: int64
+          minimum: 1
+        source_kind:
+          $ref: "#/components/schemas/DocumentAccessSourceKindV2"
+        status:
+          $ref: "#/components/schemas/DocumentAccessSourceStatusV2"
+        role:
+          $ref: "#/components/schemas/DocumentContentRoleV2"
+        grantor_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        target:
+          $ref: "#/components/schemas/DocumentAccessTargetV2"
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        provenance:
+          $ref: "#/components/schemas/DocumentAccessSourceProvenanceV2"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentDirectCollaboratorCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [target_actor_id, role]
+      properties:
+        target_actor_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        role:
+          type: string
+          enum: [viewer, editor, manager]
+    DocumentDirectCollaboratorUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_version, role]
+      properties:
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+        role:
+          type: string
+          enum: [viewer, editor, manager]
+    DocumentDirectCollaboratorRevokeRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_version]
+      properties:
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+    DocumentRoomBindingRemoveRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_version]
+      properties:
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+    DocumentRoomBindingResultV1:
+      type: object
+      additionalProperties: false
+      required: [binding_id, document_id, room_id, role, status, version]
+      properties:
+        binding_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        role:
+          type: string
+          enum: [viewer, editor, manager]
+        status:
+          type: string
+          enum: [active, suspended]
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+    DocumentShareSourceV2:
+      type: object
+      additionalProperties: false
+      required: [source, label]
+      properties:
+        source:
+          $ref: "#/components/schemas/DocumentAccessSourceV2"
+        label:
+          type: string
+          minLength: 1
+          maxLength: 255
+        target_actor:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        source_group:
+          type: string
+          enum: [direct, context, link]
+          description: Stable Share panel group for this provenance source.
+        caller_access_state:
+          type: string
+          enum: [winning, remaining, inactive, not_caller]
+          description: Explains whether this source currently determines or still contributes to the caller's effective role.
+    DocumentGeneralAccessV1:
+      type: object
+      additionalProperties: false
+      required: [scope, canonical_url]
+      properties:
+        scope:
+          $ref: "#/components/schemas/DocumentLinkScopeV2"
+        canonical_url:
+          type: string
+          format: uri-reference
+          minLength: 1
+          maxLength: 1024
+          description: Stable Product Client URL. Reading or copying it never mutates authorization state.
+    DocumentShareViewV2:
+      type: object
+      additionalProperties: false
+      required:
+        [schema_version, caller_content_role, can_manage_collaborators, sources]
+      properties:
+        schema_version:
+          type: integer
+          const: 2
+        caller_content_role:
+          $ref: "#/components/schemas/DocumentContentRoleV2"
+        can_manage_collaborators:
+          type: boolean
+        management_capabilities:
+          $ref: "#/components/schemas/DocumentManagementCapabilitiesV2"
+        general_access:
+          $ref: "#/components/schemas/DocumentGeneralAccessV1"
+        sources:
+          type: array
+          maxItems: 200
+          items:
+            $ref: "#/components/schemas/DocumentShareSourceV2"
+    DocumentManagementCapabilitiesV2:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          can_change_ownership,
+          can_update_link_policy,
+          can_update_external_policy,
+        ]
+      properties:
+        can_change_ownership:
+          type: boolean
+        can_update_link_policy:
+          type: boolean
+        can_update_external_policy:
+          type: boolean
+    DocumentAccessPolicyV2:
+      type: object
+      additionalProperties: false
+      required: [schema_version, link_scope]
+      properties:
+        schema_version:
+          type: integer
+          const: 2
+        link_scope:
+          $ref: "#/components/schemas/DocumentLinkScopeV2"
+    DocumentAccessEnvelopeV2:
+      type: object
+      additionalProperties: false
+      required:
+        [schema_version, content_role, sources, policy, authorization_mode]
+      properties:
+        schema_version:
+          type: integer
+          const: 2
+        content_role:
+          $ref: "#/components/schemas/DocumentContentRoleV2"
+        sources:
+          type: array
+          maxItems: 200
+          items:
+            $ref: "#/components/schemas/DocumentAccessSourceV2"
+        policy:
+          $ref: "#/components/schemas/DocumentAccessPolicyV2"
+        authorization_mode:
+          $ref: "#/components/schemas/DocumentAuthorizationModeV2"
+    UnifiedDocumentFrom:
+      type: object
+      additionalProperties: false
+      required: [binding_kind, context_id]
+      properties:
+        binding_kind:
+          type: string
+          enum: [room, task, wiki_source, wiki_page]
+        context_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        label:
+          type: string
+          minLength: 1
+          maxLength: 255
+        page_key:
+          type: string
+          minLength: 3
+          maxLength: 512
+          pattern: "^[a-z0-9][a-z0-9._/-]*\\.md$"
+          description: Present for wiki_page bindings; preserves the generated Personal Wiki path used to derive its read-only folder hierarchy.
+    Document:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - tenant_id
+        - title
+        - format
+        - representation_format
+        - owner
+        - creator
+        - status
+        - current_version
+        - draft_capability
+        - can_edit_native_content
+        - from
+        - capabilities
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        representation_format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        owner:
+          $ref: "#/components/schemas/UnifiedDocumentActor"
+        creator:
+          $ref: "#/components/schemas/UnifiedDocumentActor"
+        status:
+          $ref: "#/components/schemas/UnifiedDocumentStatus"
+        current_version:
+          $ref: "#/components/schemas/UnifiedDocumentNullableVersionRef"
+        draft_capability:
+          type: string
+          enum: [none, read, write]
+        can_edit_native_content:
+          type: boolean
+          description: TeamHub-projected native format and available Draft capability, independent of the current Actor's write authorization.
+        from:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/UnifiedDocumentFrom"
+        capabilities:
+          $ref: "#/components/schemas/UnifiedDocumentCapabilities"
+        access_v2:
+          $ref: "#/components/schemas/DocumentAccessEnvelopeV2"
+          description: >-
+            Additive V2 access projection. Legacy capabilities and from remain separate
+            compatibility fields during the rolling window and are not duplicated as V2 aliases.
+        search_match:
+          $ref: "#/components/schemas/DocumentSearchMatch"
+          description: Present only in Document search responses; says how the body text took part in the match.
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentVersion:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - document_id
+        - version_number
+        - filename
+        - representation_format
+        - media_type
+        - size_bytes
+        - sha256
+        - created_by
+        - source
+        - created_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        version_number:
+          type: integer
+          minimum: 1
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        representation_format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        created_by:
+          $ref: "#/components/schemas/UnifiedDocumentActor"
+        source:
+          type: string
+          description: human_export is retained only for immutable pre-Export-Artifact history.
+          enum:
+            [
+              ordinary_upload,
+              replacement_upload,
+              human_export,
+              wiki_page,
+              agent_publication,
+              legacy_migration,
+            ]
+        source_revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        base_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        source_invocation_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        exporter_schema_version:
+          type: integer
+          minimum: 1
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+      dependentRequired:
+        source_revision_id: [exporter_schema_version]
+    DocumentSearchMatch:
+      type: object
+      additionalProperties: false
+      required: [body_index_status]
+      properties:
+        body_index_status:
+          type: string
+          enum: [ready, pending, too_large, no_text, unsupported, failed]
+          description: Whether this Document's body text is available to keyword search.
+        body_snippet:
+          type: string
+          maxLength: 400
+          description: >-
+            About 60 characters on each side of the first body match, with … marking a side
+            where body text was cut; absent when only the title, a name or a bound source matched.
+    DocumentPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Document"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    DocumentVersionPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentVersion"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    DocumentPreviewSession:
+      type: object
+      additionalProperties: false
+      required: [preview_url, expires_at]
+      properties:
+        preview_url:
+          type: string
+          format: uri
+          description: >-
+            Service-signed short-lived capability URL. Its path begins with
+            /v0/document-previews/ and the bearer capability is returned only in this URL;
+            clients must not construct it. The entry serves the selected Document Version;
+            relative paths resolve at request time against the entry's current parent folder
+            and serve each Document's current Version. It cannot be revoked before expires_at,
+            except by the caller losing read access to the previewed Document.
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentHistoryTrigger:
+      type: string
+      enum: [idle, manual, agent_edit, restore]
+    DocumentHistoryEntry:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          document_id,
+          revision_id,
+          persisted_seq,
+          created_by,
+          contributors,
+          trigger,
+          created_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        persisted_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        created_by:
+          $ref: "#/components/schemas/UnifiedDocumentActor"
+        contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnifiedDocumentActor"
+        trigger:
+          $ref: "#/components/schemas/DocumentHistoryTrigger"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentHistoryPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentHistoryEntry"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+    DocumentHistoryCheckpoint:
+      type: object
+      additionalProperties: false
+      required: [id, document_id, target_persisted_seq, status]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        target_persisted_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        status:
+          type: string
+          enum: [pending, completed, failed]
+        history_entry:
+          $ref: "#/components/schemas/DocumentHistoryEntry"
+    DocumentHistoryRestoreResult:
+      type: object
+      additionalProperties: false
+      required: [status, history_entry]
+      properties:
+        status:
+          type: string
+          enum: [restored, already_current]
+        history_entry:
+          $ref: "#/components/schemas/DocumentHistoryEntry"
+    DocumentHistoryContent:
+      type: object
+      additionalProperties: false
+      required:
+        - history_entry
+        - state_bytes
+        - state_bytes_sha256
+        - state_vector
+        - full_state_fingerprint
+        - asset_manifest
+      properties:
+        history_entry:
+          $ref: "#/components/schemas/DocumentHistoryEntry"
+        state_bytes:
+          $ref: "./document-internal.yaml#/components/schemas/DocumentStateBytes"
+        state_bytes_sha256:
+          $ref: "./document-internal.yaml#/components/schemas/Sha256"
+        state_vector:
+          $ref: "./document-internal.yaml#/components/schemas/StateVector"
+        full_state_fingerprint:
+          $ref: "./document-internal.yaml#/components/schemas/Sha256"
+        asset_manifest:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/DocumentRevisionInputAsset"
+    DocumentPlacementFolder:
+      type: object
+      additionalProperties: false
+      required: [id, node_kind, name, sort_key, created_at, updated_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        node_kind:
+          type: string
+          const: folder
+        parent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        sort_key:
+          type: string
+          minLength: 1
+          maxLength: 255
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentPlacementDocument:
+      type: object
+      additionalProperties: false
+      required:
+        [id, node_kind, document_id, document, sort_key, created_at, updated_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        node_kind:
+          type: string
+          const: document
+        parent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document:
+          $ref: "#/components/schemas/DocumentTreeSummary"
+        sort_key:
+          type: string
+          minLength: 1
+          maxLength: 255
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentTreeSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          title,
+          format,
+          representation_format,
+          status,
+          owner,
+          capabilities,
+          can_edit_native_content,
+          updated_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        representation_format:
+          type: string
+          minLength: 1
+          maxLength: 120
+        status:
+          $ref: "#/components/schemas/UnifiedDocumentStatus"
+        owner:
+          $ref: "#/components/schemas/UnifiedDocumentActor"
+        capabilities:
+          $ref: "#/components/schemas/UnifiedDocumentCapabilities"
+        can_edit_native_content:
+          type: boolean
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        access_sources:
+          type: array
+          maxItems: 200
+          description: Current actor's ordinary access provenance for Shared with me navigation; never an access source itself.
+          items:
+            $ref: "#/components/schemas/DocumentAccessSourceV2"
+    DocumentPlacementNode:
+      oneOf:
+        - $ref: "#/components/schemas/DocumentPlacementFolder"
+        - $ref: "#/components/schemas/DocumentPlacementDocument"
+      discriminator:
+        propertyName: node_kind
+        mapping:
+          folder: "#/components/schemas/DocumentPlacementFolder"
+          document: "#/components/schemas/DocumentPlacementDocument"
+    MyDocumentTree:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentPlacementNode"
+    SharedDocumentTree:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentPlacementNode"
+    SharedDocumentMoveRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        parent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        move_to_root:
+          type: boolean
+          const: true
+    DocumentFolderCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        parent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+    DocumentPlacementUpdateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        parent_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        move_to_root:
+          type: boolean
+          const: true
+    DocumentRevisionInputAsset:
+      type: object
+      additionalProperties: false
+      required: [asset_id, sha256, size_bytes]
+      properties:
+        asset_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+    DocumentRevisionInput:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - document_id
+        - revision_id
+        - persisted_seq
+        - state_vector
+        - full_state_fingerprint
+        - asset_manifest
+        - input_schema_version
+        - filename
+        - media_type
+        - content_object_id
+        - size_bytes
+        - sha256
+        - object_status
+        - created_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        persisted_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        state_vector:
+          type: string
+          contentEncoding: base64
+        full_state_fingerprint:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        asset_manifest:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/DocumentRevisionInputAsset"
+        input_schema_version:
+          type: integer
+          minimum: 1
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        content_object_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        object_status:
+          type: string
+          enum: [pending, verified, failed]
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoomDocumentStatus:
+      type: string
+      enum: [active, archiving, archived]
+    RoomDocumentDurableHead:
+      type: object
+      additionalProperties: false
+      required: [persisted_seq, state_vector, state_hash, state_hash_version]
+      properties:
+        persisted_seq:
+          type: integer
+          format: int64
+          minimum: 0
+        state_vector:
+          type: string
+          contentEncoding: base64
+          maxLength: 1398104
+        state_hash:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        state_hash_version:
+          type: integer
+          minimum: 1
+          maximum: 1
+    RoomDocument:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - tenant_id
+        - room_id
+        - artifact_id
+        - status
+        - schema_version
+        - materialization_warnings
+        - durable_head
+        - created_by
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        artifact_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        source_artifact_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Permanently records the exact Version materialized into the Draft.
+        status:
+          $ref: "#/components/schemas/RoomDocumentStatus"
+        schema_version:
+          type: integer
+          minimum: 1
+        materialization_warnings:
+          type: array
+          maxItems: 256
+          description: Immutable warnings produced while the initial source was sanitized or converted.
+          items:
+            type: string
+            maxLength: 1024
+        durable_head:
+          $ref: "#/components/schemas/RoomDocumentDurableHead"
+        created_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    RoomDocumentCollaborationCredential:
+      type: object
+      additionalProperties: false
+      required:
+        - document_id
+        - collaboration_credential
+        - expires_at
+      properties:
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        collaboration_credential:
+          type: string
+          minLength: 32
+          maxLength: 2048
+          description: Signed connection token, opaque to the browser, that Document Runtime verifies when the connection opens.
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    DocumentAssetStatus:
+      type: string
+      enum:
+        [planned, stored, available, gc_pending, deleting, deleted, quarantined]
+    DocumentAssetUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [filename, media_type, size_bytes, sha256]
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 52428800
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    DocumentAsset:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - document_id
+        - filename
+        - media_type
+        - size_bytes
+        - sha256
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 52428800
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        status:
+          $ref: "#/components/schemas/DocumentAssetStatus"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"

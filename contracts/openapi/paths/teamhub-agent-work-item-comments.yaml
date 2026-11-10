@@ -1,0 +1,127 @@
+workItemComments:
+  get:
+    tags: [Agent Work Items]
+    operationId: listAgentWorkItemComments
+    summary: List Comments when the rebound Agent has current Work Item access.
+    parameters:
+      - $ref: "../components/common.yaml#/components/parameters/Cursor"
+      - $ref: "../components/common.yaml#/components/parameters/Limit"
+    responses:
+      "200":
+        description: Cursor-paginated Comment projections.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-projections.yaml#/components/schemas/AgentWorkItemCommentPage"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+  post:
+    tags: [Agent Work Items]
+    operationId: createAgentWorkItemComment
+    summary: Add a Comment as an Agent with current Work Item access.
+    parameters:
+      - $ref: "../components/common.yaml#/components/parameters/IdempotencyKey"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/work-items.yaml#/components/schemas/WorkItemCommentCreateRequest"
+    responses:
+      "201":
+        description: Agent Comment, references, Inbox Items, and activity committed atomically.
+        headers:
+          Idempotent-Replay:
+            $ref: "../components/common.yaml#/components/headers/IdempotentReplay"
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-projections.yaml#/components/schemas/AgentWorkItemComment"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+
+workItemComment:
+  patch:
+    tags: [Agent Work Items]
+    operationId: updateAgentWorkItemComment
+    summary: Replace the rebound Agent author's Comment content.
+    parameters:
+      - $ref: "../components/common.yaml#/components/parameters/IdempotencyKey"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/work-items.yaml#/components/schemas/WorkItemCommentUpdateRequest"
+    responses:
+      "200":
+        description: Updated Agent Comment with references reconciled atomically.
+        headers:
+          Idempotent-Replay:
+            $ref: "../components/common.yaml#/components/headers/IdempotentReplay"
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-projections.yaml#/components/schemas/AgentWorkItemComment"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"
+  delete:
+    tags: [Agent Work Items]
+    operationId: deleteAgentWorkItemComment
+    summary: Soft-delete the rebound Agent author's Comment.
+    parameters:
+      - $ref: "../components/common.yaml#/components/parameters/IdempotencyKey"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/work-items.yaml#/components/schemas/WorkItemVersionRequest"
+    responses:
+      "200":
+        description: Soft-deleted Comment tombstone.
+        headers:
+          Idempotent-Replay:
+            $ref: "../components/common.yaml#/components/headers/IdempotentReplay"
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-projections.yaml#/components/schemas/AgentWorkItemComment"
+      "400":
+        $ref: "../components/common.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/common.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/common.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/common.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/common.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/common.yaml#/components/responses/ServiceUnavailable"

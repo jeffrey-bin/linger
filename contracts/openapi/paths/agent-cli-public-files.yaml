@@ -1,0 +1,314 @@
+files:
+  get:
+    security:
+      - agentBearer: []
+    tags:
+      - Agent Files
+    operationId: publicListAgentCLIFiles
+    parameters:
+      - name: after_id
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+      - name: shared_with_me
+        in: query
+        description: Only Documents someone shared with this Agent.
+        schema:
+          type: boolean
+          default: false
+    responses:
+      "200":
+        description:
+          Actor-visible files ordered by Document ID; a full page may have
+          a next page.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - files
+              properties:
+                files:
+                  type: array
+                  items:
+                    $ref: ../components/agent-cli-files.yaml#/components/schemas/AgentCLIFile
+      default:
+        $ref: ../components/agent-cli-files.yaml#/components/responses/FileError
+linkShare:
+  parameters:
+    - $ref: ../components/agent-cli-files.yaml#/components/parameters/CLIFileDocumentId
+  post:
+    security:
+      - agentBearer: []
+    tags:
+      - Agent Files
+    operationId: publicManageAgentCLIFileLink
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/agent-cli-files.yaml#/components/schemas/AgentCLIFileLinkCommand
+    responses:
+      "200":
+        description:
+          Current link policy; new capabilities are returned only on create
+          or reset.
+        content:
+          application/json:
+            schema:
+              $ref: ../components/document-link-shares.yaml#/components/schemas/DocumentLinkShare
+      "204":
+        description: Link revoked.
+      default:
+        $ref: ../components/agent-cli-files.yaml#/components/responses/FileError
+content:
+  parameters:
+    - $ref: ../components/agent-cli-files.yaml#/components/parameters/CLIFileDocumentId
+  get:
+    security:
+      - agentBearer: []
+    tags:
+      - Agent Files
+    operationId: publicDownloadAgentCLIFile
+    parameters:
+      - name: If-None-Match
+        in: header
+        description:
+          Exact ordinary-file cache validator; current Agent access is checked
+          before returning 304. Native exports always return content.
+        schema:
+          type: string
+      - name: format
+        in: query
+        description:
+          Native export format. Blocks is the editable JSON working copy;
+          HTML remains compatible. Omitted uses Markdown. Ordinary files reject native
+          export formats.
+        schema:
+          type: string
+          enum:
+            - markdown
+            - html
+            - blocks
+    responses:
+      "200":
+        description: Exact current bytes, independent of filesystem projection.
+        headers:
+          ETag:
+            schema:
+              type: string
+            description: Opaque ordinary-file version and digest validator.
+          X-Document-Version-Id:
+            schema:
+              type: string
+          X-Document-Read-Only:
+            schema:
+              type: boolean
+          X-Content-Sha256:
+            schema:
+              type: string
+          X-Document-Filename:
+            schema:
+              type: string
+            description: Base64url UTF-8 filename.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      "202":
+        $ref: "../components/agent-cli-files.yaml#/components/responses/FileError"
+      "304":
+        description:
+          Agent currently authorized; ordinary file unchanged. No body.
+          Returns current version, SHA256, filename, read-only flag and ETag headers.
+      default:
+        $ref: ../components/agent-cli-files.yaml#/components/responses/FileError
+share:
+  parameters:
+    - $ref: ../components/agent-cli-files.yaml#/components/parameters/CLIFileDocumentId
+  post:
+    security:
+      - agentBearer: []
+    tags:
+      - Agent Files
+    operationId: publicShareAgentCLIFile
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/agent-cli-files.yaml#/components/schemas/AgentCLIFileShare
+    responses:
+      "204":
+        description: Target has at least the requested role.
+      default:
+        $ref: ../components/agent-cli-files.yaml#/components/responses/FileError
+replaceBody:
+  parameters:
+    - $ref: ../components/agent-cli-files.yaml#/components/parameters/CLIFileDocumentId
+  post:
+    security:
+      - agentBearer: []
+    operationId: publicReplaceAgentCLIDocumentBody
+    summary:
+      Replace native body using an explicit downloaded revision and current
+      Context authority
+    parameters:
+      - name: format
+        in: query
+        schema:
+          type: string
+          enum:
+            - html
+            - blocks
+          default: html
+        description: Blocks JSON working copy, or legacy HTML when omitted.
+      - name: base_revision_id
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: operation_id
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+    requestBody:
+      required: true
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    responses:
+      "200":
+        description: Same Document body committed or replayed; title and sharing unchanged
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - document_id
+                - revision_id
+                - history_entry_id
+                - replayed
+                - sha256
+              properties:
+                document_id:
+                  type: string
+                revision_id:
+                  type: string
+                history_entry_id:
+                  type: string
+                replayed:
+                  type: boolean
+                sha256:
+                  type: string
+      default:
+        $ref: ../components/agent-cli-files.yaml#/components/responses/FileError
+assets:
+  parameters:
+    - $ref: ../components/agent-cli-files.yaml#/components/parameters/CLIFileDocumentId
+  post:
+    security:
+      - agentBearer: []
+    tags:
+      - Agent Files
+    operationId: publicUploadAgentCLIDocumentAsset
+    summary: Upload one image or file as an Asset of an editable native Document
+    description:
+      Stores PNG, JPEG, GIF or WebP bytes (at most 10 MiB), or a PDF, Office
+      (docx, xlsx, pptx), ZIP or plain-text file (CSV, Markdown, text; at most
+      15 MiB), checked by content, as an available Document Asset. Place an
+      image with an image edit and a file with a file edit through
+      document-semantic-mutations. The same operation ID replays the same Asset.
+    parameters:
+      - name: filename
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+      - name: operation_id
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 8
+          maxLength: 128
+    requestBody:
+      required: true
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    responses:
+      "200":
+        description: Asset available for this Document, or replayed.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [asset_id, media_type, size_bytes, sha256, replayed]
+              properties:
+                asset_id:
+                  type: string
+                media_type:
+                  type: string
+                size_bytes:
+                  type: integer
+                  format: int64
+                sha256:
+                  type: string
+                replayed:
+                  type: boolean
+      default:
+        $ref: ../components/agent-cli-files.yaml#/components/responses/FileError
+assetContent:
+  parameters:
+    - $ref: ../components/agent-cli-files.yaml#/components/parameters/CLIFileDocumentId
+    - name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+  get:
+    security:
+      - agentBearer: []
+    tags:
+      - Agent Files
+    operationId: publicDownloadAgentCLIDocumentAsset
+    summary: Download the original bytes of an Asset of a readable Document
+    responses:
+      "200":
+        description: Exact Asset bytes.
+        headers:
+          X-Content-Sha256:
+            schema:
+              type: string
+          X-Document-Filename:
+            schema:
+              type: string
+            description: Base64url UTF-8 filename.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      default:
+        $ref: ../components/agent-cli-files.yaml#/components/responses/FileError

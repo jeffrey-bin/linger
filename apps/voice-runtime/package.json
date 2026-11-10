@@ -1,0 +1,47 @@
+{
+  "name": "@linger/voice-runtime",
+  "version": "0.0.0",
+  "description": "Isolated ASR, recorder and Live workers supervised by Node Services.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts dev",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "NODE_OPTIONS=--conditions=linger-production node dist/main.js start",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint --max-warnings=0 .",
+    "test": "vitest run --config vitest.config.ts",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm --filter '@linger/voice-runtime...' build",
+    "acceptance:long-recording": "tsx acceptance/long-recording-smoke.ts",
+    "acceptance:long-recording-concurrent": "tsx acceptance/concurrent-long-recording-smoke.ts",
+    "acceptance:live-audio": "vitest run --config acceptance/live-audio/vitest.config.ts",
+    "acceptance:live-scenarios": "tsx acceptance/live-scenarios/cli.ts"
+  },
+  "engines": {
+    "node": ">=26.5.0 <27"
+  },
+  "dependencies": {
+    "@livekit/agents": "1.7.1",
+    "@livekit/rtc-node": "0.13.34",
+    "@linger/service-kit": "workspace:*",
+    "@linger/wire-contracts": "workspace:*",
+    "ws": "8.18.3",
+    "zod": "4.4.3",
+    "@livekit/local-inference": "0.2.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "26.0.1",
+    "@types/ws": "8.18.1",
+    "livekit-client": "2.22.2",
+    "tsx": "4.22.4",
+    "typescript": "6.0.3",
+    "vitest": "4.1.9"
+  },
+  "exports": {
+    "./worker": {
+      "linger-production": "./dist/main.js",
+      "default": "./src/main.ts"
+    }
+  }
+}

@@ -1,0 +1,243 @@
+diff --git a/dist/hocuspocus-server.cjs b/dist/hocuspocus-server.cjs
+index a8b29cbd57ea85479df6b0a08c0e74465c26475a..204a8e51ac09dd83ef7d08b190f825b73527f855 100644
+--- a/dist/hocuspocus-server.cjs
++++ b/dist/hocuspocus-server.cjs
+@@ -232,9 +232,15 @@ var MessageReceiver = class {
+ 				const scratchDoc = new yjs.Doc();
+ 				const scratch = new y_protocols_awareness.Awareness(scratchDoc);
+ 				try {
++					scratch.setLocalState(null);
++					scratch.meta.clear();
+ 					(0, y_protocols_awareness.applyAwarenessUpdate)(scratch, update, null);
+-					await document.callbacks.beforeHandleAwareness(document, scratch.getStates(), origin);
+-					update = (0, y_protocols_awareness.encodeAwarenessUpdate)(scratch, [...scratch.getStates().keys()]);
++					const outboundClientIds = new Set([...scratch.meta.keys()].filter((clientId) => !scratch.getStates().has(clientId)));
++					await document.callbacks.beforeHandleAwareness(document, scratch.getStates(), origin, outboundClientIds);
++					for (const clientId of scratch.getStates().keys()) {
++						outboundClientIds.add(clientId);
++					}
++					update = (0, y_protocols_awareness.encodeAwarenessUpdate)(scratch, [...outboundClientIds]);
+ 				} finally {
+ 					scratch.destroy();
+ 					scratchDoc.destroy();
+@@ -500,6 +506,8 @@ var Connection = class {
+ 					code: "code" in e && typeof e.code === "number" ? e.code : _hocuspocus_common.ResetConnection.code,
+ 					reason: "reason" in e ? e.reason : _hocuspocus_common.ResetConnection.reason
+ 				});
++				this.messageQueue.length = 0;
++				return;
+ 			}
+ 			this.messageQueue.shift();
+ 		}
+@@ -1409,7 +1417,7 @@ var Hocuspocus = class {
+ 			};
+ 			this.hooks("beforeBroadcastStateless", hookPayload);
+ 		});
+-		document.beforeHandleAwareness((document, states, transactionOrigin) => {
++		document.beforeHandleAwareness((document, states, transactionOrigin, removedClientIds) => {
+ 			const connection = isTransactionOrigin(transactionOrigin) && transactionOrigin.source === "connection" ? transactionOrigin.connection : void 0;
+ 			const request = connection?.request;
+ 			return this.hooks("beforeHandleAwareness", {
+@@ -1424,6 +1432,7 @@ var Hocuspocus = class {
+ 				socketId: connection?.socketId ?? "",
+ 				transactionOrigin,
+ 				connection,
++				removedClientIds,
+ 				states
+ 			});
+ 		});
+diff --git a/dist/hocuspocus-server.esm.js b/dist/hocuspocus-server.esm.js
+index f9eec1a1a1f15438484713c2d12d4e4674418446..62a8bb3ceb4ce5e7511cd4918a384dc26824ef58 100644
+--- a/dist/hocuspocus-server.esm.js
++++ b/dist/hocuspocus-server.esm.js
+@@ -202,9 +202,15 @@ var MessageReceiver = class {
+ 				const scratchDoc = new Y.Doc();
+ 				const scratch = new Awareness(scratchDoc);
+ 				try {
++					scratch.setLocalState(null);
++					scratch.meta.clear();
+ 					applyAwarenessUpdate(scratch, update, null);
+-					await document.callbacks.beforeHandleAwareness(document, scratch.getStates(), origin);
+-					update = encodeAwarenessUpdate(scratch, [...scratch.getStates().keys()]);
++					const outboundClientIds = new Set([...scratch.meta.keys()].filter((clientId) => !scratch.getStates().has(clientId)));
++					await document.callbacks.beforeHandleAwareness(document, scratch.getStates(), origin, outboundClientIds);
++					for (const clientId of scratch.getStates().keys()) {
++						outboundClientIds.add(clientId);
++					}
++					update = encodeAwarenessUpdate(scratch, [...outboundClientIds]);
+ 				} finally {
+ 					scratch.destroy();
+ 					scratchDoc.destroy();
+@@ -470,6 +476,8 @@ var Connection = class {
+ 					code: "code" in e && typeof e.code === "number" ? e.code : ResetConnection.code,
+ 					reason: "reason" in e ? e.reason : ResetConnection.reason
+ 				});
++				this.messageQueue.length = 0;
++				return;
+ 			}
+ 			this.messageQueue.shift();
+ 		}
+@@ -1379,7 +1387,7 @@ var Hocuspocus = class {
+ 			};
+ 			this.hooks("beforeBroadcastStateless", hookPayload);
+ 		});
+-		document.beforeHandleAwareness((document, states, transactionOrigin) => {
++		document.beforeHandleAwareness((document, states, transactionOrigin, removedClientIds) => {
+ 			const connection = isTransactionOrigin(transactionOrigin) && transactionOrigin.source === "connection" ? transactionOrigin.connection : void 0;
+ 			const request = connection?.request;
+ 			return this.hooks("beforeHandleAwareness", {
+@@ -1394,6 +1402,7 @@ var Hocuspocus = class {
+ 				socketId: connection?.socketId ?? "",
+ 				transactionOrigin,
+ 				connection,
++				removedClientIds,
+ 				states
+ 			});
+ 		});
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index c3c6d1c80e1cfba5085f285226c138604a92363a..b27d2e9a3abd40770df476ff646b510ed52d3fb2 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -13,7 +13,7 @@ declare class Document extends Doc {
+   callbacks: {
+     onUpdate: (document: Document, origin: unknown, update: Uint8Array) => void;
+     beforeBroadcastStateless: (document: Document, stateless: string) => void;
+-    beforeHandleAwareness: (document: Document, states: Map<number, Record<string, any>>, transactionOrigin: unknown) => Promise<void>;
++    beforeHandleAwareness: (document: Document, states: Map<number, Record<string, any>>, transactionOrigin: unknown, removedClientIds: Set<number>) => Promise<void>;
+   };
+   connections: Map<Connection, {
+     clients: Set<any>;
+@@ -53,7 +53,7 @@ declare class Document extends Doc {
+    * map in place (set/delete/field changes) to rewrite the update, or throw
+    * to reject it entirely.
+    */
+-  beforeHandleAwareness(callback: (document: Document, states: Map<number, Record<string, any>>, transactionOrigin: unknown) => Promise<any>): Document;
++  beforeHandleAwareness(callback: (document: Document, states: Map<number, Record<string, any>>, transactionOrigin: unknown, removedClientIds: Set<number>) => Promise<any>): Document;
+   /**
+    * Register a connection and a set of clients on this document keyed by the
+    * underlying websocket connection
+@@ -657,6 +657,11 @@ interface beforeHandleAwarenessPayload<Context = any> {
+    * the chain has run.
+    */
+   states: Map<number, Record<string, any>>;
++  /**
++   * Client IDs whose inbound awareness state is explicitly null. Mutate this
++   * set in place to authorize or drop removals before the update is applied.
++   */
++  removedClientIds: Set<number>;
+   socketId: string;
+   /**
+    * The `TransactionOrigin` that will be passed to `applyAwarenessUpdate`.
+diff --git a/src/Connection.ts b/src/Connection.ts
+--- a/src/Connection.ts
++++ b/src/Connection.ts
+@@ -287,6 +287,8 @@ export class Connection<Context = any> {
+ 					code: "code" in e && typeof e.code === 'number' ? e.code : ResetConnection.code,
+ 					reason: "reason" in e ? e.reason : ResetConnection.reason,
+ 				});
++				this.messageQueue.length = 0;
++				return;
+ 			}
+ 
+ 			this.messageQueue.shift();
+diff --git a/src/Document.ts b/src/Document.ts
+index 9aa9c3fe3c4e139e917667fdfb862c78058e48b2..c07b77cfda1d5b3aa22f6b262d49bea0208de18a 100644
+--- a/src/Document.ts
++++ b/src/Document.ts
+@@ -21,11 +21,12 @@ export class Document extends Doc {
+ 		// eslint-disable-next-line @typescript-eslint/no-empty-function
+ 		onUpdate: (document: Document, origin: unknown, update: Uint8Array) => {},
+ 		beforeBroadcastStateless: (document: Document, stateless: string) => {},
+-		beforeHandleAwareness: (
+-			document: Document,
+-			states: Map<number, Record<string, any>>,
+-			transactionOrigin: unknown,
+-		) => Promise.resolve(),
++			beforeHandleAwareness: (
++				document: Document,
++				states: Map<number, Record<string, any>>,
++				transactionOrigin: unknown,
++				removedClientIds: Set<number>,
++			) => Promise.resolve(),
+ 	};
+ 
+ 	connections: Map<
+@@ -119,6 +120,7 @@ export class Document extends Doc {
+ 			document: Document,
+ 			states: Map<number, Record<string, any>>,
+ 			transactionOrigin: unknown,
++			removedClientIds: Set<number>,
+ 		) => Promise<any>,
+ 	): Document {
+ 		this.callbacks.beforeHandleAwareness = callback;
+diff --git a/src/Hocuspocus.ts b/src/Hocuspocus.ts
+index 28ae5b51ecbdca700e23ed5086d161bcc0b9969a..3b840a7154d83d0dbf39e34e12ff5ff336fcba33 100644
+--- a/src/Hocuspocus.ts
++++ b/src/Hocuspocus.ts
+@@ -448,7 +448,7 @@ export class Hocuspocus<Context = any> {
+ 			},
+ 		);
+ 
+-		document.beforeHandleAwareness((document, states, transactionOrigin) => {
++		document.beforeHandleAwareness((document, states, transactionOrigin, removedClientIds) => {
+ 			const connection =
+ 				isTransactionOrigin(transactionOrigin) &&
+ 				transactionOrigin.source === "connection"
+@@ -469,6 +469,7 @@ export class Hocuspocus<Context = any> {
+ 				socketId: connection?.socketId ?? "",
+ 				transactionOrigin,
+ 				connection,
++				removedClientIds,
+ 				states,
+ 			});
+ 		});
+diff --git a/src/MessageReceiver.ts b/src/MessageReceiver.ts
+index 8d0b279b82f30f8536ff233530fa918f10ce5ae9..b1afa5709864470e92fb4961f65b16a145afa851 100644
+--- a/src/MessageReceiver.ts
++++ b/src/MessageReceiver.ts
+@@ -88,17 +88,26 @@ export class MessageReceiver {
+ 				const scratchDoc = new Y.Doc();
+ 				const scratch = new Awareness(scratchDoc);
+ 				try {
++					scratch.setLocalState(null);
++					scratch.meta.clear();
+ 					applyAwarenessUpdate(scratch, update, null);
++					const outboundClientIds = new Set(
++						[...scratch.meta.keys()].filter(
++							(clientId) => !scratch.getStates().has(clientId),
++						),
++					);
+ 
+ 					await document.callbacks.beforeHandleAwareness(
+ 						document,
+ 						scratch.getStates(),
+ 						origin,
++						outboundClientIds,
+ 					);
++					for (const clientId of scratch.getStates().keys()) {
++						outboundClientIds.add(clientId);
++					}
+ 
+-					update = encodeAwarenessUpdate(scratch, [
+-						...scratch.getStates().keys(),
+-					]);
++					update = encodeAwarenessUpdate(scratch, [...outboundClientIds]);
+ 				} finally {
+ 					scratch.destroy();
+ 					scratchDoc.destroy();
+diff --git a/src/types.ts b/src/types.ts
+index 6649551d908bb1e33fed80f709f894f3cc89c552..695fa1c38c07e7caeb4615163d53f5b375d71f38 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -415,6 +415,11 @@ export interface beforeHandleAwarenessPayload<Context = any> {
+ 	 * the chain has run.
+ 	 */
+ 	states: Map<number, Record<string, any>>;
++	/**
++	 * Client IDs whose inbound awareness state is explicitly null. Mutate this
++	 * set in place to authorize or drop removals before the update is applied.
++	 */
++	removedClientIds: Set<number>;
+ 	socketId: string;
+ 	/**
+ 	 * The `TransactionOrigin` that will be passed to `applyAwarenessUpdate`.

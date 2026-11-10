@@ -1,0 +1,13 @@
+version: "2"
+sql:
+  - engine: postgresql
+    # Use make generate / make sqlc-verify.
+    schema: migrations
+    queries: internal/store/queries
+    gen:
+      go:
+        package: store
+        out: internal/store
+        sql_package: pgx/v5
+        emit_json_tags: true
+        emit_empty_slices: true

@@ -1,0 +1,454 @@
+components:
+  schemas:
+    PersonalProfileSourceSelection:
+      type: object
+      additionalProperties: false
+      required: [remote_id, name, kind, is_private]
+      properties:
+        remote_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        kind:
+          type: string
+          enum:
+            [
+              public_channel,
+              private_channel,
+              text_channel,
+              announcement_channel,
+              forum_channel,
+              media_channel,
+              google_calendar,
+              github_repository,
+              notion_page,
+              notion_database,
+            ]
+        is_private:
+          type: boolean
+    PersonalProfilePoint:
+      type: object
+      additionalProperties: false
+      description: One topical point of a module; it needs non-empty text or at least one item.
+      required: [title, text, items]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        text:
+          type: string
+          maxLength: 4000
+        items:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            minLength: 1
+            maxLength: 1000
+    PersonalProfileModule:
+      type: object
+      additionalProperties: false
+      description: One Profile module; it needs a non-blank overview or at least one point.
+      required: [overview, points]
+      properties:
+        overview:
+          type: string
+          maxLength: 4000
+        points:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/PersonalProfilePoint"
+    PersonalProfileTimelineEntry:
+      type: object
+      additionalProperties: false
+      description: One education or work entry; period and organization are required, and an empty place, role or description means the value is unknown.
+      required: [period, organization, place, role, description, details]
+      properties:
+        period:
+          type: string
+          minLength: 1
+          maxLength: 100
+        organization:
+          type: string
+          minLength: 1
+          maxLength: 200
+        place:
+          type: string
+          maxLength: 200
+        role:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 1000
+        details:
+          type: array
+          maxItems: 3
+          items:
+            type: string
+            minLength: 1
+            maxLength: 500
+    PersonalProfileBackground:
+      type: object
+      additionalProperties: false
+      description: The Background module; it needs a non-blank overview, a point, or a timeline entry.
+      required: [overview, points, timeline]
+      properties:
+        overview:
+          type: string
+          maxLength: 4000
+        points:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/PersonalProfilePoint"
+        timeline:
+          type: array
+          maxItems: 40
+          description: Entries in the submitted order.
+          items:
+            $ref: "#/components/schemas/PersonalProfileTimelineEntry"
+    PersonalProfileDocument:
+      type: object
+      additionalProperties: false
+      description: >-
+        The structured Personal Profile. Text fields are plain text: no line may start
+        with "#", and scripts and images are rejected. TeamHub renders the Markdown.
+        Invalid documents are rejected with profile_document_invalid or
+        profile_module_empty and an issue naming the field.
+      required:
+        [
+          name,
+          background,
+          communication_style,
+          working_style,
+          preferences,
+          writing_style,
+        ]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        background:
+          $ref: "#/components/schemas/PersonalProfileBackground"
+        communication_style:
+          $ref: "#/components/schemas/PersonalProfileModule"
+        working_style:
+          $ref: "#/components/schemas/PersonalProfileModule"
+        preferences:
+          $ref: "#/components/schemas/PersonalProfileModule"
+        writing_style:
+          $ref: "#/components/schemas/PersonalProfileModule"
+    PersonalProfileRevision:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, prompt_version, profile, markdown, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        source_profile_generation_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        prompt_version:
+          type: string
+        profile:
+          $ref: "#/components/schemas/PersonalProfileDocument"
+        markdown:
+          type: string
+          maxLength: 100000
+          description: The Markdown TeamHub rendered from profile.
+        source_apps:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          description: App keys recorded as evidence for this revision; omitted when unknown.
+          items:
+            type: string
+            pattern: "^[a-z0-9][a-z0-9_-]{0,119}$"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    PersonalProfile:
+      type: object
+      additionalProperties: false
+      required: [history, has_more]
+      properties:
+        current:
+          $ref: "#/components/schemas/PersonalProfileRevision"
+        history:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/PersonalProfileRevision"
+        has_more:
+          type: boolean
+        building_since:
+          type: string
+          format: date-time
+          description: >-
+            Set while the Profile is being written, by an Agent's build or a queued
+            or running generation; when it started.
+    PersonalProfileGenerationStatus:
+      type: string
+      enum: [queued, running, succeeded, failed]
+    PersonalProfileGenerationDecision:
+      type: string
+      enum: [pending, confirmed]
+    PersonalProfileSourceKind:
+      type: string
+      enum: [input_version, connection, external_ai_summary]
+      x-enum-varnames:
+        [
+          PersonalProfileSourceKindInputVersion,
+          PersonalProfileSourceKindConnection,
+          PersonalProfileSourceKindExternalAiSummary,
+        ]
+    AccountProfile:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          name,
+          bio,
+          organization,
+          name_user_managed,
+          bio_user_managed,
+          organization_user_managed,
+          email,
+        ]
+      properties:
+        avatar_image:
+          type: string
+          maxLength: 524288
+          description: "Uploaded JPEG or PNG data URL; empty string restores the default avatar."
+        background_image:
+          type: string
+          maxLength: 524288
+          description: "Uploaded JPEG or PNG data URL; empty string restores the default profile background."
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        bio:
+          type: string
+          maxLength: 2000
+        organization:
+          type: string
+          maxLength: 200
+        name_user_managed:
+          type: boolean
+        bio_user_managed:
+          type: boolean
+        organization_user_managed:
+          type: boolean
+        email:
+          type: string
+          maxLength: 320
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AccountProfileUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        avatar_image:
+          type: string
+          maxLength: 524288
+          description: "Uploaded JPEG or PNG data URL; empty string restores the default avatar."
+        background_image:
+          type: string
+          maxLength: 524288
+          description: "Uploaded JPEG or PNG data URL; empty string restores the default profile background."
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        bio:
+          type: string
+          maxLength: 2000
+        organization:
+          type: string
+          maxLength: 200
+    PersonalProfileGenerationSourceInput:
+      type: object
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind:
+          $ref: "#/components/schemas/PersonalProfileSourceKind"
+        input_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        connection_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        selections:
+          type: array
+          minItems: 0
+          maxItems: 20
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/PersonalProfileSourceSelection"
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 65536
+    PersonalProfileReplaceRequest:
+      type: object
+      additionalProperties: false
+      required: [base_revision_id, markdown]
+      properties:
+        base_revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: The current Revision the edit started from; a different current Revision is a conflict.
+        markdown:
+          type: string
+          minLength: 1
+          maxLength: 100000
+          description: >-
+            The complete edited Profile Markdown, in the layout the Revision's
+            markdown uses; it replaces the whole Profile.
+    PersonalProfileGenerationCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [sources]
+      properties:
+        sources:
+          type: array
+          minItems: 1
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/PersonalProfileGenerationSourceInput"
+    PersonalProfileGenerationSource:
+      type: object
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind:
+          $ref: "#/components/schemas/PersonalProfileSourceKind"
+        input_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 5242880
+        file_deleted:
+          type: boolean
+        connection_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        provider:
+          type: string
+          minLength: 1
+          maxLength: 64
+        identity_label:
+          type: string
+          maxLength: 240
+    PersonalProfileGeneration:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          tenant_id,
+          status,
+          decision_status,
+          prompt_version,
+          sources,
+          created_at,
+          updated_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        status:
+          $ref: "#/components/schemas/PersonalProfileGenerationStatus"
+        decision_status:
+          $ref: "#/components/schemas/PersonalProfileGenerationDecision"
+        prompt_version:
+          type: string
+          minLength: 1
+          maxLength: 128
+        base_profile_revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        candidate_revision_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        last_error_code:
+          type: string
+          minLength: 1
+          maxLength: 128
+        sources:
+          type: array
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/PersonalProfileGenerationSource"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        completed_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    PersonalProfileGenerationList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/PersonalProfileGeneration"
+    PersonalInsight:
+      type: object
+      additionalProperties: false
+      required: [id, dimension, statement, created_at]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        dimension:
+          type: string
+          minLength: 1
+          maxLength: 120
+        statement:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    PersonalInsightGeneration:
+      type: object
+      additionalProperties: false
+      required: [status, updated_at]
+      properties:
+        status:
+          type: string
+          pattern: "^(queued|running|succeeded|failed)$"
+        updated_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    PersonalInsightList:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/PersonalInsight"
+        latest_generation:
+          $ref: "#/components/schemas/PersonalInsightGeneration"

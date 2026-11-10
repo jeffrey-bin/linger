@@ -1,0 +1,624 @@
+components:
+  schemas:
+    Message:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          tenant_id,
+          room_id,
+          author,
+          message_kind,
+          raw_message,
+          segments,
+          attachments,
+          created_at,
+        ]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        tenant_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        author:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        message_kind:
+          $ref: "./common.yaml#/components/schemas/MessageKind"
+        raw_message:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: Exact display text reconstructed by concatenating segment content in array order.
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/MessageSegment"
+        attachments:
+          type: array
+          maxItems: 16
+          description: Ordered exact immutable Document Versions attached to this Message.
+          items:
+            $ref: "#/components/schemas/MessageAttachment"
+        context_messages:
+          type: array
+          maxItems: 10
+          description: >-
+            Ordered immutable Room Messages explicitly selected as context for this top-level Message. This is not a
+            Thread or reply hierarchy. Omitted on historical payloads.
+          items:
+            $ref: "#/components/schemas/MessageContext"
+        card:
+          $ref: "./message-cards.yaml#/components/schemas/DecisionRequestedMessageCard"
+          description: Current authoritative Typed Card projection. Omitted for ordinary Messages.
+        card_context_message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Typed Card Message referenced by this ordinary Human Message.
+        notice:
+          $ref: "#/components/schemas/MessageNotice"
+          description: What a room_notice Message announces. Present only for room_notice.
+        card_title:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description:
+            Present only on a conversation Message an Agent sent with teamhub message card; Web shows it as a light
+            card with this title above the body and files.
+        card_kind:
+          type: string
+          enum: [profile]
+          x-enum-varnames: [MessageCardKindProfile]
+          description:
+            Present only with card_title. profile marks the Agent's delivery of the Human's Personal Profile; Web shows
+            the Wiki Profile entry only for it.
+        routine_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description:
+            Human-only display label for an Agent Message produced by a fired Room Routine. Omitted when provenance or
+            the name is unavailable.
+        reply_to_message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Formal Message in this Room that this Message directly answers.
+        thread:
+          $ref: "#/components/schemas/MessageThreadSummary"
+          description: Shared Thread rooted at this parent-timeline Message. Omitted until the Thread room exists.
+        reactions:
+          type: array
+          maxItems: 64
+          description: >-
+            Public emoji Reactions grouped by Reaction ID in first-reacted order. Omitted when the Message has none or
+            does not support Reactions.
+          items:
+            $ref: "#/components/schemas/MessageReaction"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    MessageNotice:
+      description: >-
+        Structured Room notice. Actor display names are snapshots taken when the notice was written; raw_message carries
+        the same line as plain text.
+      oneOf:
+        - $ref: "#/components/schemas/AgentCreatedNotice"
+        - $ref: "#/components/schemas/MemberAddedNotice"
+        - $ref: "#/components/schemas/AgentProfileChangedNotice"
+      discriminator:
+        propertyName: type
+        mapping:
+          agent_created: "#/components/schemas/AgentCreatedNotice"
+          member_added: "#/components/schemas/MemberAddedNotice"
+          agent_profile_changed: "#/components/schemas/AgentProfileChangedNotice"
+    AgentCreatedNotice:
+      type: object
+      additionalProperties: false
+      description: >-
+        The Message author, an Agent, created this General Agent. Without approved_by it was created here and joined
+        this Room; with approved_by it was created after that Human approved the confirmation card and joined no Room.
+      required: [type, agent]
+      properties:
+        type:
+          type: string
+          const: agent_created
+        agent:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        approved_by:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+    MemberAddedNotice:
+      type: object
+      additionalProperties: false
+      description: The Message author added this Human or Agent to the Room.
+      required: [type, member]
+      properties:
+        type:
+          type: string
+          const: member_added
+        member:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+    AgentProfileChangedNotice:
+      type: object
+      additionalProperties: false
+      description: >-
+        The Message author, an Agent, changed this Agent's identity through the Agent CLI. initialized means the Agent
+        had the uninitialized prompt before. Instruction text is never included; instructions_changed only says whether
+        it changed.
+      required: [type, agent, initialized, changes, instructions_changed]
+      properties:
+        type:
+          type: string
+          const: agent_profile_changed
+        agent:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+          description: The Agent after the change.
+        initialized:
+          type: boolean
+        changes:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/AgentNoticeFieldChange"
+        instructions_changed:
+          type: boolean
+    AgentNoticeFieldChange:
+      type: object
+      additionalProperties: false
+      required: [field, before, after]
+      properties:
+        field:
+          type: string
+          enum: [name, description]
+          x-enum-varnames: [AgentNoticeFieldName, AgentNoticeFieldDescription]
+        before:
+          type: string
+          maxLength: 1000
+        after:
+          type: string
+          maxLength: 1000
+    MessageReactionId:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: "^[a-z0-9_+-]{1,64}$"
+      description: >-
+        Stable emoji ID in the official Reaction library shared by Humans and Agents: the emoji IDs of @emoji-mart/data
+        1.2.1 set 15 (Unicode Emoji 15). TeamHub rejects IDs outside that library.
+    MessageReaction:
+      type: object
+      additionalProperties: false
+      required: [reaction_id, actor_ids]
+      properties:
+        reaction_id:
+          $ref: "#/components/schemas/MessageReactionId"
+        actor_ids:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          description: Human and Agent Actors with this Reaction, in reaction order; the count is the array length.
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+    MessageActivityLog:
+      type: object
+      additionalProperties: false
+      required: [status, provider_kind, has_native_turn, truncated, records]
+      properties:
+        status:
+          type: string
+          enum: [available, unsupported, unavailable]
+          x-enum-varnames:
+            - MessageActivityLogStatusAvailable
+            - MessageActivityLogStatusUnsupported
+            - MessageActivityLogStatusUnavailable
+        provider_kind:
+          type: string
+          minLength: 1
+          maxLength: 64
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+        has_native_turn:
+          type: boolean
+          description: True when Activity identity resolved a Provider-native turn.
+        truncated:
+          type: boolean
+          description: True when the response reached the bounded record limit.
+        records:
+          type: array
+          maxItems: 10000
+          description: >-
+            Sanitized Provider-native records for the exact turn. When the Provider omits native turn identity, only
+            exact tool-call records are returned.
+          items:
+            $ref: "#/components/schemas/MessageActivityRecord"
+    MessageActivityRecord:
+      type: object
+      additionalProperties: false
+      required: [ordinal, category, native_type, native_record, redacted_fields]
+      properties:
+        ordinal:
+          type: integer
+          minimum: 0
+          maximum: 1000000
+        timestamp:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        turn_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        category:
+          type: string
+          enum:
+            [
+              message,
+              tool_call,
+              tool_result,
+              lifecycle,
+              reasoning,
+              usage,
+              provider_event,
+              compaction,
+            ]
+          x-enum-varnames:
+            - MessageActivityRecordCategoryMessage
+            - MessageActivityRecordCategoryToolCall
+            - MessageActivityRecordCategoryToolResult
+            - MessageActivityRecordCategoryLifecycle
+            - MessageActivityRecordCategoryReasoning
+            - MessageActivityRecordCategoryUsage
+            - MessageActivityRecordCategoryProviderEvent
+            - MessageActivityRecordCategoryCompaction
+        native_type:
+          type: string
+          minLength: 1
+          maxLength: 256
+        tool_call_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+        tool_name:
+          type: string
+          minLength: 1
+          maxLength: 256
+        role:
+          type: string
+          minLength: 1
+          maxLength: 64
+        phase:
+          type: string
+          minLength: 1
+          maxLength: 64
+        native_record:
+          type: object
+          additionalProperties: true
+        redacted_fields:
+          type: array
+          maxItems: 1024
+          items:
+            $ref: "#/components/schemas/MessageActivityRedactedField"
+    MessageActivityRedactedField:
+      type: object
+      additionalProperties: false
+      required: [path, reason]
+      properties:
+        path:
+          type: string
+          maxLength: 4096
+        reason:
+          type: string
+          enum:
+            [
+              secret,
+              encrypted_content,
+              reasoning_content,
+              physical_path,
+              omitted_too_large,
+            ]
+          x-enum-varnames:
+            - MessageActivityRedactionReasonSecret
+            - MessageActivityRedactionReasonEncryptedContent
+            - MessageActivityRedactionReasonReasoningContent
+            - MessageActivityRedactionReasonPhysicalPath
+            - MessageActivityRedactionReasonOmittedTooLarge
+        byte_count:
+          type: integer
+          format: int64
+          minimum: 0
+    MessageThreadSummary:
+      type: object
+      additionalProperties: false
+      required: [room_id, reply_count]
+      properties:
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        reply_count:
+          type: integer
+          format: int64
+          minimum: 0
+        latest_reply_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        latest_reply_authors:
+          type: array
+          maxItems: 3
+          items:
+            $ref: "./common.yaml#/components/schemas/ActorRef"
+    ThreadRoom:
+      type: object
+      additionalProperties: false
+      required: [room]
+      properties:
+        room:
+          $ref: "./domain.yaml#/components/schemas/Room"
+    MessageCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [raw_message, segments]
+      description: >-
+        context_message_ids are optional context and never satisfy the Message content requirement by themselves.
+        raw_message and segments may be empty only when attachment_upload_ids or context_document_version_ids is
+        non-empty.
+      properties:
+        message_kind:
+          allOf:
+            - $ref: "./common.yaml#/components/schemas/MessageKind"
+          description: Human Message creation only accepts conversation. TeamHub uses conversation when omitted.
+        raw_message:
+          type: string
+          minLength: 0
+          maxLength: 50000
+        segments:
+          type: array
+          minItems: 0
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/MessageSegment"
+        attachment_upload_ids:
+          type: array
+          maxItems: 5
+          uniqueItems: true
+          description: >-
+            Unexpired upload credentials issued to the same Human in this Room. Each upload attaches
+            to one Message only; TeamHub appends exact ordinary Document Version file segments in
+            array order.
+          items:
+            $ref: "#/components/schemas/AttachmentUploadToken"
+        context_document_version_ids:
+          type: array
+          maxItems: 5
+          uniqueItems: true
+          description: >-
+            Ordered exact Document Versions selected as immutable Agent context. TeamHub derives provenance from each
+            Version, requires the current Human to remain authorized for both the source Room and this target Room, and
+            persists the Versions as Message attachments without downloading or re-uploading their bytes. A later
+            Version of the same Document never changes this selection.
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+        context_message_ids:
+          type: array
+          maxItems: 10
+          uniqueItems: true
+          description: >-
+            Ordered committed Messages from this Room selected as context. They do not create a Thread and do not select
+            an Agent target.
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+        voice_live_turn:
+          $ref: ./voice-media.yaml#/components/schemas/VoiceLiveTurnMarker
+    MessageForwardTarget:
+      type: object
+      additionalProperties: false
+      required: [kind, id]
+      properties:
+        kind:
+          type: string
+          enum: [agent, room]
+          x-enum-varnames:
+            [MessageForwardTargetKindAgent, MessageForwardTargetKindRoom]
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+    MessageForwardRequest:
+      type: object
+      additionalProperties: false
+      required: [target]
+      properties:
+        target:
+          $ref: "#/components/schemas/MessageForwardTarget"
+    MessageForwardResult:
+      type: object
+      additionalProperties: false
+      required: [room_id, message, room_binding_ids]
+      properties:
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        message:
+          $ref: "#/components/schemas/Message"
+        room_binding_ids:
+          type: array
+          uniqueItems: true
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/Id"
+    MessageContext:
+      type: object
+      additionalProperties: false
+      required: [message_id, author, raw_message, segments, created_at]
+      properties:
+        message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        author:
+          $ref: "./common.yaml#/components/schemas/ActorRef"
+        raw_message:
+          type: string
+          minLength: 1
+          maxLength: 50000
+        segments:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "./common.yaml#/components/schemas/MessageSegment"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    MessageAttachment:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - document_id
+        - document_version_id
+        - filename
+        - media_type
+        - size_bytes
+        - sha256
+        - available
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        document_version_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        source_room_id:
+          allOf:
+            - $ref: "./common.yaml#/components/schemas/Id"
+          description: >-
+            Room Binding from which the immutable Document Version was selected. It can differ from the Message Room
+            when a managed Task publishes its result to an Origin Room.
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        available:
+          type: boolean
+          description: False after the Document is trashed or the immutable Version bytes are unavailable.
+    MessageAttachmentUpload:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - room_id
+        - filename
+        - media_type
+        - size_bytes
+        - sha256
+        - status
+        - expires_at
+        - created_at
+      properties:
+        id:
+          $ref: "#/components/schemas/AttachmentUploadToken"
+        room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        status:
+          type: string
+          const: available
+        expires_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+        created_at:
+          $ref: "./common.yaml#/components/schemas/Timestamp"
+    AttachmentUploadToken:
+      type: string
+      minLength: 3
+      maxLength: 2048
+      pattern: "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+      description: >-
+        Service-signed upload credential. It names the uploading Human, the Room, and the stored
+        file, and it expires at the upload's expires_at; clients must not construct or parse it.
+    MessageAttachmentUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [filename, content]
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        media_type:
+          type: string
+          minLength: 1
+          maxLength: 255
+        content:
+          type: string
+          format: binary
+    MessagePage:
+      type: object
+      additionalProperties: false
+      required: [items, page, snapshot_room_seq]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"
+        snapshot_room_seq:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Room Event watermark read before this Message snapshot.
+    MessageSearchRoom:
+      type: object
+      additionalProperties: false
+      required: [id, name, kind]
+      properties:
+        id:
+          $ref: "./common.yaml#/components/schemas/Id"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        kind:
+          $ref: "./domain.yaml#/components/schemas/RoomKind"
+        parent_room_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Present for thread Rooms; the Room whose membership authorizes the Message.
+        root_message_id:
+          $ref: "./common.yaml#/components/schemas/Id"
+          description: Present for thread Rooms; the parent Room Message that opens this thread.
+    MessageSearchHit:
+      type: object
+      additionalProperties: false
+      required: [message, room]
+      properties:
+        message:
+          $ref: "#/components/schemas/Message"
+        room:
+          $ref: "#/components/schemas/MessageSearchRoom"
+    MessageSearchPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageSearchHit"
+        page:
+          $ref: "./common.yaml#/components/schemas/PageMeta"

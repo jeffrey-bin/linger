@@ -1,0 +1,86 @@
+version: "2"
+
+run:
+  timeout: 10m
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - copyloopvar
+    - durationcheck
+    - errcheck
+    - errorlint
+    - gocritic
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - nilerr
+    - nolintlint
+    - revive
+    - staticcheck
+    - unconvert
+    - unused
+    - usestdlibvars
+    - wastedassign
+  settings:
+    staticcheck:
+      checks:
+        - "all"
+        - "-SA1019"
+        - "-ST1000"
+        - "-ST1003"
+        - "-ST1005"
+        - "-ST1020"
+        - "-ST1021"
+        - "-ST1022"
+        - "-QF*"
+    misspell:
+      # mirrord is the third-party tool name, not a misspelling.
+      ignore-rules:
+        - mirrord
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+    revive:
+      rules:
+        - name: receiver-naming
+        - name: error-naming
+        - name: error-strings
+        - name: errorf
+        - name: increment-decrement
+        - name: indent-error-flow
+        - name: redefines-builtin-id
+        - name: unreachable-code
+        - name: var-declaration
+        - name: context-as-argument
+          arguments:
+            - allowTypesBefore: "*testing.T"
+        - name: time-naming
+    gosec:
+      excludes:
+        - G104
+        - G115
+        - G304
+        - G204
+  exclusions:
+    rules:
+      - linters:
+          - errcheck
+        source: "^\\s*defer "
+      - linters:
+          - gosec
+          - gocritic
+          - revive
+          - bodyclose
+        path: _test\.go
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

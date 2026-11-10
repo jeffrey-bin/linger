@@ -1,0 +1,153 @@
+personalProfileQuery:
+  post:
+    tags: [Agent Business API]
+    operationId: getAgentPersonalProfile
+    summary: Read the owner Human's current Personal Profile
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentPersonalProfileQueryRequest"
+    responses:
+      "200":
+        description: The owner's current Personal Profile revision, or null.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentPersonalProfileResponse"
+      "400":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+personalProfileBuilds:
+  post:
+    tags: [Agent Business API]
+    operationId: startAgentPersonalProfileBuild
+    summary: Record that the owner Human's Personal Profile is being written
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentPersonalProfileBuildRequest"
+    responses:
+      "200":
+        description: The build in progress.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentPersonalProfileBuildResponse"
+      "400":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+personalProfileRevisions:
+  post:
+    tags: [Agent Business API]
+    operationId: writeAgentPersonalProfile
+    summary: Replace the owner Human's Personal Profile
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentPersonalProfileWriteRequest"
+    responses:
+      "200":
+        description: The current revision after the write.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentPersonalProfileWriteResponse"
+      "400":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+accountProfileUpdates:
+  post:
+    tags: [Agent Business API]
+    operationId: updateAgentAccountProfile
+    summary: Update the owner Human's Account fields
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentAccountProfileUpdateRequest"
+    responses:
+      "200":
+        description: The owner's Account fields after the update.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentAccountProfileResponse"
+      "400":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"
+accountProfileQuery:
+  post:
+    tags: [Agent Business API]
+    operationId: getAgentAccountProfile
+    summary: Read the owner Human's Account fields
+    security: [{ agentBearer: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentAccountProfileQueryRequest"
+    responses:
+      "200":
+        description: The owner's current Account fields.
+        content:
+          application/json:
+            schema:
+              $ref: "../components/agent-personal-profile.yaml#/components/schemas/AgentAccountProfileResponse"
+      "400":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/BadRequest"
+      "401":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+      "404":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/NotFound"
+      "409":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"

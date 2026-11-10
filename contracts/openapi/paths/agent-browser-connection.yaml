@@ -1,0 +1,46 @@
+request:
+  post:
+    operationId: requestAgentBrowserConnection
+    tags: [Agent Business API]
+    security: [{ agentBearer: [] }]
+    summary: Ask the owner of this Agent's Local Computer to connect their everyday Chrome through a chat card.
+    description: >-
+      TeamHub reads the browser connection of the Computer the Agent is placed
+      on. When Chrome is already usable it returns ready. Otherwise it posts, or
+      reuses for 30 minutes, a browser_connection card that @mentions the
+      Computer owner. The token never passes through this request or the card.
+      The owner's connection settles the card and wakes the Agent.
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            description: The Computer and its owner come from the Agent's placement.
+    responses:
+      "200":
+        description: Chrome is usable, or the card that asks the owner to connect it.
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [ready, connection_requested]
+                room_id: { type: string }
+                message_id: { type: string }
+                interaction_id: { type: string }
+      "401":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Unauthenticated"
+      "403":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Forbidden"
+      "409":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/Conflict"
+      "503":
+        $ref: "../components/agent-api-errors.yaml#/components/responses/ServiceUnavailable"
+      default:
+        $ref: "../components/agent-api-errors.yaml#/components/responses/InternalError"

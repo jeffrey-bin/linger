@@ -1,0 +1,171 @@
+[
+  {
+    "id": "sample-review",
+    "messages": [
+      {
+        "id": "request",
+        "threadId": "sample-review",
+        "internalDate": "1767603600000",
+        "labelIds": ["INBOX", "CATEGORY_PERSONAL"],
+        "payload": {
+          "mimeType": "text/plain",
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "Sample release checklist"
+            },
+            {
+              "name": "From",
+              "value": "Reviewer <reviewer@example.test>"
+            },
+            {
+              "name": "To",
+              "value": "Casey <casey@example.test>"
+            },
+            {
+              "name": "Date",
+              "value": "Mon, 05 Jan 2026 09:00:00 +0000"
+            }
+          ],
+          "body": {
+            "data": "UGxlYXNlIHJldmlldyB0aGUgc2FtcGxlIGNoZWNrbGlzdCBieSBGcmlkYXku"
+          }
+        }
+      },
+      {
+        "id": "response",
+        "threadId": "sample-review",
+        "internalDate": "1767603600000",
+        "labelIds": ["SENT"],
+        "payload": {
+          "mimeType": "text/html",
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "Sample release checklist"
+            },
+            {
+              "name": "From",
+              "value": "Casey <casey@example.test>"
+            },
+            {
+              "name": "To",
+              "value": "Casey <casey@example.test>"
+            },
+            {
+              "name": "Date",
+              "value": "Mon, 05 Jan 2026 09:00:00 +0000"
+            }
+          ],
+          "body": {
+            "data": "PGRpdiBkaXI9Imx0ciI-SSBhbSBDYXNleSBFeGFtcGxlLCBhbiBlbmdpbmVlciBidWlsZGluZyBzYW1wbGUgZGF0YSB0b29scy48YnIgY2xlYXI9ImFsbCI-PGJyPjxzcGFuIGNsYXNzPSJnbWFpbF9zaWduYXR1cmVfcHJlZml4Ij4tLSA8L3NwYW4-PGJyPjxkaXYgZGlyPSJsdHIiIGNsYXNzPSJnbWFpbF9zaWduYXR1cmUiPkJlc3QsPGJyPkNhc2V5PGJyPkVuZ2luZWVyIGF0IEV4YW1wbGUgU3R1ZGlvPGJyPmNhc2V5QGV4YW1wbGUudGVzdDwvZGl2PjwvZGl2Pjxicj48ZGl2IGNsYXNzPSJnbWFpbF9xdW90ZSBnbWFpbF9xdW90ZV9jb250YWluZXIiPjxkaXYgZGlyPSJsdHIiIGNsYXNzPSJnbWFpbF9hdHRyIj5PbiBNb25kYXkgUmV2aWV3ZXIgd3JvdGU6PGJyPjwvZGl2PjxibG9ja3F1b3RlIGNsYXNzPSJnbWFpbF9xdW90ZSIgc3R5bGU9Im1hcmdpbjowcHggMHB4IDBweCAwLjhleCI-UGxlYXNlIHJldmlldyB0aGUgc2FtcGxlIGNoZWNrbGlzdCBieSBGcmlkYXkuPC9ibG9ja3F1b3RlPjwvZGl2Pg"
+          }
+        }
+      },
+      {
+        "id": "draft",
+        "threadId": "sample-review",
+        "internalDate": "1767603600000",
+        "labelIds": ["DRAFT"],
+        "payload": {
+          "mimeType": "text/plain",
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "Sample release checklist"
+            },
+            {
+              "name": "From",
+              "value": "Reviewer <reviewer@example.test>"
+            },
+            {
+              "name": "To",
+              "value": "Casey <casey@example.test>"
+            },
+            {
+              "name": "Date",
+              "value": "Mon, 05 Jan 2026 09:00:00 +0000"
+            }
+          ],
+          "body": {
+            "data": "SSBhbSBhIHByb2R1Y3QgbWFuYWdlciBpbiB0aGlzIHVuc2VudCBkcmFmdC4"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "sample-notification",
+    "messages": [
+      {
+        "id": "notification",
+        "threadId": "sample-notification",
+        "internalDate": "1767603600000",
+        "labelIds": ["INBOX", "CATEGORY_SOCIAL"],
+        "payload": {
+          "mimeType": "text/plain",
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "Sample release checklist"
+            },
+            {
+              "name": "From",
+              "value": "Status <no-reply@example.test>"
+            },
+            {
+              "name": "To",
+              "value": "Casey <casey@example.test>"
+            },
+            {
+              "name": "Date",
+              "value": "Mon, 05 Jan 2026 09:00:00 +0000"
+            }
+          ],
+          "body": {
+            "data": "WW91ciBzYW1wbGUgZXhwb3J0IGlzIGF2YWlsYWJsZSBhdCBodHRwczovL3N0YXR1cy5leGFtcGxlLnRlc3QvZXhwb3J0Lg"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "sample-newsletter",
+    "messages": [
+      {
+        "id": "newsletter",
+        "threadId": "sample-newsletter",
+        "internalDate": "1767603600000",
+        "labelIds": ["INBOX", "CATEGORY_PROMOTIONS"],
+        "payload": {
+          "mimeType": "text/plain",
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "Sample release checklist"
+            },
+            {
+              "name": "From",
+              "value": "Digest <digest@example.test>"
+            },
+            {
+              "name": "To",
+              "value": "Casey <casey@example.test>"
+            },
+            {
+              "name": "Date",
+              "value": "Mon, 05 Jan 2026 09:00:00 +0000"
+            },
+            {
+              "name": "List-Id",
+              "value": "samples.example.test"
+            }
+          ],
+          "body": {
+            "data": "U2FtcGxlIGRhdGEgd2Vla2x5OiBhZGFwdGVycyBhbmQgZml4dHVyZSBkZXNpZ24u"
+          }
+        }
+      }
+    ]
+  }
+]

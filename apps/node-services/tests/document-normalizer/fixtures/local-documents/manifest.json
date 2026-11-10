@@ -1,0 +1,169 @@
+[
+  {
+    "name": "plain.md",
+    "mediaType": "text/markdown",
+    "facts": ["Aurora", "2026-11-15", "1250"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "native-en.pdf",
+    "mediaType": "application/pdf",
+    "facts": ["Aurora", "2026-11-15", "Alice Chen", "1250", "Validate search"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "columns.pdf",
+    "mediaType": "application/pdf",
+    "facts": ["LEFT-A", "LEFT-D", "RIGHT-A", "RIGHT-D"],
+    "note": "Content stream is row-interleaved; visual reading order is left column then right column.",
+    "order": [
+      "LEFT-A",
+      "LEFT-B",
+      "LEFT-C",
+      "LEFT-D",
+      "RIGHT-A",
+      "RIGHT-B",
+      "RIGHT-C",
+      "RIGHT-D"
+    ]
+  },
+  {
+    "name": "table.pdf",
+    "mediaType": "application/pdf",
+    "facts": [
+      "Aurora",
+      "Alice",
+      "1250",
+      "Borealis",
+      "Bob",
+      "2400",
+      "Cedar",
+      "Carol",
+      "3600"
+    ],
+    "note": "Three exact project-owner-budget relationships must survive.",
+    "order": []
+  },
+  {
+    "name": "ocr-en.png",
+    "mediaType": "image/png",
+    "facts": ["SCAN-ORCHID", "9876", "Daniel Lee", "2026-12-01"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "ocr-sparse.png",
+    "mediaType": "image/png",
+    "facts": ["9876"],
+    "note": "UI-like screenshot whose default page layout finds no text; sparse-text layout must recover the label.",
+    "order": []
+  },
+  {
+    "name": "scan-en.pdf",
+    "mediaType": "application/pdf",
+    "facts": ["SCAN-ORCHID", "9876", "Daniel Lee", "2026-12-01"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "mixed.pdf",
+    "mediaType": "application/pdf",
+    "facts": ["COVER-ALPHA", "SCAN-ORCHID", "9876", "Daniel Lee"],
+    "note": "Same page has native text and a scanned region.",
+    "order": []
+  },
+  {
+    "name": "blank.pdf",
+    "mediaType": "application/pdf",
+    "facts": [],
+    "note": "Negative control: no extractable body.",
+    "order": []
+  },
+  {
+    "name": "structured.docx",
+    "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "facts": [
+      "Aurora",
+      "Alice Chen",
+      "projet Étoile",
+      "1250",
+      "Borealis",
+      "2400",
+      "Validate search"
+    ],
+    "note": "Embedded image OCR is tracked separately, not assumed for either converter.",
+    "order": []
+  },
+  {
+    "name": "structured.pptx",
+    "mediaType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "facts": [
+      "Aurora",
+      "Alice Chen",
+      "1250",
+      "projet Étoile",
+      "Borealis",
+      "2400"
+    ],
+    "note": "Slide order, table relationships and SPEAKER-NOTE inspected separately.",
+    "order": []
+  },
+  {
+    "name": "structured.xlsx",
+    "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "facts": ["Aurora", "Alice", "1250", "Borealis", "Bob", "2400", "Launch"],
+    "note": "Formatted date 2026-11-15 and percentage 25% inspected separately.",
+    "order": []
+  },
+  {
+    "name": "sample.odt",
+    "mediaType": "application/vnd.oasis.opendocument.text",
+    "facts": ["ODF-ORCHID", "1250"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "sample.ods",
+    "mediaType": "application/vnd.oasis.opendocument.spreadsheet",
+    "facts": ["ODF-ORCHID", "1250"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "sample.odp",
+    "mediaType": "application/vnd.oasis.opendocument.presentation",
+    "facts": ["ODF-ORCHID", "1250"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "sample.eml",
+    "mediaType": "message/rfc822",
+    "facts": ["MAIL-ORCHID", "1250", "Alice Chen"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "sample.mhtml",
+    "mediaType": "multipart/related",
+    "facts": ["MHTML-ORCHID", "1250"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "sample.epub",
+    "mediaType": "application/epub+zip",
+    "facts": ["EPUB-ORCHID", "1250"],
+    "note": "",
+    "order": []
+  },
+  {
+    "name": "sample.dotx",
+    "mediaType": "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+    "facts": ["Aurora", "Alice Chen", "projet Étoile", "1250"],
+    "note": "",
+    "order": []
+  }
+]
