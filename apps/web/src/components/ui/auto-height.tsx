@@ -30,12 +30,14 @@ export function AutoHeight({
   useLayoutEffect(() => {
     const element = inner.current;
     if (!element || typeof ResizeObserver === "undefined") return;
-    const measure = () =>
-      setHeight((current) => {
-        const next = element.offsetHeight;
-        if (current !== undefined && current !== next) setMoving(true);
-        return next;
-      });
+    // The last measured height, so a change is detected outside the updater.
+    let measured: number | undefined = appear ? 0 : undefined;
+    const measure = () => {
+      const next = element.offsetHeight;
+      if (measured !== undefined && measured !== next) setMoving(true);
+      measured = next;
+      setHeight(next);
+    };
     // Starting from zero, grow on the next frame so the change animates.
     let frame = 0;
     if (appear)
