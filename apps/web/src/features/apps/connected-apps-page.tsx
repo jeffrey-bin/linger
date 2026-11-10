@@ -138,8 +138,8 @@ export function ConnectedAppsPage() {
           </div>
         ) : (
           <>
-            {/* The tab row keeps its own bottom margin; the toggle centers on
-                the tabs, not on that margin. */}
+            {/* The toggle is as tall as the tabs and lines up with them; the
+                tab row keeps its own bottom margin. */}
             <div className="flex items-start gap-3">
               <UnderlineTabs
                 className="min-w-0 flex-1"
@@ -150,9 +150,9 @@ export function ConnectedAppsPage() {
               />
               <Button
                 aria-pressed={connectedOnly}
-                className="mt-1 shrink-0"
+                className="shrink-0"
                 onClick={() => setConnectedOnly((value) => !value)}
-                size="compact"
+                size="large"
                 tone={connectedOnly ? "primary" : "secondary"}
               >
                 Connected only
