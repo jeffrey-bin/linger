@@ -127,12 +127,21 @@ func (op *operation) beginDesktop(ctx context.Context, input bool) (*localLinuxL
 	if !op.manager.localLinux() {
 		return nil, errors.New("native Linux desktop unavailable")
 	}
-	ctx, release, err := op.manager.holdInputs(ctx)
+	ctx, releaseLane, err := op.manager.holdLane(ctx, desktopLane)
 	if err != nil {
 		return nil, err
 	}
+	release := releaseLane
 	var receipt *actionReceipt
 	if input {
+		// X11 input goes to the active window, which a browser call could
+		// change; see focusGate.
+		var releaseFocus func()
+		if ctx, releaseFocus, err = op.manager.holdFocusedInput(ctx); err != nil {
+			releaseLane()
+			return nil, err
+		}
+		release = func() { releaseFocus(); releaseLane() }
 		receipt, err = op.manager.journal.begin(ctx, actionIdentity{AgentID: op.spec.AgentID, OperationID: op.identity.OperationID, Session: op.label + "-linux"})
 		if err != nil {
 			release()

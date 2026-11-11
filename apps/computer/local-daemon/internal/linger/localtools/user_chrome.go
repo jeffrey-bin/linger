@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -92,6 +93,65 @@ func chromeUserDataDirectory(env []string) string {
 }
 
 type userChromeInstall struct{ executable, profile string }
+
+// manyClientsExtension is the first Playwright Extension version that keeps
+// several Playwright clients connected at once, each in its own tab group.
+// An earlier version may drop one client when the next connects.
+var manyClientsExtension = [3]int{0, 5, 0}
+
+// extensionTakesManyClients reports whether every installed version of the
+// Playwright Extension in profile is at least manyClientsExtension. Chrome may
+// keep an old version folder until it restarts, so any older or unreadable
+// folder counts against it.
+func extensionTakesManyClients(env []string, profile string) bool {
+	data := chromeUserDataDirectory(env)
+	if data == "" {
+		return false
+	}
+	entries, err := os.ReadDir(filepath.Join(data, profile, "Extensions", playwrightExtensionID))
+	if err != nil {
+		return false
+	}
+	found := false
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		version, _, _ := strings.Cut(entry.Name(), "_")
+		if !versionAtLeast(version, manyClientsExtension) {
+			return false
+		}
+		found = true
+	}
+	return found
+}
+
+func versionAtLeast(version string, minimum [3]int) bool {
+	parts := strings.Split(version, ".")
+	for i, want := range minimum {
+		got := 0
+		if i < len(parts) {
+			var err error
+			if got, err = strconv.Atoi(parts[i]); err != nil {
+				return false
+			}
+		}
+		if got != want {
+			return got > want
+		}
+	}
+	return true
+}
+
+// userChromeSeat names what one task holds in the owner's everyday Chrome:
+// its Agent's own tabs when the extension keeps several clients, or else the
+// whole profile. Tasks of one seat take turns; seats of one profile do not.
+func userChromeSeat(env []string, profile, agentID string) string {
+	if extensionTakesManyClients(env, profile) {
+		return profile + "\x00" + agentID
+	}
+	return profile
+}
 
 // findUserChrome resolves the Chrome profile with the Playwright Extension.
 // The extension token belongs to one profile; Chrome opens the connect page

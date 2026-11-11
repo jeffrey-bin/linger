@@ -214,8 +214,9 @@ func TestBrowserActiveInitializationFailureFollowsCleanupReceipt(t *testing.T) {
 				m.options.NodePath = filepath.Join(t.TempDir(), "missing-node")
 			}
 			_, err = op.nativeBrowserCall(t.Context(), "browser_snapshot", json.RawMessage(`{}`))
-			if err == nil || errors.Is(err, mcpproxy.ErrCleanupUnconfirmed) != unknown || m.journal.blocked() != unknown || (op.browser != nil) != unknown {
-				t.Fatalf("initialization outcome was not preserved: unknown=%v, client=%v, blocked=%v, err=%v", unknown, op.browser != nil, m.journal.blocked(), err)
+			blocked := laneBlocked(t, m, browserLane("fixture"))
+			if err == nil || errors.Is(err, mcpproxy.ErrCleanupUnconfirmed) != unknown || blocked != unknown || m.journal.blocked() || (op.browser != nil) != unknown {
+				t.Fatalf("initialization outcome was not preserved: unknown=%v, client=%v, blocked=%v, err=%v", unknown, op.browser != nil, blocked, err)
 			}
 			if unknown {
 				if _, err := op.nativeBrowserCall(t.Context(), "browser_snapshot", json.RawMessage(`{}`)); err == nil {

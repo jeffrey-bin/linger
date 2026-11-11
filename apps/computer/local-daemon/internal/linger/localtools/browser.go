@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -32,30 +33,63 @@ var liveProfileWait = 8 * time.Second
 var errBrowserBusy = errors.New("BROWSER_BUSY: the user's Chrome is in use by another task or browser call. No action was taken; retry after it finishes")
 
 // nativeBrowserCall runs one browser tool in the Agent Chrome profile or in
-// the owner's connected Chrome. It never depends on the desktop driver; the
-// shared action journal still serializes it with desktop input.
+// the owner's connected Chrome. It never depends on the desktop driver and
+// runs in its Agent's browser lane, beside desktop input and other Agents'
+// browser calls.
 func (op *operation) nativeBrowserCall(ctx context.Context, name string, args json.RawMessage) (output json.RawMessage, callErr error) {
 	op.manager.retryCleanup()
-	chrome, err := op.resolveUserChrome(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if chrome != nil {
-		if err := op.holdUserChromeProfile(ctx, chrome.Profile); err != nil {
-			return nil, err
-		}
-	}
-	ctx, release, err := op.manager.holdInputs(ctx)
+	// Calls of one task take turns from here on: switching to the owner's
+	// Chrome below ends the session an earlier call may still be using.
+	release, err := op.holdBrowserCalls(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer release()
+	chrome, err := op.resolveUserChrome(ctx)
+	if err != nil {
+		return nil, err
+	}
+	seat := ""
+	if chrome != nil {
+		if seat, err = op.holdUserChromeProfile(ctx, chrome.Profile); err != nil {
+			return nil, err
+		}
+	}
+	ctx, releaseLane, err := op.manager.holdLane(ctx, browserLane(op.spec.AgentID))
+	if err != nil {
+		return nil, err
+	}
+	defer releaseLane()
+	ctx, releaseFocus, err := op.manager.holdBrowserFocus(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer releaseFocus()
 	if chrome == nil {
 		if err := op.dropExitedBrowser(); err != nil {
 			return nil, err
 		}
 	}
-	receipt, err := op.manager.journal.begin(ctx, actionIdentity{AgentID: op.spec.AgentID, OperationID: op.identity.OperationID, Session: op.label + "-browser"})
+	// This task holds one unknown action at a time: an Agent Chrome action
+	// left before the owner connected their Chrome settles when the task
+	// ends, and a second one would take its place.
+	op.mu.Lock()
+	unknown := op.browserUnknown != nil
+	op.mu.Unlock()
+	if unknown {
+		return nil, fmt.Errorf("COMPUTER_ACTION_UNKNOWN: an earlier browser action of this task has no verified cleanup receipt; the browser stays blocked until the task ends: %w", errNotSent)
+	}
+	// An Agent Chrome action is recorded for that Agent; one in the owner's
+	// Chrome for the seat this task holds, which another task may take next.
+	journalName := browserLane(op.spec.AgentID)
+	if chrome != nil {
+		journalName = chromeProfileJournal(seat)
+	}
+	journal, err := op.manager.namedJournal(journalName)
+	if err != nil {
+		return nil, err
+	}
+	receipt, err := journal.begin(ctx, actionIdentity{AgentID: op.spec.AgentID, OperationID: op.identity.OperationID, Session: op.label + "-browser"})
 	if err != nil {
 		return nil, err
 	}
@@ -108,14 +142,6 @@ func (op *operation) nativeBrowserCall(ctx context.Context, name string, args js
 // which later tasks of the same Agent reuse.
 // A rejected token fails the call: it never falls back to the Agent profile.
 func (op *operation) userChromeCall(ctx context.Context, chrome *browserConnection, name string, args json.RawMessage, confirmed *bool) (json.RawMessage, error) {
-	// A parallel call may have rejected or replaced this connection while
-	// this one waited for the journal; never restart a relay for it.
-	op.connectMu.Lock()
-	current := op.userChrome == chrome && !op.userChromeRejected.Load()
-	op.connectMu.Unlock()
-	if !current {
-		return nil, errUserChromeRejected
-	}
 	var err error
 	if op.browser == nil {
 		session, err := op.manager.checkoutUserChrome(ctx, op, chrome)
@@ -148,26 +174,41 @@ func (op *operation) userChromeCall(ctx context.Context, chrome *browserConnecti
 	return result, err
 }
 
-// holdUserChromeProfile admits this Operation to its everyday Chrome profile
-// for the rest of the task. It waits outside the action journal: that queue
-// serializes input of every Operation, including the task holding the profile.
-func (op *operation) holdUserChromeProfile(ctx context.Context, profile string) error {
+// holdBrowserCalls admits one browser call of this Operation at a time. The
+// calls share op.browser, op.nativeBrowser, op.nativeProxy and the owner's
+// Chrome session, which a call replaces when the owner connects mid-task.
+func (op *operation) holdBrowserCalls(ctx context.Context) (func(), error) {
+	op.browserCallsOnce.Do(func() { op.browserCalls = make(chan struct{}, 1) })
+	select {
+	case op.browserCalls <- struct{}{}:
+		return func() { <-op.browserCalls }, nil
+	case <-ctx.Done():
+		return nil, fmt.Errorf("COMPUTER_BUSY: another browser call of this task was running until this call ended (%v): %w", ctx.Err(), errNotSent) //nolint:errorlint // the wait's end is detail; the call classifies as not sent only
+	}
+}
+
+// holdUserChromeProfile admits this Operation to its seat in the everyday
+// Chrome profile for the rest of the task and returns the seat. It waits
+// outside the browser lane: another task of the same Agent may hold the seat
+// and wait for that lane.
+func (op *operation) holdUserChromeProfile(ctx context.Context, profile string) (string, error) {
 	op.profileMu.Lock()
 	defer op.profileMu.Unlock()
 	if op.releaseProfile != nil {
-		return nil
+		return op.chromeSeat, nil
 	}
 	if op.live {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeoutCause(ctx, liveProfileWait, errBrowserBusy)
 		defer cancel()
 	}
-	release, err := op.manager.acquireChromeProfile(ctx, profile)
+	seat := userChromeSeat(op.manager.env, profile, op.spec.AgentID)
+	release, err := op.manager.acquireChromeProfile(ctx, seat)
 	if err != nil {
-		return err
+		return "", err
 	}
-	op.releaseProfile = release
-	return nil
+	op.releaseProfile, op.chromeSeat = release, seat
+	return seat, nil
 }
 
 var errUserChromeRequired = errors.New("BROWSER_CONNECTION_REQUIRED: the user has not connected their everyday Chrome. Run `teamhub browser connect` to post a connection card for them in this chat, then end your turn; the card result wakes you when they connect or decline. Do not use another browser or tool instead, and never ask for the token in a message")
@@ -245,7 +286,7 @@ func (op *operation) releaseChromeProfile() {
 	defer op.profileMu.Unlock()
 	if op.releaseProfile != nil {
 		op.releaseProfile()
-		op.releaseProfile = nil
+		op.releaseProfile, op.chromeSeat = nil, ""
 	}
 }
 
@@ -266,12 +307,14 @@ func BrowserCallNotRun(err error) string {
 	return ""
 }
 
-func (m *Manager) acquireChromeProfile(ctx context.Context, profile string) (func(), error) {
+// acquireChromeProfile admits a task to one seat in an everyday Chrome
+// profile; see userChromeSeat.
+func (m *Manager) acquireChromeProfile(ctx context.Context, seat string) (func(), error) {
 	m.mu.Lock()
-	slot := m.chromeProfiles[profile]
+	slot := m.chromeProfiles[seat]
 	if slot == nil {
 		slot = make(chan struct{}, 1)
-		m.chromeProfiles[profile] = slot
+		m.chromeProfiles[seat] = slot
 	}
 	m.mu.Unlock()
 	waitCtx, cancel := context.WithTimeout(ctx, profileWait)
@@ -284,8 +327,8 @@ func (m *Manager) acquireChromeProfile(ctx context.Context, profile string) (fun
 			return releaseOnce(slot), nil
 		default:
 		}
-		// A Live call between turns gives the profile up to a task.
-		m.releaseIdleLiveChrome(profile)
+		// A Live call between turns gives the seat up to a task.
+		m.releaseIdleLiveChrome(seat)
 		select {
 		case slot <- struct{}{}:
 			return releaseOnce(slot), nil
@@ -299,7 +342,8 @@ func (m *Manager) acquireChromeProfile(ctx context.Context, profile string) (fun
 	}
 }
 
-// tryChromeProfile admits a caller only when no task holds the profile.
+// tryChromeProfile admits a caller only when no task holds the whole
+// profile, as it does while the extension keeps one client.
 func (m *Manager) tryChromeProfile(profile string) (func(), bool) {
 	m.mu.Lock()
 	slot := m.chromeProfiles[profile]
@@ -391,7 +435,8 @@ func (op *operation) markBrowserUnknown(receipt *actionReceipt, userChrome bool)
 }
 
 // settleBrowserUnknown completes a browser action whose outcome is unknown,
-// which otherwise blocks every later input on this Computer. Only a stopped
+// which otherwise blocks later calls to the same Agent browser or everyday
+// Chrome seat, and desktop input that needs the front window or the clipboard. Only a stopped
 // sender proves that none of its commands still runs. For the Agent Chrome
 // this stops that browser; the next call starts it again with the same
 // profile. The owner's everyday Chrome is never stopped: its action settles

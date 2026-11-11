@@ -341,11 +341,18 @@ func (c *cuaSession) permissions(ctx context.Context) (json.RawMessage, error) {
 }
 
 func (c *cuaSession) call(ctx context.Context, name string, args json.RawMessage) (output json.RawMessage, callErr error) {
-	ctx, release, err := c.op.manager.holdInputs(ctx)
+	ctx, release, err := c.op.manager.holdLane(ctx, desktopLane)
 	if err != nil {
 		return nil, err
 	}
 	defer release()
+	if c.needsFocus(ctx, name, args) {
+		var releaseFocus func()
+		if ctx, releaseFocus, err = c.op.manager.holdFocusedInput(ctx); err != nil {
+			return nil, err
+		}
+		defer releaseFocus()
+	}
 	c.mu.Lock()
 	pending := c.unknown != nil
 	c.mu.Unlock()
@@ -434,7 +441,7 @@ func (c *cuaSession) call(ctx context.Context, name string, args json.RawMessage
 	// Only the retained original transport can drain an older cancelled call.
 	// This never constructs a new client to clear an unknown prior action.
 	c.op.manager.retryCleanup()
-	receipt, err := c.op.manager.journal.begin(ctx, actionIdentity{AgentID: c.op.spec.AgentID, OperationID: c.op.identity.OperationID, Session: c.label})
+	receipt, err := c.op.manager.journal.begin(ctx, actionIdentity{AgentID: c.op.spec.AgentID, OperationID: c.op.identity.OperationID, Session: c.label, Background: !holdsFocus(ctx)})
 	if err != nil {
 		return nil, err
 	}
@@ -517,6 +524,47 @@ func (c *cuaSession) call(ctx context.Context, name string, args json.RawMessage
 		c.recordAgentChromeTabs(ctx, target["pid"], target["window_id"])
 	}
 	return c.finishInput(ctx, name, arguments, appKeys, result, err)
+}
+
+// cuaReadTools send no input.
+var cuaReadTools = map[string]bool{"list_windows": true, "get_window_state": true, "get_desktop_state": true, "get_screen_size": true, "get_cursor_position": true, checkPermissionsTool: true, "report_blocker": true}
+
+// backgroundTools are the macOS inputs Cua delivers to the target app in the
+// background, without the front window or the clipboard. A double-click is
+// not one: when a Finder row refuses AXOpen, sendInput brings Finder to the
+// front and double-clicks there.
+var backgroundTools = map[string]bool{"click": true, "right_click": true, "scroll": true}
+
+// needsFocus reports a call that must not run beside browser calls; see
+// focusGate. Only reads and a macOS background input to a known app other
+// than a Chromium browser run beside them. Keys and text may go to the
+// front app or through the clipboard, and a script or a batch may send
+// anything. Chrome is left out because its window may be a Playwright
+// browser's, whose page a background click would meet mid-action.
+func (c *cuaSession) needsFocus(ctx context.Context, name string, args json.RawMessage) bool {
+	switch {
+	case cuaReadTools[name]:
+		return false
+	case name == "recognize_text":
+		// A paged read presses keys in the window.
+		return runtime.GOOS != "darwin" || pagedRead(args)
+	case runtime.GOOS != "darwin" || !backgroundTools[name]:
+		return true
+	}
+	var arguments map[string]any
+	if json.Unmarshal(args, &arguments) != nil {
+		return true
+	}
+	if modifiers, _ := arguments["modifier"].([]any); len(modifiers) > 0 || foregroundInput(name, arguments) {
+		return true
+	}
+	pid, _ := arguments["pid"].(float64)
+	if token, ok := arguments["element_token"].(string); ok && pid == 0 {
+		if key, _, found := c.op.reads.row(token); found {
+			pid = float64(key.pid)
+		}
+	}
+	return pid <= 0 || c.op.manager.chromiumProcess(ctx, int(pid))
 }
 
 // checkPermissionsCall answers check_permissions, which sends no input.

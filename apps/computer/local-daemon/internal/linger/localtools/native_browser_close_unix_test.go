@@ -217,7 +217,7 @@ func TestNativeBrowserFailedTreeReceiptKeepsActionBlocked(t *testing.T) {
 	if _, err := op.nativeBrowserCall(ctx, "browser_snapshot", json.RawMessage(`{}`)); !errors.Is(err, mcpproxy.ErrCleanupUnconfirmed) {
 		t.Fatalf("failed whole-tree receipt was accepted: %v", err)
 	}
-	if op.nativeBrowser != f.browser || m.browsers["fixture"] != f.browser || !journal.blocked() {
+	if op.nativeBrowser != f.browser || m.browsers["fixture"] != f.browser || !laneBlocked(t, m, browserLane("fixture")) || journal.blocked() {
 		t.Fatal("unknown owner or action fence was lost")
 	}
 	if f.closeCalls.Load() != 1 {

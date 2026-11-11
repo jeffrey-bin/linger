@@ -1,6 +1,7 @@
 package localtools
 
 import (
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -21,7 +22,10 @@ func TestCuaServicePIDNamesTheListeningProcess(t *testing.T) {
 	}
 	defer listener.Close()
 	go func() {
+		// Close only after the caller does: the pid read fails on a
+		// connection this side already closed.
 		if connection, err := listener.Accept(); err == nil {
+			_, _ = io.Copy(io.Discard, connection)
 			_ = connection.Close()
 		}
 	}()

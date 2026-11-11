@@ -178,8 +178,21 @@ Daemon stops the old service before starting the new one. The Daemon takes the
 service's pid from the socket peer rather than a file in /tmp, which macOS cleans
 after 3 days unused.
 
-On one computer, an input call holds the screen and clipboard until it ends, and
-other tasks' input calls queue. A queued call that is cancelled returns
+On one computer, a desktop call holds the screen and clipboard until it ends, and
+other tasks' desktop calls queue. Browser calls run in lanes of their own, one
+per Agent: the tasks of one Agent take turns in its browser, and different
+Agents' browser calls run at the same time as each other and as desktop reads.
+A desktop input that needs the front window or the clipboard waits for the
+browser calls in flight. From the moment it starts waiting, new browser calls
+wait for it, because a browser call can bring Chrome forward or copy and paste
+in the page. These inputs are keys and text, foreground and modifier clicks,
+double-clicks, which may fall back to the front app, drags, cursor moves,
+scripts, batches, app launches, bringing a window to the front, window moves,
+the clipboard tools, all native Linux input, every Windows input, and text
+recognition on Windows or when it pages on macOS. A
+macOS background click, right-click or scroll to a known app runs beside
+browser calls, unless the app is a Chromium browser other than the Computer's
+own Chrome. A queued call that is cancelled returns
 `COMPUTER_BUSY` without sending input. `check_permissions` only reads permissions
 and never requests them, and the permission answer must come from the Cua service
 itself. Only the owner's Request on a permission card asks macOS: the Daemon runs
@@ -231,8 +244,7 @@ application. Before pasting it saves the whole clipboard and restores it 200 ms
 after the paste, unless someone changed the clipboard in between. It also
 restores on cancellation; saving and restoring each have a 5-second limit that
 cancellation does not shorten. A file the Agent copied in Finder before typing a
-path therefore stays on the clipboard. Every Cua call and every browser action
-share one input lock.
+path therefore stays on the clipboard. No browser call runs during the paste.
 
 A single macOS input tool reports only whether the input was delivered;
 `run_actions` reads the window once after the last step. When a Finder list row
@@ -329,7 +341,16 @@ the task opened with `launch_app` is held. A script that names no window in
 its `args` is taken to drive that window; a script to another app is neither
 paced nor held, and a paced script may not call `launch_app`.
 
-The two macOS tool groups share one persistent action record. After a
+Desktop input keeps one persistent action record,
+`computer-tools/action.json`. Each Agent's browser and each seat in the
+everyday Chrome keep their own, `computer-tools/action-browser-<hash>.json`.
+Each record file is removed once its action settles. An unknown record blocks its own desktop, Agent browser or seat,
+and a Daemon restart reads every record again. The two sides also block each
+other where one could still reach the other: an unknown browser action blocks
+desktop input that needs the front window or the clipboard, and an unknown
+desktop input of that kind blocks browser calls, so does a record that an
+older Daemon left without saying which kind it was. Such a call returns
+`COMPUTER_ACTION_UNKNOWN`. After a
 cancellation, the original connection must confirm that the Cua session was
 cleaned up; the exit of a shared service's proxy process does not count, and a
 Daemon restart does not clear unknown actions. Without the original connection's
@@ -427,15 +448,23 @@ same Agent profile, identified by the profile's `SingletonLock` and that
 process's command line. Otherwise Chrome would hand every new launch to the
 old process. A managed Chrome that exits during a task, closed by the user or
 crashed, starts again on the next browser call. A cancelled browser call whose
-outcome is unknown blocks later input until its task ends; the task then stops
-the Agent Chrome, which proves no command still runs, and settles the record.
-The owner's everyday Chrome is never stopped. Its unknown action settles once
-the task's Playwright child, the only sender, has stopped. One task or Live
-call holds the owner's Chrome profile at a time. A task waits up to 40 seconds
-for it and a Live call up to 8 seconds; the call then fails with
-`BROWSER_BUSY`, which Live reports as `browser_busy`. A task passes the
-profile on when it ends and its Playwright child has stopped, even when an
-unrelated part of its cleanup fails. The `computer` tool names are Cua 0.35.4's real names, such as
+outcome is unknown blocks that Agent's later browser calls until its task ends;
+the task then stops the Agent Chrome, which proves no command still runs, and
+settles the record. The owner's everyday Chrome is never stopped. A task holds
+one seat in it. When every installed version of the Playwright Extension in
+the profile is 0.5.0 or later, the extension keeps several Playwright clients
+connected, each in its own tab group. Each Agent then has its own seat, and
+Agents work in their own background tabs at once. An earlier extension may drop
+one client when the next connects, so its whole profile is one seat. Release
+bundles patch Playwright to keep focus emulation on its CDP connections, this
+Chrome and the Agent Chrome alike. Without it a background tab is hidden: it
+stops rendering, clicks wait for it, and mouse and key events are lost. One task or Live call holds a seat at a time, so tasks of
+one Agent take turns. An unknown action blocks the calls to its seat and
+settles once the task's Playwright child, the only sender, has stopped. A task
+waits up to 40 seconds for a seat and a Live call up to 8 seconds; the call
+then fails with `BROWSER_BUSY`, which Live reports as `browser_busy`. A task
+passes the seat on when it ends and its Playwright child has stopped, even when
+an unrelated part of its cleanup fails. The `computer` tool names are Cua 0.35.4's real names, such as
 `move_cursor`, `press_key`, `launch_app` and `bring_to_front`. `doctor` reports
 Chrome and the extension.
 

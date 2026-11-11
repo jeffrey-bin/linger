@@ -207,16 +207,17 @@ func (m *Manager) BrowserConnection(ctx context.Context, tenantID, ownerActorID,
 	if err != nil {
 		return BrowserStatus{}, err
 	}
-	// A running task owns this profile's extension connection. Verifying now
-	// would open a second relay into it, so ask the owner to retry instead.
-	release, admitted := m.tryChromeProfile(chrome.profile)
-	if !admitted {
-		return BrowserStatus{}, &BrowserCommandError{"BROWSER_BUSY", "an Agent task is using this Chrome; try again after it finishes", true}
+	// An extension that keeps one client lets verifying take it from a task.
+	// A running task then owns it, so ask the owner to retry instead, and
+	// stop an idle relay of an earlier task before verifying opens another.
+	if !extensionTakesManyClients(m.env, chrome.profile) {
+		release, admitted := m.tryChromeProfile(chrome.profile)
+		if !admitted {
+			return BrowserStatus{}, &BrowserCommandError{"BROWSER_BUSY", "an Agent task is using this Chrome; try again after it finishes", true}
+		}
+		defer release()
+		m.closeIdleUserChrome(func(s *userChromeSession) bool { return s.profile == chrome.profile })
 	}
-	defer release()
-	// An idle relay of an earlier task still holds this profile's extension
-	// connection; stop it before verifying opens another.
-	m.closeIdleUserChrome(func(s *userChromeSession) bool { return s.profile == chrome.profile })
 	connection := &browserConnection{TenantID: tenantID, OwnerActorID: ownerActorID, Profile: chrome.profile, Token: token, State: browserConnected, ConfiguredAt: time.Now().UTC()}
 	// The token is accepted only after the extension really connects; a
 	// rejected one is never stored, so nothing switches silently.

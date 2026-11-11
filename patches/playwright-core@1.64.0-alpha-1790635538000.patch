@@ -1,0 +1,17 @@
+diff --git a/lib/coreBundle.js b/lib/coreBundle.js
+index 3d050d3f66703342cead4d35b900e1027c5af8df..9117ee3528b5ea9a2ce3bbc964545867ec0785e0 100644
+--- a/lib/coreBundle.js
++++ b/lib/coreBundle.js
+@@ -38891,7 +38891,11 @@ var init_crPage = __esm({
+           const skipDefaultOverrides = browserOptions.noDefaults && this._crPage._browserContext === this._crPage._browserContext._browser._defaultContext;
+           if (this._crPage._browserContext.needsPlaywrightBinding())
+             promises2.push(this.exposePlaywrightBinding());
+-          if (this._isMainFrame() && !skipDefaultOverrides)
++          // Linger: keep focus emulation on every CDP connection, the user's
++          // Chrome through the extension and the Agent Chrome alike. Without
++          // it a background tab is hidden, stops rendering and drops input,
++          // so several Agents could not work in their own tabs at once.
++          if (this._isMainFrame())
+             promises2.push(this._client.send("Emulation.setFocusEmulationEnabled", { enabled: true }));
+           const options = this._crPage._browserContext._options;
+           if (options.bypassCSP)

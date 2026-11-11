@@ -50,10 +50,17 @@ type Manager struct {
 	// cuaGrant is the running `cua-driver permissions grant`, at most one.
 	cuaGrantMu sync.Mutex
 	cuaGrant   *exec.Cmd
-	// inputs admits one desktop or browser action at a time across
-	// Operations; see holdInputs. It is made on first use.
-	inputs     chan struct{}
-	inputsOnce sync.Once
+	// lanes admit one call at a time to the desktop and to each Agent's
+	// browser; see holdLane. Guarded by laneMu.
+	laneMu sync.Mutex
+	lanes  map[string]chan struct{}
+	// browserJournals are the action journals of browser lanes and of seats
+	// in the everyday Chrome by path, including those of earlier Daemons.
+	// Guarded by laneMu.
+	browserJournals map[string]*actionJournal
+	// focus keeps browser calls apart from desktop input that depends on
+	// the front window or the clipboard; see holdFocus.
+	focus      focusGate
 	operations map[*operation]bool
 	browsers   map[string]*nativeBrowser
 	// browserMu serializes the private browser connection records.
@@ -61,8 +68,9 @@ type Manager struct {
 	// noEverydayChrome marks a Linux desktop: it has no everyday Chrome
 	// profile lookup, so its Agents keep their own browser.
 	noEverydayChrome bool
-	// chromeProfiles admits one Operation at a time to each everyday Chrome
-	// profile, so tabs, refs and downloads of two tasks never mix.
+	// chromeProfiles admits one Operation at a time to each seat in an
+	// everyday Chrome profile, so tabs, refs and downloads of two tasks never
+	// mix; see userChromeSeat.
 	chromeProfiles map[string]chan struct{}
 	// userChromeSessions keeps idle connections to everyday Chrome for the
 	// next task of the same Agent; see checkoutUserChrome.
@@ -109,6 +117,9 @@ func New(options Options) (*Manager, error) {
 		if err != nil {
 			return nil, err
 		}
+		if err := m.openBrowserJournals(); err != nil {
+			return nil, err
+		}
 	}
 	return m, nil
 }
@@ -150,9 +161,15 @@ type operation struct {
 	connectMu          sync.Mutex
 	userChromeVerified bool
 	userChromeRejected atomic.Bool
-	// profileMu guards releaseProfile while a call waits for the profile.
+	// browserCalls admits one browser call of this Operation at a time; see
+	// holdBrowserCalls.
+	browserCalls     chan struct{}
+	browserCallsOnce sync.Once
+	// profileMu guards releaseProfile and chromeSeat while a call waits for
+	// the seat.
 	profileMu      sync.Mutex
 	releaseProfile func()
+	chromeSeat     string
 	browserUnknown *actionReceipt
 	// browserUnknownUser marks an unknown action sent to the owner's Chrome.
 	browserUnknownUser bool
@@ -480,24 +497,111 @@ func (op *operation) wrap(call func(context.Context, string, json.RawMessage) (j
 	}
 }
 
-// inputsHeld marks a context whose call already holds Manager.inputs.
-type inputsHeld struct{}
+// desktopLane is the desktop of the signed-in user, which every Cua and
+// native Linux call shares, with the Computer's own browser that Cua drives.
+// Each Agent's Playwright browser, the Agent Chrome or the owner's connected
+// Chrome, is a lane of its own: those calls go over CDP or the extension.
+const desktopLane = "desktop"
 
-// holdInputs takes the Manager's input slot unless ctx already holds it, so
-// a run_actions call keeps the screen and the clipboard
-// until it ends. A cancelled call stops waiting. Browser calls take it only
-// after their Chrome profile, so a call never waits for a profile while it
-// holds the slot.
-func (m *Manager) holdInputs(ctx context.Context) (context.Context, func(), error) {
-	if ctx.Value(inputsHeld{}) != nil {
+// browserLane names the lane of one Agent's Playwright browser. All browser
+// calls of an Operation share it, also after the owner connects their Chrome
+// mid-task, and every task of the Agent shares that Agent's Chrome.
+func browserLane(agentID string) string { return "browser:" + agentID }
+
+// chromeProfileJournal names the action journal of one seat in the owner's
+// everyday Chrome. Its lock is the seat's slot; see acquireChromeProfile.
+func chromeProfileJournal(seat string) string { return "chrome:" + seat }
+
+// laneHeld marks a context whose call already holds the named lane.
+type laneHeld struct{ lane string }
+
+// lane returns the slot that admits one call of a lane at a time.
+func (m *Manager) lane(name string) chan struct{} {
+	m.laneMu.Lock()
+	defer m.laneMu.Unlock()
+	if m.lanes == nil {
+		m.lanes = map[string]chan struct{}{}
+	}
+	if m.lanes[name] == nil {
+		m.lanes[name] = make(chan struct{}, 1)
+	}
+	return m.lanes[name]
+}
+
+// browserJournalPrefix starts the file name of every browser action record.
+const browserJournalPrefix = "action-browser-"
+
+// openBrowserJournals reads the browser action records an earlier Daemon
+// left, so an unknown one blocks desktop input that needs the front window
+// before its Agent calls the browser again.
+func (m *Manager) openBrowserJournals() error {
+	paths, err := filepath.Glob(filepath.Join(filepath.Dir(m.journal.path), browserJournalPrefix+"*.json"))
+	if err != nil {
+		return err
+	}
+	m.browserJournals = map[string]*actionJournal{}
+	for _, path := range paths {
+		if m.browserJournals[path], err = openJournal(path); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// browserActionUnknown reports a browser action whose outcome is unknown,
+// in any Agent's browser or everyday Chrome profile.
+func (m *Manager) browserActionUnknown() bool {
+	m.laneMu.Lock()
+	defer m.laneMu.Unlock()
+	for _, journal := range m.browserJournals {
+		if journal.blocked() {
+			return true
+		}
+	}
+	return false
+}
+
+// namedJournal returns the action journal of an Agent's browser lane or of a
+// seat in the everyday Chrome; desktop input uses m.journal. It opens on first
+// use and reads its file, so a record left before a restart blocks its lane or
+// seat again.
+func (m *Manager) namedJournal(name string) (*actionJournal, error) {
+	m.laneMu.Lock()
+	defer m.laneMu.Unlock()
+	sum := sha256.Sum256([]byte(name))
+	path := filepath.Join(filepath.Dir(m.journal.path), browserJournalPrefix+hex.EncodeToString(sum[:16])+".json")
+	if journal := m.browserJournals[path]; journal != nil {
+		return journal, nil
+	}
+	journal, err := openJournal(path)
+	if err != nil {
+		return nil, err
+	}
+	if m.browserJournals == nil {
+		m.browserJournals = map[string]*actionJournal{}
+	}
+	m.browserJournals[path] = journal
+	return journal, nil
+}
+
+// holdLane takes a lane unless ctx already holds it, so a run_actions call
+// keeps the screen and the clipboard until it ends. A cancelled call stops
+// waiting. No call holds two lanes. Browser calls take their lane only after
+// their Chrome profile, so a call never waits for a profile while it holds a
+// lane.
+func (m *Manager) holdLane(ctx context.Context, name string) (context.Context, func(), error) {
+	if ctx.Value(laneHeld{name}) != nil {
 		return ctx, func() {}, nil
 	}
-	m.inputsOnce.Do(func() { m.inputs = make(chan struct{}, 1) })
+	slot := m.lane(name)
 	select {
-	case m.inputs <- struct{}{}:
-		return context.WithValue(ctx, inputsHeld{}, true), func() { <-m.inputs }, nil
+	case slot <- struct{}{}:
+		return context.WithValue(ctx, laneHeld{name}, true), func() { <-slot }, nil
 	case <-ctx.Done():
-		return ctx, nil, fmt.Errorf("COMPUTER_BUSY: another task was using the screen until this call ended (%v): %w", ctx.Err(), errNotSent) //nolint:errorlint // the wait's end is detail; the call classifies as not sent only
+		if name == desktopLane {
+			return ctx, nil, fmt.Errorf("COMPUTER_BUSY: another task was using the screen until this call ended (%v): %w", ctx.Err(), errNotSent) //nolint:errorlint // the wait's end is detail; the call classifies as not sent only
+		}
+		return ctx, nil, fmt.Errorf("COMPUTER_BUSY: another task of this Agent was using its browser until this call ended (%v): %w", ctx.Err(), errNotSent) //nolint:errorlint // the wait's end is detail; the call classifies as not sent only
 	}
 }
 
@@ -627,12 +731,12 @@ func (op *operation) close() error {
 				op.browser, op.userChromeSession = nil, nil
 			}
 		}
-		// No call of this task runs any more, so its everyday Chrome profile
-		// passes on once its Playwright child has stopped. A failing cleanup
-		// step unrelated to that Chrome keeps this task for retries but must
-		// not keep the owner's Chrome from every later task. A child whose
-		// exit is unconfirmed keeps the profile: a second relay must not
-		// attach to the same extension.
+		// No call of this task runs any more, so its seat in the everyday
+		// Chrome passes on once its Playwright child has stopped. A failing
+		// cleanup step unrelated to that Chrome keeps this task for retries
+		// but must not keep the owner's Chrome from every later task. A child
+		// whose exit is unconfirmed keeps the seat: a second relay must not
+		// take its place.
 		if op.userChromeSession == nil {
 			op.releaseChromeProfile()
 		}

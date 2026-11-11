@@ -98,11 +98,23 @@ var screenshotLink = regexp.MustCompile(`\]\(([^)\n]+\.jpeg)\)`)
 // browserScreenshot captures the visible page. Playwright also saves the
 // image in the Operation's output directory; that copy is removed.
 func (op *operation) browserScreenshot(ctx context.Context) *permission.Screenshot {
-	ctx, release, err := op.manager.holdInputs(ctx)
+	releaseCalls, err := op.holdBrowserCalls(ctx)
+	if err != nil {
+		return nil
+	}
+	defer releaseCalls()
+	ctx, release, err := op.manager.holdLane(ctx, browserLane(op.spec.AgentID))
 	if err != nil {
 		return nil
 	}
 	defer release()
+	// Playwright opens a page again before the capture when the last one
+	// closed, as a browser call does.
+	ctx, releaseFocus, err := op.manager.holdBrowserFocus(ctx)
+	if err != nil {
+		return nil
+	}
+	defer releaseFocus()
 	if op.browser == nil {
 		return nil
 	}

@@ -130,17 +130,17 @@ func (m *Manager) liveSlots() chan struct{} {
 	return m.liveSlot
 }
 
-// releaseIdleLiveChrome closes the Live browser sessions that hold profile
+// releaseIdleLiveChrome closes the Live browser sessions that hold seat
 // between calls, so a task waiting for the owner's Chrome gets it. A Live
 // call in progress keeps it: it holds the Live slot, and so does the call
 // that asks.
-func (m *Manager) releaseIdleLiveChrome(profile string) {
+func (m *Manager) releaseIdleLiveChrome(seat string) {
 	if !m.tryLockLive() {
 		return
 	}
 	defer m.unlockLive()
 	for key, session := range m.liveSessions {
-		if !session.op.holdsChromeProfile(profile) {
+		if !session.op.holdsChromeSeat(seat) {
 			continue
 		}
 		// An unconfirmed cleanup keeps the profile until retryCleanup
@@ -150,11 +150,8 @@ func (m *Manager) releaseIdleLiveChrome(profile string) {
 	}
 }
 
-func (op *operation) holdsChromeProfile(profile string) bool {
-	op.connectMu.Lock()
-	chrome := op.userChrome
-	op.connectMu.Unlock()
+func (op *operation) holdsChromeSeat(seat string) bool {
 	op.profileMu.Lock()
 	defer op.profileMu.Unlock()
-	return op.releaseProfile != nil && chrome != nil && chrome.Profile == profile
+	return op.releaseProfile != nil && op.chromeSeat == seat
 }

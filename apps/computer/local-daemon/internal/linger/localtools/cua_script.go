@@ -130,7 +130,7 @@ func forbiddenKey(value any, word string) bool {
 
 // scriptArguments checks a run_script call, reads a Skill's script file into
 // script with args as a constant on its first line, and fits its time limit
-// into what remains of the call after waiting for the input lock. In a
+// into what remains of the call after waiting for the desktop lane. In a
 // reviewed Run, whose review scope is not empty, a script file runs only as
 // the judge allowed it in that scope: the body it read and the args it saw.
 func scriptArguments(ctx context.Context, arguments map[string]any, reviewScope string, inputLimit int) error {

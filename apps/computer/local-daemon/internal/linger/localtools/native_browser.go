@@ -28,20 +28,25 @@ type nativeBrowser struct {
 	err               error
 }
 
+// nativeBrowserFor returns the Agent's running Chrome or starts it. Only
+// calls in the Agent's browser lane start it, so one Agent never starts two;
+// m.mu guards just the table, and a start does not hold up other Agents.
 func (m *Manager) nativeBrowserFor(ctx context.Context, agentID string) (*nativeBrowser, error) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	if existing := m.browsers[agentID]; existing != nil {
 		select {
 		case <-existing.done:
 			if err := existing.cleanupError(); err != nil {
+				m.mu.Unlock()
 				return existing, err
 			}
 			delete(m.browsers, agentID)
 		default:
+			m.mu.Unlock()
 			return existing, nil
 		}
 	}
+	m.mu.Unlock()
 	// This is a dedicated Agent profile, never the user's default Chrome
 	// profile. Cua observes the same native window Playwright attaches to.
 	executable := chromeExecutable(m.env)
@@ -85,7 +90,8 @@ func (m *Manager) nativeBrowserFor(ctx context.Context, agentID string) (*native
 	return m.awaitNativeBrowser(ctx, agentID, browser, portFile)
 }
 
-// The caller holds m.mu while publishing or retaining the original process.
+// awaitNativeBrowser publishes the started browser, or retains a process
+// whose stop is unconfirmed, under m.mu.
 func (m *Manager) awaitNativeBrowser(ctx context.Context, agentID string, browser *nativeBrowser, portFile string) (*nativeBrowser, error) {
 	readyCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
@@ -94,7 +100,7 @@ func (m *Manager) awaitNativeBrowser(ctx context.Context, agentID string, browse
 		case <-browser.done:
 			err := errors.New("BROWSER_UNAVAILABLE: managed Chrome exited; close an older Computer-owned Chrome before retrying")
 			if cleanupErr := browser.cleanupError(); cleanupErr != nil {
-				m.browsers[agentID] = browser
+				m.publishBrowser(agentID, browser)
 				return browser, errors.Join(err, cleanupErr)
 			}
 			return nil, err
@@ -112,7 +118,7 @@ func (m *Manager) awaitNativeBrowser(ctx context.Context, agentID string, browse
 				if requestErr == nil {
 					_ = response.Body.Close()
 					if response.StatusCode == http.StatusOK {
-						m.browsers[agentID] = browser
+						m.publishBrowser(agentID, browser)
 						return browser, nil
 					}
 				}
@@ -122,13 +128,19 @@ func (m *Manager) awaitNativeBrowser(ctx context.Context, agentID string, browse
 		case <-readyCtx.Done():
 			err := errors.New("BROWSER_UNAVAILABLE: managed Chrome did not become ready")
 			if cleanupErr := browser.close(); cleanupErr != nil {
-				m.browsers[agentID] = browser
+				m.publishBrowser(agentID, browser)
 				return browser, errors.Join(err, cleanupErr)
 			}
 			return nil, err
 		case <-time.After(100 * time.Millisecond):
 		}
 	}
+}
+
+func (m *Manager) publishBrowser(agentID string, browser *nativeBrowser) {
+	m.mu.Lock()
+	m.browsers[agentID] = browser
+	m.mu.Unlock()
 }
 
 // snapProfileRoot returns where a Snap browser keeps Agent profiles. Snap

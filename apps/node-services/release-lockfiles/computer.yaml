@@ -9,6 +9,7 @@ patchedDependencies:
   "@hocuspocus/server@4.3.0": 26806fa621c7cafd75f6e2737e820e6a341b46132399176083b6b342198eab76
   "@livekit/agents@1.7.1": a2a99608ccad5c400634accbbb04b77a0f96bba6949baaa6c88b4568f7526753
   deepagents@1.12.0: 7a922549743b0a521c959c1d7400ddb6cad1ca8c43c7692e2dc8847bd3f2ea25
+  playwright-core@1.64.0-alpha-1790635538000: 78d5eb47c9c7095d8c87a9f21aba2d7f240636ea9a759299d3f99d7f7f9bcd5e
 importers:
   .: {}
   apps/computer:
@@ -2797,7 +2798,7 @@ snapshots:
   "@playwright/mcp@0.0.83":
     dependencies:
       playwright: 1.64.0-alpha-1790635538000
-      playwright-core: 1.64.0-alpha-1790635538000
+      playwright-core: 1.64.0-alpha-1790635538000(patch_hash=78d5eb47c9c7095d8c87a9f21aba2d7f240636ea9a759299d3f99d7f7f9bcd5e)
   "@protobufjs/aspromise@1.1.2": {}
   "@protobufjs/base64@1.1.2": {}
   "@protobufjs/codegen@2.0.5": {}
@@ -3678,10 +3679,11 @@ snapshots:
   picomatch@4.0.4: {}
   picomatch@4.0.5: {}
   pkce-challenge@5.0.1: {}
-  playwright-core@1.64.0-alpha-1790635538000: {}
+  playwright-core@1.64.0-alpha-1790635538000(patch_hash=78d5eb47c9c7095d8c87a9f21aba2d7f240636ea9a759299d3f99d7f7f9bcd5e):
+    {}
   playwright@1.64.0-alpha-1790635538000:
     dependencies:
-      playwright-core: 1.64.0-alpha-1790635538000
+      playwright-core: 1.64.0-alpha-1790635538000(patch_hash=78d5eb47c9c7095d8c87a9f21aba2d7f240636ea9a759299d3f99d7f7f9bcd5e)
   postcss@8.5.20:
     dependencies:
       nanoid: 3.3.16

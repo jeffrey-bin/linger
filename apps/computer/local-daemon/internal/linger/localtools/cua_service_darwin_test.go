@@ -1,6 +1,7 @@
 package localtools
 
 import (
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -27,7 +28,13 @@ func TestCuaServiceFixtureProcess(t *testing.T) {
 		if err != nil {
 			return
 		}
-		_ = connection.Close()
+		// Keep the connection until the caller closes it, as the real service
+		// does: a caller reads the peer pid after connecting, and that read
+		// fails once this side has closed.
+		go func() {
+			_, _ = io.Copy(io.Discard, connection)
+			_ = connection.Close()
+		}()
 	}
 }
 

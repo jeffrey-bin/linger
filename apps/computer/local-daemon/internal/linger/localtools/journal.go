@@ -18,6 +18,11 @@ type actionIdentity struct {
 	AgentID     string `json:"agent_id"`
 	OperationID string `json:"operation_id"`
 	Session     string `json:"session"`
+	// Background marks a desktop input that needed neither the front window
+	// nor the clipboard; see focusGate. Any other unknown desktop input,
+	// including a record without the field, also blocks browser calls until
+	// it settles.
+	Background bool `json:"background,omitempty"`
 }
 
 type actionJournal struct {
@@ -73,7 +78,7 @@ func (j *actionJournal) begin(ctx context.Context, identity actionIdentity) (*ac
 	}
 	if j.active != nil {
 		<-j.slot
-		return nil, errors.New("COMPUTER_ACTION_UNKNOWN: an earlier action has no verified cleanup receipt; input remains blocked")
+		return nil, errors.New("COMPUTER_ACTION_UNKNOWN: an earlier action has no verified cleanup receipt; this desktop, Agent browser or everyday Chrome seat stays blocked until it settles")
 	}
 	identity.Nonce = rand.Text()
 	if err := j.persist(&identity); err != nil {
@@ -84,16 +89,24 @@ func (j *actionJournal) begin(ctx context.Context, identity actionIdentity) (*ac
 	return &actionReceipt{journal: j, nonce: identity.Nonce}, nil
 }
 
+// persist records active, or removes the record once nothing is pending, so
+// the record of an Agent's browser that is never used again leaves no file.
 func (j *actionJournal) persist(active *actionIdentity) error {
-	data, err := json.Marshal(struct {
-		Version int             `json:"version"`
-		Active  *actionIdentity `json:"active"`
-	}{1, active})
-	if err != nil {
-		return err
-	}
-	if err := privatefs.WriteFile(j.path, data, false); err != nil {
-		return err
+	if active == nil {
+		if err := os.Remove(j.path); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+	} else {
+		data, err := json.Marshal(struct {
+			Version int             `json:"version"`
+			Active  *actionIdentity `json:"active"`
+		}{1, active})
+		if err != nil {
+			return err
+		}
+		if err := privatefs.WriteFile(j.path, data, false); err != nil {
+			return err
+		}
 	}
 	// Windows cannot open a directory for flushing; NTFS journals the rename.
 	if runtime.GOOS == "windows" {
@@ -132,4 +145,12 @@ func (j *actionJournal) blocked() bool {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 	return j.active != nil
+}
+
+// blocksFocus reports an unknown desktop input that a browser call bringing
+// Chrome forward or using the clipboard could still meet.
+func (j *actionJournal) blocksFocus() bool {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	return j.active != nil && !j.active.Background
 }

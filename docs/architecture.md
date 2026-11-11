@@ -117,9 +117,10 @@ Composio       holds the app keys; an approved write runs exactly once
 
 ## Inside Cua, Playwright and Shell
 
-Desktop and browser actions share one input slot and a log written before each
-action, so two agents never fight over the screen and an uncertain input is
-never sent twice.
+The screen has one input lane and each agent's browser has its own, so two
+agents never fight over the screen while their browsers work at the same time.
+Desktop input that needs the front window waits for browser calls in flight.
+Each input is logged before it runs, so an uncertain input is never sent twice.
 
 ```text
 ┌─ Cua · Playwright · Shell ───────────────────────────────────────────────────┐
@@ -127,15 +128,17 @@ never sent twice.
 │ │ Cua                  │ │ Playwright                 │ │ Shell            │ │
 │ │ reads app windows    │ │ own Chrome profile per     │ │ the Runtime's    │ │
 │ │ as elements, then    │ │ agent, or your signed-in   │ │ own command      │ │
-│ │ clicks, types, drags │ │ Chrome, one task at a time │ │ tool, run in     │ │
+│ │ clicks, types, drags │ │ Chrome, a seat per agent   │ │ tool, run in     │ │
 │ └──────────┬───────────┘ └─────────────┬──────────────┘ │ the Agent        │ │
 │ ┌──────────┴───────────────────────────┴──────────────┐ │ workspace with   │ │
-│ │ one input slot: a second task waits for the screen  │ │ your account     │ │
+│ │ one lane for the screen, one per agent's browser    │ │ your account     │ │
 │ │ each input is logged before it runs; an unknown     │ │                  │ │
-│ │ result blocks further input and is never replayed   │ │                  │ │
+│ │ result blocks its lane and is never replayed        │ │                  │ │
 │ └─────────────────────────────────────────────────────┘ └──────────────────┘ │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 <sub>On Linux, AT-SPI and xdotool replace Cua, and only the agent's own Chrome
-profile is used. Page scripts are not offered to agents.</sub>
+profile is used. With a Playwright Extension older than 0.5.0, agents take
+turns in one seat of your signed-in Chrome. Page scripts are not offered to
+agents.</sub>

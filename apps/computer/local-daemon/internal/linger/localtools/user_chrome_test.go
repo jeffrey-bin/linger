@@ -455,7 +455,7 @@ func liveSessionOnProfile(t *testing.T, m *Manager, key, profile string) *operat
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	op := &operation{manager: m, label: "linger-live", ctx: ctx, cancel: cancel, directory: t.TempDir(), userChrome: &browserConnection{Profile: profile}, releaseProfile: release}
+	op := &operation{manager: m, label: "linger-live", ctx: ctx, cancel: cancel, directory: t.TempDir(), userChrome: &browserConnection{Profile: profile}, releaseProfile: release, chromeSeat: profile}
 	m.tryLockLive()
 	if m.liveSessions == nil {
 		m.liveSessions = map[string]*liveBrowserSession{}
@@ -754,7 +754,11 @@ func TestFailedCleanupPassesTheChromeProfileOn(t *testing.T) {
 // for every later task.
 func TestUserChromeUnknownActionSettlesWhenTheTaskStops(t *testing.T) {
 	m := newConnectionManager(t)
-	receipt, err := m.journal.begin(t.Context(), actionIdentity{AgentID: "agent", OperationID: "op", Session: "linger-task-browser"})
+	journal, err := m.namedJournal(chromeProfileJournal("Default"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	receipt, err := journal.begin(t.Context(), actionIdentity{AgentID: "agent", OperationID: "op", Session: "linger-task-browser"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -768,7 +772,7 @@ func TestUserChromeUnknownActionSettlesWhenTheTaskStops(t *testing.T) {
 	if err := op.close(); err != nil {
 		t.Fatalf("close err=%v, want the stopped child to settle the action", err)
 	}
-	next, err := m.journal.begin(t.Context(), actionIdentity{AgentID: "agent", OperationID: "next", Session: "linger-next-browser"})
+	next, err := journal.begin(t.Context(), actionIdentity{AgentID: "other-agent", OperationID: "next", Session: "linger-next-browser"})
 	if err != nil {
 		t.Fatalf("input stayed blocked: %v", err)
 	}

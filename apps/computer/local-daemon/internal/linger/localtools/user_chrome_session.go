@@ -22,15 +22,17 @@ var userChromeIdle = 10 * time.Minute
 
 // userChromeSession is one Playwright child connected through the extension.
 // Tasks of the same Agent, owner, Chrome profile, token and workspace take
-// turns on it, so the next task continues in the same tab. The profile slot
+// turns on it, so the next task continues in the same tab. The seat's slot
 // already admits one task at a time, so at most one task holds it.
 type userChromeSession struct {
 	key string
-	// owner and profile name the extension connection the session holds: one
-	// Chrome profile keeps one relay, so a session of the same profile under
-	// another key, or of an owner who disconnects, stops while idle.
+	// owner, profile and seat name the extension connection the session
+	// holds. A seat keeps one relay, so a session of the same seat under
+	// another key, or of an owner who disconnects, stops while idle; when the
+	// extension keeps one client the seat is the whole profile.
 	owner      string
 	profile    string
+	seat       string
 	client     *mcpClient
 	directory  string
 	socketsDir string
@@ -73,8 +75,11 @@ func (m *Manager) checkoutUserChrome(ctx context.Context, op *operation, chrome 
 		}
 		m.closeStrayUserChrome(existing)
 	}
-	m.closeIdleUserChrome(func(s *userChromeSession) bool { return s.profile == chrome.Profile })
-	session := &userChromeSession{key: key, inUse: true, owner: browserOwner(op.spec.TenantID, op.spec.OwnerActorID), profile: chrome.Profile,
+	op.profileMu.Lock()
+	seat := op.chromeSeat
+	op.profileMu.Unlock()
+	m.closeIdleUserChrome(func(s *userChromeSession) bool { return s.seat == seat })
+	session := &userChromeSession{key: key, inUse: true, owner: browserOwner(op.spec.TenantID, op.spec.OwnerActorID), profile: chrome.Profile, seat: seat,
 		directory: filepath.Join(m.options.StateDirectory, "computer-tools", "user-chrome", key),
 		output:    filepath.Join(op.spec.WorkingDirectory, ".linger", "browser-output", key)}
 	if err := privatefs.EnsureDir(session.directory); err != nil {
