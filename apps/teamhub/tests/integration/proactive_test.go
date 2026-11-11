@@ -258,7 +258,7 @@ func TestProactiveRoutinesEventsAndListeners(t *testing.T) {
 	for _, provider := range []string{"gmail", "outlook", "google_calendar", "slack", "notion"} {
 		statements = append(statements,
 			`INSERT INTO external_connection_upstreams(upstream_id,account_id,user_id,toolkit_slug,auth_config_id)
-                VALUES('ca_alice_`+provider+`','account_alice','co_workspace:test:account:account_alice','`+provider+`','ac_`+provider+`')`,
+                VALUES('ca_alice_`+provider+`','account_alice','linger:test:account:account_alice','`+provider+`','ac_`+provider+`')`,
 			`INSERT INTO external_connections(id,account_id,provider,upstream_connection_id,status,revision,remote_principal_key,identity_label,toolkit_slug,auth_config_id,auto_reminders)
                 VALUES('connection_alice_`+provider+`','account_alice','`+provider+`','ca_alice_`+provider+`','active',1,'`+provider+`:alice@example.com','alice@example.com','`+provider+`','ac_`+provider+`',false)`,
 			`INSERT INTO external_connection_agent_grants(id,connection_id,tenant_id,agent_actor_id,represented_human_actor_id,status)
@@ -541,7 +541,7 @@ func TestProactiveAutoRemindersSwitchRemovesAndRestoresTheListener(t *testing.T)
 	}
 	for _, statement := range []string{
 		`INSERT INTO external_connection_upstreams(upstream_id,account_id,user_id,toolkit_slug,auth_config_id)
-            VALUES('ca_alice_auto','account_alice','co_workspace:test:account:account_alice','gmail','ac_gmail')`,
+            VALUES('ca_alice_auto','account_alice','linger:test:account:account_alice','gmail','ac_gmail')`,
 		`INSERT INTO external_connections(id,account_id,provider,upstream_connection_id,status,revision,remote_principal_key,identity_label,toolkit_slug,auth_config_id)
 			VALUES('connection_alice_auto','account_alice','gmail','ca_alice_auto','active',1,'gmail:alice@example.com','alice@example.com','gmail','ac_gmail')`,
 		`INSERT INTO external_connection_agent_grants(id,connection_id,tenant_id,agent_actor_id,represented_human_actor_id,status)
@@ -660,7 +660,7 @@ func TestProactiveListenerSweepAndSwitchInstallWithoutDeadlock(t *testing.T) {
 	}
 	for _, statement := range []string{
 		`INSERT INTO external_connection_upstreams(upstream_id,account_id,user_id,toolkit_slug,auth_config_id)
-            VALUES('ca_alice_race','account_alice','co_workspace:test:account:account_alice','gmail','ac_gmail')`,
+            VALUES('ca_alice_race','account_alice','linger:test:account:account_alice','gmail','ac_gmail')`,
 		`INSERT INTO external_connections(id,account_id,provider,upstream_connection_id,status,revision,remote_principal_key,identity_label,toolkit_slug,auth_config_id)
 			VALUES('connection_alice_race','account_alice','gmail','ca_alice_race','active',1,'gmail:alice@example.com','alice@example.com','gmail','ac_gmail')`,
 		`INSERT INTO external_connection_agent_grants(id,connection_id,tenant_id,agent_actor_id,represented_human_actor_id,status)

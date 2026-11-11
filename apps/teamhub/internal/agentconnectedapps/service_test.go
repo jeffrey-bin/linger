@@ -21,15 +21,15 @@ func TestSearchToolsInterleavesToolkitsAndProjectsDelegatedConnections(t *testin
 	}}
 	service := &Service{provider: provider}
 	connections := []externalsource.AgentToolConnection{
-		{ID: "connection-slack", AccountID: "owner", UserID: "co_workspace:test:account:owner", UpstreamConnectionID: "ca-slack", AppKey: "slack", DisplayName: "Slack", ToolkitSlug: "slack"},
-		{ID: "connection-gmail", AccountID: "owner", UserID: "co_workspace:test:account:owner", UpstreamConnectionID: "ca-gmail", AppKey: "gmail", DisplayName: "Gmail", ToolkitSlug: "gmail"},
+		{ID: "connection-slack", AccountID: "owner", UserID: "linger:test:account:owner", UpstreamConnectionID: "ca-slack", AppKey: "slack", DisplayName: "Slack", ToolkitSlug: "slack"},
+		{ID: "connection-gmail", AccountID: "owner", UserID: "linger:test:account:owner", UpstreamConnectionID: "ca-gmail", AppKey: "gmail", DisplayName: "Gmail", ToolkitSlug: "gmail"},
 	}
 
 	tools, err := service.searchTools(context.Background(), connections, "send", 3)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(provider.searches) != 2 || provider.searches[0].UserID != "co_workspace:test:account:owner" || provider.searches[0].ConnectedAccountID != "ca-gmail" || provider.searches[1].ConnectedAccountID != "ca-slack" {
+	if len(provider.searches) != 2 || provider.searches[0].UserID != "linger:test:account:owner" || provider.searches[0].ConnectedAccountID != "ca-gmail" || provider.searches[1].ConnectedAccountID != "ca-slack" {
 		t.Fatalf("search must use the server-resolved owner and granted connection: %+v", provider.searches)
 	}
 	if len(tools) != 3 || tools[0].ToolSlug != "GMAIL_ONE" || tools[1].ToolSlug != "SLACK_ONE" || tools[2].ToolSlug != "GMAIL_TWO" {

@@ -20,7 +20,7 @@ func TestToolSearchUsesRouterForNaturalLanguageAndResolvesExecutableMetadata(t *
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 				t.Error(err)
 			}
-			if body["user_id"] != "co_workspace:test:account:owner" || !reflect.DeepEqual(body["connected_accounts"], map[string]any{"notion": "ca_authorized"}) || !reflect.DeepEqual(body["toolkits"], map[string]any{"enable": []any{"notion"}}) ||
+			if body["user_id"] != "linger:test:account:owner" || !reflect.DeepEqual(body["connected_accounts"], map[string]any{"notion": "ca_authorized"}) || !reflect.DeepEqual(body["toolkits"], map[string]any{"enable": []any{"notion"}}) ||
 				!reflect.DeepEqual(body["manage_connections"], map[string]any{"enable": false}) ||
 				!reflect.DeepEqual(body["workbench"], map[string]any{"enable": false}) {
 				t.Errorf("search session must be restricted: %#v", body)
@@ -69,7 +69,7 @@ func TestToolSearchUsesRouterForNaturalLanguageAndResolvesExecutableMetadata(t *
 	if err != nil {
 		t.Fatal(err)
 	}
-	tools, err := client.SearchTools(t.Context(), ToolSearchRequest{UserID: "co_workspace:test:account:owner", ConnectedAccountID: "ca_authorized", ToolkitSlug: "notion", Query: query, Limit: 5})
+	tools, err := client.SearchTools(t.Context(), ToolSearchRequest{UserID: "linger:test:account:owner", ConnectedAccountID: "ca_authorized", ToolkitSlug: "notion", Query: query, Limit: 5})
 	if err != nil {
 		t.Fatal(err)
 	}

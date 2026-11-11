@@ -62,7 +62,7 @@ func TestClientCreatesManagedAuthLinkAndMapsStatus(t *testing.T) {
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatal(err)
 		}
-		if body["auth_config_id"] != "gmail-auth" || body["user_id"] != "co_workspace:test:account:account_1" {
+		if body["auth_config_id"] != "gmail-auth" || body["user_id"] != "linger:test:account:account_1" {
 			t.Fatalf("unexpected link body: %#v", body)
 		}
 		w.WriteHeader(http.StatusCreated)
@@ -112,7 +112,7 @@ func TestClientGetsAndExecutesVersionedToolsWithoutWriteRetry(t *testing.T) {
 			if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 				t.Fatal(err)
 			}
-			if request["connected_account_id"] != "ca_internal" || request["user_id"] != "co_workspace:test:account:account_1" || request["version"] != "20260721_00" {
+			if request["connected_account_id"] != "ca_internal" || request["user_id"] != "linger:test:account:account_1" || request["version"] != "20260721_00" {
 				t.Fatalf("unexpected execute request: %#v", request)
 			}
 			w.Header().Set("Retry-After", "0")

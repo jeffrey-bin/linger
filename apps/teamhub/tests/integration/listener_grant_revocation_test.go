@@ -51,7 +51,7 @@ func newListenerGrantFixture(t *testing.T, serve http.HandlerFunc, judge proacti
 		t.Fatal(err)
 	}
 	for _, statement := range []string{
-		`INSERT INTO external_connection_upstreams(upstream_id,account_id,user_id,toolkit_slug,auth_config_id) VALUES('ca_revoke','account_alice','co_workspace:test:account:account_alice','gmail','ac_gmail')`,
+		`INSERT INTO external_connection_upstreams(upstream_id,account_id,user_id,toolkit_slug,auth_config_id) VALUES('ca_revoke','account_alice','linger:test:account:account_alice','gmail','ac_gmail')`,
 		`INSERT INTO external_connections(id,account_id,provider,upstream_connection_id,status,revision,remote_principal_key,identity_label,toolkit_slug,auth_config_id,auto_reminders) VALUES('connection_revoke','account_alice','gmail','ca_revoke','active',1,'gmail:alice@example.com','alice@example.com','gmail','ac_gmail',false)`,
 	} {
 		if _, err := pool.Exec(t.Context(), statement); err != nil {

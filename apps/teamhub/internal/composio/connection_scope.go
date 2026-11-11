@@ -25,13 +25,13 @@ func (c *Client) SetConnectionAuthority(authority ConnectionAuthority) {
 }
 
 func (c *Client) UserIDForAccount(accountID string) string {
-	return "co_workspace:" + c.environmentKey + ":account:" + accountID
+	return "linger:" + c.environmentKey + ":account:" + accountID
 }
 
 // AuthConfigName is the stable name TeamHub finds or creates the auth config
 // of toolkit under.
 func (c *Client) AuthConfigName(toolkit, scheme string) string {
-	return "co_workspace:" + c.environmentKey + ":" + toolkit + ":" + scheme + ":v1"
+	return "linger:" + c.environmentKey + ":" + toolkit + ":" + scheme + ":v1"
 }
 
 func (c *Client) authorizeConnection(ctx context.Context, upstreamID string) (ConnectionBinding, error) {

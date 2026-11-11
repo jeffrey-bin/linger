@@ -162,7 +162,7 @@ func (f *fakeComposio) externalSources(t *testing.T, pool *pgxpool.Pool, provide
 // as a connect link would, for a connection a test inserts directly.
 func (f *fakeComposio) seedAccount(t *testing.T, pool *pgxpool.Pool, upstreamID, accountID, toolkit string, status composio.ConnectionStatus) {
 	t.Helper()
-	userID := "co_workspace:" + fakeComposioEnvironment + ":account:" + accountID
+	userID := "linger:" + fakeComposioEnvironment + ":account:" + accountID
 	if _, err := pool.Exec(t.Context(), `INSERT INTO external_connection_upstreams(upstream_id,account_id,user_id,toolkit_slug,auth_config_id) VALUES($1,$2,$3,$4,$5)`,
 		upstreamID, accountID, userID, toolkit, fakeComposioAuthConfigs[toolkit]); err != nil {
 		t.Fatal(err)

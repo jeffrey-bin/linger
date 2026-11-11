@@ -169,7 +169,7 @@ func TestManagedAppsConcurrentProvisioning(t *testing.T) {
 	provider.mu.Lock()
 	defer provider.mu.Unlock()
 	link := provider.links[connections[0].UpstreamConnectionID]
-	if link["user_id"] != "co_workspace:ci:account:account_alice" {
+	if link["user_id"] != "linger:ci:account:account_alice" {
 		t.Fatalf("upstream user %q", link["user_id"])
 	}
 	if link["auth_config_id"] == "ac_foreign" {
@@ -300,9 +300,9 @@ func TestManagedAppsCreateCustomAuthConfigs(t *testing.T) {
 	bodies := provider.createBodies
 	provider.mu.Unlock()
 	want := []map[string]any{
-		{"toolkit": map[string]any{"slug": "higgsfield_mcp"}, "auth_config": map[string]any{"type": "use_custom_auth", "name": "co_workspace:ci:higgsfield_mcp:DCR_OAUTH:v1", "authScheme": "DCR_OAUTH", "credentials": map[string]any{}}},
-		{"toolkit": map[string]any{"slug": "fal_ai"}, "auth_config": map[string]any{"type": "use_custom_auth", "name": "co_workspace:ci:fal_ai:API_KEY:v1", "authScheme": "API_KEY", "credentials": map[string]any{}}},
-		{"toolkit": map[string]any{"slug": "linear"}, "auth_config": map[string]any{"type": "use_composio_managed_auth", "name": "co_workspace:ci:linear:OAUTH2:v1", "auth_scheme": "OAUTH2"}},
+		{"toolkit": map[string]any{"slug": "higgsfield_mcp"}, "auth_config": map[string]any{"type": "use_custom_auth", "name": "linger:ci:higgsfield_mcp:DCR_OAUTH:v1", "authScheme": "DCR_OAUTH", "credentials": map[string]any{}}},
+		{"toolkit": map[string]any{"slug": "fal_ai"}, "auth_config": map[string]any{"type": "use_custom_auth", "name": "linger:ci:fal_ai:API_KEY:v1", "authScheme": "API_KEY", "credentials": map[string]any{}}},
+		{"toolkit": map[string]any{"slug": "linear"}, "auth_config": map[string]any{"type": "use_composio_managed_auth", "name": "linger:ci:linear:OAUTH2:v1", "auth_scheme": "OAUTH2"}},
 	}
 	if !reflect.DeepEqual(bodies, want) {
 		t.Fatalf("auth config requests = %v", bodies)
@@ -316,8 +316,8 @@ func TestManagedAppsReuseExistingCustomAuthConfig(t *testing.T) {
 	pool, provider, server := managedAppsFixture(t)
 	service := managedAppsService(t, pool, server)
 	provider.mu.Lock()
-	provider.configs["co_workspace:ci:fal_ai:API_KEY:v1"] = managedAuthConfig{id: "ac_existing", toolkit: "fal_ai", scheme: "API_KEY"}
-	provider.configs["co_workspace:ci:higgsfield_mcp:DCR_OAUTH:v1"] = managedAuthConfig{id: "ac_wrong_kind", toolkit: "higgsfield_mcp", scheme: "DCR_OAUTH", managed: true}
+	provider.configs["linger:ci:fal_ai:API_KEY:v1"] = managedAuthConfig{id: "ac_existing", toolkit: "fal_ai", scheme: "API_KEY"}
+	provider.configs["linger:ci:higgsfield_mcp:DCR_OAUTH:v1"] = managedAuthConfig{id: "ac_wrong_kind", toolkit: "higgsfield_mcp", scheme: "DCR_OAUTH", managed: true}
 	provider.mu.Unlock()
 	connection, err := service.CreateConnection(t.Context(), "account_alice", "fal_ai")
 	if err != nil {

@@ -91,7 +91,7 @@ func TestEnvironmentUserIdentityIsStableAndDistinct(t *testing.T) {
 	if ci.UserIDForAccount("same-account") == owner.UserIDForAccount("same-account") {
 		t.Fatal("environments share user identity")
 	}
-	if got := ci.UserIDForAccount("same-account"); got != "co_workspace:ci:account:same-account" {
+	if got := ci.UserIDForAccount("same-account"); got != "linger:ci:account:same-account" {
 		t.Fatal(got)
 	}
 	for _, invalid := range []string{"CI", "../ci", "ci:account:foreign", " ci"} {
