@@ -88,9 +88,9 @@ func (m *Manager) holdFocusedInput(ctx context.Context) (context.Context, func()
 	if err != nil || held {
 		return ctx, release, err
 	}
-	if m.browserActionUnknown() {
+	if unknown := m.browserActionUnknown(); unknown != "" {
 		release()
-		return ctx, nil, fmt.Errorf("COMPUTER_ACTION_UNKNOWN: an earlier browser action has no verified cleanup receipt; input that needs the front window or the clipboard waits until its task ends; a restart alone does not clear it: %w", errNotSent)
+		return ctx, nil, fmt.Errorf("COMPUTER_ACTION_UNKNOWN: an earlier browser action has no verified cleanup receipt, so input that needs the front window or the clipboard waits; %s: %w", unknown, errNotSent)
 	}
 	return ctx, release, nil
 }

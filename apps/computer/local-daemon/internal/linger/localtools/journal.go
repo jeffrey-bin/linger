@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -29,7 +30,10 @@ type actionJournal struct {
 	mu     sync.Mutex
 	path   string
 	active *actionIdentity
-	slot   chan struct{}
+	// restored marks an active record read from disk: an earlier Daemon left
+	// it, so no task of this one holds its receipt.
+	restored bool
+	slot     chan struct{}
 }
 
 type actionReceipt struct {
@@ -60,7 +64,7 @@ func openJournal(path string) (*actionJournal, error) {
 	if json.Unmarshal(data, &stored) != nil || stored.Version != 1 || (stored.Active != nil && stored.Active.Nonce == "") {
 		return nil, errors.New("invalid local tool action state; input remains blocked")
 	}
-	j.active = stored.Active
+	j.active, j.restored = stored.Active, stored.Active != nil
 	return j, nil
 }
 
@@ -85,7 +89,7 @@ func (j *actionJournal) begin(ctx context.Context, identity actionIdentity) (*ac
 		<-j.slot
 		return nil, err
 	}
-	j.active = &identity
+	j.active, j.restored = &identity, false
 	return &actionReceipt{journal: j, nonce: identity.Nonce}, nil
 }
 
@@ -139,6 +143,20 @@ func (r *actionReceipt) finish(confirmed bool) error {
 	j.mu.Unlock()
 	r.release.Do(func() { <-j.slot })
 	return err
+}
+
+// unknownAction describes the unknown action this journal holds, or returns
+// "" when it holds none.
+func (j *actionJournal) unknownAction() string {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	if j.active == nil {
+		return ""
+	}
+	if j.restored {
+		return fmt.Sprintf("Agent %q left it in %s before the Daemon restarted; no task settles it; the user removes that file once they know the action finished", j.active.AgentID, j.path)
+	}
+	return fmt.Sprintf("Agent %q left it in %s; it settles when that task ends", j.active.AgentID, j.path)
 }
 
 func (j *actionJournal) blocked() bool {

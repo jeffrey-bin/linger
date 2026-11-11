@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -74,30 +75,6 @@ func agentBrowserOp(t *testing.T, m *Manager, agent string) *operation {
 	return op
 }
 
-type span struct{ start, end time.Time }
-
-func (s span) overlaps(other span) bool {
-	return s.start.Before(other.end) && other.start.Before(s.end)
-}
-
-// timedCalls runs each call at once and returns when each ran.
-func timedCalls(t *testing.T, calls ...func() error) []span {
-	t.Helper()
-	spans := make([]span, len(calls))
-	var wg sync.WaitGroup
-	for i, call := range calls {
-		wg.Go(func() {
-			spans[i].start = time.Now()
-			if err := call(); err != nil {
-				t.Errorf("call %d: %v", i, err)
-			}
-			spans[i].end = time.Now()
-		})
-	}
-	wg.Wait()
-	return spans
-}
-
 func browserClick(op *operation) func() error {
 	return func() error {
 		_, err := op.nativeBrowserCall(op.ctx, "click", json.RawMessage(`{}`))
@@ -105,65 +82,113 @@ func browserClick(op *operation) func() error {
 	}
 }
 
-// Each fixture call takes 250 ms.
+// Browser calls of two Agents run together; tasks of one Agent take turns.
 func TestBrowserCallsOfTwoAgentsRunTogetherAndOneAgentsTasksTakeTurns(t *testing.T) {
 	m := laneManager(t, t.TempDir())
-	a, b, again := agentBrowserOp(t, m, "a"), agentBrowserOp(t, m, "b"), agentBrowserOp(t, m, "a")
-	started := time.Now()
-	timedCalls(t, browserClick(a), browserClick(b))
-	if elapsed := time.Since(started); elapsed >= 450*time.Millisecond {
-		t.Fatalf("browser calls of two Agents queued behind each other: %v", elapsed)
+	b, again := agentBrowserOp(t, m, "b"), agentBrowserOp(t, m, "a")
+	// Hold Agent a's lane as a call of its in flight does.
+	_, release, err := m.holdLane(t.Context(), browserLane("a"))
+	if err != nil {
+		t.Fatal(err)
 	}
-	started = time.Now()
-	timedCalls(t, browserClick(a), browserClick(again))
-	if elapsed := time.Since(started); elapsed < 500*time.Millisecond {
-		t.Fatalf("two tasks of one Agent drove its browser at once: %v", elapsed)
+	if err := browserClick(b)(); err != nil {
+		t.Fatalf("Agent b's browser call failed while Agent a's ran: %v", err)
 	}
+	done := make(chan error, 1)
+	go func() { done <- browserClick(again)() }()
+	select {
+	case err := <-done:
+		t.Fatalf("two tasks of one Agent drove its browser at once: %v", err)
+	case <-time.After(100 * time.Millisecond):
+	}
+	release()
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+}
+
+// focusBusy reports whether a hold of the gate waits: it gives up after a
+// short wait and then returns the not-sent error.
+func focusBusy(t *testing.T, m *Manager, exclusive bool) bool {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
+	defer cancel()
+	_, release, err := m.holdFocus(ctx, exclusive)
+	if err == nil {
+		release()
+		return false
+	}
+	if !errors.Is(err, errNotSent) || !strings.Contains(err.Error(), "COMPUTER_BUSY") {
+		t.Fatalf("a cancelled wait for the gate: %v", err)
+	}
+	return true
 }
 
 // A desktop input that needs the front window waits for browser calls in
 // flight and holds back new ones; the call sends nothing until then.
 func TestFocusedDesktopInputAndBrowserCallsTakeTurns(t *testing.T) {
 	m := laneManager(t, t.TempDir())
-	a, b := agentBrowserOp(t, m, "a"), agentBrowserOp(t, m, "b")
-	exclusive := func() error {
-		// Start once the browser calls are in flight.
-		time.Sleep(50 * time.Millisecond)
-		ctx, release, err := m.holdFocus(t.Context(), true)
-		if err != nil {
-			return err
-		}
-		if !holdsFocus(ctx) {
-			return errors.New("exclusive hold not marked")
-		}
-		time.Sleep(250 * time.Millisecond)
-		release()
-		return nil
-	}
-	spans := timedCalls(t, browserClick(a), exclusive, browserClick(b))
-	if !spans[0].overlaps(spans[2]) {
-		t.Fatalf("browser calls of two Agents queued behind each other: %v", spans)
-	}
-	held := span{spans[1].end.Add(-250 * time.Millisecond), spans[1].end}
-	if held.start.Before(spans[0].end) || held.start.Before(spans[2].end) {
-		t.Fatalf("a focused desktop input ran beside a browser call: %v", spans)
-	}
-	// A browser call that arrives while that input waits runs after it.
-	ctx, release, err := m.holdFocus(t.Context(), true)
+	_, releaseBrowser, err := m.holdFocus(t.Context(), false)
 	if err != nil {
 		t.Fatal(err)
 	}
+	if focusBusy(t, m, false) {
+		t.Fatal("browser calls of two Agents queued behind each other")
+	}
+	if !focusBusy(t, m, true) {
+		t.Fatal("a focused desktop input ran beside a browser call")
+	}
+	type hold struct {
+		ctx     context.Context
+		release func()
+	}
+	held := make(chan hold, 1)
+	go func() {
+		ctx, release, err := m.holdFocus(t.Context(), true)
+		if err != nil {
+			t.Error(err)
+			release = func() {}
+		}
+		held <- hold{ctx, release}
+	}()
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		m.focus.mu.Lock()
+		waiting := m.focus.waiting
+		m.focus.mu.Unlock()
+		if waiting == 1 {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the desktop input never waited")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	// A browser call that arrives while that input waits runs after it.
+	if !focusBusy(t, m, false) {
+		t.Fatal("a browser call overtook a waiting desktop input")
+	}
+	select {
+	case <-held:
+		t.Fatal("a focused desktop input ran beside a browser call")
+	default:
+	}
+	releaseBrowser()
+	input := <-held
+	if !holdsFocus(input.ctx) {
+		t.Fatal("exclusive hold not marked")
+	}
+	if _, _, err := m.holdFocus(input.ctx, true); err != nil {
+		t.Fatalf("a nested input did not reuse the hold: %v", err)
+	}
 	done := make(chan error, 1)
-	go func() { done <- browserClick(a)() }()
+	go func() { done <- browserClick(agentBrowserOp(t, m, "a"))() }()
 	select {
 	case err := <-done:
 		t.Fatalf("a browser call ran during focused desktop input: %v", err)
 	case <-time.After(100 * time.Millisecond):
 	}
-	if _, _, err := m.holdFocus(ctx, true); err != nil {
-		t.Fatalf("a nested input did not reuse the hold: %v", err)
-	}
-	release()
+	input.release()
 	if err := <-done; err != nil {
 		t.Fatal(err)
 	}
@@ -289,6 +314,10 @@ func TestLaneRecordsSurviveRestartPerLane(t *testing.T) {
 	if laneBlocked(t, restarted, browserLane("b")) || restarted.journal.blocked() {
 		t.Fatal("an unknown browser action blocked another lane after a restart")
 	}
+	// No task of this Daemon settles the record, so the refusal names it.
+	if _, _, err := restarted.holdFocusedInput(t.Context()); err == nil || !strings.Contains(err.Error(), "before the Daemon restarted") || !strings.Contains(err.Error(), browserJournalPrefix) {
+		t.Fatalf("focused desktop input after a restart left browser records: %v", err)
+	}
 	// A settled record leaves no file behind.
 	journal, _ := restarted.namedJournal(browserLane("b"))
 	receipt, err := journal.begin(t.Context(), actionIdentity{AgentID: "b", OperationID: "op", Session: "s"})
@@ -309,6 +338,9 @@ func TestLanesAndFocusUnderLoad(t *testing.T) {
 	m := laneManager(t, t.TempDir())
 	ctx, cancel := context.WithTimeout(t.Context(), 20*time.Second)
 	defer cancel()
+	// Each side counts itself in before it looks at the other, so a desktop
+	// input and a browser call holding the gate at once see each other.
+	var desktop, browsers atomic.Int32
 	var wg sync.WaitGroup
 	for worker := range 16 {
 		wg.Go(func() {
@@ -331,7 +363,20 @@ func TestLanesAndFocusUnderLoad(t *testing.T) {
 						releases = append(releases, release)
 					}
 				}
-				_ = held
+				if err == nil {
+					if holdsFocus(held) {
+						if desktop.Add(1) > 1 || browsers.Load() > 0 {
+							t.Error("a focused desktop input ran beside another holder of the gate")
+						}
+						desktop.Add(-1)
+					} else {
+						browsers.Add(1)
+						if desktop.Load() > 0 {
+							t.Error("a browser call ran beside a focused desktop input")
+						}
+						browsers.Add(-1)
+					}
+				}
 				for i := len(releases) - 1; i >= 0; i-- {
 					if releases[i] != nil {
 						releases[i]()
@@ -525,6 +570,13 @@ func TestEverydayChromeSeatsKeepAgentsApart(t *testing.T) {
 	}
 	if err := task("b"); err != nil {
 		t.Fatalf("another Agent's seat was blocked: %v", err)
+	}
+	// A record left on the whole profile, before the extension kept many
+	// clients, still guards every seat of that profile.
+	whole := laneJournal(t, m, chromeProfileJournal("Default"))
+	leaveUnknown(t, whole)
+	if err := task("b"); err == nil || !strings.Contains(err.Error(), "COMPUTER_ACTION_UNKNOWN") || !strings.Contains(err.Error(), whole.path) {
+		t.Fatalf("a seat ran beside an unknown action on its whole profile: %v", err)
 	}
 	if err := m.closeUserChrome(); err != nil {
 		t.Fatal(err)

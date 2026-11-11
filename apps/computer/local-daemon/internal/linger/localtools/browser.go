@@ -84,6 +84,17 @@ func (op *operation) nativeBrowserCall(ctx context.Context, name string, args js
 	journalName := browserLane(op.spec.AgentID)
 	if chrome != nil {
 		journalName = chromeProfileJournal(seat)
+		// The seat follows the installed extension. An action left on the
+		// whole profile before an upgrade may still reach this Agent's tabs.
+		if seat != chrome.Profile {
+			whole, err := op.manager.namedJournal(chromeProfileJournal(chrome.Profile))
+			if err != nil {
+				return nil, err
+			}
+			if unknown := whole.unknownAction(); unknown != "" {
+				return nil, fmt.Errorf("COMPUTER_ACTION_UNKNOWN: an earlier action in this Chrome profile has no verified cleanup receipt; %s: %w", unknown, errNotSent)
+			}
+		}
 	}
 	journal, err := op.manager.namedJournal(journalName)
 	if err != nil {

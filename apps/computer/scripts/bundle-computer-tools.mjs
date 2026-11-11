@@ -304,6 +304,24 @@ async function assetFiles(root, relative = "") {
   return files;
 }
 
+// The pnpm patch keeps focus emulation on CDP connections; without it Agents
+// cannot work in background tabs at once. An install that skipped the patch
+// would still bundle, so check the staged file itself.
+async function assertPlaywrightPatched(root, packages) {
+  const core = packages.filter(({ name }) => name === "playwright-core");
+  if (core.length === 0) throw new Error("Playwright core was not staged");
+  for (const { path: relative } of core) {
+    const bundle = await readFile(
+      path.join(root, relative, "lib/coreBundle.js"),
+      "utf8",
+    );
+    if (!bundle.includes("// Linger: keep focus emulation on every CDP"))
+      throw new Error(
+        `${relative}/lib/coreBundle.js lacks the focus emulation patch`,
+      );
+  }
+}
+
 export async function stageComputerTools(
   bundle,
   {
@@ -315,6 +333,7 @@ export async function stageComputerTools(
   await rm(root, { recursive: true, force: true });
   await mkdir(root, { recursive: true });
   const packages = await stagePackages(root);
+  await assertPlaywrightPatched(root, packages);
   await mkdir(path.join(root, "extensions"), { recursive: true });
   await cp(
     path.join(computerRoot, "tools/pi-mcp.mjs"),

@@ -185,7 +185,9 @@ Agents' browser calls run at the same time as each other and as desktop reads.
 A desktop input that needs the front window or the clipboard waits for the
 browser calls in flight. From the moment it starts waiting, new browser calls
 wait for it, because a browser call can bring Chrome forward or copy and paste
-in the page. These inputs are keys and text, foreground and modifier clicks,
+in the page. A browser call holds its turn until it returns, so one long call,
+such as a slow navigation or `browser_wait_for`, delays the waiting input and
+with it every Agent's next browser call. These inputs are keys and text, foreground and modifier clicks,
 double-clicks, which may fall back to the front app, drags, cursor moves,
 scripts, batches, app launches, bringing a window to the front, window moves,
 the clipboard tools, all native Linux input, every Windows input, and text
@@ -350,7 +352,11 @@ other where one could still reach the other: an unknown browser action blocks
 desktop input that needs the front window or the clipboard, and an unknown
 desktop input of that kind blocks browser calls, so does a record that an
 older Daemon left without saying which kind it was. Such a call returns
-`COMPUTER_ACTION_UNKNOWN`. After a
+`COMPUTER_ACTION_UNKNOWN` and names the Agent and the record file that blocks it.
+A record that an earlier Daemon left has no task here to settle it; the error
+says so, and removing that file once the action is known to be finished frees
+the desktop. An unknown action on a whole everyday Chrome profile, left before
+the extension kept many clients, also blocks every seat of that profile. After a
 cancellation, the original connection must confirm that the Cua session was
 cleaned up; the exit of a shared service's proxy process does not count, and a
 Daemon restart does not clear unknown actions. Without the original connection's

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -548,17 +549,17 @@ func (m *Manager) openBrowserJournals() error {
 	return nil
 }
 
-// browserActionUnknown reports a browser action whose outcome is unknown,
-// in any Agent's browser or everyday Chrome profile.
-func (m *Manager) browserActionUnknown() bool {
+// browserActionUnknown describes a browser action whose outcome is unknown,
+// in any Agent's browser or everyday Chrome seat, or returns "" when none is.
+func (m *Manager) browserActionUnknown() string {
 	m.laneMu.Lock()
 	defer m.laneMu.Unlock()
-	for _, journal := range m.browserJournals {
-		if journal.blocked() {
-			return true
+	for _, path := range slices.Sorted(maps.Keys(m.browserJournals)) {
+		if unknown := m.browserJournals[path].unknownAction(); unknown != "" {
+			return unknown
 		}
 	}
-	return false
+	return ""
 }
 
 // namedJournal returns the action journal of an Agent's browser lane or of a

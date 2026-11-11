@@ -32,5 +32,7 @@ patchedDependencies:
   "deepagents@1.12.0": patches/deepagents@1.12.0.patch
   # Playwright MCP drops focus emulation on CDP connections, the user's Chrome
   # and the Agent Chrome; background tabs then stop rendering and drop input,
-  # so Agents could not work in parallel in their own tabs.
+  # so Agents could not work in parallel in their own tabs. Re-create the patch
+  # on each @playwright/mcp bump; bundle-computer-tools.mjs refuses a bundle
+  # without the patched line.
   "playwright-core@1.64.0-alpha-1790635538000": patches/playwright-core@1.64.0-alpha-1790635538000.patch
