@@ -31,7 +31,8 @@ type actionJournal struct {
 	path   string
 	active *actionIdentity
 	// restored marks an active record read from disk: an earlier Daemon left
-	// it, so no task of this one holds its receipt.
+	// it, so no task of this one holds its receipt. Only the user settles it,
+	// by removing the file once they know the action finished.
 	restored bool
 	slot     chan struct{}
 }
@@ -80,7 +81,7 @@ func (j *actionJournal) begin(ctx context.Context, identity actionIdentity) (*ac
 		<-j.slot
 		return nil, context.Cause(ctx)
 	}
-	if j.active != nil {
+	if j.pendingLocked() {
 		<-j.slot
 		return nil, errors.New("COMPUTER_ACTION_UNKNOWN: an earlier action has no verified cleanup receipt; this desktop, Agent browser or everyday Chrome seat stays blocked until it settles")
 	}
@@ -150,11 +151,11 @@ func (r *actionReceipt) finish(confirmed bool) error {
 func (j *actionJournal) unknownAction() string {
 	j.mu.Lock()
 	defer j.mu.Unlock()
-	if j.active == nil {
+	if !j.pendingLocked() {
 		return ""
 	}
 	if j.restored {
-		return fmt.Sprintf("Agent %q left it in %s before the Daemon restarted; no task settles it; the user removes that file once they know the action finished", j.active.AgentID, j.path)
+		return fmt.Sprintf("Agent %q left it in %s before the Daemon restarted; no task settles it; remove that file once the action is known to be finished", j.active.AgentID, j.path)
 	}
 	return fmt.Sprintf("Agent %q left it in %s; it settles when that task ends", j.active.AgentID, j.path)
 }
@@ -162,7 +163,23 @@ func (j *actionJournal) unknownAction() string {
 func (j *actionJournal) blocked() bool {
 	j.mu.Lock()
 	defer j.mu.Unlock()
-	return j.active != nil
+	return j.pendingLocked()
+}
+
+// pendingLocked reports an active record. A restored record whose file the
+// user removed is dropped; any other failure to look keeps it. The caller
+// holds j.mu.
+func (j *actionJournal) pendingLocked() bool {
+	if j.active == nil {
+		return false
+	}
+	if j.restored {
+		if _, err := os.Lstat(j.path); errors.Is(err, os.ErrNotExist) {
+			j.active, j.restored = nil, false
+			return false
+		}
+	}
+	return true
 }
 
 // blocksFocus reports an unknown desktop input that a browser call bringing
@@ -170,5 +187,5 @@ func (j *actionJournal) blocked() bool {
 func (j *actionJournal) blocksFocus() bool {
 	j.mu.Lock()
 	defer j.mu.Unlock()
-	return j.active != nil && !j.active.Background
+	return j.pendingLocked() && !j.active.Background
 }

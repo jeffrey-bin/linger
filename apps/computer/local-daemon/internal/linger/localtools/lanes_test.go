@@ -318,6 +318,21 @@ func TestLaneRecordsSurviveRestartPerLane(t *testing.T) {
 	if _, _, err := restarted.holdFocusedInput(t.Context()); err == nil || !strings.Contains(err.Error(), "before the Daemon restarted") || !strings.Contains(err.Error(), browserJournalPrefix) {
 		t.Fatalf("focused desktop input after a restart left browser records: %v", err)
 	}
+	// Removing the files once the actions are known to be finished frees the
+	// lane, the seat and focused desktop input without another restart.
+	for _, lane := range []string{browserLane("a"), chromeProfileJournal("Default")} {
+		if err := os.Remove(laneJournal(t, restarted, lane).path); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if laneBlocked(t, restarted, browserLane("a")) || laneBlocked(t, restarted, chromeProfileJournal("Default")) {
+		t.Fatal("a removed record still blocked its lane")
+	}
+	_, release, err := restarted.holdFocusedInput(t.Context())
+	if err != nil {
+		t.Fatalf("focused desktop input stayed blocked after the records were removed: %v", err)
+	}
+	release()
 	// A settled record leaves no file behind.
 	journal, _ := restarted.namedJournal(browserLane("b"))
 	receipt, err := journal.begin(t.Context(), actionIdentity{AgentID: "b", OperationID: "op", Session: "s"})

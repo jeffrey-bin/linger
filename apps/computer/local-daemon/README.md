@@ -354,8 +354,9 @@ desktop input of that kind blocks browser calls, so does a record that an
 older Daemon left without saying which kind it was. Such a call returns
 `COMPUTER_ACTION_UNKNOWN` and names the Agent and the record file that blocks it.
 A record that an earlier Daemon left has no task here to settle it; the error
-says so, and removing that file once the action is known to be finished frees
-the desktop. An unknown action on a whole everyday Chrome profile, left before
+says so. Removing that file once the action is known to be finished frees its
+desktop, Agent browser or seat at the next call, with no restart. A record of
+this Daemon's own task still settles only through that task. An unknown action on a whole everyday Chrome profile, left before
 the extension kept many clients, also blocks every seat of that profile. After a
 cancellation, the original connection must confirm that the Cua session was
 cleaned up; the exit of a shared service's proxy process does not count, and a
