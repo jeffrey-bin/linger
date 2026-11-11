@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://docs.simplexai.com/"><img alt="Documentation" src="https://img.shields.io/badge/Docs-0975ce"></a>
+  <a href="https://docs.heylinger.com/"><img alt="Documentation" src="https://img.shields.io/badge/Docs-0975ce"></a>
   <a href="https://github.com/simplexai-labs/PolyStrata"><img alt="Powered by PolyStrata" src="https://img.shields.io/badge/Powered%20by-PolyStrata-1a1a16?logo=github&logoColor=white"></a>
   <a href="https://github.com/Niko1221/Strata"><img alt="Powered by Strata" src="https://img.shields.io/badge/Powered%20by-Strata-1a1a16?logo=github&logoColor=white"></a>
 </p>
@@ -85,12 +85,12 @@ reach the server.
 
 Open <http://localhost:3000> and sign in. The app then shows the commands that
 connect your computer. See
-[Install with Docker Compose](https://docs.simplexai.com/install/docker-compose)
+[Install with Docker Compose](https://docs.heylinger.com/install/docker-compose)
 to serve other computers on your network and to turn on voice.
 
 ## Learn more
 
-The full documentation lives at **[docs.simplexai.com](https://docs.simplexai.com/)**.
+The full documentation lives at **[docs.heylinger.com](https://docs.heylinger.com/)**.
 
 <table>
   <tr>
@@ -98,11 +98,11 @@ The full documentation lives at **[docs.simplexai.com](https://docs.simplexai.co
     <th width="520" align="left">What it covers</th>
   </tr>
   <tr>
-    <td><a href="https://docs.simplexai.com/install/desktop-app">Desktop app</a></td>
+    <td><a href="https://docs.heylinger.com/install/desktop-app">Desktop app</a></td>
     <td>Install the app, or build it from source.</td>
   </tr>
   <tr>
-    <td><a href="https://docs.simplexai.com/models/choose-a-runtime">Choose a runtime</a></td>
+    <td><a href="https://docs.heylinger.com/models/choose-a-runtime">Choose a runtime</a></td>
     <td>Claude Code, Codex or Pi, on local models or a subscription.</td>
   </tr>
   <tr>
