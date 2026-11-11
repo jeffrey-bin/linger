@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo-horizontal.svg" width="900" alt="Linger"></p>
+<p align="center"><img src="assets/logo-horizontal.svg" width="360" alt="Linger"></p>
 
 <p align="center"><b>Linger is an open-source personal agent that runs locally on your computer.</b></p>
 
@@ -43,9 +43,6 @@ Powered by **Efficient AI model–harness co-design**, it brings powerful local 
 | Agent teams                          | Brings in the agents a job needs and writes one `team.md` that they all follow.                                                                        |
 
 ## Quick start
-
-Linger runs your agents on your own computer. You need Claude Code, Codex or Pi
-installed and signed in there. Pick one of two ways to start.
 
 ### Option 1: the desktop app
 
@@ -134,16 +131,6 @@ Choose the channel that best fits your question:
 - [Email](mailto:tonyzhang@simplexai.com): write to tonyzhang@simplexai.com for anything that does not fit an issue.
 - [Security policy](SECURITY.md): report a vulnerability privately, never in a public issue.
 
-## Star History
-
-<a href="https://www.star-history.com/#simplexai-labs/linger&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=simplexai-labs/linger&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=simplexai-labs/linger&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=simplexai-labs/linger&type=Date" />
-  </picture>
-</a>
-
 ## Acknowledgements
 
 Linger is built on these open-source projects:
@@ -168,3 +155,13 @@ Have an idea? [Open a feature request](https://github.com/simplexai-labs/linger/
 This repository is licensed under the [Linger Open Source License](LICENSE),
 based on Apache 2.0 with additional conditions. [NOTICE](NOTICE) lists
 third-party code and the logos and images that this license does not cover.
+
+## Star History
+
+<a href="https://www.star-history.com/#simplexai-labs/linger&type=date&legend=top-left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=simplexai-labs/linger&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=simplexai-labs/linger&type=date&legend=top-left" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=simplexai-labs/linger&type=date&legend=top-left" />
+  </picture>
+</a>
