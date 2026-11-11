@@ -2153,3 +2153,102 @@ describe("LocalServerModule on Windows", () => {
     await f.host.stop("quit");
   });
 });
+
+describe("LocalServerModule owner account", () => {
+  const ORIGIN = "http://localhost:3000";
+  const installed =
+    (account?: Record<string, unknown>, mode = 0o600) =>
+    (home: string) => {
+      mkdirSync(path.join(home, "desktop"), { recursive: true });
+      writeFileSync(
+        path.join(home, "desktop", "local-server.json"),
+        JSON.stringify({ home, repo: "/source", origin: ORIGIN }),
+      );
+      if (!account) return;
+      const directory = path.join(home, "instances", LOCAL_INSTANCE);
+      mkdirSync(directory, { recursive: true });
+      const file = path.join(directory, "local-account.json");
+      writeFileSync(file, JSON.stringify(account));
+      chmodSync(file, mode);
+    };
+  const OWNER = {
+    email: "owner@linger.local",
+    password: "a-private-password",
+    provisioned: true,
+  };
+
+  it("signs the window in to the installed server with the account file", async () => {
+    const f = fixture({}, { serverUrl: ORIGIN }, installed(OWNER));
+    await f.host.start();
+    await vi.waitFor(() => expect(f.module.status().phase).toBe("ready"));
+    expect(await f.module.servesWindow()).toBe(true);
+    expect(await f.module.account()).toEqual({
+      email: OWNER.email,
+      password: OWNER.password,
+      file: path.join(
+        f.home,
+        "instances",
+        LOCAL_INSTANCE,
+        "local-account.json",
+      ),
+    });
+    await f.module.signInWithAccount();
+    expect(f.signIn).toHaveBeenCalledWith(ORIGIN, OWNER.email, OWNER.password);
+    await f.host.stop("quit");
+  });
+
+  it("does not offer the account to another server", async () => {
+    const f = fixture(
+      {},
+      { serverUrl: "https://team.example.com" },
+      installed(OWNER),
+    );
+    await f.host.start();
+    expect(await f.module.servesWindow()).toBe(false);
+    await expect(f.module.signInWithAccount()).rejects.toThrow(
+      "This window is not showing the Linger on this computer.",
+    );
+    expect(f.signIn).not.toHaveBeenCalled();
+    await f.host.stop("quit");
+  });
+
+  it("does not offer it before Linger is installed here", async () => {
+    const f = fixture({}, { serverUrl: ORIGIN });
+    await f.host.start();
+    expect(await f.module.servesWindow()).toBe(false);
+    await expect(f.module.account()).rejects.toThrow(
+      "Linger is not installed on this computer.",
+    );
+    await f.host.stop("quit");
+  });
+
+  it.each([
+    [
+      "missing",
+      installed(),
+      /^The account file of Linger on this computer is missing \(.*local-account\.json\)\.$/,
+    ],
+    [
+      "readable by others",
+      installed(OWNER, 0o644),
+      "The local account file must be private and owned by the current user (chmod 600).",
+    ],
+    [
+      "not provisioned",
+      installed({ ...OWNER, provisioned: false }),
+      "The local account file is invalid or the account has not been created.",
+    ],
+  ])(
+    "says why a %s account file cannot sign in",
+    async (_case, prepare, message) => {
+      const f = fixture({}, { serverUrl: ORIGIN }, prepare);
+      await f.host.start();
+      await vi.waitFor(() => expect(f.module.status().phase).toBe("ready"));
+      const failure = f.module.signInWithAccount();
+      await expect(failure).rejects.toThrow(message);
+      await expect(failure).rejects.not.toThrow(OWNER.password);
+      expect(f.signIn).not.toHaveBeenCalled();
+      await f.host.stop("quit");
+    },
+  );
+});

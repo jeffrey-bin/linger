@@ -1207,6 +1207,70 @@
       section.active .connected {
         animation: enter 420ms 120ms var(--ease) both;
       }
+      /* The owner account of the finished install. */
+      .account {
+        width: 100%;
+        max-width: 420px;
+        margin: 18px auto 0;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.86);
+        text-align: left;
+      }
+      .account-title {
+        margin: 0 0 8px;
+        color: var(--ink);
+        font-size: 12.5px;
+        font-weight: 600;
+      }
+      .account dl {
+        display: grid;
+        grid-template-columns: 64px 1fr auto auto;
+        align-items: center;
+        gap: 6px 8px;
+        margin: 0;
+      }
+      .account dt {
+        color: #5f5e55;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .account dd {
+        min-width: 0;
+        margin: 0;
+        overflow: hidden;
+        color: var(--ink);
+        font-size: 12.5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        user-select: text;
+        -webkit-user-select: text;
+      }
+      .account dd.email {
+        grid-column: 2 / -1;
+      }
+      .account dd.secret {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: 0.02em;
+      }
+      .account-note {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 11.5px;
+      }
+      .account-note .link {
+        padding: 2px 4px;
+        font-size: 11.5px;
+      }
+      .account-error {
+        margin: 0;
+        color: var(--error);
+        font-size: 12px;
+      }
+      section.active .account {
+        animation: enter 420ms 160ms var(--ease) both;
+      }
       /* Confetti for a finished install, drawn over the whole window. */
       #confetti {
         position: fixed;
@@ -1518,6 +1582,24 @@
         <p class="connected">
           <span class="live"></span>This computer is connected
         </p>
+        <div class="account" id="account" hidden>
+          <p class="account-title">Your account on this computer</p>
+          <dl id="account-fields">
+            <dt>Email</dt>
+            <dd class="email" id="account-email"></dd>
+            <dt>Password</dt>
+            <dd class="secret" id="account-password"></dd>
+            <button class="change" id="account-show" type="button">Show</button>
+            <button class="change" id="account-copy" type="button">Copy</button>
+          </dl>
+          <p class="account-note" id="account-note">
+            Use these to log in again if you log out.
+            <button class="link" id="account-reveal" type="button">
+              Open account file location
+            </button>
+          </p>
+          <p class="account-error" id="account-error" role="alert"></p>
+        </div>
         <div class="start">
           <button class="primary large" id="open" type="button">
             <span>Open Linger</span
@@ -2218,6 +2300,30 @@
           );
         }
         $("ready-lead").textContent = "Running on this computer, just for you.";
+        renderAccount(local.account);
+      };
+
+      // The password stays masked until Show; the main process copies it.
+      let copied = false;
+      const renderAccount = (account) => {
+        $("account").hidden = !account;
+        if (!account) return;
+        const error = account.error ?? "";
+        $("account-error").textContent = error;
+        $("account-error").hidden = !error;
+        $("account-fields").hidden = !!error;
+        $("account-note").hidden = !!error;
+        if (error) return;
+        $("account-email").textContent = account.email;
+        $("account-password").textContent =
+          account.password ?? "\u2022".repeat(12);
+        $("account-show").textContent = account.password ? "Hide" : "Show";
+        $("account-show").setAttribute(
+          "aria-label",
+          (account.password ? "Hide" : "Show") + " password",
+        );
+        $("account-copy").textContent = copied ? "Copied" : "Copy";
+        $("account-copy").setAttribute("aria-label", "Copy password");
       };
 
       const render = () => {
@@ -2443,6 +2549,24 @@
         render();
       });
       $("open").addEventListener("click", () => run({ op: "finish" }));
+      $("account-show").addEventListener("click", () =>
+        run({
+          op: "local.account.show",
+          on: !state.localServer.account?.password,
+        }),
+      );
+      $("account-copy").addEventListener("click", async () => {
+        if (!(await run({ op: "local.account.copy" }))) return;
+        copied = true;
+        render();
+        setTimeout(() => {
+          copied = false;
+          render();
+        }, 1500);
+      });
+      $("account-reveal").addEventListener("click", () =>
+        run({ op: "local.account.reveal" }),
+      );
       $("signin").addEventListener("click", () => {
         if (state.signedIn) return show("connect");
         if (pending !== null && pending !== "signin.open") return;

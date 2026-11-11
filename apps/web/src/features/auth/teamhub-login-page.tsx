@@ -1,5 +1,6 @@
 import {
   ArrowRight02Icon,
+  ComputerIcon,
   Mail01Icon,
   SquareLock02Icon,
   ViewIcon,
@@ -15,6 +16,10 @@ import { Icon } from "@/components/ui/icon";
 
 import { AuthShell } from "./auth-shell";
 import { safeAuthenticationReturnTo } from "./authentication-return-to";
+import {
+  type DesktopLocalAccount,
+  useDesktopLocalAccount,
+} from "./desktop-local-account";
 import {
   type AuthenticationResult,
   useTeamHubAuthentication,
@@ -33,6 +38,7 @@ export function TeamHubLoginPage({
     onAuthenticated,
     returnTo,
   });
+  const localAccount = useDesktopLocalAccount();
   const authenticationNotice =
     searchParams.get("reason") === "session-expired"
       ? "Your session has expired. Sign in again to continue."
@@ -45,8 +51,45 @@ export function TeamHubLoginPage({
           <FormFeedback tone="danger">{authenticationNotice}</FormFeedback>
         </div>
       ) : null}
+      {localAccount ? (
+        <LocalAccountSignIn
+          account={localAccount}
+          authentication={authentication}
+        />
+      ) : null}
       <AuthenticationForm authentication={authentication} />
     </AuthShell>
+  );
+}
+
+function LocalAccountSignIn({
+  account,
+  authentication,
+}: {
+  account: DesktopLocalAccount;
+  authentication: AuthenticationController;
+}) {
+  return (
+    <div className="mb-4">
+      <Button
+        className="w-full"
+        disabled={authentication.state.isSubmitting}
+        onClick={() => {
+          void authentication.signInWithDesktopAccount(account);
+        }}
+        size="large"
+        tone="secondary"
+        type="button"
+      >
+        <Icon icon={ComputerIcon} size={16} />
+        <span>Sign in with this computer's account</span>
+      </Button>
+      <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        <span>or</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+    </div>
   );
 }
 

@@ -5,11 +5,13 @@ import {
   IPC,
   type ComputerStatus,
   type DesktopSettings,
+  type LocalAccountSignIn,
   type WorkspaceGrantView,
 } from "../shared/api.js";
 import type { ComputerDaemonModule } from "./computer-daemon.js";
 import type { WorkspaceGrant } from "./config.js";
 import type { EnrollmentModule } from "./enrollment.js";
+import type { LocalServerModule } from "./local-server.js";
 import type { Module, ModuleContext } from "./modules.js";
 import { sameOrigin } from "./navigation.js";
 import type { PowerGuardModule } from "./power-guard.js";
@@ -56,6 +58,7 @@ export class DesktopIpcModule implements Module {
   readonly name = "DesktopIpc";
   readonly dependsOn = [
     "Enrollment",
+    "LocalServer",
     "PowerGuard",
     "ComputerDaemon",
     "WindowManager",
@@ -80,6 +83,7 @@ export class DesktopIpcModule implements Module {
     const grants = ctx.get<WorkspaceGrantsModule>("WorkspaceGrants");
     const windows = ctx.get<WindowManagerModule>("WindowManager");
     const power = ctx.get<PowerGuardModule>("PowerGuard");
+    const localServer = ctx.get<LocalServerModule>("LocalServer");
 
     const status = (): ComputerStatus => {
       const computerId = ctx.config.get().computerId;
@@ -132,6 +136,21 @@ export class DesktopIpcModule implements Module {
       // The daemon announces the name; a new name restarts it when idle.
       if (settings().displayName !== before) ctx.bus.emit("computer.renamed");
       return settings();
+    });
+
+    // The handler already checked that the caller is the window's server, so
+    // only the window's server needs to be the installed one.
+    handle(IPC.localAccountAvailable, () => localServer.servesWindow());
+    handle(IPC.localAccountSignIn, async (): Promise<LocalAccountSignIn> => {
+      try {
+        await localServer.signInWithAccount();
+        ctx.log.info("local_server.account_signed_in", {});
+        return { ok: true };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        ctx.log.warn("local_server.account_sign_in_failed", { error: message });
+        return { ok: false, message };
+      }
     });
 
     const permissions = this.#permissions;

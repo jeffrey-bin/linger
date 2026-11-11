@@ -390,6 +390,97 @@ describe("TeamHubLoginPage", () => {
   });
 });
 
+describe("TeamHubLoginPage in the desktop app", () => {
+  const LOCAL_BUTTON = "Sign in with this computer's account";
+  const desktop = (localAccount: {
+    available: () => Promise<boolean>;
+    signIn: () => Promise<unknown>;
+  }) => {
+    Object.assign(window, { lingerDesktop: { localAccount } });
+    return localAccount;
+  };
+  afterEach(() => {
+    delete (window as { lingerDesktop?: unknown }).lingerDesktop;
+  });
+
+  it("offers no account button in a browser", () => {
+    renderAuthenticationPage({});
+    expect(
+      screen.queryByRole("button", { name: LOCAL_BUTTON }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers no account button for a server this computer did not install", async () => {
+    const account = desktop({
+      available: vi.fn(async () => false),
+      signIn: vi.fn(),
+    });
+    renderAuthenticationPage({});
+    await waitFor(() => expect(account.available).toHaveBeenCalled());
+    expect(
+      screen.queryByRole("button", { name: LOCAL_BUTTON }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("signs in with one click and confirms the Session the desktop set", async () => {
+    const verified = {
+      id: "local-session",
+      identity: { account: { id: "owner" }, actors: [] },
+    };
+    const login = vi.fn();
+    const account = desktop({
+      available: async () => true,
+      signIn: vi.fn(async () => ({ ok: true })),
+    });
+    const onAuthenticated = vi.fn();
+    renderAuthenticationPage(
+      { login, getSession: () => verified },
+      { onAuthenticated },
+    );
+    fireEvent.click(await screen.findByRole("button", { name: LOCAL_BUTTON }));
+    await waitFor(() =>
+      expect(onAuthenticated).toHaveBeenCalledWith({
+        kind: "login",
+        session: verified,
+      }),
+    );
+    expect(account.signIn).toHaveBeenCalledOnce();
+    expect(login).not.toHaveBeenCalled();
+  });
+
+  it("shows why the desktop could not sign in", async () => {
+    desktop({
+      available: async () => true,
+      signIn: async () => ({
+        ok: false,
+        message: "The account file of Linger on this computer is missing.",
+      }),
+    });
+    const onAuthenticated = vi.fn();
+    renderAuthenticationPage({}, { onAuthenticated });
+    fireEvent.click(await screen.findByRole("button", { name: LOCAL_BUTTON }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The account file of Linger on this computer is missing.",
+    );
+    expect(onAuthenticated).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: LOCAL_BUTTON })).toBeEnabled();
+  });
+
+  it("asks for the email and password when the desktop call fails", async () => {
+    desktop({
+      available: async () => true,
+      signIn: async () => {
+        throw new Error("Not allowed");
+      },
+    });
+    renderAuthenticationPage({});
+    fireEvent.click(await screen.findByRole("button", { name: LOCAL_BUTTON }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This computer's account could not be used. Log in with your email and password.",
+    );
+  });
+});
+
 /**
  * Answers login and the Session check from the given handlers. Without a
  * Session handler, the Session echoes the latest login result.

@@ -20,6 +20,7 @@ import { pipeline } from "node:stream/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { createZstdDecompress } from "node:zlib";
 
+import { readLocalLogin } from "@linger/local-installation/account";
 import { downloadVerified } from "@linger/local-installation/download";
 import {
   removeRetrying,
@@ -43,6 +44,7 @@ import {
   nodeRuntimeDownloadUrls,
 } from "../../../../scripts/local-computer-node-distributions.mjs";
 import type { Module, ModuleContext } from "./modules.js";
+import { sameOrigin } from "./navigation.js";
 import { humanTenant, type EnrollmentModule } from "./enrollment.js";
 import type { WindowManagerModule } from "./window-manager.js";
 import {
@@ -791,6 +793,36 @@ export class LocalServerModule implements Module {
     this.#signInInstaller = undefined;
     this.#signInWake = undefined;
     this.#opened = undefined;
+  }
+
+  // Whether the window shows the Linger this app installed here; only then
+  // can its owner account sign the window in.
+  async servesWindow(): Promise<boolean> {
+    const record = await this.#readRecord();
+    const serverUrl = this.#ctx?.config.get().serverUrl;
+    return !!record && !!serverUrl && sameOrigin(record.origin, serverUrl);
+  }
+
+  // The owner account the installer created, read from its private file on
+  // every call so the password is never kept in memory.
+  async account(): Promise<LocalAccount> {
+    const record = await this.#readRecord();
+    if (!record) throw new Error("Linger is not installed on this computer.");
+    return readLocalAccount(
+      path.join(record.home, "instances", LOCAL_INSTANCE),
+    );
+  }
+
+  // Signs the window in to the installed Linger with its owner account; the
+  // password goes from the file to the server and nowhere else.
+  async signInWithAccount(): Promise<void> {
+    const record = await this.#readRecord();
+    if (!record || !(await this.servesWindow()))
+      throw new Error(
+        "This window is not showing the Linger on this computer.",
+      );
+    const account = await this.account();
+    await this.#options.signIn(record.origin, account.email, account.password);
   }
 
   // Starts the runtime's own login (the installer runs it), or hands it the
@@ -2233,6 +2265,26 @@ export const parseSetCookie = (header: string): SetCookie | undefined => {
   }
   return cookie;
 };
+
+export interface LocalAccount {
+  readonly email: string;
+  readonly password: string;
+  // The private local-account.json it came from.
+  readonly file: string;
+}
+
+// Reads an instance's owner account; a missing file says where it should be.
+export async function readLocalAccount(root: string): Promise<LocalAccount> {
+  try {
+    return await readLocalLogin({ root });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    throw new Error(
+      `The account file of Linger on this computer is missing (${path.join(root, "local-account.json")}).`,
+      { cause: error },
+    );
+  }
+}
 
 // Signs in to the local server with its owner and hands the session cookies
 // to the app's web session; the password is never stored.

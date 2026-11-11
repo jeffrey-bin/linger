@@ -29,6 +29,12 @@ export interface DesktopSettings {
   readonly displayName: string;
 }
 
+// Signing in with the owner account of the Linger this app installed; the
+// password stays in the main process.
+export type LocalAccountSignIn =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly message: string };
+
 export type DesktopPermissionId = "screen_recording" | "accessibility";
 
 // A permission step this app takes on its own Mac. Linger is this app, so
@@ -65,6 +71,12 @@ export interface LingerDesktopApi {
     get(): Promise<DesktopSettings>;
     set(patch: { displayName?: string }): Promise<DesktopSettings>;
   };
+  // The owner account of the Linger installed on this computer.
+  readonly localAccount: {
+    // Whether the window shows that Linger; false for any other server.
+    available(): Promise<boolean>;
+    signIn(): Promise<LocalAccountSignIn>;
+  };
   // macOS only.
   readonly permissions?: {
     act(step: DesktopPermissionStep): Promise<void>;
@@ -82,4 +94,6 @@ export const IPC = {
   settingsGet: "settings.get",
   settingsSet: "settings.set",
   permissionAct: "permission.act",
+  localAccountAvailable: "local-account.available",
+  localAccountSignIn: "local-account.sign-in",
 } as const;

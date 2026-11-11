@@ -14,6 +14,7 @@ import { useTeamHubRuntime } from "@/features/teamhub/teamhub-runtime";
 import type { TeamHubSession } from "@/features/teamhub/teamhub-types";
 
 import { authenticationOperation } from "./authentication-operation";
+import type { DesktopLocalAccount } from "./desktop-local-account";
 
 export interface AuthenticationResult {
   kind: "login";
@@ -76,10 +77,7 @@ export function useTeamHubAuthentication(input: {
     initialAuthenticationState,
   );
 
-  async function completeAuthentication(
-    result: AuthenticationResult,
-    signal: AbortSignal,
-  ) {
+  async function completeAuthentication(signal: AbortSignal) {
     let session: TeamHubSession;
     try {
       session = await authenticationOperation(signal, (signal) =>
@@ -100,7 +98,7 @@ export function useTeamHubAuthentication(input: {
     clearTeamHubQueries(queryClient);
     queryClient.setQueryData(teamHubSessionQueryKey, session);
     queryClient.setQueryData(teamHubIdentityQueryKey, session.identity);
-    result = { ...result, session };
+    const result: AuthenticationResult = { kind: "login", session };
     announceTeamHubAuthenticated();
     if (input.onAuthenticated)
       await authenticationOperation(signal, async () =>
@@ -127,11 +125,8 @@ export function useTeamHubAuthentication(input: {
       });
       return;
     }
-    const attempt = new AbortController();
-    activeSubmit.current = attempt;
-    dispatch({ type: "submit-start" });
-    try {
-      const session = await authenticationOperation(attempt.signal, (signal) =>
+    await runAttempt(async (signal) => {
+      await authenticationOperation(signal, (signal) =>
         teamHubData(
           client.api.POST("/v0/auth/login", {
             body: { identifier: email, password: state.password },
@@ -139,8 +134,35 @@ export function useTeamHubAuthentication(input: {
           }),
         ),
       );
+      return true;
+    });
+  }
+
+  // The desktop app signs this window in with the account of the Linger on
+  // this computer and sets the Session cookie; the page only confirms it.
+  async function signInWithDesktopAccount(account: DesktopLocalAccount) {
+    await runAttempt(async (signal) => {
+      const result = await authenticationOperation(signal, () =>
+        account.signIn().catch(() => ({
+          message: DESKTOP_ACCOUNT_UNAVAILABLE,
+          ok: false as const,
+        })),
+      );
+      if (result.ok) return true;
+      dispatch({ error: result.message, type: "operation-error" });
+      return false;
+    });
+  }
+
+  async function runAttempt(signIn: (signal: AbortSignal) => Promise<boolean>) {
+    if (activeSubmit.current) return;
+    const attempt = new AbortController();
+    activeSubmit.current = attempt;
+    dispatch({ type: "submit-start" });
+    try {
+      const signedIn = await signIn(attempt.signal);
       attempt.signal.throwIfAborted();
-      await completeAuthentication({ kind: "login", session }, attempt.signal);
+      if (signedIn) await completeAuthentication(attempt.signal);
     } catch (error) {
       if (activeSubmit.current === attempt)
         dispatch({
@@ -159,9 +181,13 @@ export function useTeamHubAuthentication(input: {
     changeField: (field: "email" | "password", value: string) =>
       dispatch({ field, type: "change-field", value }),
     handleSubmit,
+    signInWithDesktopAccount,
     state,
   };
 }
+
+const DESKTOP_ACCOUNT_UNAVAILABLE =
+  "This computer's account could not be used. Log in with your email and password.";
 
 function readAuthenticationError(error: unknown) {
   if (error instanceof TeamHubError) return error.message;

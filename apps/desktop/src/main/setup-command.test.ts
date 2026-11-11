@@ -38,6 +38,16 @@ describe("parseSetupCommand", () => {
     expect(parseSetupCommand({ op: "local.signin.cancel" })).toEqual({
       op: "local.signin.cancel",
     });
+    expect(parseSetupCommand({ op: "local.account.show", on: true })).toEqual({
+      op: "local.account.show",
+      on: true,
+    });
+    expect(parseSetupCommand({ op: "local.account.copy" })).toEqual({
+      op: "local.account.copy",
+    });
+    expect(parseSetupCommand({ op: "local.account.reveal" })).toEqual({
+      op: "local.account.reveal",
+    });
     expect(
       parseSetupCommand({ op: "local.signin.switch", runtime: "claude" }),
     ).toEqual({ op: "local.signin.switch", runtime: "claude" });
@@ -105,6 +115,11 @@ describe("parseSetupCommand", () => {
     expect(() =>
       parseSetupCommand({ op: "local.signin.switch", runtime: "local" }),
     ).toThrow();
+    // The account file is the installation's own; the page never names one.
+    expect(() =>
+      parseSetupCommand({ op: "local.account.reveal", file: "/etc/passwd" }),
+    ).toThrow();
+    expect(() => parseSetupCommand({ op: "local.account.show" })).toThrow();
     // Task access modes were removed with the runtime host.
     expect(() =>
       parseSetupCommand({ op: "sandbox.set", mode: "ask" }),

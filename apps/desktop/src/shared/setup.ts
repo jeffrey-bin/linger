@@ -42,7 +42,17 @@ export interface SetupLocalServer {
   };
   // While the "signin" step shows: the AI runtime's own sign-in.
   readonly signIn?: SetupRuntimeSignIn;
+  // Once installed: the owner account, for signing in again after logging
+  // out.
+  readonly account?: SetupLocalAccount;
 }
+
+// The owner account in the installation's local-account.json. The password
+// is present only while the person chose to show it; error says why the
+// file could not be read.
+export type SetupLocalAccount =
+  | { readonly email: string; readonly password?: string }
+  | { readonly error: string };
 
 export type SetupLocalStep =
   | "prepare"
@@ -147,6 +157,11 @@ export type SetupCommand =
       readonly op: "local.signin.switch";
       readonly runtime: "codex" | "claude" | "pi";
     }
+  // The finished install's account: show or hide the password, copy it to
+  // the clipboard, or show its file in the file manager.
+  | { readonly op: "local.account.show"; readonly on: boolean }
+  | { readonly op: "local.account.copy" }
+  | { readonly op: "local.account.reveal" }
   | { readonly op: "signin.open" }
   | { readonly op: "computer.connect" }
   | { readonly op: "notifications.test" }

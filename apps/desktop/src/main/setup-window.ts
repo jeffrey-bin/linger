@@ -1,6 +1,7 @@
 import {
   BrowserWindow,
   Notification,
+  clipboard,
   dialog,
   ipcMain,
   nativeImage,
@@ -23,6 +24,7 @@ import setupHtml from "../shell/setup.html";
 import {
   SETUP_IPC,
   type SetupCommand,
+  type SetupLocalAccount,
   type SetupState,
 } from "../shared/setup.js";
 import type { DiagnosticsModule } from "./diagnostics.js";
@@ -35,6 +37,7 @@ import {
 } from "./mac-permissions.js";
 import type { Module, ModuleContext } from "./modules.js";
 import type { PowerGuardModule } from "./power-guard.js";
+import { SetupAccount } from "./setup-account.js";
 import { parseSetupCommand } from "./setup-command.js";
 import { INVALID_SERVER, type WindowManagerModule } from "./window-manager.js";
 import type { WorkspaceGrantsModule } from "./workspace-grants.js";
@@ -75,6 +78,7 @@ export class SetupWindowModule implements Module {
   #signedIn = false;
   #permissions: PermissionStatuses | undefined;
   #diagnostics: SetupState["diagnostics"];
+  #account: SetupAccount | undefined;
   readonly #unsubscribe: (() => void)[] = [];
 
   constructor(options: SetupWindowOptions) {
@@ -83,6 +87,12 @@ export class SetupWindowModule implements Module {
 
   async start(ctx: ModuleContext): Promise<void> {
     this.#ctx = ctx;
+    const local = ctx.get<LocalServerModule>("LocalServer");
+    this.#account = new SetupAccount({
+      read: () => local.account(),
+      copy: (text) => clipboard.writeText(text),
+      showFile: (file) => shell.showItemInFolder(file),
+    });
     const pages = this.#session();
     pages.protocol.handle("app", (request) => this.#serve(request));
     const fromSetup = (event: IpcMainInvokeEvent): void => {
@@ -94,7 +104,11 @@ export class SetupWindowModule implements Module {
     };
     ipcMain.handle(SETUP_IPC.state, async (event) => {
       fromSetup(event);
-      await Promise.all([this.#refreshSignedIn(), this.#refreshPermissions()]);
+      await Promise.all([
+        this.#refreshSignedIn(),
+        this.#refreshPermissions(),
+        this.#refreshAccount(),
+      ]);
       return this.#state();
     });
     ipcMain.handle(SETUP_IPC.run, async (event, command: unknown) => {
@@ -105,6 +119,12 @@ export class SetupWindowModule implements Module {
     const push = (): void => this.#push();
     // Signing in happens in the main window; its cookies tell us when.
     const onCookie = (): void => void this.#refreshSignedIn().then(push);
+    // The account file exists once the installation is ready.
+    const onLocal = (): void => {
+      push();
+      if (local.status().phase === "ready")
+        void this.#refreshAccount().then(push);
+    };
     session.defaultSession.cookies.on("changed", onCookie);
     this.#unsubscribe.push(
       () => ipcMain.removeHandler(SETUP_IPC.state),
@@ -114,7 +134,7 @@ export class SetupWindowModule implements Module {
       ctx.bus.on("computer.changed", push),
       ctx.bus.on("power.changed", push),
       ctx.bus.on("grants.changed", push),
-      ctx.bus.on("local-server.changed", push),
+      ctx.bus.on("local-server.changed", onLocal),
       ctx.bus.on("server.changed", onCookie),
     );
     if (this.#options.show) this.show();
@@ -231,6 +251,15 @@ export class SetupWindowModule implements Module {
           .get<LocalServerModule>("LocalServer")
           .switchRuntime(command.runtime);
         return;
+      case "local.account.show":
+        this.#account?.show(command.on);
+        return;
+      case "local.account.copy":
+        this.#account?.copy();
+        return;
+      case "local.account.reveal":
+        this.#account?.reveal();
+        return;
       case "signin.open":
         windows.show();
         return;
@@ -301,7 +330,10 @@ export class SetupWindowModule implements Module {
         label,
         path,
       })),
-      localServer: localServerState(ctx.get<LocalServerModule>("LocalServer")),
+      localServer: localServerState(
+        ctx.get<LocalServerModule>("LocalServer"),
+        this.#account?.view(),
+      ),
       ...(this.#diagnostics ? { diagnostics: this.#diagnostics } : {}),
       ...(this.#permissions ? { permissions: this.#permissions } : {}),
     };
@@ -313,6 +345,11 @@ export class SetupWindowModule implements Module {
     // Signing in is the cue to bring setup back to the front.
     if (signedIn && !this.#signedIn && this.visible()) this.show();
     this.#signedIn = signedIn;
+  }
+
+  async #refreshAccount(): Promise<void> {
+    const local = this.#ctx!.get<LocalServerModule>("LocalServer");
+    if (local.status().phase === "ready") await this.#account?.refresh();
   }
 
   async #refreshPermissions(): Promise<void> {
@@ -358,6 +395,7 @@ export class SetupWindowModule implements Module {
 
 const localServerState = (
   local: LocalServerModule,
+  account: SetupLocalAccount | undefined,
 ): SetupState["localServer"] => {
   const {
     available,
@@ -391,5 +429,6 @@ const localServerState = (
     },
     keys,
     ...(signIn ? { signIn } : {}),
+    ...(account ? { account } : {}),
   };
 };

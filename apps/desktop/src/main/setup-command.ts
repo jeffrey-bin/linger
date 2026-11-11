@@ -45,6 +45,9 @@ const setupCommand = z.discriminatedUnion("op", [
       runtime: z.enum(["codex", "claude", "pi"]),
     })
     .strict(),
+  z.object({ op: z.literal("local.account.show"), on: z.boolean() }).strict(),
+  z.object({ op: z.literal("local.account.copy") }).strict(),
+  z.object({ op: z.literal("local.account.reveal") }).strict(),
   z.object({ op: z.literal("signin.open") }).strict(),
   z.object({ op: z.literal("computer.connect") }).strict(),
   z.object({ op: z.literal("notifications.test") }).strict(),

@@ -2,7 +2,8 @@ import { windowsPrivatePath } from "./windows-private.js";
 import { randomBytes } from "node:crypto";
 import { lstat, readFile } from "node:fs/promises";
 import path from "node:path";
-import { atomicPrivate, type Instance } from "./instance.js";
+import type { Instance } from "./instance.js";
+import { atomicPrivate } from "./private-files.js";
 
 export function validateLocalCredentials(options: {
   email?: string;
@@ -24,7 +25,7 @@ export function validateLocalCredentials(options: {
     );
 }
 export async function readLocalLogin(
-  instance: Instance,
+  instance: Pick<Instance, "root">,
 ): Promise<{ email: string; password: string; file: string }> {
   const file = path.join(instance.root, "local-account.json");
   const info = await lstat(file);
