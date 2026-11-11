@@ -795,9 +795,10 @@ export class LocalServerModule implements Module {
     this.#opened = undefined;
   }
 
-  // Whether the window shows the Linger this app installed here; only then
-  // can its owner account sign the window in.
+  // Whether the window shows the Linger this app installed here and its
+  // services are running; only then can its owner account sign the window in.
   async servesWindow(): Promise<boolean> {
+    if (this.#phase !== "ready") return false;
     const record = await this.#readRecord();
     const serverUrl = this.#ctx?.config.get().serverUrl;
     return !!record && !!serverUrl && sameOrigin(record.origin, serverUrl);
@@ -822,7 +823,15 @@ export class LocalServerModule implements Module {
         "This window is not showing the Linger on this computer.",
       );
     const account = await this.account();
-    await this.#options.signIn(record.origin, account.email, account.password);
+    try {
+      await this.#options.signIn(
+        record.origin,
+        account.email,
+        account.password,
+      );
+    } catch (error) {
+      throw new Error(signInFailure(error), { cause: error });
+    }
   }
 
   // Starts the runtime's own login (the installer runs it), or hands it the
@@ -2286,8 +2295,43 @@ export async function readLocalAccount(root: string): Promise<LocalAccount> {
   }
 }
 
+// A sign-in the local server answered with an error status.
+export class SignInRejectedError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`Signing in to Linger failed (${status})`);
+    this.name = "SignInRejectedError";
+    this.status = status;
+  }
+}
+
+// What a person can do about a failed sign-in with this computer's account.
+export const signInFailure = (error: unknown): string => {
+  if (error instanceof SignInRejectedError && error.status === 401)
+    return "The saved password no longer works. Log in with your email and password.";
+  // fetch rejects with a TypeError when nothing answers, and with a
+  // TimeoutError or AbortError when the answer takes too long.
+  if (
+    error instanceof TypeError ||
+    (error instanceof Error &&
+      (error.name === "TimeoutError" || error.name === "AbortError"))
+  )
+    return "Linger on this computer is not responding.";
+  return error instanceof Error ? error.message : String(error);
+};
+
+// The local services listen on 127.0.0.1 only, while the window uses
+// localhost, which may resolve to ::1 first.
+export const loopbackUrl = (origin: string): URL => {
+  const url = new URL(origin);
+  if (url.hostname === "localhost") url.hostname = "127.0.0.1";
+  return url;
+};
+
 // Signs in to the local server with its owner and hands the session cookies
-// to the app's web session; the password is never stored.
+// to the app's web session; the password is never stored. The request goes
+// to the loopback address the services bind, the cookies to the origin.
 export const signInWithPassword = async (
   origin: string,
   email: string,
@@ -2295,20 +2339,22 @@ export const signInWithPassword = async (
   setCookie: (cookie: SetCookie) => Promise<void>,
   fetcher: typeof fetch = fetch,
 ): Promise<void> => {
-  const response = await fetcher(new URL("/v0/auth/login", origin), {
-    method: "POST",
-    headers: {
-      accept: "application/json",
-      "content-type": "application/json",
-      origin,
+  const response = await fetcher(
+    new URL("/v0/auth/login", loopbackUrl(origin)),
+    {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        origin,
+      },
+      body: JSON.stringify({ identifier: email, password }),
+      redirect: "error",
+      signal: AbortSignal.timeout(30_000),
     },
-    body: JSON.stringify({ identifier: email, password }),
-    redirect: "error",
-    signal: AbortSignal.timeout(30_000),
-  });
+  );
   await response.body?.cancel();
-  if (!response.ok)
-    throw new Error(`Signing in to Linger failed (${response.status})`);
+  if (!response.ok) throw new SignInRejectedError(response.status);
   const cookies = response.headers
     .getSetCookie()
     .map(parseSetCookie)

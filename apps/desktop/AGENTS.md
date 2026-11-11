@@ -74,15 +74,20 @@ Gateway and runs Agents. The daemon exits with the app.
   to the server and enrolls this computer, so setup ends on "Linger is
   ready". That screen shows the owner account from the instance's
   owner-only `local-account.json` (`setup-account.ts`): the email, the
-  password masked until Show, Copy (the main process writes the clipboard)
-  and "Open account file location" (`shell.showItemInFolder`); an unreadable
-  file shows why instead. After a logout the SPA's login page asks
-  `window.lingerDesktop.localAccount.available()`, which is true only while
-  the window shows the origin in `local-server.json`, and offers "Sign in
+  password masked until Show, Copy (the main process writes the clipboard
+  and clears it after 60 s if it still holds the password) and "Open account
+  file location" (`shell.showItemInFolder`); an unreadable file shows why
+  instead. Only the email and file are kept; Show and Copy read the file
+  again, and closing the setup window hides the password. After a logout
+  the SPA's login page asks `window.lingerDesktop.localAccount.available()`,
+  which is true only while the window shows the origin in
+  `local-server.json` and the services are `ready`, and offers "Sign in
   with this computer's account": `localAccount.signIn()` reads the file in
   the main process and signs the window's session in with
-  `signInWithPassword`; the page gets only `{ ok }` or the reason it failed,
-  never the password. The default AI runtime is the
+  `signInWithPassword`, which posts to `127.0.0.1:<port>` (what the
+  services bind) and sets the cookies for the origin; the page gets only
+  `{ ok }` or the reason it failed (mapped by status and error kind by
+  `signInFailure`), never the password. The default AI runtime is the
   installer's recommendation, or Codex when the installer cannot inspect the
   computer. It records the install location, source, origin and engine in
   `desktop/local-server.json` under the default home and, while the window

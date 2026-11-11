@@ -30,6 +30,8 @@ import {
   hasNativePostgres,
   installLocation,
   parseSetCookie,
+  SignInRejectedError,
+  signInFailure,
   signInWithPassword,
   type LocalServerOptions,
 } from "./local-server.js";
@@ -1976,9 +1978,10 @@ describe("signInWithPassword", () => {
       set,
       fetcher as typeof fetch,
     );
-    expect(String((fetcher.mock.calls[0] as unknown[])[0])).toBe(
-      "http://localhost:3000/v0/auth/login",
-    );
+    const [url, init] = fetcher.mock.calls[0] as unknown as [URL, RequestInit];
+    // The services bind 127.0.0.1; localhost may resolve to ::1 first.
+    expect(String(url)).toBe("http://127.0.0.1:3000/v0/auth/login");
+    expect(init.headers).toMatchObject({ origin: "http://localhost:3000" });
     expect(set).toHaveBeenCalledWith(
       expect.objectContaining({
         name: "linger_session",
@@ -1999,7 +2002,36 @@ describe("signInWithPassword", () => {
         async () => {},
         (async () => new Response("{}", { status: 401 })) as typeof fetch,
       ),
-    ).rejects.toThrow(/401/);
+    ).rejects.toEqual(new SignInRejectedError(401));
+  });
+});
+
+describe("signInFailure", () => {
+  it("says what to do by status and error kind, not by message", () => {
+    expect(signInFailure(new SignInRejectedError(401))).toBe(
+      "The saved password no longer works. Log in with your email and password.",
+    );
+    const refused = new TypeError("fetch failed", {
+      cause: Object.assign(new Error("connect"), { code: "ECONNREFUSED" }),
+    });
+    expect(signInFailure(refused)).toBe(
+      "Linger on this computer is not responding.",
+    );
+    expect(
+      signInFailure(
+        new DOMException("The operation timed out", "TimeoutError"),
+      ),
+    ).toBe("Linger on this computer is not responding.");
+    expect(signInFailure(new DOMException("aborted", "AbortError"))).toBe(
+      "Linger on this computer is not responding.",
+    );
+    // A message that merely mentions 401 is not a rejected password.
+    expect(signInFailure(new Error("Signing in to Linger failed (401)"))).toBe(
+      "Signing in to Linger failed (401)",
+    );
+    expect(signInFailure(new SignInRejectedError(500))).toBe(
+      "Signing in to Linger failed (500)",
+    );
   });
 });
 
@@ -2194,6 +2226,41 @@ describe("LocalServerModule owner account", () => {
     });
     await f.module.signInWithAccount();
     expect(f.signIn).toHaveBeenCalledWith(ORIGIN, OWNER.email, OWNER.password);
+    await f.host.stop("quit");
+  });
+
+  it("does not offer the account while the services are not running", async () => {
+    const f = fixture({}, { serverUrl: ORIGIN }, (home) => {
+      installed(OWNER)(home);
+      writeFileSync(path.join(home, "resume-fails"), "");
+    });
+    // Not started yet: nothing is serving the window.
+    expect(await f.module.servesWindow()).toBe(false);
+    await f.host.start();
+    await vi.waitFor(() => expect(f.module.status().phase).toBe("failed"));
+    expect(await f.module.servesWindow()).toBe(false);
+    await expect(f.module.signInWithAccount()).rejects.toThrow(
+      "This window is not showing the Linger on this computer.",
+    );
+    expect(f.signIn).not.toHaveBeenCalled();
+    await f.host.stop("quit");
+  });
+
+  it.each([
+    [
+      new SignInRejectedError(401),
+      "The saved password no longer works. Log in with your email and password.",
+    ],
+    [
+      new TypeError("fetch failed"),
+      "Linger on this computer is not responding.",
+    ],
+  ])("says what to do when signing in fails (%s)", async (error, message) => {
+    const f = fixture({}, { serverUrl: ORIGIN }, installed(OWNER));
+    f.signIn.mockRejectedValueOnce(error);
+    await f.host.start();
+    await vi.waitFor(() => expect(f.module.status().phase).toBe("ready"));
+    await expect(f.module.signInWithAccount()).rejects.toThrow(message);
     await f.host.stop("quit");
   });
 

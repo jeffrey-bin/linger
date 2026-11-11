@@ -90,7 +90,7 @@ export class SetupWindowModule implements Module {
     const local = ctx.get<LocalServerModule>("LocalServer");
     this.#account = new SetupAccount({
       read: () => local.account(),
-      copy: (text) => clipboard.writeText(text),
+      clipboard,
       showFile: (file) => shell.showItemInFolder(file),
     });
     const pages = this.#session();
@@ -193,6 +193,7 @@ export class SetupWindowModule implements Module {
     );
     window.on("closed", () => {
       if (this.#window === window) this.#window = undefined;
+      this.#account?.hide();
     });
     this.#window = window;
     void window.loadURL(SETUP_URL).catch(() => undefined);
@@ -252,10 +253,10 @@ export class SetupWindowModule implements Module {
           .switchRuntime(command.runtime);
         return;
       case "local.account.show":
-        this.#account?.show(command.on);
+        await this.#account?.show(command.on);
         return;
       case "local.account.copy":
-        this.#account?.copy();
+        await this.#account?.copy();
         return;
       case "local.account.reveal":
         this.#account?.reveal();
