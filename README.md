@@ -117,7 +117,7 @@ The full documentation lives at **[docs.simplexai.com](https://docs.simplexai.co
 
 <p>
   <a href="https://github.com/simplexai-labs/linger/graphs/contributors">
-    <img alt="Linger contributors" src="https://contrib.rocks/image?repo=simplexai-labs/linger" />
+    <img alt="Linger contributors" src="https://raw.githubusercontent.com/simplexai-labs/linger/contributors/contributors.svg" />
   </a>
 </p>
 

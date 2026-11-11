@@ -1,0 +1,90 @@
+name: Contributors
+
+# Draws the README's contributor avatars from the GitHub API after every push
+# to main and publishes the image as the only commit on the contributors
+# branch: the default branch accepts changes only through pull requests, and
+# raw.githubusercontent.com serves the branch's file with a five-minute cache.
+# The avatars are embedded as data URIs because an SVG shown as an image
+# cannot load anything else.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: contributors
+  cancel-in-progress: true
+
+jobs:
+  draw:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Draw the avatars
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          OUT: ${{ runner.temp }}/contributors/contributors.svg
+        run: |
+          mkdir -p "$(dirname "$OUT")"
+          node --input-type=module <<'EOF'
+          import { writeFileSync } from "node:fs";
+          const headers = {
+            accept: "application/vnd.github+json",
+            authorization: `Bearer ${process.env.GH_TOKEN}`,
+          };
+          const people = [];
+          for (let page = 1; ; page += 1) {
+            const res = await fetch(
+              `https://api.github.com/repos/${process.env.REPO}/contributors?per_page=100&page=${page}`,
+              { headers },
+            );
+            if (!res.ok) throw new Error(`contributors: HTTP ${res.status}`);
+            const batch = await res.json();
+            people.push(...batch.filter((person) => person.type === "User"));
+            if (batch.length < 100) break;
+          }
+          const size = 64;
+          const step = size + 8;
+          const columns = 12;
+          const cells = await Promise.all(
+            people.map(async (person, i) => {
+              const avatar = new URL(person.avatar_url);
+              avatar.searchParams.set("s", String(size * 2));
+              const res = await fetch(avatar);
+              if (!res.ok) throw new Error(`avatar ${person.login}: HTTP ${res.status}`);
+              const type = res.headers.get("content-type") ?? "image/png";
+              const data = Buffer.from(await res.arrayBuffer()).toString("base64");
+              const x = (i % columns) * step;
+              const y = Math.floor(i / columns) * step;
+              const r = size / 2;
+              return [
+                `<g><title>${person.login}</title>`,
+                `<clipPath id="c${i}"><circle cx="${x + r}" cy="${y + r}" r="${r}"/></clipPath>`,
+                `<image x="${x}" y="${y}" width="${size}" height="${size}" clip-path="url(#c${i})" href="data:${type};base64,${data}"/>`,
+                `<circle cx="${x + r}" cy="${y + r}" r="${r - 0.5}" fill="none" stroke="#c0c0c0"/></g>`,
+              ].join("");
+            }),
+          );
+          const width = Math.max(1, Math.min(people.length, columns) * step - 8);
+          const height = Math.max(1, Math.ceil(people.length / columns) * step - 8);
+          writeFileSync(
+            process.env.OUT,
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${cells.join("")}</svg>\n`,
+          );
+          console.log(`drew ${people.length} contributors`);
+          EOF
+      - name: Publish to the contributors branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        working-directory: ${{ runner.temp }}/contributors
+        run: |
+          git init -q -b contributors
+          git add contributors.svg
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -qm "Draw the contributor avatars"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" contributors
