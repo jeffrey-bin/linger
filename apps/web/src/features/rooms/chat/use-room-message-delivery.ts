@@ -5,7 +5,10 @@ import { createTeamHubIdempotencyKey } from "@/features/teamhub/teamhub-client";
 import { classifyTeamHubCommandFailure } from "@/features/teamhub/teamhub-command-outcome";
 import type { TeamHubMessagePresentation } from "@/features/teamhub/teamhub-runtime";
 import type { TeamHubMessage } from "@/features/teamhub/teamhub-types";
-import { rememberLocalMessageImage } from "@/features/rooms/files/local-message-images";
+import {
+  releaseLocalImage,
+  rememberLocalMessageImage,
+} from "@/features/rooms/files/local-message-images";
 
 import type { MessageComposition } from "./message-composer";
 import {
@@ -405,6 +408,10 @@ export function useRoomMessageDelivery({
       return;
     }
     setOutgoing((items) => items.filter((item) => item.clientId !== clientId));
+    // Nothing shows a canceled Message's images again.
+    for (const { file } of current.attachmentInputs ?? []) {
+      releaseLocalImage(file);
+    }
   }
 
   const stageAttachment = useCallback(

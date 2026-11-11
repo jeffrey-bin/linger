@@ -1,13 +1,26 @@
 import { useEffect, useState } from "react";
 
 /**
+ * How many just-sent images keep their local file. Each pins the original
+ * file through its object URL, so an older one goes back to the download.
+ */
+export const LOCAL_MESSAGE_IMAGE_LIMIT = 24;
+
+/**
  * Images this browser just sent, by their Document id, so the committed
  * Message shows the local file at once instead of downloading it again.
+ * Oldest first.
  */
 const files = new Map<string, File>();
 
 export function rememberLocalMessageImage(documentId: string, file: File) {
+  files.delete(documentId);
   files.set(documentId, file);
+  for (const [oldestId, oldest] of files) {
+    if (files.size <= LOCAL_MESSAGE_IMAGE_LIMIT) break;
+    files.delete(oldestId);
+    if (![...files.values()].includes(oldest)) releaseLocalImage(oldest);
+  }
 }
 
 export function localMessageImage(documentId: string): File | undefined {
@@ -20,8 +33,9 @@ interface DecodedImage {
   width: number;
 }
 
-// Decoded once per file and kept for the session, so the sending row and the
-// committed row both show it at its size from their first frame.
+// Decoded once per file and kept while the file is remembered or picked, so
+// the sending row and the committed row both show it at its size from their
+// first frame.
 const decoded = new WeakMap<File, Promise<DecodedImage>>();
 const ready = new WeakMap<File, DecodedImage>();
 
@@ -31,7 +45,7 @@ export function decodeLocalImage(file: File): Promise<DecodedImage> {
   if (!pending) {
     const url = URL.createObjectURL(file);
     const element = new Image();
-    pending = new Promise<void>((resolve) => {
+    const decoding: Promise<DecodedImage> = new Promise<void>((resolve) => {
       element.onload = () => resolve();
       element.onerror = () => resolve();
       element.src = url;
@@ -41,12 +55,27 @@ export function decodeLocalImage(file: File): Promise<DecodedImage> {
         url,
         width: element.naturalWidth,
       };
-      ready.set(file, image);
+      // Released while decoding: nothing will show it.
+      if (decoded.get(file) !== decoding) URL.revokeObjectURL(url);
+      else ready.set(file, image);
       return image;
     });
+    pending = decoding;
     decoded.set(file, pending);
   }
   return pending;
+}
+
+/**
+ * Frees a local image's object URL once nothing will show it again: a picked
+ * file removed before sending, or a sent one past the remembered limit. An
+ * image already painted keeps its pixels.
+ */
+export function releaseLocalImage(file: File) {
+  const image = ready.get(file);
+  if (image) URL.revokeObjectURL(image.url);
+  ready.delete(file);
+  decoded.delete(file);
 }
 
 /**

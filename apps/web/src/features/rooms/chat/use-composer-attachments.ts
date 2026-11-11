@@ -13,7 +13,10 @@ import {
   composerAttachmentStore,
 } from "./composer-attachment-drafts";
 import type { MessageComposerProps } from "./message-composer";
-import { decodeLocalImage } from "@/features/rooms/files/local-message-images";
+import {
+  decodeLocalImage,
+  releaseLocalImage,
+} from "@/features/rooms/files/local-message-images";
 
 const maximumAttachmentCount = 5;
 
@@ -203,6 +206,7 @@ export function useComposerAttachments({
     );
     if (next.length === 0) attachmentIntentKeyRef.current = undefined;
     updateSelectedFiles(() => next);
+    releaseLocalImage(attachment.file);
     if (!idempotencyKey) return;
     void onCancelAttachment?.({
       attachmentClientId: attachment.clientId,

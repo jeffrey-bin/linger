@@ -203,7 +203,10 @@ function MessageImage({
 }) {
   const { client } = useTeamHubRuntime();
   const container = useRef<HTMLDivElement>(null);
-  const local = useDecodedImage(localMessageImage(documentId));
+  const localFile = localMessageImage(documentId);
+  const local = useDecodedImage(localFile);
+  // A local file past the remembered limit falls back to the download.
+  const hasLocalFile = localFile !== undefined;
   const [objectUrl, setObjectUrl] = useState<string>();
   const [failed, setFailed] = useState(false);
 
@@ -214,7 +217,7 @@ function MessageImage({
     const controller = new AbortController();
     setObjectUrl(undefined);
     setFailed(false);
-    if (localMessageImage(documentId)) return;
+    if (hasLocalFile) return;
 
     async function load() {
       if (started) return;
@@ -265,7 +268,7 @@ function MessageImage({
       controller.abort();
       dispose();
     };
-  }, [client, documentId, versionId]);
+  }, [client, documentId, hasLocalFile, versionId]);
 
   return (
     // Only as wide as the image, so an own Message can align it right.
