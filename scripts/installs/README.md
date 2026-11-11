@@ -68,16 +68,12 @@ The Linger installer does not go through `stack.sh`; it calls the same kind of l
 directly and by convention pins the same version as here.
 
 The same script also runs without cloning the repository: `curl -fsSL https://d2ikbbcl3j6jz9.cloudfront.net/cli/localmodels/<version>/stack.sh | sh -s -- --help`.
-To follow the latest llm-inference-lab main build, use `…/cli/localmodels/mac-main/stack.sh` or `…/cli/localmodels/lin-main/stack.sh`
+To follow the latest main build, use `…/cli/localmodels/mac-main/stack.sh` or `…/cli/localmodels/lin-main/stack.sh`
 on macOS and Linux (the two are the same file and run on both), and `…/cli/localmodels/win-main/stack.ps1` on Windows.
 
-Source, templates and tests live in `localmodels/` and `scripts/installs/` of
-[llm-inference-lab](http://192.168.10.117:6001/simplexai/infra/llm-inference-lab). After a `v<version>` tag is pushed there,
-the macOS/Linux and Windows pipeline jobs each build and upload their platforms' kits, then upload everything together to
-`https://d2ikbbcl3j6jz9.cloudfront.net/cli/localmodels/<version>/` (with both scripts and `release.json`), create a GitLab Release,
-open an MR on co-workspace `fat` (rewriting only `stack.sh`, `stack.ps1` and this section), and open an MR on linger-installer
-that pins localmodels to the same version on all three channels. Do not edit this by hand.
-The version pin only says which published CLI runs; platform and GPU support and real-device acceptance status are set by
-llm-inference-lab's product documents and dated reports.
+The localmodels release process publishes each version's kits, both scripts and `release.json` under
+`https://d2ikbbcl3j6jz9.cloudfront.net/cli/localmodels/<version>/`, and rewrites `stack.sh`, `stack.ps1` and this section
+with the new pin. Do not edit them by hand. The version pin only says which published CLI runs; it does not state which
+platforms or GPUs are supported.
 
 <!-- <<< llm-inference-lab: stack -->

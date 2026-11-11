@@ -1,7 +1,7 @@
 # `stack.ps1 ARGS` runs `localmodels stack ARGS` from the release pinned below. The first run
 # downloads that release's self-contained Python + localmodels kit, checks its SHA256 and every
 # file it lists, and caches it; later runs start offline. No system Python is needed.
-# llm-inference-lab's release pipeline writes the pin; edit the template there, not this copy.
+# The localmodels release process writes the pin; do not edit it by hand.
 # Windows PowerShell 5.1 or PowerShell 7; Windows needs tar.exe (Windows 10 1803 or newer).
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'

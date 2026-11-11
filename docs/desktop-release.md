@@ -9,9 +9,7 @@ publishes them as the GitHub Release of that tag. The workflow calls
 [`scripts/ci/desktop-release.sh`](../scripts/ci/desktop-release.sh), so the
 same steps also run on a developer machine.
 
-This is the only release path. The internal GitLab copy of the repository
-keeps a manual dry run for test builds (see [GitLab dry run](#gitlab-dry-run-test-builds-only));
-it publishes nothing, and a `desktop-v` tag pushed there runs no pipeline.
+This is the only release path.
 
 ## Downloads
 
@@ -52,7 +50,7 @@ The release goes to `RELEASE_REPO`, `simplexai-labs/linger` by default:
 - **In simplexai-labs/linger itself**, the workflow's `GITHUB_TOKEN`
   publishes; no extra secret is needed. The tag is the one pushed, at the
   built commit.
-- **In another repository** such as `simplexai-labs/linger9`, it publishes
+- **In another repository**, such as a private copy, it publishes
   across repositories with the `LINGER_RELEASE_TOKEN` secret; `prepare` stops
   at once when that secret is missing. A tag points at a commit of its own
   repository, so the release creates `desktop-v<version>` in
@@ -110,30 +108,6 @@ gh release upload native-deps <archive> --repo simplexai-labs/linger
 3. Check the release page, download each file and compare it with
    `SHA256SUMS.txt`. A test release is removed with its tag:
    `gh release delete desktop-v0.16.36-rc.1 --repo simplexai-labs/linger --cleanup-tag`.
-
-## GitLab dry run (test builds only)
-
-The internal GitLab copy of the repository has `.gitlab/ci/desktop-release.yml`
-for one purpose: building test packages on the self-hosted Runners without a
-GitHub release. It never creates a release or a tag, and `desktop-v` tags get
-no pipeline there.
-
-Build → Pipelines → Run pipeline on a branch with the variable
-`DESKTOP_RELEASE_MODE` = `dry-run`, and optionally `DESKTOP_RELEASE_VERSION`
-(default `0.0.0-dry-run.<pipeline id>`). The three `desktop-build-dry-run`
-jobs build one target each and upload their files to the project's generic
-package `linger-desktop-dry-run/<version>` with `CI_JOB_TOKEN`; the packages
-are larger than the job artifact limit, so the job artifacts hold only
-`files-<target>.txt` and `sha256-<target>.txt`. Delete dry-run packages when
-done with them (Deploy → Package Registry; needs Maintainer).
-
-Without `LINGER_NATIVE_DEPS_URL`, the jobs download the pinned archives from the
-project's generic package `linger-native-deps/1`; upload a new archive there
-under its file name when a pin changes. Optional signing material is a
-protected, masked **File** CI/CD variable named as the script reads it
-(`DESKTOP_UPDATE_KEY`, `MACOS_DEVELOPER_ID_P12`,
-`MACOS_DEVELOPER_ID_PASSWORD_FILE`, `MACOS_NOTARY_KEY`, `WINDOWS_SIGNING_P12`,
-`WINDOWS_SIGNING_PASSWORD_FILE`).
 
 ## Release Files
 

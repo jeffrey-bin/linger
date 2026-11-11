@@ -5,9 +5,8 @@ set -euo pipefail
 # The packaging scripts make the macOS DMG and the Windows installer on Linux
 # (Docker images for the disk image and NSIS, rcodesign for signatures), so
 # every target builds on a Linux x64 host. .github/workflows/desktop-release.yml
-# calls this to publish releases in simplexai-labs/linger; the GitLab manual
-# dry run (.gitlab/ci/desktop-release.yml, test builds only) calls it too.
-# docs/desktop-release.md describes both.
+# calls this to publish releases in simplexai-labs/linger;
+# docs/desktop-release.md describes it.
 #
 #   desktop-release.sh version <tag>              print tag=, version= and prerelease= lines
 #   desktop-release.sh fetch-native <target>      put the pinned PostgreSQL and voice tools
@@ -18,7 +17,7 @@ set -euo pipefail
 #   desktop-release.sh checksums <dir> <version>  write <dir>/SHA256SUMS.txt
 #   desktop-release.sh gitlab-upload <dir> <version>
 #                                                 upload <dir>'s files to a GitLab generic
-#                                                 package (dry-run test builds only)
+#                                                 package from a GitLab CI job (test builds only)
 #   desktop-release.sh github-release <dir> <tag> <version>
 #                                                 create or update the GitHub Release of <tag>
 #                                                 in RELEASE_REPO with <dir>'s files (gh)
@@ -27,8 +26,8 @@ set -euo pipefail
 #   DESKTOP_VERSION              release version, as printed by `version` (compile, package)
 #   LINGER_NATIVE_POSTGRES_DIR   where build.mjs reads the bundled archives
 #                                (~/.cache/linger-desktop)
-#   LINGER_NATIVE_DEPS_URL       folder serving those archives by file name; in GitLab CI
-#                                it defaults to this project's linger-native-deps package
+#   LINGER_NATIVE_DEPS_URL       folder serving those archives by file name; in a GitLab
+#                                CI job it defaults to the project's linger-native-deps package
 #   RELEASE_OUT                  output root (.linger-runtime/desktop-release); release
 #                                files go to $RELEASE_OUT/assets/
 #   RCODESIGN                    rcodesign executable for darwin-arm64 (PATH)
@@ -320,7 +319,7 @@ cmd_gitlab_upload() {
 
 # RELEASE_REPO defaults to the public simplexai-labs/linger. In that
 # repository the workflow's own GITHUB_TOKEN publishes; from any other one,
-# such as linger9, GH_TOKEN must be LINGER_RELEASE_TOKEN with contents write
+# GH_TOKEN must be LINGER_RELEASE_TOKEN with contents write
 # access there. A tag must point at a commit of the repository holding it, so
 # only a release in the workflow's own repository is tied to GITHUB_SHA; in
 # another one gh creates the tag at that repository's default branch.

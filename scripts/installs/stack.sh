@@ -2,7 +2,7 @@
 # `stack.sh ARGS` runs `localmodels stack ARGS` from the release pinned below. The first run
 # downloads that release's self-contained Python + localmodels kit, checks its SHA256 and every
 # file it lists, and caches it; later runs start offline. No system Python is needed.
-# llm-inference-lab's release pipeline writes the pin; edit the template there, not this copy.
+# The localmodels release process writes the pin; do not edit it by hand.
 set -eu
 
 # >>> release pin

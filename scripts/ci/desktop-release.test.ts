@@ -202,7 +202,7 @@ describe("desktop-release.sh github-release", () => {
 
   it("leaves another repository's commit out of a cross-repository release", () => {
     const result = release({
-      GITHUB_REPOSITORY: "simplexai-labs/linger9",
+      GITHUB_REPOSITORY: "example/linger-copy",
       GITHUB_SHA: "abc123",
       GH_TOKEN: "token",
     });
@@ -234,7 +234,7 @@ describe("desktop-release.sh github-release", () => {
   });
 
   it("needs LINGER_RELEASE_TOKEN to publish from another repository", () => {
-    const result = release({ GITHUB_REPOSITORY: "simplexai-labs/linger9" });
+    const result = release({ GITHUB_REPOSITORY: "example/linger-copy" });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("LINGER_RELEASE_TOKEN");
