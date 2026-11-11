@@ -789,6 +789,11 @@ async function runNativeSource(
           (await inspectNativeProcess(current.root, "livekit")).running
         )
           await stopNativeProcess(current.root, "livekit");
+        // Stop the Agent Service while TeamHub is still up so its graceful
+        // shutdown can requeue in-flight Agent Runs before TeamHub restarts.
+        // The loop below then sees it stopped and records it as started here.
+        if ((await inspectNativeProcess(current.root, "node-services")).running)
+          await stopNativeProcess(current.root, "node-services");
         for (const name of ["teamhub", "node-services", "web"] as const) {
           const running = (await inspectNativeProcess(current.root, name))
             .running;

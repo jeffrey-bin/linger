@@ -316,6 +316,63 @@ test("failed preparation never stops services that were already running", async 
   expect(f.running.has("postgres")).toBe(true);
 });
 
+test("a running node-services stops before TeamHub restarts", async () => {
+  const f = await fixture();
+  for (const name of ["teamhub", "node-services", "web"]) f.running.add(name);
+  vi.mocked(prepareRuntime).mockResolvedValue({
+    code: 0,
+    state: "ready",
+    message: "ready",
+  });
+  await installNativeSource({
+    ...f,
+    name: "native-flow",
+    setupChoice: "pi",
+    signal: new AbortController().signal,
+    onEvent: () => {},
+  });
+  expect(
+    vi.mocked(stopNativeProcess).mock.calls.map((call) => call[1]),
+  ).toEqual(["node-services"]);
+  const teamHubStart = vi
+    .mocked(startNativeProcess)
+    .mock.calls.findIndex(([options]) => options.name === "teamhub");
+  expect(vi.mocked(stopNativeProcess).mock.invocationCallOrder[0]).toBeLessThan(
+    vi.mocked(startNativeProcess).mock.invocationCallOrder[teamHubStart]!,
+  );
+  expect(f.running.has("node-services")).toBe(true);
+});
+
+test("a failure after the restart stops the node-services this run started", async () => {
+  const f = await fixture();
+  for (const name of ["postgres", "teamhub", "node-services"])
+    f.running.add(name);
+  vi.mocked(prepareRuntime).mockResolvedValue({
+    code: 0,
+    state: "ready",
+    message: "ready",
+  });
+  vi.mocked(startNativeProcess).mockImplementation(async (options) => {
+    if (options.name === "web") throw new Error("web failed");
+    f.running.add(options.name);
+    return { running: true, pid: 100 };
+  });
+  const result = await installNativeSource({
+    ...f,
+    name: "native-flow",
+    setupChoice: "pi",
+    signal: new AbortController().signal,
+    onEvent: () => {},
+  });
+  expect(result.code).toBe(1);
+  // The first stop hands in-flight Runs back; the rollback stops the
+  // processes this run started, and leaves the earlier TeamHub alone.
+  expect(
+    vi.mocked(stopNativeProcess).mock.calls.map((call) => call[1]),
+  ).toEqual(["node-services", "web", "node-services"]);
+  expect(f.running.has("teamhub")).toBe(true);
+});
+
 test("stops native business services even if owned gateway shutdown reports a failure", async () => {
   const f = await fixture();
   const { prepareNativeConfiguration } = await import("./native-source.js");

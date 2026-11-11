@@ -24,9 +24,11 @@ Open <http://localhost:3000> and sign in. The app then shows the commands that
 connect your computer, and it opens once Claude Code, Codex or Pi is installed
 and signed in there.
 
-To serve other computers on your network, set these in `.env` and run
+To serve other computers on your network, set these in `.env`, run
+`docker compose stop node-services`, then run
 `docker compose up --detach --wait` again, replacing `192.168.1.10` with this
-computer's address. Browsers and Computers then reach everything through port 3000.
+computer's address. Stopping node-services first while TeamHub is still up
+puts replies in progress back in the queue instead of failing them. Browsers and Computers then reach everything through port 3000.
 
 ```bash
 WEB_BIND_ADDRESS=0.0.0.0
@@ -42,11 +44,11 @@ your machine against a PostgreSQL you provide; see
 
 ## Troubleshooting
 
-| Problem                                            | What to try                                                                                                                                                   |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The app does not open                              | `docker compose ps`, then `docker compose logs <service>`                                                                                                     |
-| The computer shows offline, or agents never answer | On that computer, `linger-computer daemon status` and `linger-computer doctor`; read `linger-computer daemon logs`, then try `linger-computer daemon restart` |
-| "No runtime is ready yet"                          | `linger-computer runtime check` lists what to install or sign in to; `linger-computer runtime check codex --live` also waits for a real model reply           |
-| Other computers cannot connect                     | Set the four variables under [Build from source](#build-from-source) and run `docker compose up --detach --wait` again                                        |
-| The microphone is blocked                          | Browsers allow it only on `localhost` or HTTPS; put an HTTPS proxy in front of port 3000                                                                      |
-| `pnpm dev` cannot reach the database               | `pnpm dev` starts no containers: run `docker compose up --detach --wait postgres` first, then check every service with `pnpm dev:check`                       |
+| Problem                                            | What to try                                                                                                                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The app does not open                              | `docker compose ps`, then `docker compose logs <service>`                                                                                                        |
+| The computer shows offline, or agents never answer | On that computer, `linger-computer daemon status` and `linger-computer doctor`; read `linger-computer daemon logs`, then try `linger-computer daemon restart`    |
+| "No runtime is ready yet"                          | `linger-computer runtime check` lists what to install or sign in to; `linger-computer runtime check codex --live` also waits for a real model reply              |
+| Other computers cannot connect                     | Set the four variables under [Build from source](#build-from-source) and run `docker compose stop node-services`, then `docker compose up --detach --wait` again |
+| The microphone is blocked                          | Browsers allow it only on `localhost` or HTTPS; put an HTTPS proxy in front of port 3000                                                                         |
+| `pnpm dev` cannot reach the database               | `pnpm dev` starts no containers: run `docker compose up --detach --wait postgres` first, then check every service with `pnpm dev:check`                          |

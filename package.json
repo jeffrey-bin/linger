@@ -17,7 +17,7 @@
     "dev:livekit": "node scripts/with-local-env.mjs -- node --import tsx scripts/dev-livekit.ts",
     "dev:node-services": "node scripts/with-local-env.mjs -- pnpm --filter @linger/node-services start",
     "env:inventory:check": "node --import tsx scripts/check-env-inventory.ts",
-    "stack:up": "node scripts/with-local-env.mjs --optional -- sh -c 'for service in teamhub-migrate teamhub node-services web; do docker compose build \"$service\" || exit; done; docker compose up --detach --wait'",
+    "stack:up": "node scripts/with-local-env.mjs --optional -- sh -c 'for service in teamhub-migrate teamhub node-services web; do docker compose build \"$service\" || exit; done; docker compose stop node-services && docker compose up --detach --wait'",
     "stack:logs": "node scripts/with-local-env.mjs --optional -- docker compose logs --follow",
     "stack:down": "node scripts/with-local-env.mjs --optional -- docker compose down",
     "infra:up": "docker compose up -d postgres",
