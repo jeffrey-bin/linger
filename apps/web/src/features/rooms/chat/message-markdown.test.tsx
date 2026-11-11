@@ -165,6 +165,45 @@ describe("Message Markdown", () => {
     expect(oldDocument).not.toHaveBeenCalled();
   });
 
+  it("keeps rendered Markdown elements when a re-render carries equal content", () => {
+    const body =
+      "@Alice see [docs](https://example.com)\n\n```js\nconst a = 1;\n```";
+    const segments = (): TeamHubMessageSegment[] => [
+      {
+        type: "reference",
+        content: "@Alice",
+        target: "alice",
+        target_type: "user",
+      },
+      {
+        type: "text",
+        content: " see [docs](https://example.com)\n\n```js\nconst a = 1;\n```",
+      },
+    ];
+    const view = render(
+      <MessageMarkdown
+        authorKind="agent"
+        body={body}
+        segments={segments()}
+        mentions={[]}
+      />,
+    );
+    const pre = view.container.querySelector("pre");
+    const link = screen.getByRole("link", { name: "docs" });
+    expect(pre).not.toBeNull();
+    // A new message elsewhere re-renders this one with fresh but equal arrays.
+    view.rerender(
+      <MessageMarkdown
+        authorKind="agent"
+        body={body}
+        segments={segments()}
+        mentions={[]}
+      />,
+    );
+    expect(view.container.querySelector("pre")).toBe(pre);
+    expect(screen.getByRole("link", { name: "docs" })).toBe(link);
+  });
+
   it("keeps literal text that resembles an internal mention token unchanged", () => {
     render(
       <MessageMarkdown

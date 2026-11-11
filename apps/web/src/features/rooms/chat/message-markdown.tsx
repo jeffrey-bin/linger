@@ -153,110 +153,117 @@ const MemoizedMarkdownContent = memo(function MarkdownContent({
       document,
     ]),
   );
-  const components: Components = {
-    a({ children, href }) {
-      return (
-        <MarkdownLink
-          href={href}
-          authorKind={authorKind}
-          mentionsByUrl={mentionsByUrl}
-          documentsByUrl={documentsByUrl}
-        >
-          {children}
-        </MarkdownLink>
-      );
-    },
-    blockquote({ children }) {
-      return <blockquote>{children}</blockquote>;
-    },
-    code({ children }) {
-      return <code>{children}</code>;
-    },
-    h1({ children }) {
-      return <h1>{children}</h1>;
-    },
-    h2({ children }) {
-      return <h2>{children}</h2>;
-    },
-    h3({ children }) {
-      return <h3>{children}</h3>;
-    },
-    li({ children }) {
-      return <li>{children}</li>;
-    },
-    ol({ children }) {
-      return <ol>{children}</ol>;
-    },
-    p({ children }) {
-      return <p>{children}</p>;
-    },
-    pre({ children }) {
-      return <MarkdownCodeBlock>{children}</MarkdownCodeBlock>;
-    },
-    table({ children }) {
-      return (
-        <div className="tiptap-table-scroll-wrapper">
-          <div className="tiptap-table-scroll-viewport">
-            <table>{children}</table>
-          </div>
-        </div>
-      );
-    },
-    td({ children }) {
-      return <td>{children}</td>;
-    },
-    th({ children }) {
-      return <th>{children}</th>;
-    },
-    ul({ children }) {
-      return <ul>{children}</ul>;
-    },
-  };
+  // Link targets change with the content; a new value only re-renders links.
+  const links = { authorKind, mentionsByUrl, documentsByUrl };
 
   return (
     <div className="message-markdown min-w-0 max-w-full [overflow-wrap:anywhere]">
-      <ReactMarkdown
-        allowedElements={authorKind === "agent" ? agentElements : humanElements}
-        components={components}
-        remarkPlugins={[
-          remarkBreaks,
-          // CommonMark ignores ** next to CJK punctuation, such as a fullwidth colon
-          // (U+FF1A) right before the closing ** that CJK text follows directly.
-          remarkCjkFriendly,
-          ...(authorKind === "agent" ? [remarkGfm] : []),
-          ...(authorKind === "agent" ? [unavailableCitationPlugin] : []),
-          structuredMentionPlugin(mentionContent.tokens),
-          ...(documentReferences.length
-            ? [structuredDocumentPlugin(documentReferences)]
-            : []),
-        ]}
-        skipHtml
-        unwrapDisallowed
-        urlTransform={(url) =>
-          mentionsByUrl.has(url) || documentsByUrl.has(url)
-            ? url
-            : defaultUrlTransform(url)
-        }
-      >
-        {markdownBody}
-      </ReactMarkdown>
+      <MarkdownLinksContext.Provider value={links}>
+        <ReactMarkdown
+          allowedElements={
+            authorKind === "agent" ? agentElements : humanElements
+          }
+          components={markdownComponents}
+          remarkPlugins={[
+            remarkBreaks,
+            // CommonMark ignores ** next to CJK punctuation, such as a fullwidth colon
+            // (U+FF1A) right before the closing ** that CJK text follows directly.
+            remarkCjkFriendly,
+            ...(authorKind === "agent" ? [remarkGfm] : []),
+            ...(authorKind === "agent" ? [unavailableCitationPlugin] : []),
+            structuredMentionPlugin(mentionContent.tokens),
+            ...(documentReferences.length
+              ? [structuredDocumentPlugin(documentReferences)]
+              : []),
+          ]}
+          skipHtml
+          unwrapDisallowed
+          urlTransform={(url) =>
+            mentionsByUrl.has(url) || documentsByUrl.has(url)
+              ? url
+              : defaultUrlTransform(url)
+          }
+        >
+          {markdownBody}
+        </ReactMarkdown>
+      </MarkdownLinksContext.Provider>
     </div>
   );
 });
 
+const MarkdownLinksContext = createContext<{
+  authorKind: "agent" | "human";
+  mentionsByUrl: ReadonlyMap<string, MentionToken>;
+  documentsByUrl: ReadonlyMap<string, TeamHubMessageDocumentSegment>;
+}>({
+  authorKind: "human",
+  mentionsByUrl: new Map(),
+  documentsByUrl: new Map(),
+});
+
+// Renderer identities must stay stable: ReactMarkdown uses them as element
+// types, so a renderer created per render remounts its whole subtree (and
+// leaves the replaced DOM to whatever still references it).
+const markdownComponents: Components = {
+  a({ children, href }) {
+    return <MarkdownLink href={href}>{children}</MarkdownLink>;
+  },
+  blockquote({ children }) {
+    return <blockquote>{children}</blockquote>;
+  },
+  code({ children }) {
+    return <code>{children}</code>;
+  },
+  h1({ children }) {
+    return <h1>{children}</h1>;
+  },
+  h2({ children }) {
+    return <h2>{children}</h2>;
+  },
+  h3({ children }) {
+    return <h3>{children}</h3>;
+  },
+  li({ children }) {
+    return <li>{children}</li>;
+  },
+  ol({ children }) {
+    return <ol>{children}</ol>;
+  },
+  p({ children }) {
+    return <p>{children}</p>;
+  },
+  pre({ children }) {
+    return <MarkdownCodeBlock>{children}</MarkdownCodeBlock>;
+  },
+  table({ children }) {
+    return (
+      <div className="tiptap-table-scroll-wrapper">
+        <div className="tiptap-table-scroll-viewport">
+          <table>{children}</table>
+        </div>
+      </div>
+    );
+  },
+  td({ children }) {
+    return <td>{children}</td>;
+  },
+  th({ children }) {
+    return <th>{children}</th>;
+  },
+  ul({ children }) {
+    return <ul>{children}</ul>;
+  },
+};
+
 function MarkdownLink({
   children,
   href,
-  authorKind,
-  mentionsByUrl,
-  documentsByUrl,
 }: {
-  children?: import("react").ReactNode;
+  children?: ReactNode;
   href?: string;
-  authorKind: "agent" | "human";
-  mentionsByUrl: Map<string, MentionToken>;
-  documentsByUrl: Map<string, TeamHubMessageDocumentSegment>;
 }) {
+  const { authorKind, mentionsByUrl, documentsByUrl } =
+    useContext(MarkdownLinksContext);
   const {
     documentTitles = {},
     onOpenActor,
