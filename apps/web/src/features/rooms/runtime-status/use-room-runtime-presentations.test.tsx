@@ -637,6 +637,88 @@ describe("Room Runtime presentations", () => {
     });
   });
 
+  it("stops observing a terminal Run after its final sync once it left the timeline", async () => {
+    const finalCatchUp = deferred<TeamHubRuntimePresentationEventPage>();
+    const runtime = createTestTeamHubRuntime();
+    const listRoomRuntimePresentationEvents = vi
+      .fn<TestRouteHandler>()
+      .mockReturnValueOnce(eventPage(["1"], "1"))
+      .mockReturnValueOnce(finalCatchUp.promise);
+    runtime.server.on("GET", EVENTS_PATH, listRoomRuntimePresentationEvents);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const initialProps: { runStatus?: TeamHubRunStatus } = {
+      runStatus: testRunStatus(1),
+    };
+    const { rerender } = renderHook(
+      ({ runStatus }: { runStatus?: TeamHubRunStatus }) =>
+        useRoomRuntimePresentations({
+          activeRunStatuses: runStatus?.status === "active" ? [runStatus] : [],
+          runStatuses: runStatus ? [runStatus] : [],
+          roomId: "room-1",
+          tenantId: "tenant-1",
+        }),
+      {
+        initialProps,
+        wrapper: queryWrapper(queryClient, runtime),
+      },
+    );
+    await waitFor(() =>
+      expect(listRoomRuntimePresentationEvents).toHaveBeenCalledOnce(),
+    );
+    rerender({ runStatus: { ...testRunStatus(2), status: "completed" } });
+    await waitFor(() =>
+      expect(listRoomRuntimePresentationEvents).toHaveBeenCalledTimes(2),
+    );
+    // The live set drops the ended Run before its tail arrives.
+    rerender({ runStatus: undefined });
+    expect(observerCount(queryClient)).toBe(1);
+
+    await act(async () => {
+      finalCatchUp.resolve(eventPage(["2"], "2"));
+      await finalCatchUp.promise;
+    });
+    await waitFor(() => expect(observerCount(queryClient)).toBe(0));
+    expect(cachedEvents(queryClient)?.published_through_ordinal).toBe("2");
+  });
+
+  it("reads once more and releases a Run that left before its end arrived", async () => {
+    const runtime = createTestTeamHubRuntime();
+    const listRoomRuntimePresentationEvents = vi
+      .fn<TestRouteHandler>()
+      .mockReturnValueOnce(eventPage(["1"], "1"))
+      .mockReturnValueOnce(eventPage(["2", "3"], "3"));
+    runtime.server.on("GET", EVENTS_PATH, listRoomRuntimePresentationEvents);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const { rerender } = renderHook(
+      ({ visible }: { visible: boolean }) =>
+        useRoomRuntimePresentations({
+          activeRunStatuses: visible ? [testRunStatus(1)] : [],
+          runStatuses: visible ? [testRunStatus(1)] : [],
+          roomId: "room-1",
+          tenantId: "tenant-1",
+        }),
+      {
+        initialProps: { visible: true },
+        wrapper: queryWrapper(queryClient, runtime),
+      },
+    );
+    await waitFor(() =>
+      expect(cachedEvents(queryClient)?.published_through_ordinal).toBe("1"),
+    );
+    // A reconnect snapshot omits the succeeded Run, so no end is ever seen.
+    rerender({ visible: false });
+
+    await waitFor(() => expect(observerCount(queryClient)).toBe(0));
+    expect(eventRead(listRoomRuntimePresentationEvents.mock.calls[1]!)).toEqual(
+      ["room-1", "run-status-1", "1", 200],
+    );
+    expect(cachedEvents(queryClient)?.published_through_ordinal).toBe("3");
+  });
+
   it("retries a failed synchronization with backoff instead of waiting for a rerender", async () => {
     const runtime = createTestTeamHubRuntime();
     const listRoomRuntimePresentationEvents = vi
@@ -865,4 +947,42 @@ function testRunStatus(
     status: "active",
     updated_at: `2026-08-25T00:00:0${revision}Z`,
   };
+}
+
+function queryWrapper(
+  queryClient: QueryClient,
+  runtime: ReturnType<typeof createTestTeamHubRuntime>,
+) {
+  return function QueryWrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TeamHubRuntimeProvider runtime={runtime}>
+          {children}
+        </TeamHubRuntimeProvider>
+      </QueryClientProvider>
+    );
+  };
+}
+
+function eventsQueryKey() {
+  return roomRuntimePresentationEventsQueryKey(
+    "tenant-1",
+    "room-1",
+    "run-status-1",
+  );
+}
+
+function observerCount(queryClient: QueryClient) {
+  return (
+    queryClient
+      .getQueryCache()
+      .find({ exact: true, queryKey: eventsQueryKey() })
+      ?.getObserversCount() ?? 0
+  );
+}
+
+function cachedEvents(queryClient: QueryClient) {
+  return queryClient.getQueryData<TeamHubRuntimePresentationEventPage>(
+    eventsQueryKey(),
+  );
 }

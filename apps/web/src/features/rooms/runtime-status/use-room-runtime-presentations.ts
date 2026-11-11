@@ -1,5 +1,5 @@
 import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useTeamHubRuntime } from "@/features/teamhub/teamhub-runtime";
 import type {
@@ -32,15 +32,19 @@ export function useRoomRuntimePresentations({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- scope identities are intentional reset keys
     [client, queryClient, roomId, tenantId],
   );
+  // Counts eager syncs finished after their Run ended, so the observed set
+  // drops them and React Query can collect their events.
+  const [releasedSyncs, setReleasedSyncs] = useState(0);
   const runStatusesToSync = activeRunStatuses ?? runStatuses;
   const observedRunStatusIds = useMemo(() => {
+    void releasedSyncs;
     const runStatusIds = runStatuses.map((runStatus) => runStatus.id);
     const visibleRunStatusIds = new Set(runStatusIds);
     for (const runStatusId of eagerlySyncedRunStatuses.keys()) {
       if (!visibleRunStatusIds.has(runStatusId)) runStatusIds.push(runStatusId);
     }
     return runStatusIds;
-  }, [runStatuses, eagerlySyncedRunStatuses]);
+  }, [runStatuses, eagerlySyncedRunStatuses, releasedSyncs]);
   const queries = useQueries({
     queries: observedRunStatusIds.map((runStatusId) => ({
       ...roomRuntimePresentationEventsQueryOptions(
@@ -56,6 +60,17 @@ export function useRoomRuntimePresentations({
   useEffect(() => {
     const sync = createRuntimePresentationEventsSync({
       client,
+      onRevisionComplete: (runStatusId) => {
+        const target = eagerlySyncedRunStatuses.get(runStatusId);
+        if (
+          !target?.terminal ||
+          !sync.isRevisionComplete(runStatusId, target.revision)
+        ) {
+          return;
+        }
+        eagerlySyncedRunStatuses.delete(runStatusId);
+        setReleasedSyncs((count) => count + 1);
+      },
       queryClient,
       roomId,
       tenantId,
@@ -65,7 +80,7 @@ export function useRoomRuntimePresentations({
       sync.dispose();
       syncRef.current = null;
     };
-  }, [client, queryClient, roomId, tenantId]);
+  }, [client, queryClient, roomId, tenantId, eagerlySyncedRunStatuses]);
   useEffect(() => {
     const sync = syncRef.current;
     if (!sync) return;
@@ -86,6 +101,18 @@ export function useRoomRuntimePresentations({
       eagerlySyncedRunStatuses.set(runStatus.id, target);
       sync.request(runStatus.id, target.revision);
     }
+    const shownRunStatusIds = new Set(
+      [...runStatuses, ...runStatusesToSync].map((runStatus) => runStatus.id),
+    );
+    for (const [runStatusId, target] of eagerlySyncedRunStatuses) {
+      if (target.terminal || shownRunStatusIds.has(runStatusId)) continue;
+      // The Run left before its end reached this hook (a reconnect snapshot
+      // omits succeeded Runs, or updates were batched): read once more now
+      // that it has ended, then release it.
+      const ended = { revision: target.revision + 1, terminal: true };
+      eagerlySyncedRunStatuses.set(runStatusId, ended);
+      sync.request(runStatusId, ended.revision);
+    }
     for (const [runStatusId, target] of eagerlySyncedRunStatuses) {
       if (
         target.terminal &&
@@ -101,7 +128,7 @@ export function useRoomRuntimePresentations({
       retainedRunStatusIds.add(runStatusId);
     }
     sync.retain(retainedRunStatusIds);
-  }, [runStatuses, runStatusesToSync, eagerlySyncedRunStatuses]);
+  }, [runStatuses, runStatusesToSync, eagerlySyncedRunStatuses, releasedSyncs]);
 
   return useMemo(() => {
     const eventsByRunStatusId: Record<

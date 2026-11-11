@@ -19,6 +19,7 @@ export interface RunStatusTransport {
 
 const snapshotRetryBaseMs = 1_000;
 const snapshotRetryMaxMs = 30_000;
+const releasedRunLimit = 256;
 
 /**
  * Follows the Run statuses a Room shows: the list endpoint is the snapshot,
@@ -28,6 +29,12 @@ const snapshotRetryMaxMs = 30_000;
  * were lost, so both reread the snapshot. A failed snapshot read is retried
  * with backoff until one succeeds, because nothing else repairs a Run that
  * ended while the stream was down.
+ *
+ * The live set follows the snapshot's retention: once an end has been
+ * published, a succeeded Run and a failed or canceled Run that a newer Run of
+ * the same Agent superseded leave it. Their final revisions are remembered so
+ * a snapshot read that started before the end, or a late announcement, cannot
+ * bring them back.
  */
 export function createRunStatusTransport({
   client,
@@ -43,10 +50,35 @@ export function createRunStatusTransport({
       let loads = 0;
       let failedLoads = 0;
       let retryTimer: ReturnType<typeof setTimeout> | undefined;
-      const publish = () => input.onCollection([...runs.values()]);
+      const released = new Map<string, number>();
+      const isReleased = (run: TeamHubRunStatus) =>
+        run.revision <= (released.get(run.id) ?? -1);
+      // Consumers see every end before the Run leaves the live set.
+      const publish = () => {
+        input.onCollection([...runs.values()]);
+        for (const run of [...runs.values()].filter(snapshotDrops)) {
+          runs.delete(run.id);
+          released.delete(run.id);
+          released.set(run.id, run.revision);
+        }
+        for (const id of released.keys()) {
+          if (released.size <= releasedRunLimit) break;
+          released.delete(id);
+        }
+      };
+      const snapshotDrops = (run: TeamHubRunStatus) =>
+        run.status === "completed" ||
+        (run.status === "aborted" &&
+          [...runs.values()].some(
+            (other) =>
+              other.agent.id === run.agent.id &&
+              (other.created_at > run.created_at ||
+                (other.created_at === run.created_at && other.id > run.id)),
+          ));
       const apply = (run: TeamHubRunStatus) => {
         const current = runs.get(run.id);
         if (current && run.revision < current.revision) return false;
+        if (isReleased(run)) return false;
         runs.set(run.id, run);
         return true;
       };
@@ -59,7 +91,11 @@ export function createRunStatusTransport({
           const list = await client.listRoomRunStatuses(input.roomId);
           if (disposed || current !== loads) return;
           const announced = runs;
-          runs = new Map(list.items.map((run) => [run.id, run]));
+          runs = new Map(
+            list.items
+              .filter((run) => !isReleased(run))
+              .map((run) => [run.id, run]),
+          );
           // An announcement that arrived during the read and is newer than
           // the snapshot survives it.
           for (const [id, run] of announced) {

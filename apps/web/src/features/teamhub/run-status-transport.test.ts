@@ -60,6 +60,76 @@ describe("Run status transport", () => {
     ]);
   });
 
+  it("publishes a succeeded end once, then drops the Run like the snapshot", async () => {
+    const harness = createHarness([run("run-1", 1)]);
+    const collections = harness.subscribe();
+    await vi.waitFor(() => expect(collections).toHaveLength(1));
+    await harness.announce(published("run-1", 4, "completed"));
+    await harness.announce(published("run-2", 0, "active"));
+    // A late or replayed announcement does not bring the ended Run back.
+    await harness.announce(published("run-1", 3, "active"));
+    await harness.announce(published("run-1", 4, "completed"));
+
+    expect(
+      collections.map((items) => items.map(({ id, status }) => [id, status])),
+    ).toEqual([
+      [["run-1", "active"]],
+      [["run-1", "completed"]],
+      [["run-2", "active"]],
+    ]);
+  });
+
+  it("drops a failed Run only after a newer Run of the same Agent", async () => {
+    const harness = createHarness([]);
+    const collections = harness.subscribe();
+    await vi.waitFor(() => expect(collections).toHaveLength(1));
+    await harness.announce(published("run-1", 2, "aborted"));
+    await harness.announce(published("other", 0, "active", "actor-other"));
+    await harness.announce(published("run-2", 0, "active"));
+    await harness.announce(published("run-2", 1, "active"));
+
+    expect(collections.map((items) => items.map(({ id }) => id))).toEqual([
+      [],
+      ["run-1"],
+      ["run-1", "other"],
+      ["run-1", "other", "run-2"],
+      ["other", "run-2"],
+    ]);
+  });
+
+  it("keeps an end announced during a snapshot read that predates it", async () => {
+    let release!: () => void;
+    const harness = createHarness([run("run-1", 1)], async () => {
+      await new Promise<void>((resolve) => {
+        release = resolve;
+      });
+    });
+    const collections = harness.subscribe();
+    await vi.waitFor(() => expect(harness.list).toHaveBeenCalledOnce());
+    await harness.announce(published("run-1", 5, "completed"));
+    expect(collections.at(-1)).toEqual([
+      expect.objectContaining({ id: "run-1", status: "completed" }),
+    ]);
+    release();
+    await vi.waitFor(() => expect(collections).toHaveLength(2));
+    expect(collections[1]).toEqual([]);
+  });
+
+  it("lets a newer snapshot revision win over an older announcement", async () => {
+    let release!: () => void;
+    const harness = createHarness([run("run-1", 7)], async () => {
+      await new Promise<void>((resolve) => {
+        release = resolve;
+      });
+    });
+    const collections = harness.subscribe();
+    await vi.waitFor(() => expect(harness.list).toHaveBeenCalledOnce());
+    await harness.announce(published("run-1", 5, "active"));
+    release();
+    await vi.waitFor(() => expect(collections).toHaveLength(2));
+    expect(collections[1]!.map(({ revision }) => revision)).toEqual([7]);
+  });
+
   it("rereads the snapshot when the event stream resyncs", async () => {
     const harness = createHarness([run("run-1", 1)]);
     const collections = harness.subscribe();
@@ -194,11 +264,12 @@ function published(
   id: string,
   ordinal: number,
   status: TeamHubRoomRunStatus["status"],
+  agentId = "actor-agent",
 ): { kind: string; run: TeamHubRoomRunStatus } {
   return {
     kind: "agent_run.status_changed",
     run: {
-      agent: { display_name: "Codex", id: "actor-agent", kind: "agent" },
+      agent: { display_name: "Codex", id: agentId, kind: "agent" },
       created_at: "2026-11-03T10:00:00Z",
       event_ordinal: ordinal,
       replied: false,

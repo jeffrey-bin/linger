@@ -39,7 +39,8 @@ interface RunStatusSyncState {
   runStatusId: string;
   job?: LimitedSyncJob;
   key: string;
-  owners: Set<symbol>;
+  /** Each owning sync and its revision-complete listener. */
+  owners: Map<symbol, (runStatusId: string) => void>;
   queryClient: QueryClient;
   queryKey: ReturnType<typeof roomRuntimePresentationEventsQueryKey>;
   registry: RuntimePresentationSyncRegistry;
@@ -55,11 +56,14 @@ const registries = new WeakMap<QueryClient, RuntimePresentationSyncRegistry>();
 
 export function createRuntimePresentationEventsSync({
   client,
+  onRevisionComplete = () => undefined,
   queryClient,
   roomId,
   tenantId,
 }: {
   client: RuntimePresentationSyncClient;
+  /** Called after a sync completes the revisions requested so far. */
+  onRevisionComplete?: (runStatusId: string) => void;
   queryClient: QueryClient;
   roomId: string;
   tenantId: string;
@@ -106,7 +110,7 @@ export function createRuntimePresentationEventsSync({
           completedRevision: -1,
           runStatusId,
           key,
-          owners: new Set(),
+          owners: new Map(),
           queryClient,
           queryKey,
           registry,
@@ -124,7 +128,7 @@ export function createRuntimePresentationEventsSync({
         }
       }
       if (!state.owners.has(owner)) {
-        state.owners.add(owner);
+        state.owners.set(owner, onRevisionComplete);
         ownedStates.set(key, state);
       }
       if (state.requestedRevision > state.completedRevision) schedule(state);
@@ -213,7 +217,13 @@ function start(state: RunStatusSyncState): Promise<void> {
         state.completedRevision,
         targetRevision,
       );
-      if (state.requestedRevision > state.completedRevision) schedule(state);
+      if (state.requestedRevision > state.completedRevision) {
+        schedule(state);
+        return;
+      }
+      for (const notify of [...state.owners.values()]) {
+        notify(state.runStatusId);
+      }
     },
     (error: unknown) => {
       if (state.running !== running) return;
