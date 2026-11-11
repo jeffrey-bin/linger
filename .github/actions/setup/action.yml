@@ -1,9 +1,19 @@
 name: Set up the toolchain
-description: Node, pnpm and Go at the repository's pinned versions, with workspace dependencies installed.
+description: Node, pnpm and Go at the repository's pinned versions, with workspace dependencies installed, and a BASE that shares history with HEAD.
 
 runs:
   using: composite
   steps:
+    # A push's `before` shares no history with HEAD after a branch's first push
+    # (all zeros) or a force push that replaced the history. The checks then
+    # compare HEAD with itself: the changed-file checks have nothing to check and
+    # every whole-tree check still runs.
+    - shell: bash
+      run: |
+        if ! git merge-base "$BASE" HEAD >/dev/null 2>&1; then
+          echo "::notice::BASE $BASE shares no history with HEAD; the changed-file checks compare HEAD with itself."
+          echo "BASE=$(git rev-parse HEAD)" >>"$GITHUB_ENV"
+        fi
     # Reads the version from packageManager in package.json.
     - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v4

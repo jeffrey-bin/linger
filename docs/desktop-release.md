@@ -60,9 +60,11 @@ The release goes to `RELEASE_REPO`, `simplexai-labs/linger` by default:
   name only the version.
 
 simplexai-labs/linger is public, and so are its workflow logs and release
-notes. The workflow prints no internal address: `LINGER_NATIVE_DEPS_URL`
-comes from settings and is left out of messages, and keeping it as a secret
-also masks it. Signing keys are written to files under the runner's temporary
+notes. The bundled archives come from the assets of the
+[`native-deps`](https://github.com/simplexai-labs/linger/releases/tag/native-deps)
+prerelease, which is public too; a `LINGER_NATIVE_DEPS_URL` secret or variable
+points the build at another folder, and a secret keeps that address masked in
+the log. Signing keys are written to files under the runner's temporary
 folder, read only by the signing tools and removed after the build.
 
 Set these under Settings → Secrets and variables → Actions of the repository
@@ -70,7 +72,7 @@ that runs the workflow:
 
 | Name                            | Kind                 | Required                                  | Purpose                                                                                                                                                 |
 | ------------------------------- | -------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LINGER_NATIVE_DEPS_URL`        | secret (or variable) | yes                                       | Public HTTPS folder serving the archives that `apps/desktop/distribution/*.json` pin, under their file names. Each download is checked against its pin. |
+| `LINGER_NATIVE_DEPS_URL`        | secret (or variable) | no                                        | Folder serving the archives `apps/desktop/distribution/*.json` pins; the `native-deps` prerelease when unset. Each download is checked against its pin. |
 | `RELEASE_REPO`                  | variable             | no                                        | `owner/name` that receives the release; `simplexai-labs/linger` when unset.                                                                             |
 | `LINGER_RELEASE_TOKEN`          | secret               | when `RELEASE_REPO` is another repository | Fine-grained token for `RELEASE_REPO` only, with Contents: read and write. Not needed in simplexai-labs/linger itself.                                  |
 | `MACOS_DEVELOPER_ID_P12_BASE64` | secret               | no                                        | Base64 of the Developer ID `.p12`. Without it the app is signed ad hoc.                                                                                 |
@@ -80,13 +82,20 @@ that runs the workflow:
 | `WINDOWS_SIGNING_P12_BASE64`    | secret               | no                                        | Base64 of an Authenticode `.p12`. Without it the setup program is unsigned.                                                                             |
 | `WINDOWS_SIGNING_PASSWORD`      | secret               | with the `.p12`                           | Password of that `.p12`.                                                                                                                                |
 
+### Bundled archives
+
+The `native-deps` prerelease in simplexai-labs/linger holds every archive that
+`apps/desktop/distribution/*.json` pins, under its file name; being a
+prerelease, it never becomes the latest release. When a pin changes, upload the
+new archive there before tagging:
+
+```sh
+gh release upload native-deps <archive> --repo simplexai-labs/linger
+```
+
 ### First release in simplexai-labs/linger
 
-1. Put the archives that `apps/desktop/distribution/*.json` pin, under their
-   file names, in a public HTTPS folder (for example the assets of a
-   `native-deps` prerelease in simplexai-labs/linger, which keeps it from
-   becoming the latest release), and set
-   `LINGER_NATIVE_DEPS_URL` to it.
+1. Check that the `native-deps` prerelease has every pinned archive.
 2. With the source in simplexai-labs/linger, push a prerelease tag first, then
    the release:
 

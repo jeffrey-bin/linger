@@ -28,7 +28,10 @@ if ! git diff --quiet "$base" "$head_sha" -- 'apps/teamhub/migrations/*.sql'; th
     "$base_tip" "$head_sha"
 fi
 
-pnpm exec commitlint --from "$base" --to "$head_sha" --verbose
+# commitlint rejects an empty range, which a base equal to HEAD gives.
+if [[ "$base" != "$head_sha" ]]; then
+  pnpm exec commitlint --from "$base" --to "$head_sha" --verbose
+fi
 
 # Every variable runtime code reads is documented in .env.example or the inventory.
 pnpm env:inventory:check

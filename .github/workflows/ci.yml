@@ -70,9 +70,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
-      # A branch's first push has no earlier commit to compare against.
-      - if: env.BASE != '0000000000000000000000000000000000000000'
-        run: make check-repository-gate BASE="$BASE"
+      - run: make check-repository-gate BASE="$BASE"
 
   check:
     needs: changes

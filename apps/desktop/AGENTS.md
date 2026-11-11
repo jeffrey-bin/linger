@@ -276,9 +276,9 @@ Official releases come from the public simplexai-labs/linger repository: a
 `darwin-arm64`, `linux-x64` and `win32-x64` in GitHub Actions and publishes a
 linger GitHub Release with `SHA256SUMS.txt`; see
 [`docs/desktop-release.md`](../../docs/desktop-release.md). The workflow
-fetches the bundled archives from `LINGER_NATIVE_DEPS_URL`, so upload a new
-pinned archive there before tagging. The GitLab manual dry run builds test
-packages only and publishes nothing.
+fetches the bundled archives from the assets of the `native-deps` prerelease
+there, so upload a new pinned archive to it before tagging. The GitLab manual
+dry run builds test packages only and publishes nothing.
 
 Windows, Linux x64 and Apple silicon bundle PostgreSQL in the app instead
 (`file` in `distribution/<target>.json`; 35 MB on Windows, 10–12 MB
