@@ -40,7 +40,7 @@ describe("readUserEnvironment", () => {
     const directory = await root();
     await writeFile(
       userEnvironmentFile(directory),
-      "LINGER_SECRET_SEED=override\nSIMPLEX_HTTP_PORT=1\nXAI_API_KEY=xai\n",
+      "LINGER_SECRET_SEED=override\nLINGER_HTTP_PORT=1\nXAI_API_KEY=xai\n",
       { mode: 0o600 },
     );
     const warnings: string[] = [];

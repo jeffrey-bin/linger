@@ -7,7 +7,7 @@ import {
   privateDirectory,
   readPrivate,
 } from "./private-files.js";
-import { homedir } from "node:os";
+import { lingerHome } from "./home.js";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { parseEnv } from "node:util";
@@ -46,8 +46,8 @@ interface InstanceOptions {
 // Generated once per instance and never rewritten: the database, the service
 // credentials and the Composio key TeamHub saves are bound to these values.
 const credentials: Record<string, () => string> = {
-  SIMPLEX_POSTGRES_PASSWORD: () => randomBytes(32).toString("hex"),
-  SIMPLEX_SECRET_SEED: () => randomBytes(32).toString("hex"),
+  LINGER_POSTGRES_PASSWORD: () => randomBytes(32).toString("hex"),
+  LINGER_SECRET_SEED: () => randomBytes(32).toString("hex"),
   // TeamHub requires 32 bytes in standard base64.
   TEAMHUB_SECRET_ENCRYPTION_KEY: () => randomBytes(32).toString("base64"),
 };
@@ -63,17 +63,13 @@ export function instanceRoot(options: { name: string; home?: string }): string {
       "Invalid instance name; use lowercase letters, numbers and hyphens",
     );
   return path.join(
-    path.resolve(
-      options.home ??
-        process.env.LINGER_HOME ??
-        path.join(homedir(), ".simplexai"),
-    ),
+    path.resolve(options.home ?? lingerHome()),
     "instances",
     options.name,
   );
 }
-function composeProject(root: string, name: string): string {
-  return `simplex-${name}-${createHash("sha256").update(root).digest("hex").slice(0, 12)}`;
+export function composeProject(root: string, name: string): string {
+  return `linger-${name}-${createHash("sha256").update(root).digest("hex").slice(0, 12)}`;
 }
 export async function loadInstance(options: {
   name: string;

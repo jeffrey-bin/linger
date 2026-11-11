@@ -1660,7 +1660,7 @@ describe("LocalServerModule install location", () => {
     mkdirSync(picked);
     writeFileSync(path.join(picked, "notes.txt"), "");
     await f.module.chooseLocation(picked);
-    const home = path.join(picked, "Simplex");
+    const home = path.join(picked, "Linger");
     expect(f.module.status().location).toEqual({ path: home, custom: true });
 
     await f.module.begin();
@@ -1709,7 +1709,7 @@ describe("LocalServerModule install location", () => {
     await f.host.stop("quit");
   });
 
-  it("installs into an empty folder or one that holds Simplex", async () => {
+  it("installs into an empty folder or one that holds Linger", async () => {
     const root = tempDirectory();
     expect(await installLocation(root)).toBe(root);
     writeFileSync(path.join(root, ".DS_Store"), "");
@@ -1719,7 +1719,7 @@ describe("LocalServerModule install location", () => {
     expect(await installLocation(root)).toBe(root);
     const other = tempDirectory();
     writeFileSync(path.join(other, "notes.txt"), "");
-    expect(await installLocation(other)).toBe(path.join(other, "Simplex"));
+    expect(await installLocation(other)).toBe(path.join(other, "Linger"));
   });
 
   it("asks for free space on the folder's disk", async () => {
@@ -1822,7 +1822,7 @@ describe("LocalServerModule after a restart", () => {
   });
 
   it("starts the services again in the folder they were installed in", async () => {
-    const elsewhere = path.join(tempDirectory(), "Simplex");
+    const elsewhere = path.join(tempDirectory(), "Linger");
     const f = fixture({}, { serverUrl: "http://localhost:3000" }, (home) => {
       mkdirSync(path.join(home, "desktop"), { recursive: true });
       writeFileSync(

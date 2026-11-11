@@ -31,6 +31,8 @@ type Hello struct {
 
 func IdentityProofPayload(hello Hello) []byte {
 	return bytes.Join([][]byte{
+		// Frozen wire constant: daemons and Agent Services of any version must
+		// sign and verify the same label, so it keeps its original name.
 		[]byte("simplex-computer-daemon-identity-v1"),
 		[]byte(hello.RunnerID),
 		[]byte(hello.ConnectionNonce),

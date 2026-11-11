@@ -120,6 +120,8 @@ export const computerDaemonIdentityProofPayload = (
 ): Buffer =>
   Buffer.from(
     [
+      // Frozen wire constant: daemons and Agent Services of any version must
+      // sign and verify the same label, so it keeps its original name.
       "simplex-computer-daemon-identity-v1",
       hello.runner_id,
       hello.connection_nonce,

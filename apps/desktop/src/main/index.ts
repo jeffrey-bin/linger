@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, renameSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,6 +14,8 @@ import {
   shell,
   systemPreferences,
 } from "electron";
+
+import { lingerHome } from "@linger/local-installation/home";
 
 import { CredentialStore } from "./computer-credential.js";
 import {
@@ -56,17 +58,32 @@ declare const __SOURCE_DEPENDENCIES__: SourceDependencies | null;
 const VERSION = __DESKTOP_VERSION__;
 const here = path.dirname(fileURLToPath(import.meta.url));
 
+let userDataMove: UserDataMove | undefined;
 // Development overrides; installed builds use the platform defaults.
 if (process.env.LINGER_DESKTOP_USER_DATA)
   app.setPath("userData", path.resolve(process.env.LINGER_DESKTOP_USER_DATA));
-// The installed app keeps the data folder it had as Simplex: the Computer's
-// credential, identity and enrollment live there.
-else if (app.isPackaged)
-  app.setPath("userData", path.join(app.getPath("appData"), "Simplex"));
+// The installed app's data folder holds the Computer's credential, identity
+// and enrollment. Installs from before the rename move theirs here once.
+else if (app.isPackaged) {
+  const userData = path.join(app.getPath("appData"), "Linger");
+  try {
+    userDataMove = moveLegacyUserData(
+      path.join(app.getPath("appData"), "Simplex"),
+      userData,
+    );
+  } catch (error) {
+    dialog.showErrorBox(
+      "Linger could not start",
+      `Could not move the app data folder to ${userData}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    app.exit(1);
+  }
+  app.setPath("userData", userData);
+}
 
 // Windows shows notifications only for an app id that a Start menu shortcut
 // carries. The installer makes the shortcut; the app writes the id into it.
-const APP_USER_MODEL_ID = "ai.simplex.desktop.preview";
+const APP_USER_MODEL_ID = "com.simplexai.linger.desktop.preview";
 if (process.platform === "win32") app.setAppUserModelId(APP_USER_MODEL_ID);
 
 if (!app.requestSingleInstanceLock()) {
@@ -82,6 +99,17 @@ async function main(): Promise<void> {
   const log = fileLogger(path.join(userData, "logs"), {
     stderr: !app.isPackaged,
   });
+  if (userDataMove?.outcome === "kept")
+    log.warn("desktop.legacy_user_data_kept", {
+      legacy: userDataMove.legacy,
+      user_data: userDataMove.userData,
+    });
+  else if (userDataMove)
+    log.info("desktop.legacy_user_data_moved", {
+      legacy: userDataMove.legacy,
+      user_data: userDataMove.userData,
+      ...(userDataMove.setAside ? { set_aside: userDataMove.setAside } : {}),
+    });
   if (process.platform === "win32" && app.isPackaged) markStartMenuShortcut();
   const background = process.argv.includes("--background");
   const envServer = parseServerUrl(process.env.LINGER_SERVER_URL ?? "");
@@ -151,10 +179,9 @@ async function main(): Promise<void> {
       : undefined;
   };
   // The default LINGER_HOME of the installer.
-  const lingerHome =
-    process.env.LINGER_HOME || path.join(os.homedir(), ".simplexai");
+  const home = lingerHome();
   const localServer = new LocalServerModule({
-    home: lingerHome,
+    home,
     installerDirectory: path.join(here, "../installer"),
     ...(__SOURCE_ARCHIVE__ ? { sourceArchive: __SOURCE_ARCHIVE__ } : {}),
     ...(__SOURCE_DEPENDENCIES__
@@ -242,7 +269,7 @@ async function main(): Promise<void> {
         });
         return result.canceled ? undefined : result.filePaths[0];
       },
-      defaultDirectory: path.join(app.getPath("home"), "Simplex"),
+      defaultDirectory: path.join(app.getPath("home"), "Linger"),
     }),
     new ComputerDaemonModule({
       spawn: spawnDaemon(
@@ -268,7 +295,7 @@ async function main(): Promise<void> {
     new DiagnosticsModule({
       userData,
       logs: path.join(userData, "logs"),
-      home: lingerHome,
+      home,
       version: VERSION,
       output: () => app.getPath("downloads"),
       openFolder: (folder) => shell.openPath(folder),
@@ -398,8 +425,7 @@ async function daemonEnv(log: Logger): Promise<Record<string, string>> {
   for (const [name, value] of Object.entries(
     withLoginShell(process.env as Record<string, string>, login),
   )) {
-    if (value === undefined || /^(ELECTRON_|LINGER_|SIMPLEX)/i.test(name))
-      continue;
+    if (value === undefined || /^(ELECTRON_|LINGER_)/i.test(name)) continue;
     env[name] = value;
   }
   for (const name of [
@@ -411,4 +437,37 @@ async function daemonEnv(log: Logger): Promise<Record<string, string>> {
     if (value) env[name] = value;
   }
   return env;
+}
+
+interface UserDataMove {
+  readonly outcome: "moved" | "kept";
+  readonly legacy: string;
+  readonly userData: string;
+  /** Where a Linger folder without a Computer credential was set aside. */
+  readonly setAside?: string;
+}
+
+// The data folder of the app as it was named before the rename moves once to
+// its Linger name. A Linger folder that already holds a Computer credential
+// wins and the old one stays; one without a credential is set aside, so the
+// Computer keeps its identity instead of enrolling again under a new id.
+function moveLegacyUserData(
+  legacy: string,
+  userData: string,
+): UserDataMove | undefined {
+  if (!existsSync(legacy)) return undefined;
+  if (existsSync(path.join(userData, "computer", "credential.json")))
+    return { outcome: "kept", legacy, userData };
+  let setAside: string | undefined;
+  if (existsSync(userData)) {
+    setAside = `${userData}.before-move-${Date.now()}`;
+    renameSync(userData, setAside);
+  }
+  renameSync(legacy, userData);
+  return {
+    outcome: "moved",
+    legacy,
+    userData,
+    ...(setAside ? { setAside } : {}),
+  };
 }

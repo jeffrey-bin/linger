@@ -10,7 +10,7 @@ Tools: the `wintool` image from ./Dockerfile (NSIS, ImageMagick, resedit).
     python3 packaging/win/package.py [--out DIR]
 
 The setup program installs for the current user into
-%LOCALAPPDATA%\\Programs\\Simplex without administrator rights, adds a Start
+%LOCALAPPDATA%\\Programs\\Linger without administrator rights, adds a Start
 menu shortcut and an entry under Installed apps. The zip holds the same
 folder for running without installing.
 

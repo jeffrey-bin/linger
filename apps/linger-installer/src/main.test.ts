@@ -128,3 +128,12 @@ it("saves keys in the instance's user.env without echoing their values", async (
     error: "Invalid keys",
   });
 });
+
+it("migrates without a source checkout", async () => {
+  const { parseInstallerArguments } = await import("./main.js");
+  const home = path.join(os.tmpdir(), "linger-migrate-home");
+  expect(parseInstallerArguments(["--home", home, "--migrate"])).toMatchObject({
+    home,
+    migrate: true,
+  });
+});

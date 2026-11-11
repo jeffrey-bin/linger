@@ -1,7 +1,7 @@
 /** Generated Runner Gateway JSON Schema. Do not edit. */
 export const runnerGatewayEnvelopeSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  $id: "https://simplex.ai/contracts/runner-gateway/v2/envelope.schema.json",
+  $id: "https://simplexai.com/contracts/runner-gateway/v2/envelope.schema.json",
   title: "RunnerGatewayEnvelope",
   type: "object",
   oneOf: [

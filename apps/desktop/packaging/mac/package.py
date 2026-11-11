@@ -52,7 +52,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DESKTOP = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.dirname(HERE))
 from native_bundle import check_runtime, check_teamhub, refresh  # noqa: E402
-BUNDLE_ID = "ai.simplex.desktop.preview"
+BUNDLE_ID = "com.simplexai.linger.desktop.preview"
 # Prompt text for the privacy permissions tasks need. Without
 # NSAppleEventsUsageDescription macOS refuses Apple Events without asking.
 PRIVACY_USAGE = {

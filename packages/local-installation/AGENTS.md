@@ -26,6 +26,20 @@ Every update or recreate path stops node-services on its own, right before
 TeamHub restarts (natively: for a changed configuration) and while TeamHub is
 still up, so its graceful shutdown requeues in-flight Agent Runs.
 
+The home is `LINGER_HOME`, else `~/.simplexai` (`home.ts`). Installs from
+before the product was renamed Linger convert once in
+`legacy-migration.ts`, which the installer runs before it opens the home and
+the desktop runs through `installer.js --migrate`. Under each instance's lock
+it stops the instance's Computer and native services, renames `SIMPLEX_*`
+keys in the generated env files, and gives the instance its
+`linger-<name>-<hash>` project name. The legacy project name in
+`instance.json` marks an instance as not yet converted, so it is written last
+and a rerun after a crash converges. A damaged record is skipped, and a
+failing instance does not stop the others; the migration then throws one
+error naming each failed instance, and the installer does not start. The
+cache markers `.simplex-files.json` and `.simplex-model-package.json` keep
+their names.
+
 Move a freshly downloaded or unpacked file or folder into place with
 `renameRetrying` from `fs-retry.ts`: on Windows antivirus and indexing hold
 new files for a moment, and a plain rename then fails with EPERM.

@@ -153,6 +153,24 @@ Gateway and runs Agents. The daemon exits with the app.
   and every step from another page, go through TeamHub to the daemon.
 - `src/main/computer-credential.ts`: the Gateway credential in
   `<userData>/computer/credential.json` (0600).
+- Installs from before the product was renamed Linger move once on start.
+  `index.ts` renames the packaged app's data folder from `<appData>/Simplex`
+  to `<appData>/Linger` before `app.setPath("userData")`. A `Linger` folder
+  that already holds `computer/credential.json` wins and the old folder stays
+  (logged as `desktop.legacy_user_data_kept`); one without a credential is set
+  aside as `Linger.before-move-<time>`, so the Computer keeps its identity.
+  LocalServer runs `installer.js --migrate` when an instance record still
+  carries a `simplex-` project name, before it reads
+  `desktop/local-server.json`
+  (`packages/local-installation/src/legacy-migration.ts`). A failed migration
+  puts LocalServer in the failed state with the installer's error, which names
+  each instance that is still legacy; Retry runs the migration again. There is
+  no downgrade path: an older build reads neither the converted instances nor
+  the moved data folder. The bundle ID and
+  Windows AppUserModelID are `com.simplexai.linger.desktop.preview`. The
+  Windows setup installs into `%LOCALAPPDATA%\Programs\Linger`; on upgrade it
+  closes and removes `%LOCALAPPDATA%\Programs\Simplex` and moves the
+  "Open at login" Run value from `ai.simplex.desktop.preview` to the new id.
 - `src/main/legacy-migration.ts`: on start, stops a bridge an older version
   left running and moves its credential and the Desktop 0.16 daemon identity
   into the daemon layout, so the computer keeps its id.
@@ -373,8 +391,8 @@ Intel Macs have none of this and install from the network.
 - `LINGER_BRIDGE_STATE_DIR`: where an older version's bridge kept its state,
   for the one-time migration.
 - `LINGER_CODEX_PATH`, `LINGER_CLAUDE_PATH`, `LINGER_PI_PATH`: absolute
-  runtime paths for the daemon config. Other `LINGER_*`, the retired `SIMPLEX*` and
-  `ELECTRON_*` variables do not reach the daemon. The config's
+  runtime paths for the daemon config. Other `LINGER_*` and `ELECTRON_*`
+  variables do not reach the daemon. The config's
   `runtimeEnvironment` (the local server's runtime: these paths plus
   `CODEX_HOME`, `CLAUDE_CONFIG_DIR`, `PI_CODING_AGENT_DIR`) replaces them,
   names compared case-insensitively for Windows.

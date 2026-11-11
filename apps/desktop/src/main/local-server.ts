@@ -22,6 +22,7 @@ import { createZstdDecompress } from "node:zlib";
 
 import { readLocalLogin } from "@linger/local-installation/account";
 import { downloadVerified } from "@linger/local-installation/download";
+import { legacyMigrationPending } from "@linger/local-installation/home";
 import {
   removeRetrying,
   renameRetrying,
@@ -334,11 +335,20 @@ export class LocalServerModule implements Module {
 
   async start(ctx: ModuleContext): Promise<void> {
     this.#ctx = ctx;
+    const migrationFailure = await this.#migrateLegacyHome(ctx);
     // After a reboot the local services are gone; start them again while the
     // window still points at them.
     const record = await this.#readRecord();
     if (record) this.#home = record.home;
-    if (record && ctx.config.get().serverUrl === record.origin)
+    if (migrationFailure) {
+      // Resume would fail on the legacy record with a less useful error;
+      // Retry resumes, and the installer migrates again first.
+      this.#set("failed", migrationFailure);
+      if (record && ctx.config.get().serverUrl === record.origin)
+        ctx
+          .get<WindowManagerModule>("WindowManager")
+          ?.showStartFailed(migrationFailure);
+    } else if (record && ctx.config.get().serverUrl === record.origin)
       void this.#resume(record, this.#abort.signal);
     this.#offDaemon = ctx.bus.on("computer.failed", (reason) => {
       this.#daemonFailure = reason;
@@ -914,6 +924,51 @@ export class LocalServerModule implements Module {
 
   #target(): string {
     return `${this.#options.platform ?? process.platform}-${this.#options.arch ?? process.arch}`;
+  }
+
+  // An install from before the rename keeps legacy names in its instance
+  // records; the bundled installer converts them once, before a record is
+  // read. Returns why it failed, for the person to see.
+  async #migrateLegacyHome(ctx: ModuleContext): Promise<string | undefined> {
+    if (
+      !(await legacyMigrationPending(this.#options.home)) ||
+      !existsSync(this.#installerScript())
+    )
+      return undefined;
+    const outcome = await new Promise<{ code: number | null; error: string }>(
+      (resolve) => {
+        const child = spawn(
+          process.execPath,
+          [this.#installerScript(), "--home", this.#options.home, "--migrate"],
+          {
+            stdio: ["ignore", "ignore", "pipe"],
+            windowsHide: true,
+            env: {
+              ...process.env,
+              ELECTRON_RUN_AS_NODE: "1",
+              LINGER_HOME: this.#options.home,
+            },
+          },
+        );
+        let error = "";
+        child.stderr.on("data", (chunk: Buffer) => {
+          error = (error + chunk.toString("utf8")).slice(-2000);
+        });
+        child.once("error", (failure) =>
+          resolve({ code: null, error: failure.message }),
+        );
+        child.once("close", (code) => resolve({ code, error }));
+      },
+    );
+    if (outcome.code === 0) {
+      ctx.log.info("local_server.home_migrated", {});
+      return undefined;
+    }
+    const error =
+      outcome.error.trim().slice(-500) ||
+      `The installer exited with code ${outcome.code}.`;
+    ctx.log.warn("local_server.home_migration_failed", { error });
+    return error;
   }
 
   #installerScript(): string {
@@ -2390,7 +2445,7 @@ export const installLocation = async (picked: string): Promise<string> => {
     entries.includes("instances") ||
     entries.includes("installer")
     ? picked
-    : path.join(picked, "Simplex");
+    : path.join(picked, "Linger");
 };
 
 // Why Linger cannot install into `directory`, or undefined when it can: the

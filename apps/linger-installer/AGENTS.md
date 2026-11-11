@@ -21,6 +21,10 @@ after a reboot and reads the outcome from the single JSON line on stdout. It
 also restarts running services when the instance's `user.env` no longer
 matches the configuration they started with.
 
+Every mode first converts an install from before the rename to Linger
+(`migrateLegacyInstallation`); `--migrate` does only that and exits, for the
+desktop client.
+
 Run `make check-installer`; verify UI process behavior with an isolated
 browser context and retain masked evidence. Never stop a user's existing stack
 or global Computer to run acceptance.

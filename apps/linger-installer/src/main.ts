@@ -1,5 +1,5 @@
 import path from "node:path";
-import { homedir } from "node:os";
+import { lingerHome } from "@linger/local-installation/home";
 import { fileURLToPath } from "node:url";
 import { launchInstaller } from "./server/launch.js";
 export { startInstallerServer } from "./server/server.js";
@@ -15,8 +15,9 @@ export function parseInstallerArguments(args: string[]) {
     resume?: boolean;
     inspect?: boolean;
     userKeys?: boolean;
+    migrate?: boolean;
   } = {
-    home: process.env.LINGER_HOME ?? path.join(homedir(), ".simplexai"),
+    home: lingerHome(),
   };
   for (let i = 0; i < args.length; i++) {
     const flag = args[i];
@@ -30,6 +31,10 @@ export function parseInstallerArguments(args: string[]) {
     }
     if (flag === "--inspect") {
       options.inspect = true;
+      continue;
+    }
+    if (flag === "--migrate") {
+      options.migrate = true;
       continue;
     }
     if (flag === "--user-keys") {
@@ -60,7 +65,12 @@ export function parseInstallerArguments(args: string[]) {
       options.port = port;
     }
   }
-  if (!options.sourceRepo && !options.inspect && !options.userKeys)
+  if (
+    !options.sourceRepo &&
+    !options.inspect &&
+    !options.userKeys &&
+    !options.migrate
+  )
     throw new Error("The installer needs a source checkout (--source-repo).");
   if (options.resume && !options.instanceName)
     throw new Error("Resume needs a source checkout and an instance.");
@@ -218,7 +228,19 @@ if (
   } catch (error) {
     failedToStart(error);
   }
-  if (options?.userKeys) await userKeys(options);
+  // Installs from before the rename move to the Linger home once, before
+  // any mode opens it; --migrate does only that, for the desktop client.
+  if (options)
+    await import("@linger/local-installation/legacy-migration")
+      .then(({ migrateLegacyInstallation }) =>
+        migrateLegacyInstallation({ home: options!.home }),
+      )
+      .catch((error: unknown) => {
+        failedToStart(error);
+        options = undefined;
+      });
+  if (options?.migrate) process.exit(0);
+  else if (options?.userKeys) await userKeys(options);
   else if (options?.inspect) await inspect(options);
   else if (options?.resume) await resume(options);
   else if (options) await serve(options).catch(failedToStart);

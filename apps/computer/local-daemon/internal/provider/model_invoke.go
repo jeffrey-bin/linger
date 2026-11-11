@@ -419,7 +419,7 @@ func modelInvokeEnvironment(source map[string]string, scratch string) map[string
 	environment := make(map[string]string, len(source)+3)
 	for key, value := range source {
 		upper := strings.ToUpper(key)
-		if strings.HasPrefix(upper, "LINGER_") || strings.HasPrefix(upper, "SIMPLEX") ||
+		if strings.HasPrefix(upper, "LINGER_") ||
 			strings.HasPrefix(upper, "TEAMHUB_") || strings.HasPrefix(upper, "RUNNER_GATEWAY_") {
 			continue
 		}

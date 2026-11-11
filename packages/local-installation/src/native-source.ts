@@ -58,7 +58,7 @@ import {
 } from "./apple-developer-tools.js";
 import type { InstallOutcome, InstallerEvent, InstallStage } from "./events.js";
 
-const nativeServices = [
+export const nativeServices = [
   "web",
   "node-services",
   "teamhub",

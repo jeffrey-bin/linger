@@ -18,12 +18,16 @@ export const defaultBridgeStateDirectory = (
 ): string => {
   if (env.LINGER_BRIDGE_STATE_DIR)
     return path.resolve(env.LINGER_BRIDGE_STATE_DIR);
+  // The bridge kept its state under the app's name before the rename. On
+  // macOS that folder is the app's data folder, which index.ts moves to its
+  // Linger name before this runs; elsewhere the bridge's own folder keeps the
+  // old name, which names only the migration source here.
   if (platform === "darwin") {
     return path.join(
       home,
       "Library",
       "Application Support",
-      "Simplex",
+      "Linger",
       "bridge",
     );
   }

@@ -8,7 +8,7 @@ vi.mock("./native-process.js", () => ({
 vi.mock("./instance.js", () => ({
   privateDirectory: vi.fn(async () => {}),
   atomicPrivate: vi.fn(async () => {}),
-  readPrivate: vi.fn(async () => "SIMPLEX_POSTGRES_PASSWORD=secret\n"),
+  readPrivate: vi.fn(async () => "LINGER_POSTGRES_PASSWORD=secret\n"),
 }));
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";

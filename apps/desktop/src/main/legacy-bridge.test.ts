@@ -105,9 +105,9 @@ describe.skipIf(process.platform === "win32")("legacy bridge socket", () => {
 });
 
 describe("defaultBridgeStateDirectory", () => {
-  it("matches the 0.16 bridge layout", () => {
+  it("matches the 0.16 bridge layout after the data folder moved", () => {
     expect(defaultBridgeStateDirectory("darwin", {}, "/Users/a")).toBe(
-      "/Users/a/Library/Application Support/Simplex/bridge",
+      "/Users/a/Library/Application Support/Linger/bridge",
     );
     expect(defaultBridgeStateDirectory("linux", {}, "/home/a")).toBe(
       "/home/a/.local/state/simplex/bridge",

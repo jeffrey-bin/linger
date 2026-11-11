@@ -31,7 +31,7 @@ func RuntimeEnvironment(source map[string]string, gatewayToken string) map[strin
 	result := make(map[string]string)
 	for key, value := range source {
 		upperKey := strings.ToUpper(key)
-		if (gatewayToken != "" && value == gatewayToken) || strings.HasPrefix(upperKey, "LINGER_") || strings.HasPrefix(upperKey, "SIMPLEX") || strings.HasPrefix(upperKey, "RUNNER_GATEWAY_") || strings.HasPrefix(upperKey, "MIRROR_") || strings.HasPrefix(upperKey, "TEAMHUB_") || upperKey == "SERVICE_TOKEN" {
+		if (gatewayToken != "" && value == gatewayToken) || strings.HasPrefix(upperKey, "LINGER_") || strings.HasPrefix(upperKey, "RUNNER_GATEWAY_") || strings.HasPrefix(upperKey, "MIRROR_") || strings.HasPrefix(upperKey, "TEAMHUB_") || upperKey == "SERVICE_TOKEN" {
 			continue
 		}
 		result[key] = value

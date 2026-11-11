@@ -63,7 +63,7 @@ export async function prepareNativeDatabase(options: {
   await privateDirectory(data);
   const password = parseEnv(
     (await readPrivate(path.join(instance.root, "services.env")))!,
-  ).SIMPLEX_POSTGRES_PASSWORD!;
+  ).LINGER_POSTGRES_PASSWORD!;
   await atomicPrivate(passwordFile, `${password}\n`);
   let initialized = false;
   try {

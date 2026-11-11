@@ -7,7 +7,13 @@ Unicode true
 
 Name "Linger"
 OutFile "${OUTPUT}"
-InstallDir "$LOCALAPPDATA\Programs\Simplex"
+InstallDir "$LOCALAPPDATA\Programs\Linger"
+; Where installs from before the rename put the app, and the app id they
+; named "Open at login" after. Only the upgrade below reads them.
+!define LEGACY_INSTDIR "$LOCALAPPDATA\Programs\Simplex"
+!define LEGACY_APP_ID "ai.simplex.desktop.preview"
+!define APP_ID "com.simplexai.linger.desktop.preview"
+!define RUN_KEY "Software\Microsoft\Windows\CurrentVersion\Run"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\Linger"
@@ -46,9 +52,31 @@ FunctionEnd
 !insertmacro CLOSE_LINGER ""
 !insertmacro CLOSE_LINGER "un."
 
+; An install from before the rename lives in another folder: close it and
+; remove that folder (the app's data is elsewhere), and carry "Open at login"
+; over to the new app id and folder.
+Function RemoveLegacyInstall
+  retry:
+  ClearErrors
+  IfFileExists "${LEGACY_INSTDIR}\Linger.exe" 0 removed
+  Delete "${LEGACY_INSTDIR}\Linger.exe"
+  IfErrors 0 removed
+  MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "Linger is running. Quit it from its icon in the notification area, then select Retry." IDRETRY retry
+  Abort
+  removed:
+  RMDir /r "${LEGACY_INSTDIR}"
+  ClearErrors
+  ReadRegStr $0 HKCU "${RUN_KEY}" "${LEGACY_APP_ID}"
+  IfErrors done
+  WriteRegStr HKCU "${RUN_KEY}" "${APP_ID}" '"$INSTDIR\Linger.exe" --background'
+  DeleteRegValue HKCU "${RUN_KEY}" "${LEGACY_APP_ID}"
+  done:
+FunctionEnd
+
 Section "Linger"
   SetOutPath "$INSTDIR"
   Call CloseLinger
+  Call RemoveLegacyInstall
   ; An update replaces the whole app folder.
   RMDir /r "$INSTDIR\resources"
   File /r "${STAGE}\*"
@@ -72,5 +100,5 @@ Section "Uninstall"
   RMDir /r "$INSTDIR"
   DeleteRegKey HKCU "${UNINSTALL_KEY}"
   ; "Open at login", named after the app id (index.ts).
-  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "ai.simplex.desktop.preview"
+  DeleteRegValue HKCU "${RUN_KEY}" "${APP_ID}"
 SectionEnd
