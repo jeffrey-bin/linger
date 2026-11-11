@@ -21,6 +21,7 @@ vi.mock("./instance.js", async (original) => {
 });
 import { afterEach, expect, test, vi } from "vitest";
 import {
+  nativeConfigurationChanged,
   startNativeProcess,
   inspectNativeProcess,
   stopNativeProcess,
@@ -401,3 +402,25 @@ test.each([false, true])(
   },
   25_000,
 );
+test("reports a configuration change only for a running recorded process", async () => {
+  const root = await fixture();
+  const options = {
+    root,
+    name: "teamhub" as const,
+    executable: process.execPath,
+    args: ["-e", "setInterval(()=>{},1000)"],
+    cwd: root,
+    env: process.env,
+    settings: "first",
+  };
+  expect(await nativeConfigurationChanged(options)).toBe(false);
+  await startNativeProcess(options);
+  expect(await nativeConfigurationChanged(options)).toBe(false);
+  expect(
+    await nativeConfigurationChanged({ ...options, settings: "second" }),
+  ).toBe(true);
+  await stopNativeProcess(root, "teamhub");
+  expect(
+    await nativeConfigurationChanged({ ...options, settings: "second" }),
+  ).toBe(false);
+});

@@ -121,6 +121,36 @@ export async function inspectNativeProcess(
     pid: record.pid,
   };
 }
+interface NativeConfiguration {
+  executable: string;
+  args: string[];
+  cwd: string;
+  settings?: string;
+}
+function configurationHash(options: NativeConfiguration): string {
+  return createHash("sha256")
+    .update(
+      JSON.stringify({
+        executable: options.executable,
+        args: options.args,
+        cwd: options.cwd,
+        settings: options.settings,
+      }),
+    )
+    .digest("hex");
+}
+/** True only when a recorded, running process would restart for this configuration. */
+export async function nativeConfigurationChanged(
+  options: NativeConfiguration & { root: string; name: NativeService },
+): Promise<boolean> {
+  const existing = await stored(options.root, options.name);
+  if (
+    !existing ||
+    (await observed(existing.pid, existing.lease)) !== existing.birth
+  )
+    return false;
+  return configurationHash(options) !== existing.configuration;
+}
 export async function startNativeProcess(options: {
   root: string;
   name: NativeService;
@@ -136,16 +166,7 @@ export async function startNativeProcess(options: {
 }): Promise<NativeProcessState> {
   options.signal?.throwIfAborted();
   const location = paths(options.root, options.name);
-  const configuration = createHash("sha256")
-    .update(
-      JSON.stringify({
-        executable: options.executable,
-        args: options.args,
-        cwd: options.cwd,
-        settings: options.settings,
-      }),
-    )
-    .digest("hex");
+  const configuration = configurationHash(options);
   const existing = await stored(options.root, options.name);
   if (
     existing &&

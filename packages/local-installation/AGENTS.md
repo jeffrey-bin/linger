@@ -23,8 +23,8 @@ the key pair and media ports in the instance's `livekit.env`; the gateway
 forwards `/rtc` to it. `compose up` recreates what a changed `user.env`
 touches; a native process restarts when its generated environment changes.
 Every update or recreate path stops node-services on its own, right before
-the recreate and while TeamHub is still up, so its graceful shutdown requeues
-in-flight Agent Runs instead of failing them.
+TeamHub restarts (natively: for a changed configuration) and while TeamHub is
+still up, so its graceful shutdown requeues in-flight Agent Runs.
 
 Move a freshly downloaded or unpacked file or folder into place with
 `renameRetrying` from `fs-retry.ts`: on Windows antivirus and indexing hold

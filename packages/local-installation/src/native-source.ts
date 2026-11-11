@@ -29,6 +29,7 @@ import { npmRegistryEnvironment } from "./npm-registry.js";
 import { prepareNativeDatabase } from "./native-database.js";
 import {
   inspectNativeProcess,
+  nativeConfigurationChanged,
   startNativeProcess,
   stopNativeProcess,
   type NativeService,
@@ -789,31 +790,40 @@ async function runNativeSource(
           (await inspectNativeProcess(current.root, "livekit")).running
         )
           await stopNativeProcess(current.root, "livekit");
-        // Stop the Agent Service while TeamHub is still up so its graceful
-        // shutdown can requeue in-flight Agent Runs before TeamHub restarts.
-        // The loop below then sees it stopped and records it as started here.
-        if ((await inspectNativeProcess(current.root, "node-services")).running)
-          await stopNativeProcess(current.root, "node-services");
+        const serviceOptions = (name: "teamhub" | "node-services" | "web") => ({
+          root: current.root,
+          name,
+          executable: process.execPath,
+          args: [
+            path.join(current.source!.repo, "scripts/source-native.mjs"),
+            name,
+          ],
+          cwd: current.source!.repo,
+          env,
+          signal,
+          redactions: secrets,
+          // A changed user.env, port, credential or voice tool restarts it.
+          settings,
+          restartOnConfigurationChange: true,
+        });
+        // Stop the Agent Service only when TeamHub is about to restart for a
+        // changed configuration, so its graceful shutdown can requeue
+        // in-flight Runs while TeamHub is still up. When TeamHub is not
+        // running or not changing, node-services is left alone so it can
+        // reconnect. It was running before this run, so it is never recorded
+        // as started: if a later step fails, its replacement stays up beside
+        // the new TeamHub; if TeamHub's own restart fails, node-services
+        // stays stopped until the next resume.
+        const preStopped =
+          (await nativeConfigurationChanged(serviceOptions("teamhub"))) &&
+          (await inspectNativeProcess(current.root, "node-services")).running;
+        if (preStopped) await stopNativeProcess(current.root, "node-services");
         for (const name of ["teamhub", "node-services", "web"] as const) {
           const running = (await inspectNativeProcess(current.root, name))
             .running;
-          if (!running) started.push(name);
-          await startNativeProcess({
-            root: current.root,
-            name,
-            executable: process.execPath,
-            args: [
-              path.join(current.source!.repo, "scripts/source-native.mjs"),
-              name,
-            ],
-            cwd: current.source!.repo,
-            env,
-            signal,
-            redactions: secrets,
-            // A changed user.env, port, credential or voice tool restarts it.
-            settings,
-            restartOnConfigurationChange: true,
-          });
+          if (!running && !(preStopped && name === "node-services"))
+            started.push(name);
+          await startNativeProcess(serviceOptions(name));
         }
         const checks = await waitHealthy(current, signal, emit, ends);
         emit({
