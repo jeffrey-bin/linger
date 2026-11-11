@@ -191,10 +191,11 @@ export function useRoomChatTimelineActions(
     )
       void loadOlderMessages();
   };
-  // A reader following the newest Message keeps a bounded history; a linked
-  // Message or a reader scrolled into history keeps everything loaded. A
-  // timeline that would stop overflowing after the trim keeps it too, so the
-  // short-timeline loader below cannot load the same page back in a loop.
+  // Trim only while the reader follows the newest Message. A linked Message
+  // or a reader scrolled into history keeps every loaded page until the next
+  // Message count change finds them following again. A timeline shorter than
+  // five viewports is never trimmed, so the short-timeline loader below cannot
+  // load the dropped page back in a loop.
   useRoomMessageWindowTrim({
     canTrim: () =>
       !linkedMessageId &&

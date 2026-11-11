@@ -20,6 +20,8 @@ export interface RunStatusTransport {
 const snapshotRetryBaseMs = 1_000;
 const snapshotRetryMaxMs = 30_000;
 const releasedRunLimit = 256;
+// An ended Run stays this long, so its consumers can read its final state.
+export const endedRunHoldMs = 60_000;
 
 /**
  * Follows the Run statuses a Room shows: the list endpoint is the snapshot,
@@ -30,11 +32,11 @@ const releasedRunLimit = 256;
  * with backoff until one succeeds, because nothing else repairs a Run that
  * ended while the stream was down.
  *
- * The live set follows the snapshot's retention: once an end has been
- * published, a succeeded Run and a failed or canceled Run that a newer Run of
- * the same Agent superseded leave it. Their final revisions are remembered so
- * a snapshot read that started before the end, or a late announcement, cannot
- * bring them back.
+ * The live set follows the snapshot's retention: a succeeded Run and a failed
+ * or canceled Run that a newer Run of the same Agent superseded leave it
+ * endedRunHoldMs after the publish that showed them so. Their final revisions
+ * are remembered so a snapshot read that started before the end, or a late
+ * announcement, cannot bring them back.
  */
 export function createRunStatusTransport({
   client,
@@ -53,17 +55,31 @@ export function createRunStatusTransport({
       const released = new Map<string, number>();
       const isReleased = (run: TeamHubRunStatus) =>
         run.revision <= (released.get(run.id) ?? -1);
-      // Consumers see every end before the Run leaves the live set.
+      const holds = new Map<string, ReturnType<typeof setTimeout>>();
+      // A snapshot read during the hold may already have dropped the Run;
+      // its held revision is remembered either way.
+      const release = (id: string, heldRevision: number) => {
+        holds.delete(id);
+        const run = runs.get(id);
+        if (run && !snapshotDrops(run)) return;
+        runs.delete(id);
+        released.delete(id);
+        released.set(id, Math.max(heldRevision, run?.revision ?? -1));
+        for (const key of released.keys()) {
+          if (released.size <= releasedRunLimit) break;
+          released.delete(key);
+        }
+        if (run) input.onCollection([...runs.values()]);
+      };
+      // Consumers see every end for a while before the Run leaves the set.
       const publish = () => {
         input.onCollection([...runs.values()]);
-        for (const run of [...runs.values()].filter(snapshotDrops)) {
-          runs.delete(run.id);
-          released.delete(run.id);
-          released.set(run.id, run.revision);
-        }
-        for (const id of released.keys()) {
-          if (released.size <= releasedRunLimit) break;
-          released.delete(id);
+        for (const run of runs.values()) {
+          if (holds.has(run.id) || !snapshotDrops(run)) continue;
+          holds.set(
+            run.id,
+            setTimeout(() => release(run.id, run.revision), endedRunHoldMs),
+          );
         }
       };
       const snapshotDrops = (run: TeamHubRunStatus) =>
@@ -72,8 +88,9 @@ export function createRunStatusTransport({
           [...runs.values()].some(
             (other) =>
               other.agent.id === run.agent.id &&
-              (other.created_at > run.created_at ||
-                (other.created_at === run.created_at && other.id > run.id)),
+              (Date.parse(other.created_at) > Date.parse(run.created_at) ||
+                (Date.parse(other.created_at) === Date.parse(run.created_at) &&
+                  other.id > run.id)),
           ));
       const apply = (run: TeamHubRunStatus) => {
         const current = runs.get(run.id);
@@ -160,6 +177,7 @@ export function createRunStatusTransport({
       return () => {
         disposed = true;
         clearTimeout(retryTimer);
+        for (const timer of holds.values()) clearTimeout(timer);
         unsubscribe();
       };
     },

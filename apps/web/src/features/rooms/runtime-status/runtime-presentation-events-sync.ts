@@ -62,7 +62,10 @@ export function createRuntimePresentationEventsSync({
   tenantId,
 }: {
   client: RuntimePresentationSyncClient;
-  /** Called after a sync completes the revisions requested so far. */
+  /**
+   * Called after a sync completes the revisions requested so far, or stops
+   * for good on an error that a retry cannot fix.
+   */
   onRevisionComplete?: (runStatusId: string) => void;
   queryClient: QueryClient;
   roomId: string;
@@ -91,7 +94,11 @@ export function createRuntimePresentationEventsSync({
         roomRuntimePresentationEventsQueryKey(tenantId, roomId, runStatusId),
       );
       const state = ownedStates.get(key);
-      return state !== undefined && state.completedRevision >= revision;
+      // A blocked read never completes; its caller can let the Run go.
+      return (
+        state !== undefined &&
+        (state.blocked || state.completedRevision >= revision)
+      );
     },
     request(runStatusId: string, revision: number) {
       if (disposed) return;
@@ -248,6 +255,9 @@ function start(state: RunStatusSyncState): Promise<void> {
         );
       } else {
         state.blocked = true;
+        for (const notify of [...state.owners.values()]) {
+          notify(state.runStatusId);
+        }
       }
     },
   );

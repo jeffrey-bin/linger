@@ -82,10 +82,15 @@ describe("MessageHtmlFragment", () => {
     let enter: () => void = () => {};
     const observe = vi.fn();
     const disconnect = vi.fn();
+    const init = vi.fn();
     vi.stubGlobal(
       "IntersectionObserver",
       class {
-        constructor(callback: IntersectionObserverCallback) {
+        constructor(
+          callback: IntersectionObserverCallback,
+          options: IntersectionObserverInit,
+        ) {
+          init(options);
           enter = () =>
             callback(
               [{ isIntersecting: true } as IntersectionObserverEntry],
@@ -98,8 +103,15 @@ describe("MessageHtmlFragment", () => {
     );
     try {
       const { container } = render(
-        <MessageHtmlFragment html="<p>Widget</p>" title="Deferred widget" />,
+        <div style={{ overflowY: "auto" }} data-testid="scroller">
+          <MessageHtmlFragment html="<p>Widget</p>" title="Deferred widget" />
+        </div>,
       );
+      // The margin applies to the timeline scroller, not the page viewport.
+      expect(init).toHaveBeenCalledWith({
+        root: screen.getByTestId("scroller"),
+        rootMargin: "600px 0px",
+      });
 
       expect(container.querySelector("iframe")).toBeNull();
       expect(screen.getByRole("img", { name: "Deferred widget" })).toHaveStyle({

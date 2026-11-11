@@ -57,9 +57,9 @@ export function planRoomMessageWindowTrim<
 
 /**
  * Applies {@link planRoomMessageWindowTrim} after the loaded Message count
- * changes, only while the reader follows the newest Message, no linked
- * Message is open, and no page is loading. A reader scrolled into history
- * keeps everything they loaded.
+ * changes, when no page is loading, the last read did not fail, and `canTrim`
+ * allows it. `canTrim` is read only on a count change, so it must read live
+ * state (refs, DOM) rather than values captured by an earlier render.
  */
 export function useRoomMessageWindowTrim({
   canTrim,
@@ -75,7 +75,8 @@ export function useRoomMessageWindowTrim({
   const queryHash = JSON.stringify(queryKey);
   useEffect(() => {
     if (messageCount <= ROOM_MESSAGE_RETAINED_LIMIT) return;
-    if (queryClient.getQueryState(queryKey)?.fetchStatus !== "idle") return;
+    const state = queryClient.getQueryState(queryKey);
+    if (state?.fetchStatus !== "idle" || state.status === "error") return;
     if (!canTrim()) return;
     const data =
       queryClient.getQueryData<MessagePages<{ items: readonly unknown[] }>>(

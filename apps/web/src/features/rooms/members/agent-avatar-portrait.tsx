@@ -53,6 +53,8 @@ export function AgentAvatarPortrait({
   const holding = hold || cheering;
   // Mount the motion while the figure moves. Once it rests on its still frame
   // with nothing asking for more, unmount it so Lottie frees its SVG and data.
+  // The next move loads the motion again, a short wait the HTTP cache keeps
+  // small; Lottie mutates the parsed data, so it is not kept between moves.
   const [moving, setMoving] = useState(false);
   if ((animate || holding) && !moving && !uploaded && !prefersReducedMotion()) {
     setMoving(true);

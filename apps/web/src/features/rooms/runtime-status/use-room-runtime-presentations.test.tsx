@@ -719,6 +719,45 @@ describe("Room Runtime presentations", () => {
     expect(cachedEvents(queryClient)?.published_through_ordinal).toBe("3");
   });
 
+  it("releases an ended Run whose final read stops on a protocol violation", async () => {
+    const runtime = createTestTeamHubRuntime();
+    const listRoomRuntimePresentationEvents = vi
+      .fn<TestRouteHandler>()
+      .mockReturnValueOnce(eventPage(["1"], "1"))
+      // A page that skips ordinals is a protocol violation, not retried.
+      .mockReturnValue(eventPage(["5"], "5"));
+    runtime.server.on("GET", EVENTS_PATH, listRoomRuntimePresentationEvents);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const initialProps: { runStatus?: TeamHubRunStatus } = {
+      runStatus: testRunStatus(1),
+    };
+    const { rerender } = renderHook(
+      ({ runStatus }: { runStatus?: TeamHubRunStatus }) =>
+        useRoomRuntimePresentations({
+          runStatuses: runStatus ? [runStatus] : [],
+          roomId: "room-1",
+          tenantId: "tenant-1",
+        }),
+      {
+        initialProps,
+        wrapper: queryWrapper(queryClient, runtime),
+      },
+    );
+    await waitFor(() =>
+      expect(cachedEvents(queryClient)?.published_through_ordinal).toBe("1"),
+    );
+    rerender({ runStatus: { ...testRunStatus(2), status: "completed" } });
+    await waitFor(() =>
+      expect(listRoomRuntimePresentationEvents).toHaveBeenCalledTimes(2),
+    );
+    rerender({ runStatus: undefined });
+
+    await waitFor(() => expect(observerCount(queryClient)).toBe(0));
+    expect(listRoomRuntimePresentationEvents).toHaveBeenCalledTimes(2);
+  });
+
   it("retries a failed synchronization with backoff instead of waiting for a rerender", async () => {
     const runtime = createTestTeamHubRuntime();
     const listRoomRuntimePresentationEvents = vi

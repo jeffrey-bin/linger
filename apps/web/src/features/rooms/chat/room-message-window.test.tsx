@@ -63,9 +63,14 @@ describe("planRoomMessageWindowTrim", () => {
 describe("useRoomMessageWindowTrim", () => {
   const queryKey = ["teamhub", "t", "room", "r", "messages"];
 
-  function setup(sizes: number[], canTrim: boolean) {
+  function setup(
+    sizes: number[],
+    canTrim: boolean,
+    state: { fetchStatus?: "fetching"; status?: "error" } = {},
+  ) {
     const queryClient = new QueryClient();
     queryClient.setQueryData(queryKey, history(sizes));
+    queryClient.getQueryCache().find({ queryKey })!.setState(state);
     const refetch = vi
       .spyOn(queryClient, "refetchQueries")
       .mockResolvedValue(undefined);
@@ -100,5 +105,19 @@ describe("useRoomMessageWindowTrim", () => {
     const { pageCount, refetch } = setup([250, 50], true);
     expect(pageCount()).toBe(1);
     expect(refetch).toHaveBeenCalledWith({ exact: true, queryKey });
+  });
+
+  it("waits while an older page loads", () => {
+    const { pageCount, refetch } = setup([50, 50, 50, 50, 50], true, {
+      fetchStatus: "fetching",
+    });
+    expect(pageCount()).toBe(5);
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("does not refetch after a failed read", () => {
+    const { pageCount, refetch } = setup([250, 50], true, { status: "error" });
+    expect(pageCount()).toBe(2);
+    expect(refetch).not.toHaveBeenCalled();
   });
 });
