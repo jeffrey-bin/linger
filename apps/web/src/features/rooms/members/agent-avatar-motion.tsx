@@ -38,22 +38,25 @@ function motionUrl(figure: string) {
 
 /**
  * The figure's Lottie motion (peek, blink and smile), drawn over its still
- * portrait. It loads the first time the figure moves and stays mounted, so
- * later moves start at once. Each time `playing` turns on, the figure plays
- * the motion once and stops on its last frame, which is the resting pose; it
- * never loops, because every SVG frame forces a style and layout pass.
- * `hold` leans in and keeps the smile until it turns off, taking precedence
- * over playing; each new `blink` blinks once while it holds.
+ * portrait. Each time `playing` turns on, the figure plays the motion once and
+ * stops on its last frame, which is the resting pose; it never loops, because
+ * every SVG frame forces a style and layout pass. `hold` leans in and keeps
+ * the smile until it turns off, taking precedence over playing; each new
+ * `blink` blinks once while it holds. `onIdle` fires once the figure rests and
+ * neither `playing` nor `hold` asks for more, so the owner can unmount it and
+ * free the parsed animation.
  */
 export default function AgentAvatarMotion({
   blink = 0,
   figure,
   hold = false,
+  onIdle,
   playing,
 }: {
   blink?: number;
   figure: string;
   hold?: boolean;
+  onIdle?: () => void;
   playing: boolean;
 }) {
   const boxRef = useRef<HTMLSpanElement>(null);
@@ -95,13 +98,25 @@ export default function AgentAvatarMotion({
       setAnimation(undefined);
     };
   }, [figure]);
+  // The complete listener reads the latest wishes without re-subscribing.
+  const idleRef = useRef({ hold, onIdle, playing });
+  useEffect(() => {
+    idleRef.current = { hold, onIdle, playing };
+  });
+  useEffect(() => {
+    if (!animation) return;
+    return animation.addEventListener("complete", () => {
+      const { hold: held, onIdle: idle, playing: wanted } = idleRef.current;
+      if (!held && !wanted) idle?.();
+    });
+  }, [animation]);
   const heldRef = useRef(false);
   useEffect(() => {
     if (!animation) return;
     if (hold || heldRef.current) {
       heldRef.current = hold;
       playHold(animation, hold);
-      if (hold || !playing) return;
+      if (hold) return;
     }
     if (playing) {
       // A hold leaves a shorter segment behind; one play runs the whole one.
@@ -110,6 +125,9 @@ export default function AgentAvatarMotion({
       }
       animation.setLoop(false);
       animation.play();
+    } else if (animation.isPaused) {
+      // Nothing is left to play; a running segment reports idle on complete.
+      idleRef.current.onIdle?.();
     }
   }, [animation, hold, playing]);
   const blinkedRef = useRef(blink);

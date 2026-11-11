@@ -18,7 +18,7 @@ import {
 } from "../members/agent-avatar-status-context";
 import { runtimeFailureMessage } from "../runtime-status/runtime-failure-message";
 import type { RuntimeExecutionFailure } from "../runtime-status/runtime-presentation-events";
-import { Fragment, type ReactNode, useMemo, useState } from "react";
+import { Fragment, type ReactNode, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 
 import { Button } from "@/components/ui/button";
@@ -190,9 +190,11 @@ export function MessageTimeline({
     useMessageFilePreview(onOpenMessageFile);
   const { candidateMessages, openedAtNewest, startsOwnGroup } =
     useTimelineMessageGroups(messages, currentActorId);
+  const runtimeViewCache = useRef<RuntimeTimelineViewCache>(new Map());
   const runtimeStatusViews = useMemo(
     () =>
       buildRuntimeTimelineViews({
+        cache: runtimeViewCache.current,
         runStatuses,
         runtimePresentationEventsByRunStatusId,
       }),
@@ -373,33 +375,61 @@ export function MessageTimeline({
   );
 }
 
+/**
+ * Each Run's last view, kept while the Run stays listed. A Run is projected
+ * again only when its status or its event list is a new object, so one Run's
+ * runtime event does not re-project every other Run.
+ */
+type RuntimeTimelineViewCache = Map<
+  string,
+  {
+    records: readonly TeamHubRuntimePresentationEventRecord[] | undefined;
+    runStatus: TeamHubRunStatus;
+    view: AgentRunStatusView | undefined;
+  }
+>;
+
 export function buildRuntimeTimelineViews({
+  cache,
   runStatuses,
   runtimePresentationEventsByRunStatusId,
 }: {
+  /** Reused and pruned to the given Runs on every pass. */
+  cache?: RuntimeTimelineViewCache;
   runStatuses: readonly TeamHubRunStatus[];
   runtimePresentationEventsByRunStatusId: Readonly<
     Record<string, readonly TeamHubRuntimePresentationEventRecord[]>
   >;
 }) {
   const runtimeStatusViews: AgentRunStatusView[] = [];
+  const listed = new Set<string>();
   for (const runStatus of runStatuses) {
     const records = runtimePresentationEventsByRunStatusId[runStatus.id];
-    const presentation = records
-      ? projectRuntimeChatPresentation(records)
-      : undefined;
-    const history = resolveAgentRunStatusHistory({ runStatus, presentation });
-    if (history.length === 0) continue;
-
-    const latestSegmentKey = history.at(-1)!.key;
-    const runtimeStatus = createAgentRunStatusView(
-      runStatus,
-      history,
-      latestSegmentKey,
-    );
-    runtimeStatusViews.push(runtimeStatus);
+    const cached = cache?.get(runStatus.id);
+    const view =
+      cached?.runStatus === runStatus && cached.records === records
+        ? cached.view
+        : runtimeTimelineView(runStatus, records);
+    listed.add(runStatus.id);
+    cache?.set(runStatus.id, { records, runStatus, view });
+    if (view) runtimeStatusViews.push(view);
+  }
+  for (const runStatusId of cache?.keys() ?? []) {
+    if (!listed.has(runStatusId)) cache?.delete(runStatusId);
   }
   return runtimeStatusViews;
+}
+
+function runtimeTimelineView(
+  runStatus: TeamHubRunStatus,
+  records: readonly TeamHubRuntimePresentationEventRecord[] | undefined,
+) {
+  const presentation = records
+    ? projectRuntimeChatPresentation(records)
+    : undefined;
+  const history = resolveAgentRunStatusHistory({ runStatus, presentation });
+  if (history.length === 0) return undefined;
+  return createAgentRunStatusView(runStatus, history, history.at(-1)!.key);
 }
 
 function TypingDots({ className = "" }: { className?: string }) {
@@ -815,9 +845,14 @@ export function AgentStreamingStatusDock({
   /** Shown only while that Agent has no Run status; it offers no Stop. */
   typingAgent?: AgentStreamingTypingAgent;
 }) {
+  const runtimeViewCache = useRef<RuntimeTimelineViewCache>(new Map());
   const runtimeStatuses = useMemo(
     () =>
-      dockRuntimeStatuses(runStatuses, runtimePresentationEventsByRunStatusId),
+      dockRuntimeStatuses(
+        runStatuses,
+        runtimePresentationEventsByRunStatusId,
+        runtimeViewCache.current,
+      ),
     [runStatuses, runtimePresentationEventsByRunStatusId],
   );
   const entries = useMemo<AgentStreamingDockEntry[]>(() => {
@@ -1042,6 +1077,7 @@ function dockRuntimeStatuses(
   runtimePresentationEventsByRunStatusId: Readonly<
     Record<string, readonly TeamHubRuntimePresentationEventRecord[]>
   >,
+  cache: RuntimeTimelineViewCache,
 ) {
   const latestByAgent = new Map<string, TeamHubRunStatus>();
   for (const runStatus of runStatuses) {
@@ -1063,6 +1099,7 @@ function dockRuntimeStatuses(
   }
   // Select before projection: a completed Run may have no displayable history.
   return buildRuntimeTimelineViews({
+    cache,
     runStatuses: [...latestByAgent.values()],
     runtimePresentationEventsByRunStatusId,
   }).filter(

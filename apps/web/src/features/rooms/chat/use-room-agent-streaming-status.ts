@@ -59,12 +59,16 @@ export function useRoomAgentStreamingStatus({
     roomId,
     tenantId,
   });
-  const progressVersion = [
-    ...visibleRunStatuses.map(
-      (runStatus) => `${runStatus.id}:${runStatus.revision}`,
-    ),
-    runtimePresentations.progressVersion,
-  ].join("|");
+  const runStatusVersion = useMemo(
+    () =>
+      visibleRunStatuses
+        .map((runStatus) => `${runStatus.id}:${runStatus.revision}`)
+        .join("|"),
+    [visibleRunStatuses],
+  );
+  const progressVersion = runStatusVersion
+    ? `${runStatusVersion}|${runtimePresentations.progressVersion}`
+    : runtimePresentations.progressVersion;
 
   return {
     runStatuses: visibleRunStatuses,

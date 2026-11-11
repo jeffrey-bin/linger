@@ -17,7 +17,11 @@ import type {
   TeamHubRuntimePresentationEventRecord,
 } from "@/features/teamhub/teamhub-types";
 
-import { AgentStreamingStatusDock, MessageTimeline } from "./message-timeline";
+import {
+  AgentStreamingStatusDock,
+  buildRuntimeTimelineViews,
+  MessageTimeline,
+} from "./message-timeline";
 import { AGENT_STATUS_LINE_TIMING } from "./agent-status-line";
 import {
   createDocumentTestRuntime,
@@ -3161,3 +3165,48 @@ function readDocumentVersion(client: TeamHubClient, documentVersionId: string) {
     }),
   );
 }
+
+describe("Runtime timeline projection reuse", () => {
+  it("re-projects only the Run whose status or events changed", () => {
+    const first = runStatus({ id: "run-status-1" });
+    const second = runStatus({
+      agent: { display_name: "Claude", id: "agent-2", kind: "agent" },
+      id: "run-status-2",
+    });
+    const firstEvents = [runtimeStatusRecord("1", "working", "Reading")];
+    const secondEvents = [runtimeStatusRecord("1", "thinking")];
+    const cache = new Map();
+    const [firstView, secondView] = buildRuntimeTimelineViews({
+      cache,
+      runStatuses: [first, second],
+      runtimePresentationEventsByRunStatusId: {
+        "run-status-1": firstEvents,
+        "run-status-2": secondEvents,
+      },
+    });
+
+    const next = buildRuntimeTimelineViews({
+      cache,
+      runStatuses: [first, second],
+      runtimePresentationEventsByRunStatusId: {
+        "run-status-1": firstEvents,
+        "run-status-2": [
+          ...secondEvents,
+          runtimeStatusRecord("2", "working", "Writing"),
+        ],
+      },
+    });
+    expect(next).toHaveLength(2);
+    expect(next[0]).toBe(firstView);
+    expect(next[1]).not.toBe(secondView);
+
+    const revised = buildRuntimeTimelineViews({
+      cache,
+      runStatuses: [{ ...first, revision: 2 }],
+      runtimePresentationEventsByRunStatusId: { "run-status-1": firstEvents },
+    });
+    expect(revised[0]).not.toBe(firstView);
+    // A Run that leaves the list leaves the cache too.
+    expect([...cache.keys()]).toEqual(["run-status-1"]);
+  });
+});

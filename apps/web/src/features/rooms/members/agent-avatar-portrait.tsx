@@ -51,10 +51,11 @@ export function AgentAvatarPortrait({
     return () => window.clearTimeout(settle);
   }, [cheer]);
   const holding = hold || cheering;
-  // Mount the motion on the first move and keep it, so later moves are instant.
-  const [moved, setMoved] = useState(false);
-  if ((animate || holding) && !moved && !uploaded && !prefersReducedMotion()) {
-    setMoved(true);
+  // Mount the motion while the figure moves. Once it rests on its still frame
+  // with nothing asking for more, unmount it so Lottie frees its SVG and data.
+  const [moving, setMoving] = useState(false);
+  if ((animate || holding) && !moving && !uploaded && !prefersReducedMotion()) {
+    setMoving(true);
   }
   return (
     <span
@@ -75,12 +76,13 @@ export function AgentAvatarPortrait({
           transition: "opacity 200ms ease",
         }}
       />
-      {moved && appearance.kind !== "image" ? (
+      {moving && appearance.kind !== "image" ? (
         <Suspense fallback={null}>
           <AgentAvatarMotion
             blink={blink}
             figure={appearance.figure}
             hold={holding}
+            onIdle={() => setMoving(false)}
             playing={animate}
           />
         </Suspense>
