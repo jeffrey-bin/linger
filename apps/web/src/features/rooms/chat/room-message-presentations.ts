@@ -1,3 +1,6 @@
+import { replaceEqualDeep } from "@tanstack/react-query";
+import { useMemo, useRef } from "react";
+
 import {
   presentTeamHubMessageAttachments,
   type TeamHubMessagePresentation,
@@ -8,19 +11,51 @@ import type {
   TeamHubMessage,
 } from "@/features/teamhub/teamhub-types";
 
+type RoomMessagePresentations = Record<string, TeamHubMessagePresentation>;
+
+interface RoomMessagePresentationInput {
+  deliveryPresentations: Readonly<RoomMessagePresentations>;
+  mentionOptions: TeamHubActorRef[];
+  messages: TeamHubMessage[];
+  roomMessagePresentations: Readonly<RoomMessagePresentations>;
+}
+
+/**
+ * Resolves presentations and keeps every entry whose content did not change
+ * from the previous result, so memoized rows skip unrelated Messages.
+ */
+export function useRoomMessagePresentations({
+  deliveryPresentations,
+  mentionOptions,
+  messages,
+  roomMessagePresentations,
+}: RoomMessagePresentationInput) {
+  const previous = useRef<RoomMessagePresentations | undefined>(undefined);
+  return useMemo(() => {
+    previous.current = replaceEqualDeep(
+      previous.current,
+      resolveRoomMessagePresentations({
+        deliveryPresentations,
+        mentionOptions,
+        messages,
+        roomMessagePresentations,
+      }),
+    );
+    return previous.current;
+  }, [
+    deliveryPresentations,
+    mentionOptions,
+    messages,
+    roomMessagePresentations,
+  ]);
+}
+
 export function resolveRoomMessagePresentations({
   deliveryPresentations,
   mentionOptions,
   messages,
   roomMessagePresentations,
-}: {
-  deliveryPresentations: Readonly<Record<string, TeamHubMessagePresentation>>;
-  mentionOptions: TeamHubActorRef[];
-  messages: TeamHubMessage[];
-  roomMessagePresentations: Readonly<
-    Record<string, TeamHubMessagePresentation>
-  >;
-}) {
+}: RoomMessagePresentationInput): RoomMessagePresentations {
   const presentations = {
     ...deliveryPresentations,
     ...roomMessagePresentations,
@@ -29,14 +64,12 @@ export function resolveRoomMessagePresentations({
   for (const message of messages) {
     const deliveryPresentation = deliveryPresentations[message.id];
     const roomPresentation = roomMessagePresentations[message.id];
-    const existing = presentations[message.id];
     const mentions = roomPresentation?.mentions.length
       ? roomPresentation.mentions
       : deliveryPresentation?.mentions.length
         ? deliveryPresentation.mentions
         : referencedMessageActors(message.segments, mentionOptions);
     presentations[message.id] = {
-      ...existing,
       attachments: firstPresentedAttachments(
         roomPresentation?.attachments,
         deliveryPresentation?.attachments,
@@ -53,7 +86,7 @@ function firstPresentedAttachments(
   ...candidates: Array<TeamHubMessagePresentation["attachments"] | undefined>
 ): TeamHubMessagePresentation["attachments"] {
   for (const candidate of candidates) {
-    if (candidate?.length) return [...candidate];
+    if (candidate?.length) return candidate;
   }
   return [];
 }

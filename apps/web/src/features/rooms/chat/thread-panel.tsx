@@ -34,7 +34,7 @@ import {
   type MessageComposition,
 } from "./message-composer";
 import {
-  presentDirectRoomMessage,
+  createDirectRoomMessagePresenter,
   withDirectRoomWireBody,
 } from "./direct-room-message";
 import { isTimelineMessage } from "./message-grouping";
@@ -44,7 +44,7 @@ import {
   type PendingRoomMessage,
 } from "./message-row";
 import { AgentStreamingStatusDock } from "./message-timeline";
-import { resolveRoomMessagePresentations } from "./room-message-presentations";
+import { useRoomMessagePresentations } from "./room-message-presentations";
 import {
   createRoomProjection,
   replaceLoadedRoomMessage,
@@ -197,37 +197,32 @@ function ThreadPanelContent({
   }, [composerFocusRequested, threadRoomId]);
 
   const replies = useMemo(() => messages.filter(isTimelineMessage), [messages]);
+  const present = useMemo(
+    () => createDirectRoomMessagePresenter(directPeer),
+    [directPeer],
+  );
   const presentedRoot = useMemo(
-    () => presentDirectRoomMessage(rootMessage, directPeer),
-    [directPeer, rootMessage],
+    () => present(rootMessage),
+    [present, rootMessage],
   );
   const presentedReplies = useMemo(
-    () =>
-      replies.map((message) => presentDirectRoomMessage(message, directPeer)),
-    [directPeer, replies],
+    () => replies.map(present),
+    [present, replies],
   );
   const threadMessages = useMemo(
     () => [rootMessage, ...replies],
     [replies, rootMessage],
   );
-  const presentations = useMemo(
-    () =>
-      resolveRoomMessagePresentations({
-        deliveryPresentations: conversation.delivery.presentations,
-        mentionOptions,
-        messages: threadMessages,
-        roomMessagePresentations: {
-          [rootMessage.id]: { attachments: [], mentions: rootMentions },
-        },
-      }),
-    [
-      conversation.delivery.presentations,
-      mentionOptions,
-      rootMentions,
-      rootMessage.id,
-      threadMessages,
-    ],
+  const rootPresentations = useMemo(
+    () => ({ [rootMessage.id]: { attachments: [], mentions: rootMentions } }),
+    [rootMentions, rootMessage.id],
   );
+  const presentations = useRoomMessagePresentations({
+    deliveryPresentations: conversation.delivery.presentations,
+    mentionOptions,
+    messages: threadMessages,
+    roomMessagePresentations: rootPresentations,
+  });
   const documentMetadata = useDocumentCardMetadata(
     client,
     tenantId,

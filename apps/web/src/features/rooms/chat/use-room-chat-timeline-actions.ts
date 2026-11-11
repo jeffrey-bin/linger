@@ -8,7 +8,7 @@ import { teamHubData } from "@/features/teamhub/teamhub-api";
 import { tenantRoomsQueryKey } from "../room-queries";
 import { preloadUnifiedDocumentPage } from "../documents/document-route-preload";
 import type { MessageComposition } from "./message-composer";
-import { resolveRoomMessagePresentations } from "./room-message-presentations";
+import { useRoomMessagePresentations } from "./room-message-presentations";
 import { replaceLoadedRoomMessage } from "./room-projection";
 import { useFocusComposerOnEntry } from "./use-focus-composer-on-entry";
 import { usePrefetchPanelAfterPaint } from "./use-prefetch-panel-after-paint";
@@ -232,7 +232,7 @@ export type RoomChatTimelineActions = ReturnType<
 >;
 
 type MessagePresentationResolutionInput = Parameters<
-  typeof resolveRoomMessagePresentations
+  typeof useRoomMessagePresentations
 >[0];
 
 function useResolvedRoomMessagePresentations({
@@ -245,22 +245,15 @@ function useResolvedRoomMessagePresentations({
   linkedMessage?: TeamHubMessage;
   orderedMessages: TeamHubMessage[];
 }) {
-  return useMemo(
+  const messages = useMemo(
     () =>
-      resolveRoomMessagePresentations({
-        deliveryPresentations,
-        mentionOptions,
-        messages: linkedMessage
-          ? [...orderedMessages, linkedMessage]
-          : orderedMessages,
-        roomMessagePresentations,
-      }),
-    [
-      deliveryPresentations,
-      linkedMessage,
-      mentionOptions,
-      orderedMessages,
-      roomMessagePresentations,
-    ],
+      linkedMessage ? [...orderedMessages, linkedMessage] : orderedMessages,
+    [linkedMessage, orderedMessages],
   );
+  return useRoomMessagePresentations({
+    deliveryPresentations,
+    mentionOptions,
+    messages,
+    roomMessagePresentations,
+  });
 }

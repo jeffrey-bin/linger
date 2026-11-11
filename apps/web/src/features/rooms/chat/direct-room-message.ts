@@ -54,6 +54,22 @@ export function presentDirectRoomMessage(
   return { ...message, raw_message, segments };
 }
 
+/**
+ * Presents each Message object once for one peer, so an unchanged Message keeps
+ * its presented identity (and its memoized row) when other Messages arrive.
+ */
+export function createDirectRoomMessagePresenter(peer?: TeamHubActorRef) {
+  const presented = new WeakMap<TeamHubMessage, TeamHubMessage>();
+  return (message: TeamHubMessage) => {
+    let result = presented.get(message);
+    if (!result) {
+      result = presentDirectRoomMessage(message, peer);
+      presented.set(message, result);
+    }
+    return result;
+  };
+}
+
 function dropLeadingWhitespace(
   segments: TeamHubMessageSegment[],
 ): TeamHubMessageSegment[] {

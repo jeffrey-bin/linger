@@ -372,7 +372,9 @@ function ConversationMessageRow({
   // outside it follows below.
   const reactionsOnBubble = bubbled;
 
-  const renderText = (block: MessageTextBlock) => (
+  // Keyed by position: an edited or streamed body updates in place instead
+  // of remounting its Markdown, and equal bodies never collide.
+  const renderText = (block: MessageTextBlock, index: number) => (
     <div
       className={cn(
         "message-row-body text-app-ink",
@@ -380,7 +382,7 @@ function ConversationMessageRow({
         // card and a person's own words only pop.
         entering && isAgent && !card && "message-text-sweep",
       )}
-      key={`text:${block.body}`}
+      key={`text:${index}`}
     >
       <MessageMarkdown
         authorKind={message.author.kind}
@@ -533,8 +535,10 @@ function ConversationMessageRow({
   const profileBlocks = bodyBlocks.filter(
     (block) => block.kind !== "document_card" && block.kind !== "file",
   );
-  const renderProfileBlock = (block: (typeof bodyBlocks)[number]) =>
-    block.kind === "text" ? renderText(block) : renderBlock(block);
+  const renderProfileBlock = (
+    block: (typeof bodyBlocks)[number],
+    index: number,
+  ) => (block.kind === "text" ? renderText(block, index) : renderBlock(block));
 
   return (
     <article
@@ -639,8 +643,11 @@ function ConversationMessageRow({
                   profileParts
                     ? profileBlocks.map((block, index) =>
                         index === 0 && block.kind === "text"
-                          ? renderText({ ...block, body: profileParts[2]! })
-                          : renderProfileBlock(block),
+                          ? renderText(
+                              { ...block, body: profileParts[2]! },
+                              index,
+                            )
+                          : renderProfileBlock(block, index),
                       )
                     : undefined
                 }

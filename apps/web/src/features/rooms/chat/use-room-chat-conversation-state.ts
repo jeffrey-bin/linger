@@ -15,7 +15,7 @@ import type { MessageSkillOption } from "./message-composer-references";
 import type { VoiceModePresentation } from "./voice-mode/voice-mode-controls";
 import type { VoiceLiveDraft } from "./voice-mode/voice-live-draft";
 import { voiceModeStatusLabel } from "./voice-mode/voice-mode-presentation";
-import { presentDirectRoomMessage } from "./direct-room-message";
+import { createDirectRoomMessagePresenter } from "./direct-room-message";
 import { useRoomMentionOptions } from "./use-room-mention-options";
 import {
   orderRoomMessages,
@@ -190,24 +190,22 @@ function usePresentedRoomMessages({
   linkedMessage,
   pages,
 }: {
-  directPeer: Parameters<typeof presentDirectRoomMessage>[1];
+  directPeer: Parameters<typeof createDirectRoomMessagePresenter>[0];
   linkedMessage?: TeamHubMessage;
   pages: readonly { items: TeamHubMessage[] }[];
 }) {
   const orderedMessages = useMemo(() => orderRoomMessages(pages), [pages]);
+  const present = useMemo(
+    () => createDirectRoomMessagePresenter(directPeer),
+    [directPeer],
+  );
   const presentedMessages = useMemo(
-    () =>
-      orderedMessages.map((message) =>
-        presentDirectRoomMessage(message, directPeer),
-      ),
-    [directPeer, orderedMessages],
+    () => orderedMessages.map(present),
+    [orderedMessages, present],
   );
   const linkedPresentedMessage = useMemo(
-    () =>
-      linkedMessage
-        ? presentDirectRoomMessage(linkedMessage, directPeer)
-        : undefined,
-    [directPeer, linkedMessage],
+    () => (linkedMessage ? present(linkedMessage) : undefined),
+    [linkedMessage, present],
   );
   const interactionMessages = useMemo(() => {
     if (

@@ -4,6 +4,7 @@ import type { TeamHubMessage } from "@/features/teamhub/teamhub-types";
 
 import {
   composeDirectRoomMessage,
+  createDirectRoomMessagePresenter,
   presentDirectRoomMessage,
 } from "./direct-room-message";
 
@@ -51,6 +52,15 @@ describe("Direct Room Message compatibility", () => {
         peer,
       ).raw_message,
     ).toBe("@Research Agent Review this");
+  });
+
+  it("presents an unchanged Human Message as the same object", () => {
+    const message = directMessage();
+    const present = createDirectRoomMessagePresenter(peer);
+    const presented = present(message);
+    expect(presented).not.toBe(message);
+    expect(present(message)).toBe(presented);
+    expect(present({ ...message })).not.toBe(presented);
   });
 
   it("hides a leading peer Mention that TeamHub separates with a newline", () => {
