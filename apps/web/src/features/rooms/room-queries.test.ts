@@ -29,6 +29,8 @@ import {
   tenantAgentsQueryOptions,
   tenantRoomsQueryOptions,
 } from "./room-queries";
+import { appendRoomMessage } from "./chat/room-projection";
+import { planRoomMessageWindowTrim } from "./chat/room-message-window";
 
 describe("Room query scope", () => {
   it("reuses a recent Message snapshot on remount and still refreshes on invalidation", async () => {
@@ -483,6 +485,81 @@ describe("Room query scope", () => {
 });
 
 describe("Room Message query reconciliation", () => {
+  it("trims live-grown history through a refetch that keeps a real cursor and newer live Messages", async () => {
+    const runtime = createTestTeamHubRuntime();
+    const id = (index: number) => `message-${String(index).padStart(3, "0")}`;
+    let serverCount = 300;
+    runtime.server.on("GET", "/v0/rooms/{roomId}/messages", ({ query }) => {
+      const cursor = query.get("cursor");
+      const end = cursor
+        ? Number(cursor.slice("message-".length)) - 1
+        : serverCount;
+      const start = Math.max(1, end - 49);
+      return {
+        items: Array.from({ length: end - start + 1 }, (_, offset) =>
+          message(id(start + offset)),
+        ),
+        page:
+          start > 1
+            ? { has_more: true, next_cursor: id(start) }
+            : { has_more: false },
+        snapshot_room_seq: serverCount,
+      };
+    });
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const options = roomMessagesInfiniteQueryOptions(
+      runtime.client,
+      "tenant-northstar",
+      "room-all",
+    );
+    const observer = new InfiniteQueryObserver(queryClient, options);
+    const unsubscribe = observer.subscribe(() => undefined);
+    try {
+      await observer.refetch();
+      // Live delivery appends 160 Messages TeamHub also stores, then one the
+      // refetch response does not include yet.
+      for (let index = 301; index <= 460; index += 1) {
+        appendRoomMessage(queryClient, options.queryKey, message(id(index)));
+      }
+      serverCount = 460;
+      appendRoomMessage(queryClient, options.queryKey, message(id(461)));
+
+      const plan = planRoomMessageWindowTrim(
+        queryClient.getQueryData<InfiniteData<TeamHubMessagePage>>(
+          options.queryKey,
+        )!,
+      );
+      expect(plan.kind).toBe("refetch-newest");
+      queryClient.setQueryData(
+        options.queryKey,
+        plan.kind === "none" ? undefined : plan.data,
+      );
+      await queryClient.refetchQueries({
+        exact: true,
+        queryKey: options.queryKey,
+      });
+
+      const ids = () =>
+        observer
+          .getCurrentResult()
+          .data!.pages.slice()
+          .reverse()
+          .flatMap((page) => page.items.map((item) => item.id));
+      expect(ids()).toEqual(
+        Array.from({ length: 51 }, (_, offset) => id(411 + offset)),
+      );
+
+      await observer.fetchNextPage();
+      expect(ids()[0]).toBe(id(361));
+      expect(ids()).toHaveLength(101);
+    } finally {
+      unsubscribe();
+      queryClient.clear();
+    }
+  });
+
   it("keeps a newer cached card when an older in-flight query resolves", async () => {
     const runtime = createTestTeamHubRuntime();
 

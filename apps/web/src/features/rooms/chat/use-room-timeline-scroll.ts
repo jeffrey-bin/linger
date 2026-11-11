@@ -249,9 +249,19 @@ export function useRoomTimelineScroll({
     shouldAutoFollowRef.current = true;
   }
 
+  /** Whether the reader follows the newest Message rather than history. */
+  function isFollowingLatest() {
+    return (
+      timelineElement !== null &&
+      pendingPrependRef.current === null &&
+      shouldAutoFollowRef.current
+    );
+  }
+
   return {
     cancelOlderMessagesIfUnchanged,
     initialScrollReady,
+    isFollowingLatest,
     pinToLatest,
     prepareForOlderMessages,
     recordTimelineScroll,

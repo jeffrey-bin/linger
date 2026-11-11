@@ -4,7 +4,7 @@ import {
   MoreHorizontalIcon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 
 import { writeClipboardText } from "@/lib/clipboard";
@@ -59,9 +59,50 @@ export function HtmlFragmentFrame({
   widgetHtml: string;
 }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(minFragmentHeight);
   // The width cap the fragment declares, if any; otherwise the chat width.
   const [contentWidth, setContentWidth] = useState<number | null>(null);
+  // Each fragment is a script-running document. Create it only when it nears
+  // the viewport, so a long history does not start every widget at once.
+  const [nearViewport, setNearViewport] = useState(
+    () => typeof IntersectionObserver === "undefined",
+  );
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (nearViewport || !host) return;
+    // rootMargin only widens the root's own box, so the timeline scroller
+    // must be the root; with the page viewport the margin would be clipped.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer.disconnect();
+          setNearViewport(true);
+        }
+      },
+      { root: scrollingAncestor(host), rootMargin: "600px 0px" },
+    );
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, [nearViewport]);
+
+  // A fragment that loads above the visible area grows the content under it;
+  // keep what the reader is looking at in place, as browser scroll anchoring
+  // is off in the timeline.
+  const renderedHeightRef = useRef(height);
+  useLayoutEffect(() => {
+    const delta = height - renderedHeightRef.current;
+    renderedHeightRef.current = height;
+    const host = hostRef.current;
+    if (!delta || !host) return;
+    const scroller = scrollingAncestor(host);
+    if (!scroller) return;
+    const previousBottom = host.getBoundingClientRect().bottom - delta;
+    if (previousBottom <= scroller.getBoundingClientRect().top) {
+      scroller.scrollTop += delta;
+    }
+  }, [height]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
@@ -91,26 +132,49 @@ export function HtmlFragmentFrame({
       // width narrower gets a frame that hugs it (plus the 1px border on
       // each side).
       className="group relative my-2 max-w-full"
+      ref={hostRef}
       style={{
         width: contentWidth
           ? `min(${contentWidth + 2}px, var(--chat-card-width))`
           : "var(--chat-card-width)",
       }}
     >
-      <iframe
-        className="block w-full rounded-xl border border-app-border bg-app-surface shadow-[var(--chat-card-shadow)]"
-        data-html-fragment=""
-        ref={frameRef}
-        sandbox="allow-scripts"
-        srcDoc={source}
-        // The reported height is the content's; the 1px border on each side
-        // comes on top, so the fragment shows in full without a scrollbar.
-        style={{ height: height + 2 }}
-        title={title}
-      />
+      {nearViewport ? (
+        <iframe
+          className="block w-full rounded-xl border border-app-border bg-app-surface shadow-[var(--chat-card-shadow)]"
+          data-html-fragment=""
+          ref={frameRef}
+          sandbox="allow-scripts"
+          srcDoc={source}
+          // The reported height is the content's; the 1px border on each side
+          // comes on top, so the fragment shows in full without a scrollbar.
+          style={{ height: height + 2 }}
+          title={title}
+        />
+      ) : (
+        <div
+          aria-label={title}
+          className="w-full rounded-xl border border-app-border bg-app-surface shadow-[var(--chat-card-shadow)]"
+          data-html-fragment-placeholder=""
+          role="img"
+          style={{ height: height + 2 }}
+        />
+      )}
       <FragmentHostActions html={widgetHtml} title={title} />
     </div>
   );
+}
+
+function scrollingAncestor(element: HTMLElement) {
+  for (
+    let parent = element.parentElement;
+    parent;
+    parent = parent.parentElement
+  ) {
+    const { overflowY } = getComputedStyle(parent);
+    if (overflowY === "auto" || overflowY === "scroll") return parent;
+  }
+  return null;
 }
 
 function FragmentHostActions({ html, title }: { html: string; title: string }) {

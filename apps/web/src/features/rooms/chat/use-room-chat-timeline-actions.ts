@@ -9,6 +9,7 @@ import { tenantRoomsQueryKey } from "../room-queries";
 import { preloadUnifiedDocumentPage } from "../documents/document-route-preload";
 import type { MessageComposition } from "./message-composer";
 import { useRoomMessagePresentations } from "./room-message-presentations";
+import { useRoomMessageWindowTrim } from "./room-message-window";
 import { replaceLoadedRoomMessage } from "./room-projection";
 import { useFocusComposerOnEntry } from "./use-focus-composer-on-entry";
 import { usePrefetchPanelAfterPaint } from "./use-prefetch-panel-after-paint";
@@ -36,7 +37,9 @@ export function useRoomChatTimelineActions(
     actorItems,
     client,
     linkedMessage,
+    linkedMessageId,
     messages,
+    messagesQuery,
     navigate,
     navigation,
     openPanelTab,
@@ -188,6 +191,22 @@ export function useRoomChatTimelineActions(
     )
       void loadOlderMessages();
   };
+  // A reader following the newest Message keeps a bounded history; a linked
+  // Message or a reader scrolled into history keeps everything loaded. A
+  // timeline that would stop overflowing after the trim keeps it too, so the
+  // short-timeline loader below cannot load the same page back in a loop.
+  useRoomMessageWindowTrim({
+    canTrim: () =>
+      !linkedMessageId &&
+      timeline.initialScrollReady &&
+      timeline.isFollowingLatest() &&
+      !!timeline.timelineElement &&
+      timeline.timelineElement.scrollHeight >
+        5 * timeline.timelineElement.clientHeight,
+    messageCount: orderedMessages.length,
+    queryClient,
+    queryKey: messagesQuery.queryKey,
+  });
   const timelineViewport = timeline.timelineElement;
   useEffect(() => {
     if (

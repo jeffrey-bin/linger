@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { writeClipboardText } from "@/lib/clipboard";
@@ -76,6 +76,47 @@ describe("MessageHtmlFragment", () => {
     await vi.waitFor(() => {
       expect(writeClipboardText).toHaveBeenCalledWith(html);
     });
+  });
+
+  it("creates the iframe only once the fragment nears the viewport", () => {
+    let enter: () => void = () => {};
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(callback: IntersectionObserverCallback) {
+          enter = () =>
+            callback(
+              [{ isIntersecting: true } as IntersectionObserverEntry],
+              this as unknown as IntersectionObserver,
+            );
+        }
+        observe = observe;
+        disconnect = disconnect;
+      },
+    );
+    try {
+      const { container } = render(
+        <MessageHtmlFragment html="<p>Widget</p>" title="Deferred widget" />,
+      );
+
+      expect(container.querySelector("iframe")).toBeNull();
+      expect(screen.getByRole("img", { name: "Deferred widget" })).toHaveStyle({
+        height: "50px",
+      });
+      expect(observe).toHaveBeenCalledOnce();
+
+      act(() => enter());
+
+      expect(screen.getByTitle("Deferred widget").tagName).toBe("IFRAME");
+      expect(
+        screen.queryByRole("img", { name: "Deferred widget" }),
+      ).not.toBeInTheDocument();
+      expect(disconnect).toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("names downloaded SVG fragments from the message title", () => {
