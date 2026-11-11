@@ -27,6 +27,8 @@ Connector logos and agent avatars are separate identities and stay unchanged.
 and tray copies. macOS uses only the template alpha; Windows and Linux use the
 color tile. Status badges remain a runtime overlay. The template has no app-tile
 background, so macOS can tint it correctly on either menu-bar appearance.
+`apps/desktop/packaging/mac/background.tiff` is the DMG window background: the
+horizontal wordmark and an arrow from the app to Applications, at 1x and 2x.
 
 The root README uses the horizontal SVG. The `lev9-docs` repository consumes
 copies of `logo-horizontal.svg`, `logo-horizontal-dark.svg` and `web/favicon.svg`

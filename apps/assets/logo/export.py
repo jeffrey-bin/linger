@@ -6,7 +6,7 @@ import ctypes.util
 import json
 import shutil
 import xml.etree.ElementTree as ET
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, TiffImagePlugin
 
 # Apple's Python does not search Homebrew's Cairo library directory.
 if not ctypes.util.find_library('cairo') and Path('/opt/homebrew/lib/libcairo.2.dylib').exists():
@@ -118,4 +118,23 @@ dark_preview = Image.new('RGBA', (1440, 600), INK)
 word_image = raster(dark_word, 1200)
 dark_preview.alpha_composite(word_image, (120, (600-word_image.height)//2))
 dark_preview.convert('RGB').save(ROOT/'preview-dark.jpg', quality=95)
+# DMG window background in points; packaging/mac/dsstore.py centers the app
+# and Applications icons at (160, 196) and (480, 196). No text: fonts vary by host.
+background = ET.Element(f'{{{NS}}}svg', viewBox='0 0 640 440', width='640', height='440')
+ET.SubElement(background, f'{{{NS}}}rect', width='640', height='440', fill=IVORY)
+lockup = ET.fromstring(horizontal)
+lockup_width = 44 * word_box[2] / word_box[3]
+lockup.attrib.update(x=f'{(640-lockup_width)/2:.2f}', y='50', width=f'{lockup_width:.2f}', height='44')
+background.append(lockup)
+for i, x in enumerate(range(262, 372, 11)):
+    ET.SubElement(background, f'{{{NS}}}circle', cx=str(x), cy='196', r='2', fill='#FDA946', opacity=f'{0.3+0.07*i:.2f}')
+ET.SubElement(background, f'{{{NS}}}path', d='M372 186 382 196 372 206', fill='none', stroke='#FDA946',
+              **{'stroke-width': '3', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'})
+background_svg = ET.tostring(background, encoding='unicode')
+# A 72 dpi and a 144 dpi frame, so Finder shows the sharp one on Retina displays.
+with TiffImagePlugin.AppendingTiffWriter(REPO/'apps/desktop/packaging/mac/background.tiff', True) as tiff:
+    for scale in [1, 2]:
+        raster(background_svg, 640*scale, 440*scale).convert('RGB').save(
+            tiff, format='TIFF', dpi=(72*scale, 72*scale), compression='tiff_adobe_deflate')
+        tiff.newFrame()
 print('Exported canonical assets and synchronized Web and desktop copies.')
